@@ -31,6 +31,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 from poker_engine.confidence.gate import ConfidenceGate
 from poker_engine.core.enums import ActionType, PlayerStatus, Position, Street
@@ -112,14 +113,54 @@ DEFAULT_LAYOUT = "ldplayer_portrait_1440x2560"
 DEFAULT_DEVICE_SERIAL = os.environ.get("POKERSENSE_ADB_SERIAL", "auto")
 
 
-def build_capture_backend() -> CaptureService:
-    """Return the production ADB backend."""
-    from poker_engine.perceptual.capture.adb_backend import AdbBackend
+def build_capture_backend(
+    source: str = "adb",
+    *,
+    device_index: int = 0,
+    api: str = "MSMF",
+    normalization=None,
+) -> CaptureService:
+    """Return a production capture backend.
 
-    try:
-        return AdbBackend()
-    except RuntimeError as exc:
-        raise LiveCaptureError(str(exc)) from exc
+    ``source`` selects the capture path:
+
+    - ``"adb"`` (default): the LDPlayer ADB backend, for the calibrated
+      ``wepoker_android`` platform. Kept as the default so existing callers
+      keep working unchanged.
+    - ``"capture-card"``: the UVC capture-card backend
+      (:class:`CaptureCardBackend`), for ``wepoker_android_capture_card``.
+      This backend is wired here but its platform is NOT calibrated yet — the
+      production loader fails closed on the missing recognition calibration, so
+      a capture-card pipeline will raise rather than read fabricated values.
+
+    ``normalization`` is a :class:`NormalizationConfig` applied inside the
+    capture-card backend (portrait phone streamed letterboxed into a landscape
+    UVC frame must be rotated/cropped before recognition). It is ignored for the
+    ADB source, whose frames are already the calibrated portrait layout.
+    """
+    if source == "adb":
+        from poker_engine.perceptual.capture.adb_backend import AdbBackend
+
+        try:
+            return AdbBackend()
+        except RuntimeError as exc:
+            raise LiveCaptureError(str(exc)) from exc
+
+    if source == "capture-card":
+        from poker_engine.perceptual.capture.capture_card_backend import (
+            CaptureCardBackend,
+        )
+
+        try:
+            return CaptureCardBackend(
+                device_index=device_index,
+                api=api,
+                normalization=normalization,
+            )
+        except RuntimeError as exc:
+            raise LiveCaptureError(str(exc)) from exc
+
+    raise LiveCaptureError(f"unknown capture source: {source!r}")
 
 
 def load_platform_seat_mapping(
@@ -261,11 +302,27 @@ def build_confidence_gate(
     )
 
 
+def _imread_unicode(path: Path):
+    """Read an image via ``imdecode`` so non-ASCII paths work.
+
+    ``cv2.imread`` silently returns ``None`` on Windows for an absolute path
+    containing non-ASCII characters (for example a checkout under a Chinese
+    directory name). Reading the bytes first and decoding them via
+    ``cv2.imdecode`` avoids the filesystem-encoding path that breaks.
+    """
+    try:
+        with open(path, "rb") as handle:
+            data = np.frombuffer(handle.read(), dtype=np.uint8)
+    except OSError:
+        return None
+    return cv2.imdecode(data, cv2.IMREAD_COLOR)
+
+
 def _load_templates(directory: Path) -> dict:
     if not directory.is_dir():
         raise LiveCaptureError(f"template directory missing: {directory}")
     templates = {
-        path.stem: cv2.imread(str(path)) for path in sorted(directory.glob("*.png"))
+        path.stem: _imread_unicode(path) for path in sorted(directory.glob("*.png"))
     }
     if not templates:
         raise LiveCaptureError(f"no templates found in {directory}")
@@ -313,7 +370,7 @@ def load_calibration(
                 for i in range(5)
             ),
         )
-    _placeholder_rank = cv2.imread(str(next((template_dir / "rank").glob("*.png"))))
+    _placeholder_rank = _imread_unicode(next((template_dir / "rank").glob("*.png")))
     digit_dir = vision_dir / "digit"
     digit_templates = (
         _load_templates(digit_dir)
@@ -357,8 +414,8 @@ def load_calibration(
     else:
         action_recognizer = TemplateActionRecognizer(
             ActionTemplateSet(
-                templates={ActionType.FOLD: cv2.imread(
-                    str(next((template_dir / "suit").glob("*.png")))
+                templates={ActionType.FOLD: _imread_unicode(
+                    next((template_dir / "suit").glob("*.png"))
                 )},
                 version="uncalibrated",
             )
@@ -368,7 +425,7 @@ def load_calibration(
     dealer_recognizer = None
     if dealer_layout_path.is_file() and dealer_template_path.is_file():
         dealer_recognizer = TemplateSlotMarkerRecognizer(
-            cv2.imread(str(dealer_template_path)),
+            _imread_unicode(dealer_template_path),
             slot_marker_layout_from_dict(
                 json.loads(dealer_layout_path.read_text())
             ),
@@ -379,7 +436,7 @@ def load_calibration(
     empty_slot_recognizer = None
     if empty_layout_path.is_file() and empty_template_path.is_file():
         empty_slot_recognizer = TemplatePerSlotMarkerRecognizer(
-            cv2.imread(str(empty_template_path)),
+            _imread_unicode(empty_template_path),
             slot_marker_layout_from_dict(
                 json.loads(empty_layout_path.read_text())
             ),
@@ -492,8 +549,20 @@ def build_pipeline(
     device_serial: str = DEFAULT_DEVICE_SERIAL,
     platform: str = DEFAULT_PLATFORM,
     layout: str = DEFAULT_LAYOUT,
+    source: str = "adb",
+    *,
+    device_index: int = 0,
+    api: str = "MSMF",
+    normalization=None,
 ) -> RealtimePipeline:
-    """Assemble a pipeline reading raw portrait frames from LDPlayer."""
+    """Assemble a pipeline reading raw portrait frames from the capture source.
+
+    The default ``source="adb"`` keeps the existing calibrated
+    ``wepoker_android`` / LDPlayer behaviour unchanged. Passing
+    ``source="capture-card"`` reads from a UVC capture card; the capture-card
+    platform is wired but NOT calibrated, so its loader fails closed (see
+    :func:`load_calibration`) until Stage I measurement lands.
+    """
     table_map, vision = load_calibration(platform, layout)
     measured = load_measured_calibrations(
         _REPO_ROOT / "configs" / "vision" / platform
@@ -512,7 +581,15 @@ def build_pipeline(
         return _seed_state(hand_id=f"live-{next_hand_number}")
 
     orchestrator.start_hand(_seed_state(hand_id="live-1"))
-    frame_source = DeviceFrameSource(build_capture_backend(), device_serial)
+    frame_source = DeviceFrameSource(
+        build_capture_backend(
+            source,
+            device_index=device_index,
+            api=api,
+            normalization=normalization,
+        ),
+        device_serial,
+    )
     return RealtimePipeline(
         frame_source,
         vision,
@@ -542,15 +619,26 @@ def build_pipeline(
 async def live_analysis_stream(
     device_serial: str = DEFAULT_DEVICE_SERIAL,
     interval_seconds: float = 1.0,
+    source: str = "adb",
+    *,
+    device_index: int = 0,
+    api: str = "MSMF",
+    normalization=None,
 ) -> AsyncIterator[DesktopFrame]:
-    """Yield fresh analysis while the selected ADB device is available.
+    """Yield fresh analysis while the selected capture source is available.
 
     Capture and recognition are CPU-bound and run off the event loop, so the
-    server stays responsive between frames.
+    server stays responsive between frames. ``source`` selects the capture
+    backend (see :func:`build_capture_backend`).
     """
     try:
         pipeline = await asyncio.to_thread(
-            build_pipeline, device_serial
+            build_pipeline,
+            device_serial,
+            source=source,
+            device_index=device_index,
+            api=api,
+            normalization=normalization,
         )
     except LiveCaptureError:
         raise

@@ -7,7 +7,7 @@
 
 ## 模块
 
-- `perceptual/capture/`：`Frame`（不可变帧）、`CaptureTarget`、`CaptureService`（抽象）、`AdbBackend`（生产）、`FakeBackend`（CI）。`MssBackend` / `QuartzBackend` 作为通用桌面捕获和历史 H5 兼容实现保留，但不是默认链路。
+- `perceptual/capture/`：`Frame`（不可变帧）、`CaptureTarget`、`CaptureService`（抽象）、`AdbBackend`（生产）、`FakeBackend`（CI）。`MssBackend` / `QuartzBackend` 作为通用桌面捕获和历史 H5 兼容实现保留，但不是默认链路。`CaptureCardBackend` 为 USB 采集卡（手机 → UVC → PC）的**实时采集后端**（MSMF/DirectShow + YUY2 + 断流/黑屏检测），配合 `normalization.py` 完成阶段 C 的画面归一化；该后端已实现并单测，但采集卡平台的识别标定（ROI/阈值/模板）尚未完成，见 `configs/vision/wepoker_android_capture_card/README.md`。
 - `perceptual/vision/`：`ROIKind` / `ROI` / `TableMap`（含 JSON 序列化）+ `roi.py`（确定性裁剪 + layout 校验）。
 
 ## Frame 像素不可变（bytes-backed）

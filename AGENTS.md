@@ -108,7 +108,15 @@ structure; do not represent a local build as a clean-user installation test.
   recognizer evidence binding, quality-report contract, and R6 eligibility.
 - `docs/capture-card-calibration-guide.zh-CN.md`: AI-executable private-data
   calibration and acceptance specification for the candidate phone-to-PC USB
-  capture-card path; its evidence remains separate from LDPlayer and H5.
+  capture-card path; its evidence remains separate from LDPlayer and H5. The
+  hardware-independent tooling for it lives in
+  `tools/capture_card_calibration/`
+  (`python -m tools.capture_card_calibration.cli --help`); stages A and B
+  still need real hardware and a human operator.
+- `PLAN-capture-card-calibration.zh-CN.md`: the step-by-step development and
+  work plan that turns the calibration guide's stages A-L into ordered,
+  one-action-at-a-time tasks, splitting each into what the agent can build
+  (code/config/tooling) and what needs real hardware or a human operator.
 - `docs/recognition-ui-handoff.md`: practical handoff for the parallel WPK
   recognition and Live Coach UI work, including existing modules, owned gaps,
   frozen contracts, sequencing, and acceptance checklists.
@@ -125,6 +133,38 @@ structure; do not represent a local build as a clean-user installation test.
   policy-default change requires a fresh measured artifact and tool hash.
 
 ## Progress log
+
+- **2026-09-03 — capture-card calibration toolchain:** added
+  `tools/capture_card_calibration/`, the hardware-independent half of the
+  calibration guide. It provides: SHA-256/SHA256SUMS hashing (guide rule 8),
+  a strict label/field schema that forces UNKNOWN (a field never carries a
+  guessed value) and intercepts REPLACE_ME placeholders, deterministic
+  `layout_id` construction (§6), the dataset delivery skeleton (§3) with
+  `frames.jsonl` / `roi_measurements.csv` I/O, pixel-ROI -> normalized
+  coordinate geometry that emits draft `table_map` + slot layouts, minimum
+  coverage checks with an exact top-up list (§10), session+hand-isolated
+  splits with leakage detection (§11), an acceptance report that defaults to
+  PARTIAL/BLOCKED (§17), and a `cli.py` entrypoint. It also ships the
+  stage A/B live-recording helpers (`probe` to read a device's negotiated
+  UVC parameters, `record` to capture a session to `source/raw/*.mkv` while
+  automatically logging disconnect / black-frame / reconnect signal events).
+  Unit-tested (see `tests/tools/test_capture_card_*.py`). This does NOT
+  calibrate anything — stages A (freeze hardware) and B (record 45–90 min of
+  real hands) still require real hardware and a human operator.
+
+- **2026-09-03 — capture-card realtime backend:** added the UVC capture
+  backend `CaptureCardBackend` (`perceptual/capture/capture_card_backend.py`)
+  implementing the `CaptureService` contract via OpenCV `VideoCapture`
+  (MSMF/DirectShow, YUY2 fourcc, resolution/fps, disconnect + all-black
+  signal-loss detection), plus stage-C frame normalization
+  (`perceptual/capture/normalization.py`: fixed rotate -> mirror -> crop ->
+  content-size validation, versioned). Both are unit-tested with a mocked
+  VideoCapture. Added `configs/vision/wepoker_android_capture_card/` as an
+  explicit `uncalibrated` platform scaffold. This is the realtime backend only:
+  no capture-card recognition calibration exists, so the platform's fields must
+  read UNKNOWN until `docs/capture-card-calibration-guide.zh-CN.md` stages A-K
+  produce real capture-card evidence and stage L lands it. No end-to-end
+  capture-card capability is claimed.
 
 - **2026-09-02 — capture-card calibration handoff:** added a Chinese,
   AI-executable end-to-end specification for independently calibrating a real

@@ -9,7 +9,9 @@ from .base import (
 )
 from .fake_backend import FakeBackend
 from .adb_backend import AdbBackend
+from .capture_card_backend import CaptureCardBackend
 from .mss_backend import MssBackend
+from .normalization import NormalizationConfig, normalize
 from .quartz_backend import (
     QuartzBackend,
     WindowCandidate,
@@ -26,6 +28,9 @@ __all__ = [
     "WindowRect",
     "FakeBackend",
     "AdbBackend",
+    "CaptureCardBackend",
+    "NormalizationConfig",
+    "normalize",
     "MssBackend",
     "QuartzBackend",
     "WindowCandidate",

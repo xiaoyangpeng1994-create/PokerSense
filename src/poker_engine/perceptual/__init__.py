@@ -13,6 +13,8 @@ from .capture.base import (
 )
 from .capture.fake_backend import FakeBackend
 from .capture.adb_backend import AdbBackend
+from .capture.capture_card_backend import CaptureCardBackend
+from .capture.normalization import NormalizationConfig, normalize
 from .vision.errors import TableMapError, TableMapMismatchError
 from .vision.roi import (
     check_layout_compatibility,
@@ -30,6 +32,9 @@ __all__ = [
     "WindowRect",
     "FakeBackend",
     "AdbBackend",
+    "CaptureCardBackend",
+    "NormalizationConfig",
+    "normalize",
     "ROIKind",
     "ROI",
     "TableMap",

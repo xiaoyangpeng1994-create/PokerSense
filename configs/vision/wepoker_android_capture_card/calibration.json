@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "platform_id": "wepoker_android_capture_card",
+  "layout_id": "uncalibrated",
+  "template_source": "wepoker",
+  "status": "uncalibrated",
+  "measured_at": null,
+  "note": "Capture-card (phone -> UVC -> PC) platform scaffold. NO recognition calibration exists yet: there are no measured ROIs, thresholds, sample counts, or confidence conclusions, and none may be inherited from wepoker_android (LDPlayer) or wepoker (H5). The UVC realtime backend exists (CaptureCardBackend), but every field must read UNKNOWN until stages A-K of docs/capture-card-calibration-guide.zh-CN.md produce real capture-card evidence and stage L lands it here. Card ART templates may be shared from 'wepoker' only after independent verification (guide rule 2); geometry and thresholds must be re-measured."
+}

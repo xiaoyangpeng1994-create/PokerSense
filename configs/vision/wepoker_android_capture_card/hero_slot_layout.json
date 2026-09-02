@@ -1,0 +1,19 @@
+{
+  "kind": "hero",
+  "layout_id": "phone_samsung_galaxy_s25_ultra__card_replace_me__uvc_1920x1080_30__canvas_498x1080__v1",
+  "slots": [
+    {
+      "height": 1.0,
+      "width": 0.4643,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "height": 1.0,
+      "width": 0.4732,
+      "x": 0.5179,
+      "y": 0.0
+    }
+  ],
+  "version": 1
+}
