@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "benchmark": "adaptive-equity-target-calibration",
+  "measured_at": "2026-08-22T14:33:21+04:00",
+  "source_revision": "ad1afab467ecbf2972053237c2c26602369a0dec+working-tree",
+  "benchmark_tool": "tools/benchmark_adaptive_equity.py",
+  "benchmark_tool_sha256": "1576c53a3e458c9564cf8f99b2289c0d3c04a2f5acbdbede9931901e503d20ea",
+  "command": "PYTHONPATH=src python tools/benchmark_adaptive_equity.py --repeats 5 --hardware-label 'MacBookPro18,3 Apple M1 Pro 10-core 32GB'",
+  "environment": {
+    "model_identifier": "MacBookPro18,3",
+    "chip": "Apple M1 Pro",
+    "cpu_cores": 10,
+    "memory_gb": 32,
+    "os": "macOS 26.5.2 (25F84)",
+    "python": "3.12.2"
+  },
+  "cases": [
+    {
+      "name": "exact_hu_flop_8_assignments",
+      "units": 7920,
+      "repeats": 5,
+      "latency_ms": {"median": 1101.432, "p95": 1102.117, "maximum": 1102.117},
+      "units_per_ms_at_p95": 7.186
+    },
+    {
+      "name": "mc_hu_flop_10000",
+      "units": 10000,
+      "repeats": 5,
+      "latency_ms": {"median": 1433.463, "p95": 1434.451, "maximum": 1434.451},
+      "units_per_ms_at_p95": 6.971
+    },
+    {
+      "name": "mc_3way_flop_10000",
+      "units": 10000,
+      "repeats": 5,
+      "latency_ms": {"median": 2100.723, "p95": 2102.024, "maximum": 2102.024},
+      "units_per_ms_at_p95": 4.757
+    }
+  ],
+  "recommended_conservative_policy": {
+    "exact_outcomes_per_ms": 3,
+    "mc_trials_per_ms": 2,
+    "safety_factor": 0.5
+  }
+}

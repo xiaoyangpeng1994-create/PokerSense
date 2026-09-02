@@ -1,0 +1,3 @@
+# Strategy fixtures and their calibration hashes are byte-level contracts.
+# Keep checkout bytes stable on every CI runner and developer platform.
+* text=auto eol=lf

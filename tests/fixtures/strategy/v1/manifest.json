@@ -1,0 +1,83 @@
+{
+  "coverage": {
+    "advice_statuses": {
+      "ABSTAIN": 91,
+      "PARTIAL": 10,
+      "READY": 192,
+      "STALE": 5
+    },
+    "dealt_player_counts": {
+      "2": 111,
+      "3": 48,
+      "4": 16,
+      "5": 13,
+      "6": 64,
+      "7": 13,
+      "8": 15,
+      "9": 18
+    },
+    "fixture_types": {
+      "benchmark": 8,
+      "synthetic": 290
+    },
+    "preflop_action_lines": [
+      "unopened",
+      "limp",
+      "multi_limp",
+      "raise",
+      "three_bet",
+      "four_bet",
+      "squeeze",
+      "iso_raise",
+      "all_in"
+    ],
+    "quality_fields": [
+      "hero_cards",
+      "board_cards",
+      "dealer_button",
+      "street",
+      "pot",
+      "player_stacks",
+      "actor",
+      "action_history",
+      "blinds"
+    ],
+    "requirements": [
+      "REQ-AUD-001",
+      "REQ-CTX-001",
+      "REQ-EQ-001",
+      "REQ-FUS-001",
+      "REQ-IN-001",
+      "REQ-IN-002",
+      "REQ-MET-001",
+      "REQ-OUT-001",
+      "REQ-OUT-002",
+      "REQ-PERF-001",
+      "REQ-PRV-001",
+      "REQ-RNG-001",
+      "REQ-RTR-001",
+      "REQ-ST-001",
+      "REQ-ST-002",
+      "REQ-TRN-001",
+      "REQ-UI-001"
+    ],
+    "streets": {
+      "flop": 18,
+      "preflop": 253,
+      "river": 18,
+      "turn": 9
+    }
+  },
+  "fixture_count": 298,
+  "fixture_file": "fixtures.jsonl",
+  "fixture_schema_version": "1.0.0",
+  "fixture_sha256": "351859eb9d4f75ab4e97a9290cb6bda08c3d144dcdc1588641785f5e9fce16ca",
+  "generated_at": "2026-08-22T00:00:00Z",
+  "generator": "tools/generate_strategy_mock_fixtures.py",
+  "not_release_acceptance_evidence": [
+    "real_provider_golden_parity",
+    "real_platform_capture_replay",
+    "hardware_specific_performance_result",
+    "clean_install_platform_acceptance"
+  ]
+}

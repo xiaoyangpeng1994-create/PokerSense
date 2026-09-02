@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<title>PokerSense</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="brand"><span class="dot" id="conn-dot"></span><span id="conn-label">PokerSense</span></div>
+    <div class="header-actions">
+      <div class="street-badge" id="street-badge">—</div>
+      <button class="settings-button" id="settings-button" type="button" aria-label="Settings">⚙</button>
+    </div>
+  </div>
+
+  <div class="table-panel">
+    <div class="card-row">
+      <span class="label" data-i18n="board">Board</span>
+      <div class="card-slots" id="board-slots"></div>
+    </div>
+    <div class="card-row">
+      <span class="label" data-i18n="hero">Hero</span>
+      <div class="card-slots" id="hero-slots"></div>
+    </div>
+    <div class="pot-row">
+      <span class="label" data-i18n="pot">Pot</span>
+      <span class="value" id="pot-value">0<span class="unit">bb</span></span>
+    </div>
+  </div>
+
+  <div class="equity-panel">
+    <div class="equity-headline">
+      <div>
+        <div class="win-label" data-i18n="winRate">Win Rate</div>
+        <div class="win" id="win-rate">—</div>
+      </div>
+      <div class="equity-secondary" id="tie-rate">tie —</div>
+    </div>
+    <div class="equity-bar">
+      <div class="seg-win" id="seg-win" style="width:0%"></div>
+      <div class="seg-tie" id="seg-tie" style="width:0%"></div>
+    </div>
+  </div>
+
+  <section class="advice-panel" id="advice-panel" hidden aria-live="polite">
+    <div class="advice-header">
+      <div>
+        <div class="advice-kicker" data-i18n="strategyAdvice">Strategy advice</div>
+        <div class="advice-status" id="advice-status">—</div>
+      </div>
+      <div class="advice-confidence" id="advice-confidence">—</div>
+    </div>
+    <div class="advice-badges" id="advice-badges"></div>
+    <div class="advice-hero" id="advice-hero"></div>
+    <div class="advice-actions" id="advice-actions"></div>
+    <div class="advice-message" id="advice-message"></div>
+    <details class="advice-evidence" id="advice-evidence">
+      <summary data-i18n="detailsEvidence">Details and evidence</summary>
+      <dl class="advice-meta" id="advice-meta"></dl>
+      <div id="advice-evidence-content"></div>
+    </details>
+  </section>
+
+  <div class="confidence-panel">
+    <div class="confidence-overall">
+      <span class="badge" id="confidence-badge"></span>
+      <span id="confidence-value">confidence —</span>
+    </div>
+    <div class="confidence-fields" id="confidence-fields"></div>
+  </div>
+
+  <div class="footer">
+    <span id="footer-left">frame —</span>
+    <span id="footer-right">—</span>
+  </div>
+</div>
+<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+  <form method="dialog">
+    <div class="settings-title-row">
+      <h1 id="settings-title" data-i18n="settings">Settings</h1>
+      <button class="dialog-close" id="settings-close" type="submit" aria-label="Close">×</button>
+    </div>
+    <label class="language-label" for="language-select" data-i18n="language">Language</label>
+    <select id="language-select">
+      <option value="auto" data-i18n="languageAuto">System default</option>
+      <option value="zh">简体中文</option>
+      <option value="en">English</option>
+    </select>
+    <p class="settings-note" data-i18n="languageHint">Changes are saved automatically.</p>
+  </form>
+</dialog>
+<script src="app.js"></script>
+</body>
+</html>

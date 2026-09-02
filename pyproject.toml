@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "poker-engine"
+version = "0.1.11"
+description = "PokerSense - Android table training companion and analysis engine"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "Proprietary" }
+authors = [{ name = "Poker Intelligence Engine Team" }]
+# Core layer (poker_engine.core) remains zero third-party runtime dependencies.
+# numpy + opencv-python are required by the perceptual layer (Task 6/7B).
+# Exact pins (ADR: dependency audit) — do NOT loosen.
+dependencies = [
+    "numpy==2.4.6",
+    "opencv-python==4.14.0.94",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "flake8",
+    "httpx",
+]
+# Legacy desktop-window capture backends. Production Android capture uses the
+# ADB executable and has no additional Python dependency.
+perceptual = [
+    "mss>=9.0",
+    "pyobjc-framework-Quartz>=10.0; sys_platform == 'darwin'",
+]
+# Engineering calibration tool (tools/calibrate.py). Must match the pinned
+# opencv-python to avoid resolving a conflicting OpenCV version.
+calibrate = [
+    "opencv-python==4.14.0.94",
+]
+# Desktop shell (local server + native window). A UI-glue layer, not the
+# frozen core -- loosely bounded rather than exact-pinned on purpose.
+desktop = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pywebview>=5.0",
+]
+packaging = [
+    "pyinstaller>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+"poker_engine.strategy.assets" = ["*.json", "*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

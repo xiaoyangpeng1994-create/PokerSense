@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "platform_id": "wepoker_android",
+  "layout_id": "ldplayer_portrait_1440x2560",
+  "template_source": "wepoker",
+  "measured_at": "2026-08-23",
+  "card": {
+    "samples": 46,
+    "correct": 46,
+    "readable_score_floor": 0.7,
+    "unreadable_score_ceiling": 0.0,
+    "source": "46 cards across 23 distinct hero hands in 58 full-resolution 1440x2560 ADB frames from two LDPlayer instances, manually compared with the source frames; repeated temporal views of the same hand were not counted as independent accuracy samples. All 58 visible-hand frames read correctly (minimum accepted raw score 0.771). Eight login/transition/menu/result frames abstained with raw score 0.0. Card art templates are shared with WePoker H5; geometry and confidence evidence are Android-specific."
+  },
+  "board": {
+    "samples": 27,
+    "correct": 27,
+    "readable_score_floor": 0.5,
+    "unreadable_score_ceiling": 0.47,
+    "source": "Android-specific board ROI and occupancy evidence measured on private full-resolution 1440x2560 ADB PNGs: 17 distinct manually reviewed postflop board states (64 visible card identities across flop, turn, and river) plus 10 manually reviewed preflop empty-board states. All 27 stable states produced the correct occupancy and identities. Deal/flip animations, folded-card overlays, menus, and illegal partial patterns were retained as abstention/conflict evidence; the highest transitional non-stable occupancy score was 0.47. A separate 88-minute 1440x2608 H.264 LDPlayer recording, normalized by removing its 48-pixel host toolbar, was used only as additional temporal and compression validation, not to lower the raw-ADB threshold."
+  },
+  "street": {
+    "samples": 27,
+    "correct": 27,
+    "readable_score_floor": 0.5,
+    "unreadable_score_ceiling": 0.47,
+    "source": "Street is derived only from the independently calibrated five-slot Android board occupancy pattern. The same 17 distinct postflop states and 10 distinct preflop empty-board states were manually reviewed and all 27 derived the correct street. Nonstandard and transitional patterns remain UNKNOWN or CONFLICT. H.264 video samples were used as temporal validation only; threshold evidence comes from full-resolution ADB PNGs."
+  },
+  "amount": {
+    "samples": 22,
+    "correct": 22,
+    "readable_score_floor": 0.8,
+    "unreadable_score_ceiling": 0.389,
+    "source": "Android pot OCR measured from private full-resolution 1440x2560 ADB PNGs using an Android-only fixed ROI and digit templates. Twenty-two distinct manually transcribed pot values covering digits 0-9 all decoded correctly; 53 labeled stable frames including temporal repeats were also 53/53. Empty board labels, menus, card overlays, and transition crops abstained; the highest negative raw match was 0.389. The ROI covers the observed 24-pixel vertical pot shift between table occupancies. This evidence enables only the global pot field; no stack or bet-size ROI inherits it."
+  },
+  "stack": {
+    "samples": 80,
+    "correct": 80,
+    "readable_score_floor": 0.83,
+    "unreadable_score_ceiling": 0.381,
+    "source": "Android visual-slot stack OCR measured independently from the pot on private full-resolution 1440x2560 ADB PNGs. Eight fixed seat slots were reviewed across 2/4-player and populated 8-player layouts; ten timeline-spread readable crops per slot (80 total) were manually compared with their source pixels and all 80 decoded correctly. The review includes zero stacks, dimmed/folded stacks, three- and four-digit values, and every digit 0-9. An additional 68 manually reviewed empty-seat, result-overlay, and transition crops abstained; their highest non-stack raw match was 0.381. Stack-specific glyph templates and topology checks prevent the observed 8-versus-3 correlation error. Geometry, calibrator, and confidence evidence are stack-specific and do not inherit the global-pot measurement."
+  },
+  "dealer": {
+    "samples": 40,
+    "correct": 40,
+    "readable_score_floor": 0.8,
+    "unreadable_score_ceiling": 0.654,
+    "source": "Android dealer-button recognition measured independently on private full-resolution 1440x2560 ADB PNGs. Eight explicit visual-slot search windows cover the observed 24-pixel seat-layout shift. Five timeline-spread detections per slot (40 total), including a dimmed result-state marker, were manually compared with the source frame and all mapped to the correct visual slot. Across all 234 frames, 216 had one marker above the measured floor and no frame had two slots above it. Eighteen no-marker, hidden-marker, menu, or result-transition frames abstained; the highest negative raw match was 0.654. This field reports a visual slot only and does not infer a canonical poker seat without a separate PlatformSeatMapping."
+  },
+  "action": {
+    "samples": 45,
+    "correct": 45,
+    "readable_score_floor": 0.83,
+    "unreadable_score_ceiling": 0.762,
+    "source": "Android completed-action labels measured independently on private full-resolution 1440x2560 ADB PNGs. Binary glyph masks retain no avatar or screenshot background. Forty-five timeline- and slot-spread detections were manually reviewed: 8 Fold, 8 Check, 8 Call, 8 Bet, 8 Raise, and all 5 available All-in labels; all 45 had the correct action and visual slot. Across all 234 frames and eight action ROIs, 600 slot labels cleared the 0.83 floor with no runner-up above it. The 48 strongest rejected candidates were also reviewed; they were Hero's clickable Bet/Raise controls, nicknames, avatars, cards, or overlays, with a maximum raw score of 0.762. This field reports a rendered completed-action label only. Persistent Fold labels require temporal deduplication, and it does not infer action amount, canonical actor, or current player-to-act."
+  },
+  "occupancy": {
+    "samples": 272,
+    "correct": 272,
+    "readable_score_floor": 0.8,
+    "unreadable_score_ceiling": 0.552,
+    "source": "Android seat occupancy measured independently on 34 manually reviewed stable full-resolution 1440x2560 ADB table states, covering 272 visual-slot labels across one-player/waiting, heads-up, five-player, and fully occupied eight-player layouts. Occupied evidence requires a valid independently calibrated stack value; empty evidence requires the privacy-safe binary plus-marker template in that slot. All 272 labels agreed with the reviewed source states, with no occupied/empty conflict. The minimum occupied stack score was 0.835, minimum empty-marker score 0.924, and maximum rejected marker score 0.552. Missing stack and missing plus marker remains UNKNOWN rather than being guessed empty. Visual slot identity is still not a canonical poker seat until an explicit PlatformSeatMapping is selected."
+  },
+  "actor": {
+    "samples": 33,
+    "correct": 33,
+    "readable_score_floor": 0.8,
+    "unreadable_score_ceiling": 0.549,
+    "source": "Android current-actor evidence is deliberately limited to Hero. Thirty-three full-resolution ADB frames containing the large blue circular action controls were manually reviewed and all meant Hero was currently to act. Geometry and HSV evidence are measured on the raw 1440x2560 framebuffer; all accepted scores were at least 0.905. The other 201 frames covered opponent turns, deal/result states, menus, and overlays and abstained. A dimmed confirmation dialog was the strongest rejected candidate at 0.549; wide blue modal controls fail the bounded circular geometry. This field can assert actor visual slot 0 only and never guesses an opponent actor from a timer ring."
+  }
+}

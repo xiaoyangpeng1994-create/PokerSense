@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local Claude Code session config (dev-machine-specific, not product code)
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific data
+*.log
+.sqlite
+.sqlite3
+
+# Workspace data / assistant memory (not product code)
+.workbuddy/
+
+# Local upstream research checkouts (not distributed with PokerSense)
+.upstream/
+
+# Review artifacts (temporary acceptance packages)
+task-*/
+task-*.zip
+
+# Generated docs/intro files (not product code, not part of any Task)
+outputs/
+
+# Synthetic WePoker training data (generated on demand, not committed)
+datasets/wepoker/
+
+# Private real-device calibration inputs (never package or publish)
+android_dedup_full/
+android_dedup_full.zip
+video_leidian_*.mp4
+_dedup_report(1).json
+dedup_frames(1).py

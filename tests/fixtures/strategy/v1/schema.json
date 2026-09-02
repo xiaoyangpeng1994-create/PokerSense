@@ -1,0 +1,118 @@
+{
+  "$id": "https://pokersense.local/schema/strategy-fixture-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "expected": {
+      "required": [
+        "terminal_stage",
+        "advice",
+        "provider_lookups",
+        "assertions"
+      ],
+      "type": "object"
+    },
+    "fixture_id": {
+      "pattern": "^MOCK-[A-Z0-9-]+$",
+      "type": "string"
+    },
+    "fixture_schema_version": {
+      "const": "1.0.0"
+    },
+    "fixture_type": {
+      "enum": [
+        "benchmark",
+        "synthetic"
+      ]
+    },
+    "function_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "input": {
+      "required": [
+        "game_config",
+        "request_context",
+        "observations",
+        "state",
+        "ranges",
+        "providers",
+        "fault_injection"
+      ],
+      "type": "object"
+    },
+    "requirements": {
+      "items": {
+        "enum": [
+          "REQ-AUD-001",
+          "REQ-CTX-001",
+          "REQ-EQ-001",
+          "REQ-FUS-001",
+          "REQ-IN-001",
+          "REQ-IN-002",
+          "REQ-MET-001",
+          "REQ-OUT-001",
+          "REQ-OUT-002",
+          "REQ-PERF-001",
+          "REQ-PRV-001",
+          "REQ-RNG-001",
+          "REQ-RTR-001",
+          "REQ-ST-001",
+          "REQ-ST-002",
+          "REQ-TRN-001",
+          "REQ-UI-001"
+        ]
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "test_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tolerances": {
+      "required": [
+        "probability_abs",
+        "equity_abs",
+        "money_abs"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "fixture_schema_version",
+    "fixture_id",
+    "fixture_type",
+    "title",
+    "requirements",
+    "function_ids",
+    "test_ids",
+    "tags",
+    "input",
+    "expected",
+    "tolerances"
+  ],
+  "title": "PokerSense strategy fixture v1",
+  "type": "object"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "platform_id": "wepoker",
+  "layout_id": "h5_2max",
+  "measured_at": "2026-08-20",
+  "card": {
+    "samples": 62,
+    "correct": 62,
+    "readable_score_floor": 0.5,
+    "unreadable_score_ceiling": 0.335,
+    "source": "62 hero-card crops captured from a live WePoker H5 table, ground truth read from full-resolution images; 8 non-card crops (card backs, felt, obscured slots) used as negatives. Readable cards scored >= 0.664, non-cards <= 0.335, so 0.5 sits inside the observed gap. See tests/vision/test_corner_glyph_recognizer.py."
+  }
+}
