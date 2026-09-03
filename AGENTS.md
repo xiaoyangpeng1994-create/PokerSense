@@ -248,6 +248,27 @@ structure; do not represent a local build as a clean-user installation test.
   invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
   honest state, not a claim that calibration is complete.
 
+- **2026-09-04 — video-mined label top-up: stage-G gaps closed 8 -> 2:**
+  mined both raw session videos (~16 min total) at 10 fps with a private
+  scene miner, then promoted only visually-verified evidence into the private
+  dataset (216 -> 355 labelled frames; every single frame eyeballed on a
+  contact sheet, no auto-proposal landed unreviewed). Landed: 61 verified
+  completed-action labels (CALL 18 / RAISE 21 / BET 4 / FOLD 18 across
+  slots 0-7), 55 `current_actor=HERO` frames (blue "N 跟注" decision circle
+  is the reliable hero-turn cue; the grey 让或弃/自动让牌 toggles are always
+  on and are NOT a turn signal), 50 MENU + 2 SIGNAL_LOSS + 1 OVERLAY anomaly
+  scenes, 30 deal-transition and 70 action-transition temporal groups.
+  Coverage: hero_actor, anomaly_scenes, all field negatives, and temporal
+  deal/action/street_change are now `ok`. Honest remaining gaps (nothing in
+  the current footage can close them): CHECK 0/10 and ALL_IN 0/6 badges never
+  rendered (raise-heavy low-stakes play), BET 4/10, hand_end RESULT screens
+  not identified (golden burst is a win effect, semantics unconfirmed),
+  reconnect groups 2/5 (signal was stable throughout). Action-badge vocabulary
+  measured on this platform: CALL=blue, RAISE/BET=orange (text tells them
+  apart), FOLD=dimmed avatar + white text, countdown=white "Ns"; 等待审核/
+  等待中 is NOT an action. Private checklist regenerated as
+  `reports/label-topup-checklist.zh-CN.md` v4.
+
 - **2026-09-03 — capture-card 5-slot board geometry landed; card-template
   pilot (honest negative):** mined the two raw session videos (~16 min) with a
   private scene miner (board-strip blob counting, seat avatar dark/white text
