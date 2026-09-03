@@ -628,6 +628,8 @@ def _cmd_stack_worksheet(args: argparse.Namespace) -> int:
     if not gaps:
         print("no OCCUPIED-but-stack-UNKNOWN targets to transcribe")
         return 1
+    if args.limit is not None:
+        gaps = gaps[: args.limit]
 
     frames_dir = root / "normalized" / "frames"
     by_frame = {label.frame: label for label in labels}
@@ -1076,6 +1078,8 @@ def build_parser() -> argparse.ArgumentParser:
                          help="fill-in CSV (default: reports/stack-values.csv)")
     stackws.add_argument("--session", default=None,
                          help="only target this session (e.g. session_002)")
+    stackws.add_argument("--limit", type=int, default=None,
+                         help="only render the first N targets (quick pilot)")
     stackws.add_argument("--include-images", action="store_false", default=True,
                          help="omit crops/frame thumbnails (labels only)")
     stackws.set_defaults(func=_cmd_stack_worksheet)

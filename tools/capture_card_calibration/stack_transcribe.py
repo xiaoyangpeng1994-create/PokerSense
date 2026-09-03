@@ -251,7 +251,7 @@ def render_stack_worksheet(
         f"<h1>{html.escape(title)}</h1>"
         f"<p class=\"sub\">{html.escape(summary)}</p>"
         "<div class=\"toolbar\">"
-        "<span id=\"progress\">已填 0 / 0</span>"
+        f"<span id=\"progress\">已填 0 / {len(gaps)}</span>"
         "<button id=\"download\" type=\"button\">下载填好的 CSV</button>"
         "<button id=\"clear\" type=\"button\">清空全部</button>"
         "</div>"
