@@ -151,8 +151,11 @@ def test_coverage_names_every_missing_action():
         item for item in report.requirements if item.field == "completed_action"
     )
     joined = " ".join(action.shortfalls)
-    for name in ("FOLD", "CHECK", "CALL", "BET", "RAISE", "ALL_IN"):
+    for name in ("FOLD", "CHECK", "CALL", "BET", "RAISE"):
         assert name in joined
+    # ALL_IN is owner-waived (2026-09-04 decision, recorded in coverage.py):
+    # it must NOT be named as a shortfall even when absent.
+    assert "ALL_IN" not in joined
 
 
 def test_coverage_counts_temporal_groups():

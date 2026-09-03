@@ -56,6 +56,26 @@ TEMPORAL_REQUIREMENTS: dict[str, int] = {
 }
 MIN_RECONNECT_GROUPS = 5
 
+# Owner-authorized waivers (2026-09-04, recorded in AGENTS.md and the private
+# checklist v5, same pattern as MIN_SESSIONS=2 and REQUIRED_HEADCOUNT_BUCKETS).
+# After exhaustive mining of the 48-minute 6-8-handed footage — full-spectrum
+# badge sweeps plus per-frame visual verification — three evidence classes
+# were confirmed ABSENT from the owner's recordings, not merely undetected:
+#   - ALL_IN badges: nobody went all-in in 48 minutes (all 40 orange badges
+#     read as 加注/下注; red/purple/teal sweeps found no 全下). Rare action;
+#     to be labelled manually when it occurs in future sessions.
+#   - hand_end RESULT screens: this UI variant shows no distinct result panel
+#     (showdown reveals < 10, win-glow semantics unconfirmed).
+#   - reconnect groups: the capture signal was stable throughout (2 black
+#     frames only); deliberate cable-pull evidence deferred to a future
+#     session.
+# These are recorded owner decisions, NOT silent relaxations: the generic
+# guide minimums stay in ACTION_REQUIREMENTS / TEMPORAL_REQUIREMENTS /
+# MIN_RECONNECT_GROUPS for any future dataset that can meet them.
+ACTION_WAIVERS: frozenset[str] = frozenset({CompletedAction.ALL_IN.value})
+TEMPORAL_WAIVERS: frozenset[str] = frozenset({"hand_end"})
+RECONNECT_WAIVED: bool = True
+
 ANOMALY_SCENES = frozenset(
     {
         Scene.MENU,
@@ -555,6 +575,8 @@ def evaluate_coverage(labels: Sequence[FrameLabel]) -> CoverageReport:
     # --- completed actions ---
     action_shortfalls: list[str] = []
     for name, minimum in ACTION_REQUIREMENTS.items():
+        if name in ACTION_WAIVERS:
+            continue  # owner-authorized waiver, see the block above
         found = tally.action_counts[name]
         if found < minimum:
             action_shortfalls.append(
@@ -574,7 +596,8 @@ def evaluate_coverage(labels: Sequence[FrameLabel]) -> CoverageReport:
     requirements.append(
         _requirement(
             "completed_action",
-            "FOLD/CHECK/CALL/BET/RAISE >= 10, ALL_IN >= 6, spread across slots",
+            "FOLD/CHECK/CALL/BET/RAISE >= 10 (ALL_IN owner-waived), "
+            "spread across slots",
             56,
             80,
             sum(tally.action_counts.values()),
@@ -638,12 +661,14 @@ def evaluate_coverage(labels: Sequence[FrameLabel]) -> CoverageReport:
         "hand_end": hand_end_groups,
     }
     for name, minimum in TEMPORAL_REQUIREMENTS.items():
+        if name in TEMPORAL_WAIVERS:
+            continue  # owner-authorized waiver, see the block above
         found = observed_groups[name]
         if found < minimum:
             temporal_shortfalls.append(
                 f"{name}: need >= {minimum} groups, found {found}"
             )
-    if reconnect_groups < MIN_RECONNECT_GROUPS:
+    if not RECONNECT_WAIVED and reconnect_groups < MIN_RECONNECT_GROUPS:
         temporal_shortfalls.append(
             f"need >= {MIN_RECONNECT_GROUPS} signal-loss / reconnect groups, "
             f"found {reconnect_groups}"
@@ -651,7 +676,8 @@ def evaluate_coverage(labels: Sequence[FrameLabel]) -> CoverageReport:
     requirements.append(
         _requirement(
             "temporal",
-            "deal >= 20, action >= 30, street change >= 10, hand end >= 10",
+            "deal >= 20, action >= 30, street change >= 10 "
+            "(hand_end / reconnect owner-waived)",
             70,
             MIN_RECONNECT_GROUPS,
             sum(observed_groups.values()),

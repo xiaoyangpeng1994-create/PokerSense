@@ -248,6 +248,18 @@ structure; do not represent a local build as a clean-user installation test.
   invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
   honest state, not a claim that calibration is complete.
 
+- **2026-09-04 — stage G CLOSED (owner-waived final three):** after the VFR
+  fix surfaced CHECK/BET, the remaining three sub-gaps (ALL_IN 0/6, hand_end
+  0/10, reconnect 2/5) were presented to the owner with full evidence;
+  he ruled them waived — all-in is a rare action to be hand-labelled when it
+  occurs, this UI shows no distinct result panel, and the capture signal was
+  stable throughout. Implemented as recorded waivers in `coverage.py`
+  (`ACTION_WAIVERS` / `TEMPORAL_WAIVERS` / `RECONNECT_WAIVED`, generic guide
+  minimums preserved; test updated to pin ALL_IN not being named).
+  **Coverage: stage G minimum coverage = met (378 frames).** Next stages:
+  H (train/validation splits), I (platform templates + thresholds — card
+  suits need the street-gated fusion work), J (seat mapping), K (replay).
+
 - **2026-09-04 — VFR time-base fix: footage is 48 min, CHECK/BET closed:**
   the two mkv containers claim 30 fps but the effective capture rate is ~10
   fps, so in-frame phone clocks are the ground truth: session_001 spans
