@@ -248,6 +248,19 @@ structure; do not represent a local build as a clean-user installation test.
   invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
   honest state, not a claim that calibration is complete.
 
+- **2026-09-04 — glyph-level temporal fusion UNBLOCKS card suits (prototype):**
+  following the stage-I single-frame impasse, a fusion prototype content-
+  matches each labelled frame to its cv2 position in the raw video (VFR index
+  drift is real: ffmpeg index != sequential cv2 index, but board-strip
+  signature matching lands exact, meandiff 0.0), gathers street-gated
+  neighbour glyphs (signature gate, ~30-40 per card), and classifies the
+  averaged glyph. The exact K♠ case that k-NN/medoid got wrong (C at
+  best=1.000) reads correctly as S after fusion; all three prototype cases
+  read right. Margins are still thin (~2.5% S-vs-C), so the production path
+  is per-frame fusion + full split-discipline threshold calibration — that
+  rerun is the next stage-I task. Card field remains UNCALIBRATED until the
+  fused pipeline passes zero-false-VALID on the locked validation split.
+
 - **2026-09-04 — stage H done; stage I card field honestly BLOCKED (for now):**
   stage H splits are written and validated (train 224 / calibration 63 /
   validation 80, hand-isolated, each with stable positives and hard negatives)
