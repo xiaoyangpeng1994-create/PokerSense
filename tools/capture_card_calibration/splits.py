@@ -195,12 +195,19 @@ def _has_unknown_field(label: FrameLabel) -> bool:
     )
     if any(field.status is not LabelStatus.VALID for field in fields):
         return True
-    return any(
-        slot.stack.status is not LabelStatus.VALID
-        or slot.dealer.status is not LabelStatus.VALID
-        or slot.occupancy.status is not LabelStatus.VALID
-        for slot in label.slots
-    )
+    for slot in label.slots:
+        if slot.occupancy.status is not LabelStatus.VALID:
+            return True
+        if slot.dealer.status is not LabelStatus.VALID:
+            return True
+        # An EMPTY slot legitimately keeps an UNKNOWN stack (dataset rule:
+        # "a seated player should carry a stack; an empty slot must not").
+        # Requiring it would make every table with empty seats unusable as a
+        # positive, contradicting the project's own labelling rule.
+        if (slot.occupancy.value == "OCCUPIED"
+                and slot.stack.status is not LabelStatus.VALID):
+            return True
+    return False
 
 
 def detect_leakage(plan: SplitPlan) -> list[str]:
