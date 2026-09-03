@@ -134,6 +134,46 @@ structure; do not represent a local build as a clean-user installation test.
 
 ## Progress log
 
+- **2026-09-03 — label top-up review page (`cli review-frames`):** stage F
+  label coverage is currently the bottleneck (105 of 106 frames carry at least
+  one UNKNOWN field), and a terminal `coverage`/`splits` run reports *how many*
+  samples are missing but never *which pixel to look at*. Added
+  `tools/capture_card_calibration/review_frames.py`, which turns an audit
+  report plus the label set into a per-frame labeller-facing HTML page: each
+  card embeds the normalized PNG, the audit findings that point at that frame
+  (if any), and a slot-by-slot read-out marking which fields are still
+  UNKNOWN/CONFLICT. The output is self-contained (images inlined as base64) so
+  it opens without the private data dir, and it lives under the private
+  dataset's `reports/` — never Git. It never rewrites a label or invents a
+  value, honouring the failure-closed philosophy. Wired it into `cli.py`
+  (`review-frames --root/--out/--json-out/--limit/--rules/--include-images`)
+  and unit-tested it with synthetic-only
+  `tests/tools/test_capture_card_review_frames.py` (25 tests: field rendering,
+  gap detection, slot views, per-frame issue indexing, HTML/JSON emission,
+  escaping, self-containedness). Module stays import-safe without OpenCV. Ran
+  it over the real 106-frame set (123 MB with embedded images, 380 KB in
+  `--include-images` off mode); the per-frame gap distribution matches the
+  top-up checklist exactly (board_cards 27 / hero_cards 6 / pot 1 frame-level;
+  stack 461 / dealer 232 / completed_action+current_actor 848 slot-level).
+
+- **2026-09-03 — stage-H splits run against the real label set is BLOCKED
+  by stage-F coverage, not a tool defect:** ran `cli splits` (and `cli
+  coverage`) over the private 106-frame label set. `splits` assigns frames by
+  hand group and reports `train/validation have no stable positive frames`
+  because 105 of 106 frames carry at least one known-but-UNKNOWN field: stack
+  is UNKNOWN on 461 slot observations, dealer on 232, board_cards 27,
+  hero_cards 6. Diagnosed against `_has_unknown_field`: even under a generous
+  rule that lets an EMPTY slot keep an UNKNOWN stack, only 14 of 106 frames
+  qualify as fully-valid, so the read is legitimately fail-closed — the 2-5
+  and 6-8 seat frames and completed-action/temporal/anomaly samples still must
+  be transcribed before a usable train/validation split exists. Coverage shows
+  the exact gaps (completed_action 0, hero_actor 0, anomaly 0, board/pot/dealer
+  negative samples short, head-count 3-5 never observed). A per-field top-up
+  checklist was written to the private dataset
+  (`reports/label-topup-checklist.zh-CN.md`), but no label or split value was
+  invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
+  honest state, not a claim that calibration is complete.
+
 - **2026-09-03 — capture-card boundary measurement, seat reader, and
   two-session floor:** added `tools/capture_card_calibration/boundary.py`
   (stage C section-6 content-boundary drift measurement) and its

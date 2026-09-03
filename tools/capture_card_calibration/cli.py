@@ -51,6 +51,12 @@ from .record import (
     update_device_manifest,
     write_session_log,
 )
+from .review_frames import (
+    build_card,
+    index_issues,
+    render_card_json,
+    render_review_html,
+)
 from .sampler import SampleOptions, default_reader, sample_session
 from .report import (
     STATUS_PASS,
@@ -510,6 +516,72 @@ def _cmd_audit_labels(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_review_frames(args: argparse.Namespace) -> int:
+    """Stage F: render a labeller-facing review page for label top-up.
+
+    Every frame is rendered as a card showing the normalized PNG, the audit
+    findings that point at it (if any), and a slot-by-slot read-out of what is
+    already labelled, with the still-missing fields highlighted. This does not
+    edit a label; it makes the ``UNKNOWN`` fields a human can actually see.
+    The output HTML is self-contained (images inlined) and lives in the private
+    dataset's ``reports/`` directory, never in Git.
+    """
+    root = Path(args.root)
+    path = root / "labels" / "frames.jsonl"
+    if not path.is_file():
+        print(f"no labels at {path}")
+        return 1
+    try:
+        labels = read_frames_jsonl(path)
+    except SchemaError as exc:
+        print(f"label file is invalid: {exc}")
+        return 1
+    if not labels:
+        print("no labelled frames to review")
+        return 1
+
+    report = audit_labels(labels, rules=args.rules)
+    issue_index = index_issues(report)
+
+    frames_dir = root / "normalized" / "frames"
+
+    cards = []
+    for label in labels:
+        if args.limit is not None and len(cards) >= args.limit:
+            break
+        label_path = frames_dir / label.frame if frames_dir.is_dir() else None
+        image_bytes = b"" if args.include_images is False else None
+        card = build_card(
+            label,
+            image_path=label_path,
+            image_bytes=image_bytes,
+            issue_bucket=issue_index,
+            include_image=args.include_images,
+        )
+        cards.append(card)
+
+    # A frame explicitly excluded from the image pass still gets a page: this
+    # surfaces what audit said about it, which is useful even without pixels.
+    summary = (
+        f"{len(labels)} labelled frame(s) across "
+        f"{len(report.sessions)} session(s) · {report.hands_checked} hand(s) · "
+        f"audit {report.error_count} ERROR / {report.warn_count} WARN"
+    )
+
+    target = Path(args.out) if args.out else root / "reports" / "review-frames.html"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if args.json_out:
+        Path(args.json_out).write_text(
+            render_card_json(cards), encoding="utf-8"
+        )
+        print(f"wrote {args.json_out}")
+    target.write_text(
+        render_review_html(cards, summary=summary), encoding="utf-8"
+    )
+    print(f"reviewed {len(cards)} frame(s) → {target}")
+    return 0
+
+
 def _cmd_report(args: argparse.Namespace) -> int:
     root = Path(args.root)
     inputs = _load_inputs(root)
@@ -726,6 +798,31 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--json-out", type=Path, default=None)
     audit.add_argument("--strict", action="store_true")
     audit.set_defaults(func=_cmd_audit_labels)
+
+    review = sub.add_parser(
+        "review-frames",
+        help="stage F: render a labeller-facing page for label top-up",
+    )
+    review.add_argument("--root", type=Path, required=True)
+    review.add_argument("--out", type=Path, default=None,
+                        help="output HTML path (default: reports/review-frames.html)")
+    review.add_argument("--json-out", type=Path, default=None,
+                        help="also dump machine-readable cards as JSON")
+    review.add_argument("--limit", type=int, default=None,
+                        help="only render the first N frames")
+    review.add_argument(
+        "--rules",
+        nargs="*",
+        default=None,
+        help="audit rules to run (default: all)",
+    )
+    review.add_argument(
+        "--include-images",
+        action="store_false",
+        default=True,
+        help="omit normalized frame images (labels + audit only)",
+    )
+    review.set_defaults(func=_cmd_review_frames)
 
     splits = sub.add_parser("splits", help="stage H hand-isolated splits")
     splits.add_argument("--root", type=Path, required=True)
