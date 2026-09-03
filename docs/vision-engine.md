@@ -16,7 +16,7 @@
 | `asset_manifest.py` | `VisionAssetManifest`（版本绑定，JSON round-trip） |
 | `calibration.py` | monotonic empirical bins + per-detector `abstain_floor` |
 | `trace.py` | `RecognitionTrace`（memory-only） |
-| `card_recognizer.py` | 牌面 rank/suit 模板匹配 |
+| `corner_glyph_recognizer.py` | 牌面识别（`CardRecognizer` 实现）：只读角标 rank/suit glyph，不做整牌模板匹配 |
 | `amount_recognizer.py` | 数字模板（ChipAmount，禁 float） |
 | `action_recognizer.py` | per-seat action 识别 |
 | `slot_marker_recognizer.py` | Dealer 与空座 plus marker 的逐槽识别 |
