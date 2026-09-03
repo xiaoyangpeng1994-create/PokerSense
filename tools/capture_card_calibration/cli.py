@@ -69,6 +69,11 @@ from .stack_transcribe import (
     render_stack_csv,
     render_stack_worksheet,
 )
+from .stack_auto import (
+    render_auto_report,
+    render_proposal_csv,
+    run_stack_auto,
+)
 from .sampler import SampleOptions, default_reader, sample_session
 from .report import (
     STATUS_PASS,
@@ -702,6 +707,93 @@ def _cmd_stack_apply(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_stack_auto(args: argparse.Namespace) -> int:
+    """Stage F: propose stack values by reading the pill pixels (no writes).
+
+    Builds a 0-9 digit template library from the already-confirmed ``VALID``
+    stacks on a hand-isolated train split, reads every OCCUPIED-but-UNKNOWN
+    stack pill, and gates each read on a two-way confidence test (winning
+    digit must beat the runner-up by ``MARGIN_THRESHOLD`` and actually fit,
+    ``best_dist < FIT_THRESHOLD``). Accepted reads are written to a proposal
+    CSV in the exact shape ``stack-apply`` consumes — never to
+    ``frames.jsonl`` — so the write path stays the single audited writer.
+
+    The run also scores the reader against the confirmed stacks on the eval
+    split and writes a review report with the false-VALID / UNKNOWN counts,
+    so an auditor (or Kimi K3) can re-check every decision before anything is
+    applied.
+    """
+    root = Path(args.root)
+    path = root / "labels" / "frames.jsonl"
+    if not path.is_file():
+        print(f"no labels at {path}")
+        return 1
+    try:
+        labels = read_frames_jsonl(path)
+    except SchemaError as exc:
+        print(f"label file is invalid: {exc}")
+        return 1
+    if not labels:
+        print("no labelled frames to propose for")
+        return 1
+
+    frames_dir = root / "normalized" / "frames"
+    if not frames_dir.is_dir():
+        print(f"no normalized frames at {frames_dir}")
+        return 1
+
+    result = run_stack_auto(
+        path, frames_dir,
+        session=args.session,
+        eval_ratio=args.eval_ratio,
+    )
+    s = result.summary
+    print("template library:", s.template_digit_samples,
+          f"samples across {s.digits_covered} digits "
+          f"(train {s.train_frames} frames / {s.train_stacks} stacks)")
+    print(f"proposals: {s.accepted} / {s.targets} OCCUPIED-but-UNKNOWN targets")
+    print(f"reader accuracy on eval: {s.eval_total} confirmed stacks "
+          f"(accepted {s.eval_accepted} / UNKNOWN {s.eval_unknown}); "
+          f"correct {s.accepted_correct} / false {s.accepted_false}; "
+          f"precision {s.eval_precision:.1%}, recall {s.eval_recall:.1%}")
+    if result.mismatches:
+        print(f"!! {len(result.mismatches)} accepted read(s) disagree with "
+              f"ground truth — review before applying:")
+        for m in result.mismatches:
+            print(f"   {m.frame} slot {m.slot_id}: read {m.value} "
+                  f"vs {m.known_value}")
+
+    # Write the review report and the proposal CSV (the report always; the CSV
+    # only when there is at least one accepted target).
+    report_target = (
+        Path(args.report_out)
+        if args.report_out
+        else root / "reports" / "stack-auto-report.md"
+    )
+    report_target.parent.mkdir(parents=True, exist_ok=True)
+    report_target.write_text(
+        render_auto_report(s, result.candidates, result.mismatches),
+        encoding="utf-8",
+    )
+    print(f"wrote {report_target}")
+
+    csv_target = (
+        Path(args.csv_out)
+        if args.csv_out
+        else root / "reports" / "stack-auto-proposal.csv"
+    )
+    csv_target.parent.mkdir(parents=True, exist_ok=True)
+    csv_target.write_text(render_proposal_csv(result.candidates), encoding="utf-8")
+    print(f"wrote {csv_target}")
+
+    if result.summary.accepted:
+        print(
+            "apply the confident reads with: stack-apply --csv "
+            f"{csv_target}"
+        )
+    return 0
+
+
 def _cmd_viewpoint(args: argparse.Namespace) -> int:
     """Stage F: review whether each frame is the owner *playing* or *watching*.
 
@@ -1092,6 +1184,24 @@ def build_parser() -> argparse.ArgumentParser:
     stackapply.add_argument("--csv", type=Path, required=True,
                             help="filled CSV with frame,slot_id,value")
     stackapply.set_defaults(func=_cmd_stack_apply)
+
+    stackauto = sub.add_parser(
+        "stack-auto",
+        help="stage F: propose stack values by reading pill pixels (no writes)",
+    )
+    stackauto.add_argument("--root", type=Path, required=True)
+    stackauto.add_argument("--session", default=None,
+                           help="only propose for this session (e.g. session_002)")
+    stackauto.add_argument("--eval-ratio", type=float, default=0.4,
+                           help="held-out fraction for the confidence gate "
+                                "eval (0<r<1)")
+    stackauto.add_argument("--report-out", type=Path, default=None,
+                           help="review report Markdown "
+                                "(default: reports/stack-auto-report.md)")
+    stackauto.add_argument("--csv-out", type=Path, default=None,
+                           help="proposal CSV to feed stack-apply "
+                                "(default: reports/stack-auto-proposal.csv)")
+    stackauto.set_defaults(func=_cmd_stack_auto)
 
     splits = sub.add_parser("splits", help="stage H hand-isolated splits")
     splits.add_argument("--root", type=Path, required=True)

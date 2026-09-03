@@ -28,6 +28,7 @@ Import-safe without OpenCV: only the reader functions import cv2.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
@@ -40,9 +41,12 @@ __all__ = [
     "SLOT_LAYOUT_MULTI",
     "SLOT_LAYOUT_HEADS",
     "SLOT_LAYOUT_S002",
+    "DigitMatch",
     "build_digit_templates",
+    "classify_digit",
     "read_seat_fields",
     "read_slot",
+    "split_stack_digits",
 ]
 
 
@@ -109,6 +113,25 @@ _DEALER_BLACK_MAX = 70
 # them.
 _DIGIT_MIN_AREA = 25
 _DIGIT_H = (11, 16)
+
+#: Maximum width of a connected white component that can still be a single
+#: stack digit. On this canvas a real digit is 9-11px ("1" as narrow as 5px,
+#: a wide "2"/"9" up to ~12px); nothing legitimate is wider than ~13px. The
+#: UI *merges two adjacent digits* when it draws a multi-digit value with them
+#: touching (e.g. a "194" whose "9" and "4" touch, or "198" with "9"+"8"
+#: touching), and ``cv2.dilate(2,2)`` bridges that run into one component.
+#: Measured on the reference frames, that bridged blob is 21-22px — so a
+#: component wider than ``_DIGIT_MAX_W`` (=20) is a merge, not a digit, and
+#: the 20px threshold was validated on the private corpus (every real merge
+#: lands at 21px or more).
+#:
+#: A blob at least this wide is a *reliability signal*, not a discard rule
+#: for the child pixels: the failure-closed path must never trust the
+#: remaining partial glyphs as a complete digit sequence (a merged "198" must
+#: never be read as a confident "1"). Callers that can tolerate an UNKNOWN
+#: read (``stack_auto``) use ``split_stack_digits`` and fail closed when a
+#: merge is detected; ``_split_digits`` keeps the historical discard behaviour
+#: so existing callers/tests are unchanged.
 _DIGIT_MAX_W = 20
 
 # White luminance floor: digits and badges are bright (>150), the green
@@ -153,6 +176,54 @@ def _white_mask(crop: np.ndarray, *, floor: int = _WHITE_MIN) -> np.ndarray:
     return th
 
 
+def _digits_from_crop(crop: np.ndarray) -> tuple[list[np.ndarray], bool]:
+    """Split a stack-pill crop into x-sorted digit masks.
+
+    Returns ``(glyphs, had_merge)`` where ``had_merge`` is True when a
+    connected white component exceeded a single digit's width. ``glyphs`` is
+    every digit-height component that fits a single digit (``w <= _DIGIT_MAX_W``),
+    in x order; the over-wide merged blob is **not** returned (its pixels
+    cannot be trusted as one digit — e.g. a merged "194" must not surface as a
+    confident "1").
+    """
+    import cv2
+
+    if crop is None or crop.size == 0 or min(crop.shape[:2]) < 3:
+        return [], False
+    th = _white_mask(crop)
+    th = cv2.dilate(th, cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2)), iterations=1)
+    n, lab, stats, _cent = cv2.connectedComponentsWithStats(th, 8)
+    chars: list[tuple[int, int, np.ndarray]] = []
+    had_merge = False
+    for i in range(1, n):
+        x, y, w, h, area = stats[i]
+        if area < _DIGIT_MIN_AREA or not (_DIGIT_H[0] <= h <= _DIGIT_H[1]):
+            continue
+        if w > _DIGIT_MAX_W:
+            # A >20px white blob is two or more digits that the UI drew
+            # touching (dilated into one component). Mark it; do not return
+            # its pixels as a single glyph.
+            had_merge = True
+            continue
+        mask = (lab[y : y + h, x : x + w] == i).astype(np.uint8) * 255
+        chars.append((x, w, mask))
+    chars.sort(key=lambda c: c[0])
+    return [c[-1] for c in chars], had_merge
+
+
+def split_stack_digits(crop: np.ndarray) -> tuple[list[np.ndarray], bool]:
+    """Split a stack-pill crop, reporting whether a digit merge was detected.
+
+    This is the failure-closed entry point for the auto-reader. It behaves
+    exactly like ``_split_digits`` but additionally returns ``had_merge``: a
+    call (e.g. ``stack_auto._read_stack_pill``) must treat any read from a
+    crop with ``had_merge is True`` as unreliable — a merged multi-digit value
+    would otherwise be truncated into a confident-looking single digit (the
+    "198 -> 1" failure), which violates the never-guess rule.
+    """
+    return _digits_from_crop(crop)
+
+
 def _split_digits(crop: np.ndarray) -> list[np.ndarray]:
     """Return x-sorted digit masks (uint8 0/255) from a stack-pill crop.
 
@@ -160,24 +231,8 @@ def _split_digits(crop: np.ndarray) -> list[np.ndarray]:
     of a "7"); connected components are then filtered to digit-like size
     and consistent height (a "D" dealer badge is taller and is dropped).
     """
-    import cv2
-
-    if crop is None or crop.size == 0 or min(crop.shape[:2]) < 3:
-        return []
-    th = _white_mask(crop)
-    th = cv2.dilate(th, cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2)), iterations=1)
-    n, lab, stats, _cent = cv2.connectedComponentsWithStats(th, 8)
-    chars: list[tuple[int, int, np.ndarray]] = []
-    for i in range(1, n):
-        x, y, w, h, area = stats[i]
-        if area < _DIGIT_MIN_AREA or not (_DIGIT_H[0] <= h <= _DIGIT_H[1]):
-            continue
-        if w > _DIGIT_MAX_W:
-            continue
-        mask = (lab[y : y + h, x : x + w] == i).astype(np.uint8) * 255
-        chars.append((x, w, mask))
-    chars.sort(key=lambda c: c[0])
-    return [c[-1] for c in chars]
+    glyphs, _ = _digits_from_crop(crop)
+    return glyphs
 
 
 def _norm(mask: np.ndarray, size: tuple[int, int] = (20, 28)) -> np.ndarray:
@@ -187,16 +242,70 @@ def _norm(mask: np.ndarray, size: tuple[int, int] = (20, 28)) -> np.ndarray:
     return (m > 127).astype(np.float32)
 
 
-def _classify(
+@dataclass(frozen=True)
+class DigitMatch:
+    """One normalized digit classified against a template library.
+
+    ``best`` / ``best_dist`` are the winning digit (the template sample the
+    text glyph is closest to) and its mean-square error. ``runner_up`` /
+    ``runner_up_dist`` are the second-best *different* digit and its MSE. The
+    confidence margin (``margin = runner_up_dist - best_dist``) measures how
+    decisively the winner beats the runner-up: a large margin means a clean
+    read, a small one means the two digits are confusable (e.g. 6/8, 9/7,
+    1/7 — the capture-card digits are all bright white on dark green and
+    9x-1x 3x look-alikes occur). ``recognized`` is True only when the winner
+    is a real digit; the runner-up is undefined (``None``) when there is no
+    competing digit.
+    """
+
+    best: str
+    best_dist: float
+    runner_up: str | None
+    runner_up_dist: float | None
+
+    @property
+    def margin(self) -> float:
+        """Positive gap between runner-up and best MSE; ``inf`` if no runner-up."""
+        if self.runner_up_dist is None:
+            return float("inf")
+        return self.runner_up_dist - self.best_dist
+
+
+def classify_digit(
     v: np.ndarray, templates: dict[str, list[np.ndarray]]
-) -> tuple[str, float]:
-    best, bd = None, float("inf")
+) -> DigitMatch:
+    """Classify one normalized glyph, returning the full winner/runner-up pair.
+
+    The MSE distance is *unnormalized* but comparable across candidates for a
+    single query; only the *ordering* and the *gap* matter for the gate, never
+    the raw value (which varies with glyph brightness/size).
+    """
+    best_label, best_dist = None, float("inf")
+    runner_label, runner_dist = None, float("inf")
     for d, samples in templates.items():
         for s in samples:
             dist = float(np.mean((v - s) ** 2))
-            if dist < bd:
-                best, bd = d, dist
-    return (best, bd) if best is not None else ("?", bd)
+            if dist < best_dist:
+                if best_label is not None and best_label != d:
+                    # The current best demotes to runner-up.
+                    runner_label, runner_dist = best_label, best_dist
+                best_label, best_dist = d, dist
+            elif dist < runner_dist and d != best_label:
+                runner_label, runner_dist = d, dist
+    return DigitMatch(
+        best=best_label if best_label is not None else "?",
+        best_dist=best_dist,
+        runner_up=runner_label,
+        runner_up_dist=runner_dist,
+    )
+
+
+def _classify(
+    v: np.ndarray, templates: dict[str, list[np.ndarray]]
+) -> tuple[str, float]:
+    """Backward-compatible wrapper returning the legacy ``(best, best_dist)``."""
+    match = classify_digit(v, templates)
+    return (match.best, match.best_dist)
 
 
 def _find_dealer(crop: np.ndarray) -> bool:
