@@ -303,6 +303,33 @@ def test_worksheet_omits_images_when_disabled(tmp_path):
     assert "data:image/jpeg;base64," not in html_text
 
 
+def test_worksheet_is_a_fillable_form(tmp_path):
+    # The page must be a one-stop fill-in form: a download button, a live
+    # progress counter, and per-row inputs carrying data-index/frame/slot so
+    # the client script can export exactly the CSV shape stack-apply expects.
+    gaps = []
+    for idx in range(3):
+        gaps.append(
+            StackGap(
+                frame=f"f{idx}.png", session_id="session_001", hand_id="h1",
+                timestamp_ms=idx * 10, slot_id=idx, layout_key="multi",
+            )
+        )
+    html_text = render_stack_worksheet(
+        gaps, {}, tmp_path, include_images=False
+    )
+    assert 'id="download"' in html_text
+    assert 'id="clear"' in html_text
+    assert 'id="progress"' in html_text
+    assert "已填" in html_text
+    # Each of the 3 targets has a distinct data-index on its input.
+    assert html_text.count("data-index=") == 3
+    assert "data-frame=" in html_text
+    assert "data-slot=" in html_text
+    # The client script must be present (it wires up download/clear/progress).
+    assert "buildCsv" in html_text
+
+
 def test_worksheet_uses_jpeg_crops_and_thumbs(tmp_path):
     # When images are on, both the crop and the frame thumbnail are JPEG
     # (keeps a 180-target worksheet from ballooning into hundreds of MB).

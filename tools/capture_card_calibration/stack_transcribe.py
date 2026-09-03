@@ -239,6 +239,7 @@ def render_stack_worksheet(
         rows.append(
             _row_html(
                 gap, crop_uri, frame_uri, street, pot,
+                index=len(rows),
             )
         )
 
@@ -249,13 +250,18 @@ def render_stack_worksheet(
         f"<title>{html.escape(title)}</title><style>{_CSS_STACK}</style></head><body>"
         f"<h1>{html.escape(title)}</h1>"
         f"<p class=\"sub\">{html.escape(summary)}</p>"
-        "<p class=\"hint\">Read the zoomed crop for each target, type the integer "
-        "into the <b>value</b> cell, then save this table as CSV and feed it to "
-        "<code>stack-apply</code>. Leave blank any cell you cannot read. This page "
-        "never writes a value by itself.</p>"
+        "<div class=\"toolbar\">"
+        "<span id=\"progress\">已填 0 / 0</span>"
+        "<button id=\"download\" type=\"button\">下载填好的 CSV</button>"
+        "<button id=\"clear\" type=\"button\">清空全部</button>"
+        "</div>"
+        "<p class=\"hint\">对着左边的<b>放大数字</b>，把整数填进对应的输入框。看不清就留空。"
+        "填完点「下载填好的 CSV」，再用 <code>stack-apply --csv &lt;下载的文件&gt;</code> 写回。"
+        "本页填了不会自动改任何文件，只有下载 + 命令行应用那一步才写数据集。</p>"
         "<table class=\"ws\"><thead><tr>"
         "<th>frame</th><th>slot</th><th>ctx</th><th>crop</th><th>value</th>"
         "</tr></thead><tbody>" + "".join(rows) + "</tbody></table>"
+        f"<script>{_JS_STACK}</script>"
         "<p class=\"foot\">Private dataset — frames must never enter Git. "
         "An unconfirmed value is never auto-filled.</p>"
         "</body></html>"
@@ -263,7 +269,7 @@ def render_stack_worksheet(
     return body
 
 
-def _row_html(gap, crop_uri, frame_uri, street, pot) -> str:
+def _row_html(gap, crop_uri, frame_uri, street, pot, *, index: int) -> str:
     # Show the crop as the primary reading surface; show the full frame as a
     # small context thumbnail when available.
     ctx_bits = []
@@ -294,7 +300,8 @@ def _row_html(gap, crop_uri, frame_uri, street, pot) -> str:
         f"<td class=\"slot-cell\">{gap.slot_id}</td>"
         f"<td class=\"ctx-cell\">{thumb_cell}</td>"
         f"<td class=\"crop-cell\">{crop_cell}</td>"
-        f"<td class=\"value-cell\"><input type=\"text\" "
+        f"<td class=\"value-cell\"><input type=\"text\" inputmode=\"numeric\" "
+        f"data-index=\"{index}\" "
         f"data-frame=\"{html.escape(gap.frame)}\" "
         f"data-slot=\"{gap.slot_id}\" placeholder=\"?\"></td></tr>"
     )
@@ -458,7 +465,100 @@ table.ws th{color:var(--muted);font-weight:500;white-space:nowrap;}
 .noimg{color:var(--muted);font-size:12px;}
 .value-cell input{width:90px;padding:6px 8px;font-size:15px;font-weight:600;
   border:1px solid var(--line);border-radius:6px;}
+.value-cell input.filled{border-color:var(--gap);background:#fff7ed;
+  color:#9a3412;}
 .foot{margin-top:20px;color:var(--muted);font-size:12px;}
+.toolbar{display:flex;align-items:center;gap:12px;margin:0 0 14px;flex-wrap:wrap;
+  padding:12px 14px;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;}
+.toolbar #progress{font-weight:600;color:var(--gap);font-size:15px;
+  min-width:110px;}
+.toolbar button{font-size:14px;font-weight:600;padding:8px 16px;border-radius:8px;
+  border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  cursor:pointer;}
+.toolbar button:hover{background:#eef1f4;}
+.toolbar button.primary{background:var(--gap);border-color:var(--gap);
+  color:#fff;}
+.toolbar button.primary:hover{background:#9a3412;}
+"""
+
+#: Client-side script that makes the worksheet a real fill-in form: it counts
+#: filled cells, lets the user download the completed CSV (exactly the shape
+#: ``stack-apply`` expects: frame,slot_id,value), and clear all in one click.
+#: The page still never writes the dataset — only the downloaded CSV + the CLI
+#: apply step do.
+_JS_STACK = """
+(function () {
+  var inputs = Array.prototype.slice.call(
+    document.querySelectorAll('.ws .value-cell input')
+  );
+  var progress = document.getElementById('progress');
+  var download = document.getElementById('download');
+  var clearBtn = document.getElementById('clear');
+  var total = inputs.length;
+
+  function filledCount() {
+    var n = 0;
+    inputs.forEach(function (i) {
+      if (i.value.trim() !== '') n += 1;
+    });
+    return n;
+  }
+
+  function refresh() {
+    var n = filledCount();
+    progress.textContent = '已填 ' + n + ' / ' + total;
+    inputs.forEach(function (i) {
+      i.classList.toggle('filled', i.value.trim() !== '');
+    });
+  }
+
+  function buildCsv() {
+    var rows = ['frame,slot_id,value'];
+    inputs.forEach(function (i) {
+      var frame = i.getAttribute('data-frame').replace(/"/g, '""');
+      var slot = i.getAttribute('data-slot');
+      var value = i.value.trim();
+      rows.push('"' + frame + '",' + slot + ',' + value);
+    });
+    return '\\ufeff' + rows.join('\\r\\n') + '\\r\\n';
+  }
+
+  function downloadCsv() {
+    var blob = new Blob([buildCsv()], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'stack-values.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function () {
+      inputs.forEach(function (i) { i.value = ''; });
+      refresh();
+    });
+  }
+  if (download) {
+    download.addEventListener('click', downloadCsv);
+  }
+  inputs.forEach(function (i) {
+    i.addEventListener('input', refresh);
+    i.addEventListener('keydown', function (e) {
+      // Enter jumps to the next input for a fast transcription flow.
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var idx = parseInt(i.getAttribute('data-index'), 10);
+        var next = inputs[idx + 1];
+        if (next) next.focus();
+      }
+    });
+  });
+  refresh();
+})();
 """
 
 
