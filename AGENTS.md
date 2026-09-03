@@ -134,6 +134,28 @@ structure; do not represent a local build as a clean-user installation test.
 
 ## Progress log
 
+- **2026-09-03 — capture-card boundary measurement, seat reader, and
+  two-session floor:** added `tools/capture_card_calibration/boundary.py`
+  (stage C section-6 content-boundary drift measurement) and its
+  `cli boundary` subcommand, measuring canvas geometry separately from content
+  luminance so a leftover UVC letterbox border is caught even while the game
+  draws a dark menu band; only stable table frames decide the verdict against
+  the guide's 2-pixel tolerance. Added `tools/capture_card_calibration/seat_reader.py`
+  (stage F seat pixel reader) reading per-visual-slot occupancy / stack /
+  dealer from normalized frames via luminance/chroma thresholds, giving VALID or
+  UNKNOWN per read and reusing no LDPlayer or H5 ROI. Recorded the
+  owner-authorized waiver of the third capture session as an explicit
+  annotation (`MIN_SESSIONS = 2` in `schema.py`, surfaced in `report.py`), with
+  the deliberate, documented rationale. Resolved the capture-card identity
+  placeholder by replacing the `card_replace_me` platform config / layout_id
+  with the real ugreen UVC card and updating `hero_slot_layout.json` and the
+  `land_capture_card_configs.py` default. Unit-tested via synthetic-only
+  `tests/tools/test_capture_card_boundary.py`; capture-card tool modules and
+  tests are flake8-clean and pass with `PYTHONPATH=src`. This still calibrates
+  nothing on its own: validation of the seat reader's measured geometry and the
+  remaining negative-sample / temporal / action / anomaly gaps below require
+  real capture-card evidence.
+
 - **2026-09-03 — capture-card calibration toolchain:** added
   `tools/capture_card_calibration/`, the hardware-independent half of the
   calibration guide. It provides: SHA-256/SHA256SUMS hashing (guide rule 8),

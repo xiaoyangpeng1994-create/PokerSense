@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Sequence
 
 from . import SCHEMA_VERSION
+from .audit import audit_labels
 from .boundary import (
     EDGES,
     MAX_BOUNDARY_DRIFT_PX,
@@ -456,6 +457,59 @@ def _cmd_boundary(args: argparse.Namespace) -> int:
     return 0 if (ok or not args.strict) else 1
 
 
+def _cmd_audit_labels(args: argparse.Namespace) -> int:
+    """Stage F: cross-field consistency audit of ``labels/frames.jsonl``.
+
+    The audit reports *logical* contradictions a machine can decide without
+    looking at a pixel (street vs board count, board monotonicity, dealer
+    uniqueness, occupancy vs stack, empty-slot dealer, pot monotonicity). It
+    never rewrites a label — it flags a field so the owner can confirm or fix
+    it. Rules that depend on fields the owner has not labelled yet (action)
+    stay silent, so an under-labelled dataset does not drown the report.
+    """
+    root = Path(args.root)
+    path = root / "labels" / "frames.jsonl"
+    if not path.is_file():
+        print(f"no labels at {path}")
+        return 1
+    try:
+        labels = read_frames_jsonl(path)
+    except SchemaError as exc:
+        print(f"label file is invalid: {exc}")
+        return 1
+
+    report = audit_labels(labels, rules=args.rules)
+
+    print(f"frames: {report.frames_checked}  hands: {report.hands_checked}  "
+          f"sessions: {', '.join(report.sessions) or 'none'}")
+    print(f"violations: {len(report.issues)} "
+          f"({report.error_count} ERROR, {report.warn_count} WARN)")
+    print()
+    print(f"{'rule':<26} {'checked':>8} {'violated':>9}")
+    print("-" * 46)
+    for result in report.results:
+        print(f"{result.rule:<26} {result.checked:>8} {result.violated:>9}")
+
+    if report.issues:
+        for issue in report.issues:
+            slot = f" slot={issue.slot_id}" if issue.slot_id is not None else ""
+            print(
+                f"  [{issue.severity}] {issue.rule}{slot} {issue.frame} :: "
+                f"{issue.message}"
+            )
+
+    if args.json_out:
+        Path(args.json_out).write_text(
+            json.dumps(report.to_dict(), ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(f"\nwrote {args.json_out}")
+
+    if args.strict and report.has_errors:
+        return 1
+    return 0
+
+
 def _cmd_report(args: argparse.Namespace) -> int:
     root = Path(args.root)
     inputs = _load_inputs(root)
@@ -657,6 +711,21 @@ def build_parser() -> argparse.ArgumentParser:
     coverage.add_argument("--json-out", type=Path, default=None)
     coverage.add_argument("--strict", action="store_true")
     coverage.set_defaults(func=_cmd_coverage)
+
+    audit = sub.add_parser(
+        "audit-labels",
+        help="stage F: cross-field consistency audit of labels/frames.jsonl",
+    )
+    audit.add_argument("--root", type=Path, required=True)
+    audit.add_argument(
+        "--rules",
+        nargs="*",
+        default=None,
+        help="only run these rules (names from the audit report)",
+    )
+    audit.add_argument("--json-out", type=Path, default=None)
+    audit.add_argument("--strict", action="store_true")
+    audit.set_defaults(func=_cmd_audit_labels)
 
     splits = sub.add_parser("splits", help="stage H hand-isolated splits")
     splits.add_argument("--root", type=Path, required=True)
