@@ -248,8 +248,26 @@ structure; do not represent a local build as a clean-user installation test.
   invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
   honest state, not a claim that calibration is complete.
 
+- **2026-09-04 — VFR time-base fix: footage is 48 min, CHECK/BET closed:**
+  the two mkv containers claim 30 fps but the effective capture rate is ~10
+  fps, so in-frame phone clocks are the ground truth: session_001 spans
+  03:06-03:26 (20 min) and session_002 04:40-05:08 (28 min) — 48 minutes of
+  real 6-8-handed play, not 16. Dataset timestamps stay on the container
+  time base; event dedupe must convert (s001 x1200/11985, s002 x1680/17063).
+  Re-deduping on real time split over-merged events (orange badges 25 -> 40)
+  and, together with a blob-geometry badge/name discriminator, surfaced two
+  classes previously declared absent: **让牌 = teal CHECK badge (11 verified
+  events)** and 下注 BET (12 verified incl. the teal variant; text, not hue,
+  separates BET from RAISE on orange badges). completed_action is now
+  FOLD/CALL/RAISE/CHECK/BET-complete. Verified-absent after full-spectrum
+  badge sweeps and per-frame text reads: ALL_IN (0 in 48 min), hand_end
+  RESULT (4 showdown-reveal candidates, win-glow semantics unconfirmed),
+  reconnect (2 black frames; signal was stable). Checklist v5 in the private
+  dataset records the exact recording recipe needed to close the last three.
+
 - **2026-09-04 — video-mined label top-up: stage-G gaps closed 8 -> 2:**
-  mined both raw session videos (~16 min total) at 10 fps with a private
+  mined both raw session videos (48 min wall-clock; see the VFR entry above)
+  at 10 fps with a private
   scene miner, then promoted only visually-verified evidence into the private
   dataset (216 -> 355 labelled frames; every single frame eyeballed on a
   contact sheet, no auto-proposal landed unreviewed). Landed: 61 verified
