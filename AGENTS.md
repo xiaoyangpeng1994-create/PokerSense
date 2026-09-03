@@ -248,6 +248,25 @@ structure; do not represent a local build as a clean-user installation test.
   invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
   honest state, not a claim that calibration is complete.
 
+- **2026-09-04 — stage H done; stage I card field honestly BLOCKED (for now):**
+  stage H splits are written and validated (train 224 / calibration 63 /
+  validation 80, hand-isolated, each with stable positives and hard negatives)
+  after fixing a `_has_unknown_field` semantics bug in `splits.py` — it
+  demanded a VALID stack on EMPTY slots, contradicting the dataset rule
+  ("a seated player should carry a stack; an empty slot must not"), which
+  made every 6-8-handed frame unusable as a positive. A duplicate-frame
+  cleanup (scene-priority dedupe, 378 -> 367) preceded the split. Stage I
+  for hero_cards+board_cards then ran the full evidence pipeline (train-only
+  templates, calibration distributions, locked validation): single-frame
+  glyph matching **cannot** separate S/C or D/H at 53x78 — medoid IoU gives
+  no gap (wrong reads up to 0.994), k-NN k=5 collides at best=1.000, and
+  hole-count topology finds zero holes on all 281 train glyphs (structure
+  not preserved at this resolution). Zero-false-VALID therefore forces
+  threshold>1.000 = 0% recall: card recognition stays UNCALIBRATED
+  (fail-closed), and the recorded next method is street-gated glyph-level
+  temporal fusion (supersampling), which already fixed rank 6->5 reads in
+  the earlier pilot. Evidence lives in the private `evidence/field_metrics.json`.
+
 - **2026-09-04 — stage G CLOSED (owner-waived final three):** after the VFR
   fix surfaced CHECK/BET, the remaining three sub-gaps (ALL_IN 0/6, hand_end
   0/10, reconnect 2/5) were presented to the owner with full evidence;
