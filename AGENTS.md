@@ -248,6 +248,27 @@ structure; do not represent a local build as a clean-user installation test.
   invented and no coverage requirement was relaxed. This is a PARTIAL/BLOCKED
   honest state, not a claim that calibration is complete.
 
+- **2026-09-03 — capture-card 5-slot board geometry landed; card-template
+  pilot (honest negative):** mined the two raw session videos (~16 min) with a
+  private scene miner (board-strip blob counting, seat avatar dark/white text
+  events, table-vs-anomaly gating), yielding 83 RIVER candidates whose 5 card
+  boxes are stable to ±1 px across both sessions. Widened the platform
+  `board_cards` ROI to the measured full 5-card strip (110,478)-(388,556) and
+  landed `configs/vision/wepoker_android_capture_card/board_slot_layout.json`
+  (5 measured slots, relative to the strip); evidence rows appended to the
+  private `labels/roi_measurements.csv`. Card-recognition pilot against the
+  owner's labelled frames: H5 (`wepoker`) corner-glyph templates FAIL
+  verification at capture-card scale (70.5% hero / 90.5% board, black-suit
+  S/C collapse with high raw scores — no abstain threshold can gate them), so
+  `template_source: wepoker` must not be relied on for suits. Platform-derived
+  medoid templates from labelled crops reach 89.6% hold-out with residual
+  6/8 and S/C confusion; 10-frame temporal fusion within one street fixes
+  rank 6/5 reads (measured) but needs street-boundary gating. Card
+  calibration therefore stays UNCALIBRATED (fail-closed); next step is formal
+  stage-I template/threshold work on street-gated fused crops. Mining also
+  produced 621 action-event / 569 button / 52 anomaly / 24 transition
+  candidates ready for owner-reviewed label top-up.
+
 - **2026-09-03 — capture-card boundary measurement, seat reader, and
   two-session floor:** added `tools/capture_card_calibration/boundary.py`
   (stage C section-6 content-boundary drift measurement) and its

@@ -16,6 +16,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import cv2
+import numpy as np
 import pytest
 
 from poker_engine.core.enums import Rank, Suit
@@ -33,6 +34,13 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _TEMPLATE_DIR = _REPO_ROOT / "configs" / "vision" / "wepoker"
 _FIXTURE_DIR = Path(__file__).parent / "fixtures" / "wepoker"
 
+
+def _imread(path: Path) -> np.ndarray:
+    """Unicode-safe imread: cv2.imread returns None on non-ASCII paths."""
+    return cv2.imdecode(np.fromfile(str(path), dtype=np.uint8),
+                        cv2.IMREAD_COLOR)
+
+
 _RANK_CH = {
     "A": Rank.ACE, "K": Rank.KING, "Q": Rank.QUEEN, "J": Rank.JACK,
     "T": Rank.TEN, "9": Rank.NINE, "8": Rank.EIGHT, "7": Rank.SEVEN,
@@ -45,7 +53,7 @@ _SUIT_CH = {
 
 
 def _load_dir(path: Path) -> dict:
-    return {f.stem: cv2.imread(str(f)) for f in sorted(path.glob("*.png"))}
+    return {f.stem: _imread(f) for f in sorted(path.glob("*.png"))}
 
 
 @pytest.fixture(scope="module")
@@ -72,7 +80,7 @@ def test_template_set_is_complete():
 
 @pytest.mark.parametrize("label", _fixtures())
 def test_recognizes_real_wepoker_card(recognizer, label):
-    image = cv2.imread(str(_FIXTURE_DIR / f"{label}.png"))
+    image = _imread(_FIXTURE_DIR / f"{label}.png")
     assert image is not None, f"fixture {label} unreadable"
 
     result = recognizer.recognize(image)
@@ -88,7 +96,7 @@ def test_black_suits_are_not_confused(recognizer):
     black = [lbl for lbl in _fixtures() if lbl[1] in ("C", "S")]
     assert len(black) >= 6, "fixture set must cover black suits meaningfully"
     for label in black:
-        image = cv2.imread(str(_FIXTURE_DIR / f"{label}.png"))
+        image = _imread(_FIXTURE_DIR / f"{label}.png")
         result = recognizer.recognize(image)
         assert result.value is not None
         assert result.value[0].suit is _SUIT_CH[label[1]], f"{label}: suit flipped"
@@ -101,7 +109,7 @@ def test_isolated_glyphs_do_not_span_the_whole_band(recognizer):
     the suit crop, which pinned the crop to the band's full height. Guarding
     the height directly is what stops that regression coming back silently.
     """
-    image = locate_card_face(cv2.imread(str(_FIXTURE_DIR / "7S.png")))
+    image = locate_card_face(_imread(_FIXTURE_DIR / "7S.png"))
     band = DEFAULT_GEOMETRY.suit_band
     band_height = int((band[1] - band[0]) * image.shape[0])
     suit_glyph = isolate_glyph(image, band)
@@ -111,7 +119,7 @@ def test_isolated_glyphs_do_not_span_the_whole_band(recognizer):
 
 def test_felt_is_rejected_from_occluded_card(recognizer):
     """KH is captured with table felt visible past the card edge."""
-    raw = cv2.imread(str(_FIXTURE_DIR / "KH.png"))
+    raw = _imread(_FIXTURE_DIR / "KH.png")
     card = locate_card_face(raw)
     # The felt strip is cropped away entirely before any glyph work starts.
     assert card.shape[1] < raw.shape[1]
@@ -122,7 +130,7 @@ def test_felt_is_rejected_from_occluded_card(recognizer):
 
 
 def test_normalize_preserves_aspect_ratio():
-    tall = cv2.imread(str(_FIXTURE_DIR / "7S.png"))[0:60, 0:20]
+    tall = _imread(_FIXTURE_DIR / "7S.png")[0:60, 0:20]
     out = normalize_glyph(tall)
     assert out.shape == NORM_SIZE
     assert out.max() > 0

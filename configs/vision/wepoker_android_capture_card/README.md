@@ -18,6 +18,16 @@
   **真机录制工具**（`probe` 探设备、`record` 录会话）。运行方式：
   `python -m tools.capture_card_calibration.cli --help`。
 
+## 已就绪（几何层，2026-09-03 更新）
+
+- `hero_slot_layout.json`：hero 2 槽，实测。
+- `board_slot_layout.json`：board 5 槽，实测（83 个 RIVER 帧、跨两个 session
+  中位数稳定 ±1px）；配套平台配置的 `board_cards` ROI 已拓宽到完整 5 牌条带。
+- ⚠️ 识别标定仍未完成：H5（wepoker）角标模板在采集卡分辨率下**未通过**
+  花色验证（黑桃/梅花混淆且 raw score 高，无法用阈值门控），故
+  `template_source: wepoker` 不得用于花色。`calibration.json` 保持
+  `uncalibrated`，card 字段必须继续读出 UNKNOWN。
+
 ## 用录制工具做阶段 A/B
 
 ```bash
