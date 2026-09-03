@@ -134,6 +134,44 @@ structure; do not represent a local build as a clean-user installation test.
 
 ## Progress log
 
+- **2026-09-03 — viewpoint evidence tool (`cli viewpoint`):** the owner anchored
+  the LIVE discriminator on **the three action buttons** ("以三按钮为准"), and
+  this tool surfaces that evidence for a human to confirm by eye. `viewpoint.py`
+  is deliberately *not* an auto-classifier (guide rules 1-2 forbid reusing
+  another platform's geometry, and the failure-closed philosophy forbids guessing
+  which table a frame belongs to): it extracts the explainable signals — the
+  revealed-hero-cards white fraction (`hero_signal`), the coloured three-button
+  action-band fraction (`_action_signal`), and a caller-supplied `hero_occupied`
+  — then returns a conservative `LIVE`/`SPECTATE`/`UNKNOWN` verdict with a
+  confidence and a `ViewpointEvidence` breakdown. `hero_occupied` is *never*
+  derived here (a second heuristic would break the fail-closed contract); it is
+  supplied by the seat-reader pipeline / the labeller and only corroborates.
+  `cli viewpoint` renders a self-contained HTML contact sheet in the private
+  dataset's `reports/` (images inlined; never in Git) plus an optional `--json-out`
+  machine-readable verdicts file. On the 101-frame drop-clean dataset it reports
+  session_001 all-LIVE (the owner's real heads-up game) and session_002
+  47 LIVE / 17 UNKNOWN (the UNKNOWN frames are mid-street frames where the
+  buttons were not lit — exactly the frames the owner should eyeball). 18 new
+  unit tests; flake8-clean project-wide.
+
+- **2026-09-03 — data-trust audit: dropped spectate-segment frames from
+  session_001:** the owner flagged that the capture may have mixed in frames of
+  a table he was *watching*, not playing, which would corrupt every hero-relative
+  field (hero_cards, current_actor, completed_action). A frame-by-frame review of
+  the private dataset confirmed it: session_001's first segment (t < 62300 ms,
+  `session_001_hand_0000/0001`, 5 frames) was the 8-handed table of an opponent
+  ("泰迪小白" et al.) that the owner was spectating, before he entered his own
+  heads-up table. Note the room-label line `<不要不要不要01的牌局>` is a *room
+  name*, NOT a spectate badge — the reliable LIVE indicator is the owner's own
+  nickname + revealed hole cards + action buttons at the bottom. session_001's
+  later segment (heads-up, owner = "鱼而已不要") and all of session_002 (8-handed,
+  owner playing) are genuine live play. Per owner decision the 5 spectate frames
+  were dropped from `labels/frames.jsonl` (106 -> 101; backup kept as
+  `labels/frames.jsonl.pre_spectate_drop.bak`), and the coverage / top-up
+  checklist was regenerated. `hero_cards` was already UNKNOWN on those frames
+  (correct fail-closed), but their board_cards / street / pot / occupancy came
+  from a table the owner was *not* playing, so dropping them matters.
+
 - **2026-09-03 — label top-up review page (`cli review-frames`):** stage F
   label coverage is currently the bottleneck (105 of 106 frames carry at least
   one UNKNOWN field), and a terminal `coverage`/`splits` run reports *how many*

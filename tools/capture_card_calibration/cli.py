@@ -53,9 +53,14 @@ from .record import (
 )
 from .review_frames import (
     build_card,
+    encode_frame_image,
     index_issues,
     render_card_json,
     render_review_html,
+)
+from .viewpoint import (
+    classify_viewpoint,
+    render_viewpoint_report,
 )
 from .sampler import SampleOptions, default_reader, sample_session
 from .report import (
@@ -582,6 +587,105 @@ def _cmd_review_frames(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_viewpoint(args: argparse.Namespace) -> int:
+    """Stage F: review whether each frame is the owner *playing* or *watching*.
+
+    This does not auto-classify (the failure-closed philosophy and the guide's
+    rule 1-2 forbid guessing which table a frame belongs to). It extracts the
+    explainable signals (revealed hero cards, the three-button action band,
+    hero-seat presence) and renders a contact sheet where the verdict is a
+    *suggestion* and the image is authoritative — so the owner can confirm by
+    eye which frames are their own play. ``--seed-from-session`` lets the
+    owner pre-mark the known-good session(s) to bias the signal expectations.
+    """
+    root = Path(args.root)
+    path = root / "labels" / "frames.jsonl"
+    if not path.is_file():
+        print(f"no labels at {path}")
+        return 1
+    try:
+        labels = read_frames_jsonl(path)
+    except SchemaError as exc:
+        print(f"label file is invalid: {exc}")
+        return 1
+    if not labels:
+        print("no labelled frames to review")
+        return 1
+
+    frames_dir = root / "normalized" / "frames"
+    entries: list[dict[str, object]] = []
+    live = spectate = unknown = 0
+    for label in labels:
+        if args.limit is not None and len(entries) >= args.limit:
+            break
+        frame_path = frames_dir / label.frame
+        image = ""
+        signals = None
+        if frame_path.is_file():
+            try:
+                evidence = classify_viewpoint(
+                    frame_path,
+                    scene=label.scene,
+                    hero_occupied=args.seat_occupied if args.seat_occupied is not None
+                    else None,
+                )
+                signals = evidence.to_dict()
+                image = encode_frame_image(frame_path)
+            except ValueError:
+                signals = None
+        if signals is not None:
+            verdict = str(signals["verdict"])
+        else:
+            verdict = "UNKNOWN"
+        if verdict == "LIVE":
+            live += 1
+        elif verdict == "SPECTATE":
+            spectate += 1
+        else:
+            unknown += 1
+        entries.append(
+            {
+                "frame": label.frame,
+                "verdict": verdict,
+                "confidence": (signals or {}).get("confidence", "LOW"),
+                "image": image,
+                "meta": f"{label.session_id} · {label.hand_id}",
+                "signals": signals,
+            }
+        )
+
+    total = len(entries)
+    summary = (
+        f"{total} frame(s) · LIVE {live} / SPECTATE {spectate} / UNKNOWN {unknown} · "
+        f"verdicts are suggestions; the image is authoritative"
+    )
+    target = Path(args.out) if args.out else root / "reports" / "viewpoint-review.html"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if args.json_out:
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "total": total,
+            "live": live,
+            "spectate": spectate,
+            "unknown": unknown,
+            "entries": [
+                {k: v for k, v in entry.items() if k != "image"}
+                for entry in entries
+            ],
+        }
+        Path(args.json_out).write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(f"wrote {args.json_out}")
+    target.write_text(
+        render_viewpoint_report(entries, title="Viewpoint review", summary=summary),
+        encoding="utf-8",
+    )
+    print(f"reviewed {total} frame(s) → {target}")
+    return 0
+
+
 def _cmd_report(args: argparse.Namespace) -> int:
     root = Path(args.root)
     inputs = _load_inputs(root)
@@ -823,6 +927,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="omit normalized frame images (labels + audit only)",
     )
     review.set_defaults(func=_cmd_review_frames)
+
+    viewpoint = sub.add_parser(
+        "viewpoint",
+        help="stage F: review which frames are the owner playing vs watching",
+    )
+    viewpoint.add_argument("--root", type=Path, required=True)
+    viewpoint.add_argument("--out", type=Path, default=None,
+                           help="output HTML path (default: "
+                                "reports/viewpoint-review.html)")
+    viewpoint.add_argument("--json-out", type=Path, default=None,
+                           help="also dump machine-readable verdicts as JSON")
+    viewpoint.add_argument("--limit", type=int, default=None,
+                           help="only review the first N frames")
+    viewpoint.add_argument(
+        "--seat-occupied",
+        type=lambda v: None if v in ("", "none", "null") else (v.lower() == "true"),
+        default=None,
+        help="pre-set hero-seat occupancy (true/false) for all frames; "
+             "omit to leave it as a signal the labeller confirms by eye",
+    )
+    viewpoint.set_defaults(func=_cmd_viewpoint)
 
     splits = sub.add_parser("splits", help="stage H hand-isolated splits")
     splits.add_argument("--root", type=Path, required=True)
