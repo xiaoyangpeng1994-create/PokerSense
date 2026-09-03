@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tools.capture_card_calibration.schema import (
     FieldValue,
     FrameLabel,
@@ -297,4 +299,28 @@ def test_worksheet_omits_images_when_disabled(tmp_path):
     html_text = render_stack_worksheet(
         gaps, {}, tmp_path, include_images=False
     )
+    assert "data:image/png;base64," not in html_text
+    assert "data:image/jpeg;base64," not in html_text
+
+
+def test_worksheet_uses_jpeg_crops_and_thumbs(tmp_path):
+    # When images are on, both the crop and the frame thumbnail are JPEG
+    # (keeps a 180-target worksheet from ballooning into hundreds of MB).
+    cv2 = pytest.importorskip("cv2")
+    import numpy as np
+
+    gaps = [
+        StackGap(
+            frame="f.png", session_id="session_001", hand_id="h1",
+            timestamp_ms=0, slot_id=1, layout_key="multi",
+        ),
+    ]
+    # A real frame so the encode path actually runs.
+    frame = np.zeros((400, 300, 3), dtype=np.uint8)
+    cv2.imwrite(str(tmp_path / "f.png"), frame)
+    html_text = render_stack_worksheet(
+        gaps, {}, tmp_path, include_images=True
+    )
+    # crop + thumbnail JPEG MIME appears; PNG must be gone.
+    assert "data:image/jpeg;base64," in html_text
     assert "data:image/png;base64," not in html_text

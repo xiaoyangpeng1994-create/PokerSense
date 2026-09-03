@@ -44,6 +44,9 @@ from .seat_reader import SLOT_LAYOUT_MULTI, SLOT_LAYOUT_S002
 #: the digits are legible on the worksheet without the viewer squinting.
 _STACK_UPSCALE = 4
 
+#: Crop is encoded as JPEG at this quality — legible digits, manageable size.
+_CROP_JPEG_QUALITY = 92
+
 #: Crop padding (as a multiple of the pill's own w/h) so the digit ROI is not
 #: clipped at the pill edges.
 _PAD_X = 0.5
@@ -141,26 +144,37 @@ def _crop_stack_pill(
         return None
     crop = cv2.resize(crop, None, fx=_STACK_UPSCALE, fy=_STACK_UPSCALE,
                       interpolation=cv2.INTER_CUBIC)
-    ok, buf = cv2.imencode(".png", crop)
+    # JPEG (not PNG) keeps the digits legible while keeping a 180-target
+    # worksheet down from hundreds of MB to a browser-huggable size.
+    ok, buf = cv2.imencode(".jpg", crop, [
+        cv2.IMWRITE_JPEG_QUALITY, _CROP_JPEG_QUALITY,
+    ])
     if not ok:
         return None
     return base64.b64encode(buf).decode("ascii")
 
 
-def _frame_image_uri(path: Path) -> str:
-    try:
-        import cv2
+#: Frame thumbnail is only context for the labeller; encode it as a small JPEG
+#: so a multi-hundred-row worksheet stays a page that a browser can hold.
+_FRAME_THUMB_WIDTH = 720
+_FRAME_JPEG_QUALITY = 70
 
-        import numpy as np
 
-        img = cv2.imdecode(np.frombuffer(path.read_bytes(), dtype=np.uint8),
-                           cv2.IMREAD_COLOR)
-        ok, buf = cv2.imencode(".png", img)
-        if not ok:
-            return ""
-        return base64.b64encode(buf).decode("ascii")
-    except Exception:  # pragma: no cover - defensive; never crash a worksheet
+def _encode_frame_uri(img) -> str:
+    """Encode a frame as a compact JPEG thumbnail for the worksheet context."""
+    import cv2
+
+    H, W = img.shape[:2]
+    if W > _FRAME_THUMB_WIDTH:
+        scale = _FRAME_THUMB_WIDTH / W
+        img = cv2.resize(img, None, fx=scale, fy=scale,
+                         interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".jpg", img, [
+        cv2.IMWRITE_JPEG_QUALITY, _FRAME_JPEG_QUALITY,
+    ])
+    if not ok:
         return ""
+    return base64.b64encode(buf).decode("ascii")
 
 
 def render_stack_worksheet(
@@ -177,28 +191,43 @@ def render_stack_worksheet(
     The page is a *form*, not a result: it annotates what to read and leaves a
     CSV-style table for the labeller to fill. No value is written here.
     """
+    # Frame-level image cache: a frame that hosts several targets is decoded
+    # and encoded once, not once per target, or a 60-frame / 180-target sheet
+    # would balloon into hundreds of megabytes.
+    frame_cache: dict[str, tuple[str, str]] = {}
     rows = []
     for gap in gaps:
         layout = _layout_for_session(gap.session_id)
         label = labels_by_frame.get(gap.frame)
+
         frame_uri = ""
-        if include_images and (frames_dir / gap.frame).is_file():
-            frame_uri = _frame_image_uri(frames_dir / gap.frame)
         crop_uri = ""
         if include_images:
-            try:
-                import cv2
+            cached = frame_cache.get(gap.frame)
+            if cached is not None:
+                frame_uri, crop_uri = cached
+            else:
+                try:
+                    import cv2
 
-                import numpy as np
+                    import numpy as np
 
-                img = cv2.imdecode(
-                    np.frombuffer((frames_dir / gap.frame).read_bytes(),
-                                  dtype=np.uint8),
-                    cv2.IMREAD_COLOR,
-                )
-                crop_uri = _crop_stack_pill(img, gap.slot_id, layout) or ""
-            except Exception:  # pragma: no cover - defensive
-                crop_uri = ""
+                    img = cv2.imdecode(
+                        np.frombuffer((frames_dir / gap.frame).read_bytes(),
+                                      dtype=np.uint8),
+                        cv2.IMREAD_COLOR,
+                    )
+                    if img is None:
+                        frame_cache[gap.frame] = ("", "")
+                    else:
+                        frame_uri = _encode_frame_uri(img)
+                        crop_uri = (
+                            _crop_stack_pill(img, gap.slot_id, layout) or ""
+                        )
+                        frame_cache[gap.frame] = (frame_uri, crop_uri)
+                except Exception:  # pragma: no cover - defensive
+                    frame_cache[gap.frame] = ("", "")
+                    frame_uri, crop_uri = "", ""
         # Frame context: street and pot if readable (helps the labeller orient).
         street = ""
         pot = ""
@@ -251,12 +280,12 @@ def _row_html(gap, crop_uri, frame_uri, street, pot) -> str:
     )
     crop_cell = (
         f'<img class="crop" alt="slot {gap.slot_id} stack" '
-        f'src="data:image/png;base64,{crop_uri}">'
+        f'src="data:image/jpeg;base64,{crop_uri}">'
         if crop_uri
         else "<div class=\"noimg\">crop unavailable</div>"
     )
     thumb_cell = (
-        f'<img class="thumb" alt="frame" src="data:image/png;base64,{frame_uri}">'
+        f'<img class="thumb" alt="frame" src="data:image/jpeg;base64,{frame_uri}">'
         if frame_uri
         else ""
     )
