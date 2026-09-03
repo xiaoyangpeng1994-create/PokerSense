@@ -168,8 +168,27 @@ structure; do not represent a local build as a clean-user installation test.
   machine-readable verdicts file. On the 101-frame drop-clean dataset it reports
   session_001 all-LIVE (the owner's real heads-up game) and session_002
   47 LIVE / 17 UNKNOWN (the UNKNOWN frames are mid-street frames where the
-  buttons were not lit — exactly the frames the owner should eyeball). 18 new
+  buttons were not lit — exactly the frames the owner should eyeball).   18 new
   unit tests; flake8-clean project-wide.
+
+- **2026-09-03 — stack-value transcription tool (`cli stack-worksheet` /
+  `cli stack-apply`):** with occupancy now `ok`, the remaining blocker for a
+  "stable positive" frame is an `OCCUPIED` seat whose `stack` is still
+  `UNKNOWN` — which de-qualifies the whole frame and leaves calibration/
+  validation splits empty. `stack_transcribe.py` turns every such target into a
+  form the labeller fills by eye (a zoomed crop of that seat's stack pill plus
+  the frame context), and applies only the values the labeller actually returns.
+  It **renders, never writes**: `stack-worksheet` emits a self-contained HTML
+  (images inlined, never in Git) + a `frame,slot_id,value` CSV template;
+  `stack-apply` is the sole writer and keeps a timestamped backup of
+  `frames.jsonl` first. Philosophy (guide rule): a blank/unknown/already-set
+  cell is never auto-filled, `CONFLICT` is never transcribed (it needs a
+  re-read, not a guess), and a non-empty value must validate as a non-negative
+  int before promotion to `VALID`. Geometry comes from `seat_reader`'s
+  `SLOT_LAYOUT_MULTI` / `SLOT_LAYOUT_S002` per session — it stays in normalized
+  canvas space and is not reused from any other platform. `cli review-frames`
+  gained a `--session` filter so the labeller can work the primary 6-8 handed
+  bucket without a 100+-frame dump. 14 new unit tests; flake8-clean.
 
 - **2026-09-03 — data-trust audit: dropped spectate-segment frames from
   session_001:** the owner flagged that the capture may have mixed in frames of

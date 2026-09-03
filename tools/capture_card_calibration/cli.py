@@ -13,6 +13,7 @@ making interactive use miserable.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 from pathlib import Path
@@ -61,6 +62,12 @@ from .review_frames import (
 from .viewpoint import (
     classify_viewpoint,
     render_viewpoint_report,
+)
+from .stack_transcribe import (
+    apply_stack_values,
+    collect_stack_gaps,
+    render_stack_csv,
+    render_stack_worksheet,
 )
 from .sampler import SampleOptions, default_reader, sample_session
 from .report import (
@@ -545,6 +552,16 @@ def _cmd_review_frames(args: argparse.Namespace) -> int:
         print("no labelled frames to review")
         return 1
 
+    # Optional focus filter: only review frames from a given session, so the
+    # labeller can work the primary 6-8 handed bucket without a 100+-frame dump.
+    if args.session and labels:
+        filtered = [label for label in labels if label.session_id == args.session]
+        print(
+            f"filtered to session {args.session}: "
+            f"{len(filtered)} of {len(labels)} frame(s)"
+        )
+        labels = filtered
+
     report = audit_labels(labels, rules=args.rules)
     issue_index = index_issues(report)
 
@@ -584,6 +601,102 @@ def _cmd_review_frames(args: argparse.Namespace) -> int:
         render_review_html(cards, summary=summary), encoding="utf-8"
     )
     print(f"reviewed {len(cards)} frame(s) → {target}")
+    return 0
+
+
+def _cmd_stack_worksheet(args: argparse.Namespace) -> int:
+    """Stage F: render a stack-value transcription worksheet.
+
+    Stage H/I are blocked because OCCUPIED seats with an UNKNOWN ``stack``
+    de-qualify a frame from being a "stable positive". This renders each such
+    target (OCCUPIED = stack not yet VALID) with a zoomed crop of the stack
+    pill so the digits are legible, plus a CSV template to fill in. It does
+    NOT write any value — the labeller reads and transcribes.
+    """
+    root = Path(args.root)
+    path = root / "labels" / "frames.jsonl"
+    if not path.is_file():
+        print(f"no labels at {path}")
+        return 1
+    try:
+        labels = read_frames_jsonl(path)
+    except SchemaError as exc:
+        print(f"label file is invalid: {exc}")
+        return 1
+
+    gaps = collect_stack_gaps(labels, session=args.session)
+    if not gaps:
+        print("no OCCUPIED-but-stack-UNKNOWN targets to transcribe")
+        return 1
+
+    frames_dir = root / "normalized" / "frames"
+    by_frame = {label.frame: label for label in labels}
+    summary = (
+        f"{len(gaps)} target(s) — {len({g.frame for g in gaps})} frame(s) "
+        f"across {len({g.hand_id for g in gaps})} hand(s)"
+    )
+
+    target = Path(args.out) if args.out else root / "reports" / "stack-worksheet.html"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        render_stack_worksheet(
+            gaps, by_frame, frames_dir,
+            title="Stack value transcription",
+            summary=summary,
+            include_images=args.include_images,
+        ),
+        encoding="utf-8",
+    )
+    print(f"wrote {target}")
+
+    csv_target = (
+        Path(args.csv_out) if args.csv_out else root / "reports" / "stack-values.csv"
+    )
+    csv_target.write_text(render_stack_csv(gaps), encoding="utf-8")
+    print(f"wrote {csv_target}")
+    print("fill the 'value' column, then run: stack-apply --csv <file>")
+    return 0
+
+
+def _cmd_stack_apply(args: argparse.Namespace) -> int:
+    """Stage F: promote labeller-confirmed stack values to VALID.
+
+    Reads the filled CSV (frame, slot_id, value), backs up ``frames.jsonl``,
+    and promotes only the non-blank values that match an OCCUPIED-UNKNOWN
+    target. Blank / unknown / already-set cells are skipped and counted — a
+    value is never invented or defaulted.
+    """
+    root = Path(args.root)
+    path = root / "labels" / "frames.jsonl"
+    if not path.is_file():
+        print(f"no labels at {path}")
+        return 1
+
+    csv_path = Path(args.csv)
+    if not csv_path.is_file():
+        print(f"no values CSV at {csv_path}")
+        return 1
+
+    rows: list[dict[str, object]] = []
+    with csv_path.open("r", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None or set(reader.fieldnames) != {
+            "frame", "slot_id", "value",
+        }:
+            print(f"CSV must have columns frame,slot_id,value — got "
+                  f"{reader.fieldnames}")
+            return 1
+        for row in reader:
+            rows.append(row)
+
+    result = apply_stack_values(
+        path, rows,
+        backup_dir=root / "reports" / "backups",
+    )
+    print(result.summary_line())
+    if result.backup_path:
+        print(f"backup: {result.backup_path}")
+    print(f"total rows: {result.total}")
     return 0
 
 
@@ -914,6 +1027,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="also dump machine-readable cards as JSON")
     review.add_argument("--limit", type=int, default=None,
                         help="only render the first N frames")
+    review.add_argument("--session", default=None,
+                        help="only review frames from this session id "
+                             "(e.g. session_002), to focus a top-up pass")
     review.add_argument(
         "--rules",
         nargs="*",
@@ -948,6 +1064,30 @@ def build_parser() -> argparse.ArgumentParser:
              "omit to leave it as a signal the labeller confirms by eye",
     )
     viewpoint.set_defaults(func=_cmd_viewpoint)
+
+    stackws = sub.add_parser(
+        "stack-worksheet",
+        help="stage F: render a stack-value transcription worksheet",
+    )
+    stackws.add_argument("--root", type=Path, required=True)
+    stackws.add_argument("--out", type=Path, default=None,
+                         help="output HTML (default: reports/stack-worksheet.html)")
+    stackws.add_argument("--csv-out", type=Path, default=None,
+                         help="fill-in CSV (default: reports/stack-values.csv)")
+    stackws.add_argument("--session", default=None,
+                         help="only target this session (e.g. session_002)")
+    stackws.add_argument("--include-images", action="store_false", default=True,
+                         help="omit crops/frame thumbnails (labels only)")
+    stackws.set_defaults(func=_cmd_stack_worksheet)
+
+    stackapply = sub.add_parser(
+        "stack-apply",
+        help="stage F: promote labeller-confirmed stack values to VALID",
+    )
+    stackapply.add_argument("--root", type=Path, required=True)
+    stackapply.add_argument("--csv", type=Path, required=True,
+                            help="filled CSV with frame,slot_id,value")
+    stackapply.set_defaults(func=_cmd_stack_apply)
 
     splits = sub.add_parser("splits", help="stage H hand-isolated splits")
     splits.add_argument("--root", type=Path, required=True)
