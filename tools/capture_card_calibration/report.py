@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 from .coverage import CoverageReport
-from .schema import DeviceAndCapture, FieldMetrics
+from .schema import DeviceAndCapture, FieldMetrics, MIN_SESSIONS
 
 STATUS_PASS = "PASS"
 STATUS_PARTIAL = "PARTIAL"
@@ -95,9 +95,9 @@ def determine_status(
 
     if not inputs.coverage.is_complete:
         reasons.extend(inputs.coverage.gap_lines)
-    if len(inputs.coverage.sessions) < 3:
+    if len(inputs.coverage.sessions) < MIN_SESSIONS:
         reasons.append(
-            "fewer than 3 independent capture sessions "
+            f"fewer than {MIN_SESSIONS} independent capture sessions "
             f"({len(inputs.coverage.sessions)})"
         )
 

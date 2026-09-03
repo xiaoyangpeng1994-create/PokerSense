@@ -19,6 +19,17 @@ from pathlib import Path
 from typing import Sequence
 
 from . import SCHEMA_VERSION
+from .boundary import (
+    EDGES,
+    MAX_BOUNDARY_DRIFT_PX,
+    ContentBounds,
+    EdgeFlags,
+    content_bounds,
+    edge_content_flags,
+    load_gray,
+    merge_edge_flags,
+    summarize_drift,
+)
 from .coverage import evaluate_coverage
 from .dataset import (
     FrameEntry,
@@ -336,6 +347,115 @@ def _cmd_layout_id(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_boundary(args: argparse.Namespace) -> int:
+    root = Path(args.root)
+    manifest_path = root / "normalized" / "manifest.json"
+    if not manifest_path.is_file():
+        print(f"no frame manifest at {manifest_path}")
+        return 1
+    entries = json.loads(
+        manifest_path.read_text(encoding="utf-8")
+    ).get("frames", [])
+    if not entries:
+        print("frame manifest lists no frames")
+        return 1
+
+    frames_dir = root / "normalized" / "frames"
+    groups: dict[tuple[str, bool], list[ContentBounds]] = {}
+    flags: list[EdgeFlags] = []
+    blank = 0
+    missing = 0
+    for entry in entries:
+        path = frames_dir / entry["file"]
+        if not path.is_file():
+            missing += 1
+            continue
+        gray = load_gray(path)
+        flags.append(edge_content_flags(gray))
+        bounds = content_bounds(gray)
+        if bounds is None:
+            blank += 1
+            continue
+        key = (str(entry.get("scene", "")), bool(entry.get("stable", True)))
+        groups.setdefault(key, []).append(bounds)
+
+    measured = sum(len(items) for items in groups.values())
+    print(f"frames measured: {measured} (blank {blank}, missing {missing})")
+
+    summaries = []
+    for (scene, stable), items in sorted(groups.items()):
+        summary = summarize_drift(items, scene=scene, stable=stable)
+        if summary is not None:
+            summaries.append(summary)
+
+    print()
+    header = (
+        f"{'scene':<16} {'stable':<7} {'frames':>7} "
+        f"{'drift L/R/T/B':>16} {'worst':>6}"
+    )
+    print(header)
+    print("-" * len(header))
+    for item in summaries:
+        drift = item.drift_by_edge()
+        cell = (
+            f"{drift['left']}/{drift['right']}/"
+            f"{drift['top']}/{drift['bottom']}"
+        )
+        print(
+            f"{item.scene:<16} {str(item.stable):<7} "
+            f"{item.frame_count:>7} {cell:>16} {item.worst_drift:>6}"
+        )
+
+    merged = merge_edge_flags(flags)
+    print("\nedge evidence (does the canvas reach the frame border?):")
+    for edge in EDGES:
+        verdict = "content" if merged.as_dict()[edge] else "NO CONTENT"
+        print(f"  {edge:<7} {verdict}")
+
+    judged = [item for item in summaries if item.scene == args.scene]
+    judged = [item for item in judged if item.stable]
+    print()
+    if not judged:
+        print(f"no stable '{args.scene}' frames available to judge")
+        return 1
+    worst = max(item.worst_drift for item in judged)
+    ok = worst <= MAX_BOUNDARY_DRIFT_PX
+    print(
+        f"stage C boundary drift: {'PASS' if ok else 'FAIL'} "
+        f"(worst {worst} px, tolerance {MAX_BOUNDARY_DRIFT_PX} px)"
+    )
+
+    if args.json_out:
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "frames_measured": measured,
+            "blank_frames": blank,
+            "missing_files": missing,
+            "tolerance_px": MAX_BOUNDARY_DRIFT_PX,
+            "judged_scene": args.scene,
+            "worst_drift_px": worst,
+            "verdict": "PASS" if ok else "FAIL",
+            "edge_evidence": merged.as_dict(),
+            "groups": [
+                {
+                    "scene": item.scene,
+                    "stable": item.stable,
+                    "frame_count": item.frame_count,
+                    "drift_px": item.drift_by_edge(),
+                    "worst_drift_px": item.worst_drift,
+                    "within_tolerance": item.within_tolerance,
+                }
+                for item in summaries
+            ],
+        }
+        Path(args.json_out).write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(f"wrote {args.json_out}")
+    return 0 if (ok or not args.strict) else 1
+
+
 def _cmd_report(args: argparse.Namespace) -> int:
     root = Path(args.root)
     inputs = _load_inputs(root)
@@ -557,6 +677,19 @@ def build_parser() -> argparse.ArgumentParser:
     layout.add_argument("--canvas", type=_parse_size, required=True)
     layout.add_argument("--version", type=int, default=1)
     layout.set_defaults(func=_cmd_layout_id)
+
+    boundary = sub.add_parser(
+        "boundary", help="stage C content boundary drift (section 6)"
+    )
+    boundary.add_argument("--root", type=Path, required=True)
+    boundary.add_argument(
+        "--scene",
+        default="table",
+        help="scene whose stable frames decide the verdict (default: table)",
+    )
+    boundary.add_argument("--json-out", type=Path, default=None)
+    boundary.add_argument("--strict", action="store_true")
+    boundary.set_defaults(func=_cmd_boundary)
 
     report = sub.add_parser("report", help="stage 17 acceptance report")
     report.add_argument("--root", type=Path, required=True)

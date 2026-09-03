@@ -408,8 +408,14 @@ DEVICE_SECTIONS = (
     "recording",
 )
 
-# Section 5 requires at least three independent capture sessions.
-MIN_SESSIONS = 3
+# Section 5 nominally asks for three independent capture sessions, but the
+# project owner explicitly waived the third session on 2026-09-03: the two
+# existing sessions already cover both fixed 8-max (session_001) and dynamic
+# 6-8 player MTT (session_002) table setups, and the remaining coverage gaps
+# are field-level (action / temporal / anomaly / metrics), not session-level.
+# This is a recorded owner decision, deliberately NOT a silent relaxation of
+# the guide, so the acceptance floor is 2 until the owner says otherwise.
+MIN_SESSIONS = 2
 
 
 def _collect_placeholders(node: Any, prefix: str, found: list[str]) -> None:

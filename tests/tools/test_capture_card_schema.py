@@ -272,7 +272,8 @@ def test_device_require_ready_fails_closed():
 
 
 def test_device_require_min_sessions():
-    with pytest.raises(SchemaError, match="at least 3 independent"):
+    # Floor is now 2 (owner-authorised waiver of the third session).
+    with pytest.raises(SchemaError, match="at least 2 independent"):
         _device().require_min_sessions()
 
 

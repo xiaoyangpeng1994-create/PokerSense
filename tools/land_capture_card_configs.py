@@ -44,7 +44,7 @@ path given by ``--root``):
         --root ../capture_card_calibration_20260903 \
         --platform-id wepoker_android_capture_card \
         --layout-id \
-        phone_samsung_galaxy_s25_ultra__card_replace_me__uvc_1920x1080_30__canvas_498x1080__v1
+        phone_samsung_galaxy_s25_ultra__card_ugreen__uvc_1920x1080_30__canvas_498x1080__v1
 """
 
 from __future__ import annotations
@@ -310,7 +310,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--layout-id",
         default=(
-            "phone_samsung_galaxy_s25_ultra__card_replace_me__"
+            "phone_samsung_galaxy_s25_ultra__card_ugreen__"
             "uvc_1920x1080_30__canvas_498x1080__v1"
         ),
         help="section-6 layout id (embeds phone/card/uvc/canvas)",

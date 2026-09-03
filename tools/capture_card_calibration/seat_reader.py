@@ -1,0 +1,391 @@
+# -*- coding: utf-8 -*-
+"""Read per-seat ground truth (occupancy / stack / dealer) from a single
+normalized table frame for the capture-card platform.
+
+This module implements the *pixel reading* half of stage F section 9 for
+the seat fields. It takes a BGR frame (already normalized to the canvas)
+and reads, for each of the ``SLOT_COUNT`` visual slots:
+
+- ``occupancy`` -> ``OCCUPIED`` if an avatar box is present, ``EMPTY`` if
+  the slot shows a round "+" button;
+- ``stack``     -> the integer chip count in the dark-green stack pill;
+- ``dealer``    -> whether a circular white "D" badge sits under the slot.
+
+Design principles (mirroring the guide's failure-closed philosophy):
+
+- Every read returns a confident ``VALID`` value or ``UNKNOWN``. A slot
+  with no readable pixels is never guessed.
+- Detection is threshold-driven on luminance: the white-on-green stack
+  digits, the "+" empty button and the "D" badge are all bright against
+  the green felt captured via the UVC card. AVATAR occupancy is decided by
+  chroma saturation, which distinguishes a picture from the uniform felt.
+- It does NOT reuse any coordinate, ROI or threshold from the LDPlayer or
+  H5 platforms (guide rules 1 and 2). All geometry is expressed in the
+  0..1 normalized canvas space and must be calibrated on this platform.
+
+Import-safe without OpenCV: only the reader functions import cv2.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Sequence
+
+import numpy as np
+
+from . import SLOT_COUNT
+from .schema import FieldValue, LabelStatus, Occupancy
+
+__all__ = [
+    "SLOT_LAYOUT_MULTI",
+    "SLOT_LAYOUT_HEADS",
+    "SLOT_LAYOUT_S002",
+    "build_digit_templates",
+    "read_seat_fields",
+    "read_slot",
+]
+
+
+# Slot id -> physical seat. Slot 0 is the hero seat (bottom-centre). This
+# mirrors the slot_id convention already used for this platform in
+# ``labels/roi_measurements.csv``: 0=hero bottom, 1=LL, 2=LM, 3=UL,
+# 4=Top, 5=UR, 6=RM, 7=LR.
+#
+# (cx, cy, w, h) are normalized canvas coordinates of the **stack pill**
+# (the dark-green rounded pill carrying the white chip count). They were
+# measured on the full 8-handed frame
+# ``session_001__t_00010500__f_000315``. The avatar sits directly above
+# the pill; the "+" empty button sits where the pill would be for an empty
+# slot; the "D" dealer badge sits under the name row.
+SLOT_LAYOUT_MULTI: dict[int, dict[str, float]] = {
+    0: dict(cx=0.50, cy=0.865, w=0.20, h=0.032),   # hero bottom
+    1: dict(cx=0.12, cy=0.640, w=0.18, h=0.030),   # LL
+    2: dict(cx=0.10, cy=0.462, w=0.18, h=0.030),   # LM
+    3: dict(cx=0.10, cy=0.301, w=0.18, h=0.030),   # UL
+    4: dict(cx=0.50, cy=0.211, w=0.20, h=0.032),   # Top
+    5: dict(cx=0.90, cy=0.301, w=0.18, h=0.030),   # UR
+    6: dict(cx=0.90, cy=0.462, w=0.18, h=0.030),   # RM
+    7: dict(cx=0.88, cy=0.640, w=0.18, h=0.030),   # LR
+}
+
+# Head-up / two-handed layout. Only the hero (0) and the opponent seat
+# opposite (top, 4) are normally occupied on a 2-handed capture; the ring
+# is kept complete so the geometry stays coherent.
+SLOT_LAYOUT_HEADS: dict[int, dict[str, float]] = dict(SLOT_LAYOUT_MULTI)
+
+# session_002 layout. This capture uses the *same* 8-max ring as session_001
+# (seats 1-7 and the side columns align with SLOT_LAYOUT_MULTI), but the hero
+# stack pill sits lower because the hero hand is revealed nudge the name/type
+# row down. Measured on ``session_002__t_00042700``: hero pill at
+# (0.500, 0.949); side seats at (0.096/0.095, 0.466/0.640) and
+# (0.905/0.907, 0.466/0.640) — identical to SLOT_LAYOUT_MULTI. Only slot 0
+# differs.
+SLOT_LAYOUT_S002: dict[int, dict[str, float]] = dict(SLOT_LAYOUT_MULTI)
+SLOT_LAYOUT_S002[0] = dict(cx=0.50, cy=0.978, w=0.20, h=0.026)
+
+# Dealer badge: a compact white disc with a black "D" core. It sits just
+# off the stack pill (to the side for edge seats, below for top/bottom).
+# Detection is: a near-round low-saturation bright blob whose centre holds
+# dark pixels (the letter D). A cyan "chip" ring has the same low-sat
+# brightness but always carries the same dark fraction, so the discriminator
+# is the *low-saturation white* area (a pure-white disc is far larger than a
+# cyan ring).
+_DEALER_BLOB_W = (14, 24)
+_DEALER_BLOB_H = (14, 24)
+_DEALER_BLOB_ASQUARE = 5     # |w-h| tolerance (near round)
+_DEALER_MIN_AREA = 120
+_DEALER_WHITE_LOWSAT_MIN = 0.20   # pure-white disc area ratio
+_DEALER_BLACK_MIN = 0.05          # black "D" core area ratio
+_DEALER_SCAN_MULT = 1.1           # search window (pill height multiplier)
+_DEALER_VAL_MIN = 180
+_DEALER_SAT_MAX = 60
+_DEALER_BLACK_MAX = 70
+
+# Digit segmentation parameters (measured on the reference frame). Stack
+# digits are a consistent height (~14px at the 498-x-1080 canvas); a "D"
+# dealer badge that bleeds into the ROI is taller (~17px) and is dropped
+# by the height window. Aspect ratio is intentionally NOT constrained:
+# a narrow "1" is ~2.8 h/w, the same as a "D", so only height separates
+# them.
+_DIGIT_MIN_AREA = 25
+_DIGIT_H = (11, 16)
+_DIGIT_MAX_W = 20
+
+# White luminance floor: digits and badges are bright (>150), the green
+# felt sits well below 120.
+_WHITE_MIN = 150
+
+# Avatar occupancy: a picture is saturated (>80 chroma over 12% of pixels);
+# the "+" button and felt are not.
+_AVATAR_SAT = 80
+_AVATAR_FRAC = 0.12
+
+
+def _imread(path: Path | str) -> np.ndarray:
+    import cv2
+
+    return cv2.imdecode(
+        np.frombuffer(Path(path).read_bytes(), dtype=np.uint8),
+        cv2.IMREAD_COLOR,
+    )
+
+
+def _roi(img: np.ndarray, cx: float, cy: float, w: float, h: float) -> np.ndarray:
+    H, W = img.shape[:2]
+
+    def f(v: float) -> int:
+        return int(round(v))
+
+    try:
+        return img[
+            f((cy - h / 2) * H) : f((cy + h / 2) * H),
+            f((cx - w / 2) * W) : f((cx + w / 2) * W),
+        ]
+    except IndexError:
+        return np.zeros((0, 0, 3), dtype=img.dtype)
+
+
+def _white_mask(crop: np.ndarray, *, floor: int = _WHITE_MIN) -> np.ndarray:
+    import cv2
+
+    gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+    _, th = cv2.threshold(gray, floor, 255, cv2.THRESH_BINARY)
+    return th
+
+
+def _split_digits(crop: np.ndarray) -> list[np.ndarray]:
+    """Return x-sorted digit masks (uint8 0/255) from a stack-pill crop.
+
+    A tiny dilation merges a digit's own broken strokes (e.g. the crossbar
+    of a "7"); connected components are then filtered to digit-like size
+    and consistent height (a "D" dealer badge is taller and is dropped).
+    """
+    import cv2
+
+    if crop is None or crop.size == 0 or min(crop.shape[:2]) < 3:
+        return []
+    th = _white_mask(crop)
+    th = cv2.dilate(th, cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2)), iterations=1)
+    n, lab, stats, _cent = cv2.connectedComponentsWithStats(th, 8)
+    chars: list[tuple[int, int, np.ndarray]] = []
+    for i in range(1, n):
+        x, y, w, h, area = stats[i]
+        if area < _DIGIT_MIN_AREA or not (_DIGIT_H[0] <= h <= _DIGIT_H[1]):
+            continue
+        if w > _DIGIT_MAX_W:
+            continue
+        mask = (lab[y : y + h, x : x + w] == i).astype(np.uint8) * 255
+        chars.append((x, w, mask))
+    chars.sort(key=lambda c: c[0])
+    return [c[-1] for c in chars]
+
+
+def _norm(mask: np.ndarray, size: tuple[int, int] = (20, 28)) -> np.ndarray:
+    import cv2
+
+    m = cv2.resize(mask, size, interpolation=cv2.INTER_AREA)
+    return (m > 127).astype(np.float32)
+
+
+def _classify(
+    v: np.ndarray, templates: dict[str, list[np.ndarray]]
+) -> tuple[str, float]:
+    best, bd = None, float("inf")
+    for d, samples in templates.items():
+        for s in samples:
+            dist = float(np.mean((v - s) ** 2))
+            if dist < bd:
+                best, bd = d, dist
+    return (best, bd) if best is not None else ("?", bd)
+
+
+def _find_dealer(crop: np.ndarray) -> bool:
+    """True if a near-round white disc with a black "D" core is present.
+
+    The D badge is a bright, low-saturation white disc; the black letter D
+    sits at its centre. A cyan "chip" ring (a common look-alike) has the
+    same dark fraction but far less low-saturation white, so requiring a
+    minimum pure-white area cleanly separates the two.
+    """
+    import cv2
+
+    if crop is None or crop.size == 0 or min(crop.shape[:2]) < 3:
+        return False
+    th = _white_mask(crop)
+    n, lab, stats, _cent = cv2.connectedComponentsWithStats(th, 8)
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+    gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+    sat = hsv[:, :, 1]
+    val = hsv[:, :, 2]
+    for i in range(1, n):
+        x, y, w, h, area = stats[i]
+        if not (_DEALER_MIN_AREA <= area):
+            continue
+        if not (
+            _DEALER_BLOB_W[0] <= w <= _DEALER_BLOB_W[1]
+            and _DEALER_BLOB_H[0] <= h <= _DEALER_BLOB_H[1]
+        ):
+            continue
+        if abs(w - h) > _DEALER_BLOB_ASQUARE:
+            continue
+        sub_val = val[y : y + h, x : x + w]
+        sub_sat = sat[y : y + h, x : x + w]
+        sub_gray = gray[y : y + h, x : x + w]
+        # Pure-white disc: bright + low saturation.
+        white = ((sub_val > _DEALER_VAL_MIN) & (sub_sat < _DEALER_SAT_MAX)).mean()
+        # Black letter D core.
+        black = (sub_gray < _DEALER_BLACK_MAX).mean()
+        if white >= _DEALER_WHITE_LOWSAT_MIN and black >= _DEALER_BLACK_MIN:
+            return True
+    return False
+
+
+def _has_white_cross(band: np.ndarray, *, floor: int = 150) -> bool:
+    """True if the band holds the empty-slot "+" button.
+
+    The "+" is a white cross (one horizontal stroke and one vertical
+    stroke meeting at the centre) on a dark disc. As a connected
+    component it is a single near-square blob whose white pixels hug the
+    horizontal and vertical centre-lines (the four corners stay dark), so
+    its *fill ratio* (white / bounding-box area) is low (~0.2) and its
+    centre is bright while the corners are dark. An avatar is a dense
+    picture and never produces such a sparse, cross-shaped blob.
+    """
+    import cv2
+
+    gray = cv2.cvtColor(band, cv2.COLOR_BGR2GRAY)
+    _, th = cv2.threshold(gray, floor, 255, cv2.THRESH_BINARY)
+    n, lab, stats, _cent = cv2.connectedComponentsWithStats(th, 8)
+    for i in range(1, n):
+        x, y, w, h, area = stats[i]
+        if not (12 <= w <= 34 and 12 <= h <= 34 and 0.7 <= w / h <= 1.4):
+            continue
+        box = w * h
+        fill = area / box
+        if not (0.05 <= fill <= 0.42):
+            continue
+        sub = (lab[y : y + h, x : x + w] == i).astype(np.uint8)
+        # Cross: center row/column are lit, the four corners are dark.
+        mid_y, mid_x = h // 2, w // 2
+        centre = sub[mid_y, mid_x]
+        corners = (sub[0, 0], sub[0, -1], sub[-1, 0], sub[-1, -1])
+        # At least the centre pixel must be white and corners mostly dark.
+        if centre == 1 and sum(corners) <= 2:
+            return True
+    return False
+
+
+def _is_occupied(band: np.ndarray) -> bool:
+    """An occupied slot shows an avatar; an empty slot shows a "+" button.
+
+    Note the green felt is itself highly saturated, so occupancy cannot be
+    decided by chroma alone. Instead we treat a white cross (the "+"), or a
+    bright picture with no cross, as occupied; a bare dark disc means empty.
+
+    We invert the logic: an empty slot is *detected* by its white cross;
+    anything without a cross that is not flat felt counts as occupied.
+    """
+    import cv2
+
+    if band is None or band.size == 0 or min(band.shape[:2]) < 3:
+        return False
+    # Empty slot -> white cross present.
+    if _has_white_cross(band):
+        return False
+    # A filled slot has a dense, high-contrast picture (the avatar) vs. the
+    # near-uniform dark disc of an empty slot. Measure luminance variance.
+    g = cv2.cvtColor(band, cv2.COLOR_BGR2GRAY)
+    return bool(float(g.std()) > 18.0)
+
+
+def build_digit_templates(
+    reference: np.ndarray,
+    layout: dict[int, dict[str, float]],
+    slot_counts: dict[int, str],
+) -> dict[str, list[np.ndarray]]:
+    """Build a 0-9 digit library from a known reference frame.
+
+    ``slot_counts`` maps slot_id -> the ground-truth chip count visible in
+    ``reference`` (only used to supervise extraction). The reference ring
+    must cover all ten digits for a complete library.
+    """
+    templates: dict[str, list[np.ndarray]] = {}
+    for slot_id, row in layout.items():
+        exp = slot_counts.get(slot_id)
+        if not exp:
+            continue
+        masks = _split_digits(_roi(reference, row["cx"], row["cy"], row["w"], row["h"]))
+        if len(masks) != len(exp):
+            continue
+        for mask, d in zip(masks, exp):
+            templates.setdefault(d, []).append(_norm(mask))
+    return templates
+
+
+def read_slot(
+    slot_id: int,
+    img: np.ndarray,
+    layout: dict[int, dict[str, float]],
+    templates: dict[str, list[np.ndarray]],
+) -> dict[str, FieldValue]:
+    """Read occupancy/stack/dealer for one slot (``VALID`` or ``UNKNOWN``)."""
+    row = layout[slot_id]
+    H, W = img.shape[:2]
+    pill = _roi(img, row["cx"], row["cy"], row["w"], row["h"])
+
+    # Occupancy: an avatar sits above the pill. Approximate band = 2.2x pill.
+    ph = pill.shape[0]
+    avatar_top = max(0, int((row["cy"] - row["h"] / 2) * H) - int(ph * 2.2))
+    pill_top = int((row["cy"] - row["h"] / 2) * H)
+    pill_left = int((row["cx"] - row["w"] / 2) * W)
+    pill_right = int((row["cx"] + row["w"] / 2) * W)
+    avatar = img[avatar_top:pill_top, max(0, pill_left - 4):min(W, pill_right + 4)]
+
+    # Stack first: a readable chip count is the strongest occupancy signal
+    # (only a seated player has a stack number). Empty slots have none.
+    stack = FieldValue.unknown()
+    if templates:
+        masks = _split_digits(pill)
+        if masks:
+            digits = "".join(_classify(_norm(m), templates)[0] for m in masks)
+            if digits.isdigit():
+                stack = FieldValue.valid(int(digits))
+
+    # Occupancy: a readable stack implies occupied. Otherwise fall back to
+    # the empty-slot signal (a dark disc with a white "+" cross).
+    if stack.status is LabelStatus.VALID:
+        occupied = True
+    elif avatar.size:
+        # A bare dark disc means empty; any picture (avatar) means occupied.
+        occupied = _is_occupied(avatar)
+    else:
+        occupied = False
+
+    occupancy = FieldValue.valid(Occupancy.OCCUPIED if occupied else Occupancy.EMPTY)
+
+    # Dealer: the badge hugs the pill (to the right for edge seats, below
+    # for top/bottom seats), so we only extend right and down — never up,
+    # which would otherwise sweep the top status-bar / gear icons.
+    s = int(ph * _DEALER_SCAN_MULT)
+    win_y0 = pill_top
+    win_y1 = min(H, pill_top + ph + s)
+    win_x0 = max(0, pill_left - s // 3)
+    win_x1 = min(W, pill_right + s)
+    win = img[win_y0:win_y1, win_x0:win_x1]
+    dealer = FieldValue.valid(_find_dealer(win)) if win.size else FieldValue.unknown()
+
+    return {"occupancy": occupancy, "stack": stack, "dealer": dealer}
+
+
+def read_seat_fields(
+    img: np.ndarray,
+    layout: dict[int, dict[str, float]],
+    templates: dict[str, list[np.ndarray]],
+    *,
+    slots: Sequence[int] | None = None,
+) -> dict[int, dict[str, FieldValue]]:
+    """Read seat fields for the requested (default all) slots."""
+    out: dict[int, dict[str, FieldValue]] = {}
+    for slot_id in (slots if slots is not None else range(SLOT_COUNT)):
+        out[slot_id] = read_slot(slot_id, img, layout, templates)
+    return out
