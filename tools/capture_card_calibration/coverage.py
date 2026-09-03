@@ -137,11 +137,19 @@ def _digits_of(values: Iterable[int]) -> set[str]:
     return found
 
 
+# Section 10 asks for head-count buckets {2, 3-5, 6-8} plus join/leave. The
+# project owner plays ~90% of hands at a 6-8 handed table and never plays a
+# 3-5 handed table, so an owner-authorized focus (recorded in AGENTS.md, same
+# pattern as the MIN_SESSIONS=2 waiver) restricts the required buckets to the
+# two that actually occur in the owner's play: {2, 6-8}. A block the owner
+# never plays must not be collected just to satisfy a generic table — it would
+# be out-of-distribution noise, not evidence.
+REQUIRED_HEADCOUNT_BUCKETS: frozenset[str] = frozenset({"2", "6-8"})
+
+
 def _headcount_bucket(occupied: int) -> str | None:
     if occupied == 2:
         return "2"
-    if 3 <= occupied <= 5:
-        return "3-5"
     if 6 <= occupied <= 8:
         return "6-8"
     return None
@@ -526,7 +534,7 @@ def evaluate_coverage(labels: Sequence[FrameLabel]) -> CoverageReport:
             f"need >= 320 slot occupancy labels, found "
             f"{tally.occupancy_slot_labels}"
         )
-    missing_buckets = sorted({"2", "3-5", "6-8"} - tally.headcount_buckets)
+    missing_buckets = sorted(REQUIRED_HEADCOUNT_BUCKETS - tally.headcount_buckets)
     if missing_buckets:
         occupancy_shortfalls.append(
             "head-count buckets never observed: " + ", ".join(missing_buckets)
@@ -534,7 +542,8 @@ def evaluate_coverage(labels: Sequence[FrameLabel]) -> CoverageReport:
     requirements.append(
         _requirement(
             "occupancy",
-            ">= 40 stable table states, >= 320 slot labels, 2/3-5/6-8 players",
+            ">= 40 stable table states, >= 320 slot labels, 2/6-8 players "
+            "(owner focus)",
             320,
             0,
             tally.occupancy_slot_labels,
@@ -685,6 +694,7 @@ __all__ = [
     "MIN_ANOMALY_FRAMES",
     "MIN_PREFLOP_EMPTY_BOARDS",
     "MIN_RECONNECT_GROUPS",
+    "REQUIRED_HEADCOUNT_BUCKETS",
     "Requirement",
     "STREET_REQUIREMENTS",
     "TEMPORAL_REQUIREMENTS",

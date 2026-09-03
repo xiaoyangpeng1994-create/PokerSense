@@ -593,6 +593,27 @@ def test_coverage_module_exposes_section_ten_minimums():
     assert coverage_module.MIN_ANOMALY_FRAMES == 50
 
 
+def test_owner_focus_excludes_3_5_headcount_bucket():
+    # The owner plays ~90% of hands at a 6-8 handed table and never plays a
+    # 3-5 handed table. Section 10's generic {2,3-5,6-8} is owner-authorized
+    # to a focused {2,6-8} (recorded in AGENTS.md), so a 3-5 handed dataset
+    # must not be required. This pins that focus so it cannot silently regress.
+    assert "3-5" not in coverage_module.REQUIRED_HEADCOUNT_BUCKETS
+    assert "2" in coverage_module.REQUIRED_HEADCOUNT_BUCKETS
+    assert "6-8" in coverage_module.REQUIRED_HEADCOUNT_BUCKETS
+
+
+def test_coverage_2_and_6_8_buckets_are_required():
+    # A dataset with only a 6-8 handed table passes the head-count bucket
+    # check; only missing {2,6-8} (not 3-5) is reported as a shortfall.
+    labels = _dataset(12, sessions=3)
+    report = evaluate_coverage(labels)
+    occupancy = next(r for r in report.requirements if r.field == "occupancy")
+    # The synthetic fixture is 8-handed OCCUPIED -> bucket "6-8".
+    assert "2" in occupancy.shortfalls or not occupancy.met
+    assert not any("3-5" in shortfall for shortfall in occupancy.shortfalls)
+
+
 def test_coverage_report_serializes():
     report = evaluate_coverage(_dataset(4))
     payload = json.loads(json.dumps(report.to_dict()))

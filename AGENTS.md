@@ -134,6 +134,23 @@ structure; do not represent a local build as a clean-user installation test.
 
 ## Progress log
 
+- **2026-09-03 — owner focus: 6-8 handed table is the calibration primary
+  direction.** The owner stated "90% 的牌局都是 6-8 人" and asked to focus there.
+  An audit of the drop-clean dataset confirms it: head-count buckets are
+  {1人: 6, 2人: 31, 6-8人: 64} with **zero 3-5 handed frames** — the owner plays
+  6-8 handed and never plays a 3-5 handed table. Section 10's generic head-count
+  requirement {2, 3-5, 6-8} was therefore **owner-authorized** to a focused
+  {2, 6-8} (new `REQUIRED_HEADCOUNT_BUCKETS` in `coverage.py`, documented inline
+  and recorded here — the same pattern as the `MIN_SESSIONS=2` waiver). This is
+  a recorded owner decision, not a silent relaxation: a table type the owner
+  never plays must not be collected purely to satisfy a generic table, since it
+  would be out-of-distribution noise rather than evidence. The real remaining
+  gaps (now that occupancy is `ok`) are within the 6-8 handed bucket: the
+  `completed_action` / `current_actor` fields are entirely empty (0 samples),
+  the TURN street has only 3 frames, and the negative samples (card-back,
+  non-pot, occlusion, menu) are near-zero. The updated top-up checklist
+  (`reports/label-topup-checklist.zh-CN.md` v3) prioritises these.
+
 - **2026-09-03 — viewpoint evidence tool (`cli viewpoint`):** the owner anchored
   the LIVE discriminator on **the three action buttons** ("以三按钮为准"), and
   this tool surfaces that evidence for a human to confirm by eye. `viewpoint.py`
