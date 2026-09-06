@@ -132,6 +132,43 @@ def test_amount_multi_char(text):
     assert str(r.value) == text
 
 
+def test_amount_match_counts_holes_on_normalized_grid():
+    """A tiny thin-stroke "8" whose holes collapse at raw size must still
+    match the 8 template: the topology gate counts holes on the shared
+    28x28 grid, for both the input crop and the templates.
+
+    2026-09-06 regression: the capture-card pot ribbon rendered "184"
+    whose 15x10 middle glyph lost both counters under raw-grid Otsu, so
+    the gate excluded the 2-hole 8 template and read "134" at 0.861 — a
+    false VALID. Counting holes on the normalized grid keeps the
+    counters closed.
+    """
+    from poker_engine.perceptual.vision.amount_recognizer import (
+        _glyph_hole_count,
+        _match_char,
+    )
+
+    def _glyph(text, size=64, scale=1.8, thick=3):
+        img = np.zeros((size, size, 3), np.uint8)
+        cv2.putText(
+            img, text, (size // 6, size * 13 // 16),
+            cv2.FONT_HERSHEY_SIMPLEX, scale, (255, 255, 255), thick,
+            cv2.LINE_AA,
+        )
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        cols = np.where((gray > 40).any(axis=0))[0]
+        rows = np.where((gray > 40).any(axis=1))[0]
+        return img[rows[0]:rows[-1] + 1, cols[0]:cols[-1] + 1]
+
+    collapsed = cv2.resize(_glyph("8"), (10, 15), interpolation=cv2.INTER_AREA)
+    assert _glyph_hole_count(collapsed) == 0  # the raw-grid collapse itself
+
+    templates = {d: _glyph(d) for d in "38"}
+    label, score = _match_char(collapsed, templates)
+    assert label == "8"
+    assert score >= 0.8
+
+
 def _render_dark_pill(text, bg=(30, 80, 65)):
     width = max(50, 45 * len(text))
     image = np.full((50, width, 3), bg, dtype=np.uint8)

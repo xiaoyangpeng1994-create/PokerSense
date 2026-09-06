@@ -26,13 +26,20 @@
   "measured_at": "2026-09-04",
   "note": "Card recognition calibrated 2026-09-04 by the gray-fused-mlp-v3 pipeline (see AGENTS.md progress log). Earlier verdict that suits were physically unresolvable at 53x78 was reversed: the root causes were the HSV-hue colour router (undefined for black ink), letterbox jitter in temporal fusion, and ~3% suit mislabels \u2014 all fixed in software. The seat fields (occupancy/dealer/stack) and seat mapping were calibrated earlier (see the same progress log). Action-badge recognition remains UNCALIBRATED: action fields must keep reading UNKNOWN.",
   "platform_id": "wepoker_android_capture_card",
+  "pot": {
+    "correct": 20,
+    "readable_score_floor": 0.893623,
+    "samples": 35,
+    "source": "field_calibration.py on capture_card_calibration_20260903 (eval hold-out); zero false VALID, Wilson 95% lower bound 0.433643",
+    "unreadable_score_ceiling": 0.779256
+  },
   "schema_version": 1,
   "stack": {
-    "correct": 9,
-    "readable_score_floor": 0.807415,
-    "samples": 129,
-    "source": "field_calibration.py on capture_card_calibration_20260903 (eval hold-out); zero false VALID, Wilson 95% lower bound 0.041038",
-    "unreadable_score_ceiling": 0.798582
+    "correct": 34,
+    "readable_score_floor": 0.800147,
+    "samples": 130,
+    "source": "field_calibration.py on capture_card_calibration_20260903 (eval hold-out); zero false VALID, Wilson 95% lower bound 0.203462",
+    "unreadable_score_ceiling": 0.79877
   },
   "status": "calibrated",
   "template_source": "wepoker"

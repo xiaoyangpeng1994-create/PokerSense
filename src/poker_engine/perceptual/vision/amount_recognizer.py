@@ -112,10 +112,19 @@ def _match_char(char_img: np.ndarray, templates: Mapping[str, np.ndarray]):
     ratio preserved), so digit shape is compared independently of source size.
     """
     gray = _normalize_char(_to_gray(char_img))
-    char_holes = _glyph_hole_count(char_img)
+    # Count holes on the same normalized grid the templates live on, not on
+    # the raw segment: at raw size (e.g. a 15x10 thin-font ribbon "8") Otsu
+    # binarization collapses enclosed counters, and a 0-hole reading would
+    # exclude the true 2-hole template from the candidate set below — the
+    # 2026-09-06 "184 -> 134" false VALID. The 28x28 letterbox upscales the
+    # glyph enough to keep counters closed, and both sides of the topology
+    # gate then see the same grid (capsule-font digits count identically
+    # either way; verified on the capture-card dataset).
+    char_holes = _glyph_hole_count(gray)
     matching_topology = {
         label for label, tmpl in templates.items()
-        if _glyph_hole_count(tmpl) == char_holes
+        if _glyph_hole_count(_normalize_char(_template_gray(tmpl)))
+        == char_holes
     }
     candidates = (
         matching_topology if matching_topology else set(templates)
