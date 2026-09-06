@@ -14,6 +14,7 @@ Every step is deterministic given the injected components and frame source.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any
@@ -45,6 +46,30 @@ from .hand_boundary import (
 from .temporal_consensus import TemporalConsensus
 
 
+# Per-stage wall-clock cost keys recorded on :class:`PipelineStep.timings`.
+# Kept as plain strings (not an Enum) so they can be serialized straight into
+# a report without a lookup table.
+STAGE_CAPTURE = "capture"
+STAGE_VISION = "vision"
+STAGE_CONSENSUS = "consensus"
+STAGE_BOUNDARY = "boundary"
+STAGE_CHANGE = "change"
+STAGE_ADVANCE = "advance"
+STAGE_EQUITY = "equity"
+STAGE_TOTAL = "total"
+
+ALL_STAGE_NAMES = (
+    STAGE_CAPTURE,
+    STAGE_VISION,
+    STAGE_CONSENSUS,
+    STAGE_BOUNDARY,
+    STAGE_CHANGE,
+    STAGE_ADVANCE,
+    STAGE_EQUITY,
+    STAGE_TOTAL,
+)
+
+
 @dataclass(frozen=True)
 class PipelineStep:
     """Result of processing one frame.
@@ -52,6 +77,11 @@ class PipelineStep:
     ``analysis_changed`` is True only when this step produced a *new* canonical
     state + equity snapshot. Every step still carries its own recognition
     confidence so a client never renders stale table data after an abstention.
+
+    ``timings`` records per-stage wall-clock cost in milliseconds. It is
+    observability only — never used to make a decision — so a caller may safely
+    ignore it. Stages absent from a given step (e.g. ``equity`` on a frame that
+    did not change state) are simply omitted rather than reported as zero.
     """
 
     frame_seq: int
@@ -59,6 +89,14 @@ class PipelineStep:
     change: ChangeReport
     analysis_changed: bool
     hand_boundary: HandBoundaryDetection
+    timings: tuple[tuple[str, float], ...] = ()
+
+    def timing(self, stage: str) -> float | None:
+        """Return one stage's cost in ms, or None when not recorded."""
+        for name, value in self.timings:
+            if name == stage:
+                return value
+        return None
 
 
 class RealtimePipeline:
@@ -77,6 +115,7 @@ class RealtimePipeline:
         confirmation_frames: dict[str, int] | None = None,
         hand_boundary_policy: HandBoundaryPolicy | None = None,
         new_hand_state_factory: Callable[[], PokerState] | None = None,
+        monotonic_clock: Callable[[], float] = time.monotonic,
     ) -> None:
         if not callable(getattr(frame_source, "next_frame", None)):
             raise TypeError("frame_source must provide next_frame()")
@@ -114,55 +153,72 @@ class RealtimePipeline:
         if new_hand_state_factory is not None and not callable(new_hand_state_factory):
             raise TypeError("new_hand_state_factory must be callable or None")
         self._new_hand_state_factory = new_hand_state_factory
+        if not callable(monotonic_clock):
+            raise TypeError("monotonic_clock must be callable")
+        self._monotonic_clock = monotonic_clock
         self._previous_obs: RawObservation | None = None
         self._current_analysis: RealtimeAnalysis | None = None
 
     def step(self) -> PipelineStep | None:
         """Advance one frame. Returns None when the frame source is exhausted."""
+        clock = self._monotonic_clock
+        started = clock()
+
+        mark = clock()
         frame = self._frame_source.next_frame()
+        capture_ms = (clock() - mark) * 1000.0
         if frame is None:
             return None
 
+        mark = clock()
         raw_obs = self._vision.process(frame, self._table_map)
+        vision_ms = (clock() - mark) * 1000.0
+
+        mark = clock()
         obs = self._temporal_consensus.apply(raw_obs).observation
+        consensus_ms = (clock() - mark) * 1000.0
+
+        mark = clock()
         boundary = detect_hand_boundary(
             self._latest_state(), obs, self._hand_boundary_policy
         )
+        boundary_ms = (clock() - mark) * 1000.0
 
         if boundary.status is HandBoundaryStatus.CONFIRMED:
             self._start_next_hand(obs.timestamp)
-            self._advance(obs, frame)
+            advance_ms, equity_ms = self._advance(obs, frame)
             change = ChangeReport(
                 changed=True, changed_fields=("hand_boundary",)
             )
             self._previous_obs = obs
             assert self._current_analysis is not None
-            return PipelineStep(
-                frame_seq=frame.frame_seq,
-                analysis=self._current_analysis,
-                change=change,
-                analysis_changed=True,
-                hand_boundary=boundary,
+            return self._step_result(
+                frame, self._current_analysis, change, True, boundary,
+                capture_ms, vision_ms, consensus_ms, boundary_ms,
+                0.0, advance_ms, equity_ms, started,
             )
 
         if self._previous_obs is None:
             # First frame: no previous to diff against; still record the
             # opening state through the orchestrator.
-            self._advance(obs, frame)
+            advance_ms, equity_ms = self._advance(obs, frame)
             change = ChangeReport(changed=True, changed_fields=())
             self._previous_obs = obs
             assert self._current_analysis is not None
-            return PipelineStep(
-                frame_seq=frame.frame_seq,
-                analysis=self._current_analysis,
-                change=change,
-                analysis_changed=True,
-                hand_boundary=boundary,
+            return self._step_result(
+                frame, self._current_analysis, change, True, boundary,
+                capture_ms, vision_ms, consensus_ms, boundary_ms,
+                0.0, advance_ms, equity_ms, started,
             )
 
+        mark = clock()
         change = detect_change(self._previous_obs, obs)
+        change_ms = (clock() - mark) * 1000.0
         if change.changed:
-            self._advance(obs, frame)
+            advance_ms, equity_ms = self._advance(obs, frame)
+        else:
+            advance_ms = 0.0
+            equity_ms = None
 
         self._previous_obs = obs
         assert self._current_analysis is not None
@@ -175,24 +231,72 @@ class RealtimePipeline:
             frame_seq=frame.frame_seq,
             confidence=ConfidenceSnapshot.from_observation(obs),
         )
-        return PipelineStep(
-            frame_seq=frame.frame_seq,
-            analysis=fresh_analysis,
-            change=change,
-            analysis_changed=change.changed,
-            hand_boundary=boundary,
+        return self._step_result(
+            frame, fresh_analysis, change, change.changed, boundary,
+            capture_ms, vision_ms, consensus_ms, boundary_ms,
+            change_ms, advance_ms, equity_ms, started,
         )
 
-    def _advance(self, obs: RawObservation, frame: Any) -> None:
+    def _step_result(
+        self,
+        frame,
+        analysis,
+        change,
+        analysis_changed,
+        boundary,
+        capture_ms,
+        vision_ms,
+        consensus_ms,
+        boundary_ms,
+        change_ms,
+        advance_ms,
+        equity_ms,
+        started,
+    ) -> PipelineStep:
+        """Assemble one step, folding the collected stage costs into it."""
+        total_ms = (self._monotonic_clock() - started) * 1000.0
+        stages = (
+            (STAGE_CAPTURE, capture_ms),
+            (STAGE_VISION, vision_ms),
+            (STAGE_CONSENSUS, consensus_ms),
+            (STAGE_BOUNDARY, boundary_ms),
+            (STAGE_CHANGE, change_ms),
+            (STAGE_ADVANCE, advance_ms),
+            (STAGE_TOTAL, total_ms),
+        )
+        if equity_ms is not None:
+            stages += ((STAGE_EQUITY, equity_ms),)
+        return PipelineStep(
+            frame_seq=frame.frame_seq,
+            analysis=analysis,
+            change=change,
+            analysis_changed=analysis_changed,
+            hand_boundary=boundary,
+            timings=stages,
+        )
+
+    def _advance(self, obs: RawObservation, frame: Any) -> tuple[float, float]:
+        """Feed one observation through; return ``(advance_ms, equity_ms)``.
+
+        Equity is timed separately because it dominates the step budget (see
+        ``tools/benchmark_realtime_latency.py``) and is the stage most likely
+        to be truncated by a deadline.
+        """
+        clock = self._monotonic_clock
+        started = clock()
         self._orchestrator.process_observation(obs)
         state = self._latest_state()
+        equity_started = clock()
+        equity = self._compute_equity(state)
+        equity_ms = (clock() - equity_started) * 1000.0
         snapshot = RealtimeAnalysis(
             frame_seq=frame.frame_seq,
             state=StateSnapshot.from_state(state),
-            equity=self._compute_equity(state),
+            equity=equity,
             confidence=ConfidenceSnapshot.from_observation(obs),
         )
         self._current_analysis = snapshot
+        return (clock() - started) * 1000.0, equity_ms
 
     def _start_next_hand(self, boundary_time) -> None:
         if self._new_hand_state_factory is None:

@@ -11,7 +11,10 @@ from poker_engine.core.enums import Position, Rank, Suit
 from poker_engine.core.value_objects import Card
 
 from .contracts import RangeDistribution
-from .heuristic_provider import PreflopRfiHeuristicProvider
+from .heuristic_provider import (
+    EXPLICIT_PLAYER_COUNTS,
+    PreflopRfiHeuristicProvider,
+)
 
 
 class RangePriorState(str, Enum):
@@ -107,7 +110,11 @@ class PreflopRfiRangePrior:
         if not isinstance(query, RangePriorQuery):
             raise TypeError("query must be a RangePriorQuery")
         reasons = []
-        if query.player_count not in self._provider.capability.player_counts:
+        # This prior is defined over upstream *authored* ranges only. The
+        # Provider's capability is deliberately wider (it also serves 7/8
+        # handed advice derived from those charts), but a combo prior must not
+        # be silently rebuilt from a neighbour's chart.
+        if query.player_count not in EXPLICIT_PLAYER_COUNTS:
             reasons.append("unsupported_player_count")
         if query.effective_stack_bb != Decimal("100"):
             reasons.append("unsupported_stack")

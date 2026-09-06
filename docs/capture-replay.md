@@ -23,6 +23,11 @@ Observation，防止绕过当前 recognizer。
 - `calibrations`：每个识别字段的文件 path/SHA-256/sample count；文件内部必须声明同一
   platform/layout、字段名和相同样本数。
 - `seat_mapping`：版本化 stack/action/actor/dealer visual slot→canonical seat 映射。
+
+采集卡平台已有首个真实手牌 replay 草案（`session_002_hand_0117`，stable_observation 阶段，
+6 帧 0  mismatch：fold/street_change EXACT + chip 动作失败关闭 INVALID + 快照 NO_ACTION），
+草案与性能数字存于私有标定目录 `replay/capture_card_hand_0117/` 与 `evidence/replay_report.json`；
+`release_eligible=false` 按实记录（非 raw_frame 阶段、字段 calibration 未落地）。
 - `initial_state`：Core schema v1 的 `PokerState`。
 - `frames[]`：严格递增 frame sequence、非递减 aware timestamp、原始帧引用或内嵌
   Observation，以及逐帧期望 status/state version/event types/reasons。

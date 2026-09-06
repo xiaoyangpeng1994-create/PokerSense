@@ -269,27 +269,44 @@ def test_parse_device_index_forms():
 
 
 # --------------------------------------------------------------------------
-# Platform scaffold declares uncalibrated state
+# Platform calibration state (cards calibrated; legacy path stays closed)
 # --------------------------------------------------------------------------
 
-def test_capture_card_platform_scaffold_is_uncalibrated():
+def test_capture_card_platform_calibration_state():
+    """Cards are calibrated (gray-fused-mlp-v3); legacy path stays closed.
+
+    The platform graduated from the uncalibrated scaffold on 2026-09-04:
+    the fused card measurement is real evidence, but the legacy
+    single-frame card path must remain fail-closed (floor=1.0) so nothing
+    can accidentally serve the old matcher with a loosened gate, and no
+    geometry/threshold may be inherited from LDPlayer/H5.
+    """
+    import hashlib
     import pathlib
 
     repo_root = pathlib.Path(__file__).resolve().parents[2]
-    path = (
-        repo_root
-        / "configs"
-        / "vision"
-        / "wepoker_android_capture_card"
-        / "calibration.json"
-    )
-    data = json.loads(path.read_text(encoding="utf-8"))
-    assert data["status"] == "uncalibrated"
+    vision = repo_root / "configs" / "vision" / "wepoker_android_capture_card"
+    data = json.loads((vision / "calibration.json").read_text(encoding="utf-8"))
     assert data["platform_id"] == "wepoker_android_capture_card"
-    # No field measurements may exist yet (nothing inherits LDPlayer/H5).
-    assert not any(
-        isinstance(v, dict) and "samples" in v for v in data.values()
-    )
+    assert data["status"] == "calibrated"
+    # legacy single-frame template source stays "wepoker" (guide rule 2:
+    # card ART templates may be shared after independent verification); the
+    # fused pipeline uses its own card_heads.npz, not these templates.
+    assert data["template_source"] == "wepoker"
+
+    legacy = data["card"]
+    assert legacy["readable_score_floor"] == 1.0
+    assert legacy["unreadable_score_ceiling"] == 1.0
+
+    fused = data["card_fused"]
+    assert fused["validation_correct"] == fused["validation_positive_samples"]
+    assert fused["false_valid"] == 0
+    assert 0.0 <= fused["rank_floor"] <= 1.0
+    assert 0.0 < fused["suit_floor"] <= 1.0
+    heads = vision / fused["models"]
+    assert heads.is_file()
+    digest = hashlib.sha256(heads.read_bytes()).hexdigest()
+    assert digest == fused["models_sha256"]
 
 
 def test_capture_card_backend_exported_from_package():

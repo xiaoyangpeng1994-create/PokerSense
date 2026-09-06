@@ -27,7 +27,9 @@ import asyncio
 import json
 import os
 import sys
-from collections.abc import AsyncIterator
+import time
+from collections.abc import AsyncIterator, Callable
+from dataclasses import dataclass
 from pathlib import Path
 
 import cv2
@@ -75,6 +77,11 @@ from poker_engine.perceptual.vision.corner_glyph_recognizer import (
 )
 from poker_engine.perceptual.vision.engine import VisionEngine
 from poker_engine.perceptual.vision.errors import TableMapError
+from poker_engine.perceptual.vision.fused_card_adapter import FusedCardRecognizerAdapter
+from poker_engine.perceptual.vision.fused_card_recognizer import (
+    FusedCardRecognizer,
+    load_card_heads,
+)
 from poker_engine.perceptual.vision.hero_turn_recognizer import (
     AndroidHeroTurnRecognizer,
 )
@@ -90,9 +97,10 @@ from poker_engine.state_engine.platform_mapping import (
     PlatformMappedStateEngine,
     PlatformSeatMapping,
 )
+from poker_engine.strategy.action_line import build_action_line_resolver
 from poker_engine.strategy.contracts import GameConfig, GameType
 from poker_engine.strategy.orchestration import StrategyOrchestrator
-from poker_engine.strategy.router import StrategyRouter
+from poker_engine.strategy.registry import build_strategy_router
 
 from .errors import LiveCaptureError
 from .serialize import DesktopFrame
@@ -111,6 +119,11 @@ _REPO_ROOT = _resource_root()
 DEFAULT_PLATFORM = "wepoker_android"
 DEFAULT_LAYOUT = "ldplayer_portrait_1440x2560"
 DEFAULT_DEVICE_SERIAL = os.environ.get("POKERSENSE_ADB_SERIAL", "auto")
+CAPTURE_CARD_PLATFORM = "wepoker_android_capture_card"
+CAPTURE_CARD_LAYOUT = (
+    "phone_samsung_galaxy_s25_ultra__card_ugreen__"
+    "uvc_1920x1080_30__canvas_498x1080__v1"
+)
 
 
 def build_capture_backend(
@@ -229,7 +242,13 @@ def load_measured_calibration(vision_dir: Path) -> MeasuredCalibration:
 def load_measured_calibrations(
     vision_dir: Path,
 ) -> dict[str, MeasuredCalibration]:
-    """Load every independently measured field calibration in a profile."""
+    """Load every independently measured field calibration in a profile.
+
+    The capture-card platform calibrates cards with the temporal-fusion
+    pipeline under ``card_fused`` (the legacy single-frame ``card`` block is
+    kept at floor=1.0 as a deliberate fail-closed guard). When ``card_fused``
+    is present it takes precedence as the platform's ``card`` measurement.
+    """
     path = vision_dir / "calibration.json"
     if not path.is_file():
         raise LiveCaptureError(f"no calibration measurement at {path}")
@@ -242,12 +261,27 @@ def load_measured_calibrations(
         field = data.get(name)
         if field is None:
             continue
+        if name == "card" and "card_fused" in data:
+            # The fused pipeline is the platform's real card measurement; the
+            # legacy single-frame ``card`` block is a fail-closed placeholder
+            # (floor == ceiling == 1.0) that ``MeasuredCalibration`` would
+            # reject. Skip it and take the fused block below.
+            continue
         measured[name] = MeasuredCalibration(
             samples=field["samples"],
             correct=field["correct"],
             readable_score_floor=field["readable_score_floor"],
             unreadable_score_ceiling=field["unreadable_score_ceiling"],
             source=field["source"],
+        )
+    fused = data.get("card_fused")
+    if fused is not None:
+        measured["card"] = MeasuredCalibration(
+            samples=fused["samples"],
+            correct=fused["correct"],
+            readable_score_floor=fused["suit_floor"],
+            unreadable_score_ceiling=0.0,
+            source=fused["source"],
         )
     if "card" not in measured:
         raise LiveCaptureError(f"card calibration missing at {path}")
@@ -341,7 +375,14 @@ def load_calibration(
         )
 
     table_map = TableMap.from_json(table_map_path.read_text())
-    calibration_data = json.loads((vision_dir / "calibration.json").read_text())
+    calibration_path = vision_dir / "calibration.json"
+    if not calibration_path.is_file():
+        raise LiveCaptureError(f"no calibration measurement at {calibration_path}")
+    calibration_data = json.loads(calibration_path.read_text())
+    if calibration_data.get("status") == "uncalibrated":
+        raise LiveCaptureError(
+            f"recognition profile {platform}/{layout} is explicitly uncalibrated"
+        )
     template_source = calibration_data.get("template_source", platform)
     template_dir = _REPO_ROOT / "configs" / "vision" / template_source
     hero_layout = hero_layout_from_dict(
@@ -355,6 +396,33 @@ def load_calibration(
             version=f"{platform}-{layout}-v1",
         )
     )
+
+    # Capture-card platform: the temporal-fusion recognizer supersedes the
+    # single-frame matcher whenever its measured ``card_fused`` calibration
+    # and exported heads are present. Failure to load the heads keeps the
+    # legacy (fail-closed, floor=1.0) path rather than half-wiring the fused
+    # pipeline — a missing model file must never silently downgrade to a
+    # loosened single-frame gate.
+    fused_meta = vision_dir / "card_heads.json"
+    fused_card_pipeline = False
+    if fused_meta.is_file():
+        fused_data = json.loads((vision_dir / "calibration.json").read_text())
+        if "card_fused" in fused_data:
+            try:
+                heads = load_card_heads(vision_dir / "card_heads.npz")
+                calibrated = fused_data["card_fused"]
+                card_recognizer = FusedCardRecognizerAdapter(
+                    FusedCardRecognizer(
+                        heads,
+                        rank_floor=calibrated.get("rank_floor", 0.0),
+                        suit_floor=calibrated.get("suit_floor", 0.3),
+                    )
+                )
+                fused_card_pipeline = True
+            except (FileNotFoundError, ValueError, OSError):
+                # Keep the legacy fail-closed recognizer; the platform stays
+                # UNKNOWN on cards rather than guessing.
+                pass
 
     board_layout_path = vision_dir / "board_slot_layout.json"
     if board_layout_path.is_file():
@@ -492,6 +560,7 @@ def load_calibration(
         dealer_recognizer=dealer_recognizer,
         empty_slot_recognizer=empty_slot_recognizer,
         actor_recognizer=AndroidHeroTurnRecognizer(),
+        disable_hero_dynamic_fallback=fused_card_pipeline,
     )
     return table_map, engine
 
@@ -563,6 +632,20 @@ def build_pipeline(
     platform is wired but NOT calibrated, so its loader fails closed (see
     :func:`load_calibration`) until Stage I measurement lands.
     """
+    if source == "capture-card":
+        if platform == DEFAULT_PLATFORM and layout == DEFAULT_LAYOUT:
+            platform = CAPTURE_CARD_PLATFORM
+            layout = CAPTURE_CARD_LAYOUT
+        elif platform != CAPTURE_CARD_PLATFORM:
+            raise LiveCaptureError(
+                "capture-card source requires the independent "
+                f"{CAPTURE_CARD_PLATFORM!r} recognition profile"
+            )
+    elif source == "adb" and platform == CAPTURE_CARD_PLATFORM:
+        raise LiveCaptureError(
+            "ADB source cannot use the capture-card recognition profile"
+        )
+
     table_map, vision = load_calibration(platform, layout)
     measured = load_measured_calibrations(
         _REPO_ROOT / "configs" / "vision" / platform
@@ -616,20 +699,76 @@ def build_pipeline(
     )
 
 
+@dataclass(frozen=True)
+class LiveStreamHealth:
+    """Observable health of the capture loop.
+
+    Emitted through :func:`live_analysis_stream`'s ``on_health`` hook so a
+    caller can alert or degrade without the stream changing what it yields.
+    ``exhausted`` means the frame source ran out (a finite replay), which is
+    a clean stop rather than a failure.
+    """
+
+    consecutive_failures: int
+    total_failures: int
+    backoff_seconds: float
+    exhausted: bool = False
+
+    def __post_init__(self) -> None:
+        for name in ("consecutive_failures", "total_failures"):
+            value = getattr(self, name)
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise TypeError(f"{name} must be an int")
+            if value < 0:
+                raise ValueError(f"{name} must be >= 0")
+        if isinstance(self.backoff_seconds, bool) or not isinstance(
+            self.backoff_seconds, (int, float)
+        ):
+            raise TypeError("backoff_seconds must be a number")
+        if self.backoff_seconds < 0:
+            raise ValueError("backoff_seconds must be >= 0")
+        if not isinstance(self.exhausted, bool):
+            raise TypeError("exhausted must be a bool")
+
+    @property
+    def degraded(self) -> bool:
+        """True while the loop is recovering from a transient capture fault."""
+        return self.consecutive_failures > 0
+
+
 async def live_analysis_stream(
     device_serial: str = DEFAULT_DEVICE_SERIAL,
-    interval_seconds: float = 1.0,
+    interval_seconds: float = 0.0,
     source: str = "adb",
     *,
     device_index: int = 0,
     api: str = "MSMF",
     normalization=None,
+    max_consecutive_failures: int = 5,
+    backoff_initial_seconds: float = 0.5,
+    backoff_max_seconds: float = 8.0,
+    on_health: Callable[[LiveStreamHealth], None] | None = None,
 ) -> AsyncIterator[DesktopFrame]:
     """Yield fresh analysis while the selected capture source is available.
 
     Capture and recognition are CPU-bound and run off the event loop, so the
     server stays responsive between frames. ``source`` selects the capture
     backend (see :func:`build_capture_backend`).
+
+    ``interval_seconds`` is a **minimum** period, not a fixed one: the loop
+    sleeps only ``max(0, interval_seconds - step_duration)``. It therefore
+    defaults to ``0.0`` — run as fast as the source can supply frames. The
+    earlier fixed 1.0s sleep dominated end-to-end latency: with ~110-280ms of
+    real work per step it capped the pipeline near 0.8fps and added up to a
+    full second of avoidable lag before any frame was even looked at.
+
+    Capture faults fall into two classes and are handled differently:
+
+    * :class:`LiveCaptureError` — the *device* went away (ADB dropped, USB
+      re-enumeration). Transient, so the loop backs off exponentially and
+      retries, reporting each attempt through ``on_health``.
+    * anything else — a programming or configuration fault. Raised
+      immediately; retrying a bug only hides it.
     """
     try:
         pipeline = await asyncio.to_thread(
@@ -646,12 +785,14 @@ async def live_analysis_stream(
         raise LiveCaptureError(
             f"capture engine initialization failed: {exc}"
         ) from exc
-    # Recognition now promotes measured seat, stack, dealer, Hero-turn, and
-    # completed-action evidence through the Android mapping. No released
-    # multiplayer Provider is bundled, so advice still emits an auditable
-    # ABSTAIN rather than inventing a strategy.
+    # Recognition promotes measured seat, stack, dealer, Hero-turn, and
+    # completed-action evidence through the Android mapping.  Strategy
+    # Providers are registered in one place (strategy.registry) so capability
+    # growth never touches this wiring again.  When no registered Provider
+    # covers a spot, advice still emits an auditable ABSTAIN rather than
+    # inventing a strategy.
     strategy_session = LiveStrategySession(
-        StrategyOrchestrator(StrategyRouter()),
+        StrategyOrchestrator(build_strategy_router()),
         GameConfig(
             variant="NLHE",
             game_type=GameType.CASH,
@@ -661,21 +802,78 @@ async def live_analysis_stream(
             big_blind=ChipAmount("2"),
             minimum_chip=ChipAmount("1"),
         ),
+        action_line_resolver=build_action_line_resolver(),
     )
+    if isinstance(interval_seconds, bool) or not isinstance(
+        interval_seconds, (int, float)
+    ):
+        raise TypeError("interval_seconds must be a number")
+    if interval_seconds < 0:
+        raise ValueError("interval_seconds must be >= 0")
+    if not isinstance(max_consecutive_failures, int) or isinstance(
+        max_consecutive_failures, bool
+    ):
+        raise TypeError("max_consecutive_failures must be an int")
+    if max_consecutive_failures < 0:
+        raise ValueError("max_consecutive_failures must be >= 0")
+    if on_health is not None and not callable(on_health):
+        raise TypeError("on_health must be callable or None")
+    consecutive_failures = 0
+    total_failures = 0
+    backoff = float(backoff_initial_seconds)
     while True:
+        started = time.monotonic()
         try:
             step = await asyncio.to_thread(pipeline.step)
-        except (LiveCaptureError, TableMapError) as exc:
+        except LiveCaptureError as exc:
+            # Device-level fault: the source may come back, so recover
+            # instead of tearing the whole stream down on one dropped frame.
+            consecutive_failures += 1
+            total_failures += 1
+            if on_health is not None:
+                on_health(
+                    LiveStreamHealth(
+                        consecutive_failures=consecutive_failures,
+                        total_failures=total_failures,
+                        backoff_seconds=backoff,
+                    )
+                )
+            if consecutive_failures > max_consecutive_failures:
+                raise LiveCaptureError(
+                    f"capture source unavailable after {consecutive_failures} "
+                    f"consecutive failures: {exc}"
+                ) from exc
+            await asyncio.sleep(backoff)
+            backoff = min(backoff * 2.0, float(backoff_max_seconds))
+            continue
+        except TableMapError as exc:
             raise LiveCaptureError(str(exc)) from exc
         except Exception as exc:
             raise LiveCaptureError(f"capture engine failed: {exc}") from exc
-        if step is not None:
-            yield strategy_session.frame(
-                step.analysis,
-                pipeline.current_state(),
-                action_history=pipeline.action_history(),
-            )
-        await asyncio.sleep(interval_seconds)
+        if step is None:
+            # Frame source exhausted (a finite replay finished). Stop
+            # cleanly rather than spinning on a source that will never
+            # produce another frame.
+            if on_health is not None:
+                on_health(
+                    LiveStreamHealth(
+                        consecutive_failures=0,
+                        total_failures=total_failures,
+                        backoff_seconds=0.0,
+                        exhausted=True,
+                    )
+                )
+            return
+        consecutive_failures = 0
+        backoff = float(backoff_initial_seconds)
+        yield strategy_session.frame(
+            step.analysis,
+            pipeline.current_state(),
+            action_history=pipeline.action_history(),
+        )
+        remaining = interval_seconds - (time.monotonic() - started)
+        if remaining > 0:
+            await asyncio.sleep(remaining)
 
 
 __all__ = [
@@ -690,4 +888,5 @@ __all__ = [
     "live_analysis_stream",
     "load_calibration",
     "DEFAULT_DEVICE_SERIAL",
+    "LiveStreamHealth",
 ]

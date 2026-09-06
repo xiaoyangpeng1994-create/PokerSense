@@ -2,47 +2,56 @@
 <html lang="zh">
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark" />
 <title>PokerSense</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div id="app">
-  <div class="header">
-    <div class="brand"><span class="dot" id="conn-dot"></span><span id="conn-label">PokerSense</span></div>
-    <div class="header-actions">
-      <div class="street-badge" id="street-badge">—</div>
-      <button class="settings-button" id="settings-button" type="button" aria-label="Settings">⚙</button>
+<main id="app" data-phase="connecting">
+  <header class="header">
+    <div class="brand">
+      <span class="dot pending" id="conn-dot" aria-hidden="true"></span>
+      <span class="brand-label" id="conn-label" role="status" aria-live="polite">PokerSense</span>
     </div>
-  </div>
+    <div class="header-actions">
+      <div class="street-badge" id="street-badge" data-empty="true">—</div>
+      <button class="settings-button control" id="settings-button" type="button" aria-label="Settings">
+        <span aria-hidden="true">⚙</span>
+      </button>
+    </div>
+  </header>
 
-  <div class="table-panel">
+  <div class="status-banner" id="status-banner" role="status" aria-live="polite" data-tone="info" hidden></div>
+
+  <section class="table-panel" aria-label="Table">
     <div class="card-row">
-      <span class="label" data-i18n="board">Board</span>
+      <span class="label field-label" data-i18n="board">Board</span>
       <div class="card-slots" id="board-slots"></div>
     </div>
     <div class="card-row">
-      <span class="label" data-i18n="hero">Hero</span>
+      <span class="label field-label" data-i18n="hero">Hero</span>
       <div class="card-slots" id="hero-slots"></div>
     </div>
     <div class="pot-row">
-      <span class="label" data-i18n="pot">Pot</span>
-      <span class="value" id="pot-value">0<span class="unit">bb</span></span>
+      <span class="label field-label" data-i18n="pot">Pot</span>
+      <span class="value unknown" id="pot-value">—</span>
     </div>
-  </div>
+  </section>
 
-  <div class="equity-panel">
+  <section class="equity-panel" aria-label="Equity">
     <div class="equity-headline">
       <div>
         <div class="win-label" data-i18n="winRate">Win Rate</div>
-        <div class="win" id="win-rate">—</div>
+        <div class="win idle" id="win-rate">—</div>
       </div>
       <div class="equity-secondary" id="tie-rate">tie —</div>
     </div>
-    <div class="equity-bar">
+    <div class="equity-bar idle" id="equity-bar" role="img" aria-label="Equity split">
       <div class="seg-win" id="seg-win" style="width:0%"></div>
       <div class="seg-tie" id="seg-tie" style="width:0%"></div>
     </div>
-  </div>
+  </section>
 
   <section class="advice-panel" id="advice-panel" hidden aria-live="polite">
     <div class="advice-header">
@@ -63,24 +72,27 @@
     </details>
   </section>
 
-  <div class="confidence-panel">
+  <section class="confidence-panel" aria-label="Recognition confidence">
     <div class="confidence-overall">
-      <span class="badge" id="confidence-badge"></span>
+      <span class="badge" id="confidence-badge" aria-hidden="true"></span>
       <span id="confidence-value">confidence —</span>
     </div>
     <div class="confidence-fields" id="confidence-fields"></div>
-  </div>
+  </section>
 
-  <div class="footer">
+  <footer class="footer">
     <span id="footer-left">frame —</span>
     <span id="footer-right">—</span>
-  </div>
-</div>
+  </footer>
+</main>
+
 <dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
   <form method="dialog">
     <div class="settings-title-row">
       <h1 id="settings-title" data-i18n="settings">Settings</h1>
-      <button class="dialog-close" id="settings-close" type="submit" aria-label="Close">×</button>
+      <button class="dialog-close control" id="settings-close" type="submit" aria-label="Close">
+        <span aria-hidden="true">×</span>
+      </button>
     </div>
     <label class="language-label" for="language-select" data-i18n="language">Language</label>
     <select id="language-select">

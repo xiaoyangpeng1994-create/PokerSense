@@ -50,6 +50,10 @@ _UI_DIR = _resolve_ui_dir()
 AnalysisFrame = RealtimeAnalysis | DesktopFrame
 AnalysisStreamFactory = Callable[[], AsyncIterator[AnalysisFrame]]
 
+# Capture sources accepted on the command line. Mirrors the backends
+# :func:`poker_engine.desktop.live.build_capture_backend` knows how to build.
+CAPTURE_SOURCES = ("adb", "capture-card")
+
 
 class _SettingsPayload(BaseModel):
     language: str
@@ -75,6 +79,33 @@ _RETRY_SECONDS = 3.0
 
 def _default_stream() -> AsyncIterator[AnalysisFrame]:
     return live_analysis_stream(DEFAULT_DEVICE_SERIAL)
+
+
+def build_stream_factory(
+    *,
+    device_serial: str = DEFAULT_DEVICE_SERIAL,
+    source: str = "adb",
+    device_index: int = 0,
+    api: str = "MSMF",
+) -> AnalysisStreamFactory:
+    """Bind a capture source into a stream factory for :func:`create_app`.
+
+    The ADB default keeps the released behaviour unchanged. ``source`` is
+    validated by :func:`poker_engine.desktop.live.build_capture_backend`, which
+    raises :class:`LiveCaptureError` for anything it cannot build -- so an
+    unknown source fails closed at startup rather than silently falling back
+    to a different capture path.
+    """
+
+    def factory() -> AsyncIterator[AnalysisFrame]:
+        return live_analysis_stream(
+            device_serial,
+            source=source,
+            device_index=device_index,
+            api=api,
+        )
+
+    return factory
 
 
 def create_app(stream_factory: AnalysisStreamFactory = _default_stream) -> FastAPI:
@@ -119,25 +150,65 @@ def run(
     host: str = "127.0.0.1",
     port: int = 8765,
     device_serial: str = DEFAULT_DEVICE_SERIAL,
+    source: str = "adb",
+    device_index: int = 0,
+    api: str = "MSMF",
 ) -> None:
-    def stream() -> AsyncIterator[DesktopFrame]:
-        return live_analysis_stream(device_serial)
+    stream = build_stream_factory(
+        device_serial=device_serial,
+        source=source,
+        device_index=device_index,
+        api=api,
+    )
 
     import uvicorn
 
     uvicorn.run(create_app(stream), host=host, port=port, log_level="warning")
 
 
-__all__ = ["create_app", "run"]
+__all__ = ["CAPTURE_SOURCES", "build_stream_factory", "create_app", "run"]
 
 
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Run the PokerSense local server")
     parser.add_argument(
         "--device-serial",
         default=DEFAULT_DEVICE_SERIAL,
         help="ADB serial from `adb devices`; auto is allowed for one device",
     )
+    parser.add_argument(
+        "--source",
+        choices=CAPTURE_SOURCES,
+        default="adb",
+        help=(
+            "capture source: 'adb' reads the LDPlayer framebuffer (default); "
+            "'capture-card' reads a UVC capture card"
+        ),
+    )
+    parser.add_argument(
+        "--device-index",
+        type=int,
+        default=0,
+        help="capture-card only: OpenCV camera index of the UVC device",
+    )
+    parser.add_argument(
+        "--api",
+        default="MSMF",
+        help=(
+            "capture-card only: OpenCV capture backend. MSMF is the default "
+            "because DirectShow yields black frames on tested UVC cards"
+        ),
+    )
     parser.add_argument("--port", type=int, default=8765)
-    args = parser.parse_args()
-    run(port=args.port, device_serial=args.device_serial)
+    args = parser.parse_args(argv)
+    run(
+        port=args.port,
+        device_serial=args.device_serial,
+        source=args.source,
+        device_index=args.device_index,
+        api=args.api,
+    )
+
+
+if __name__ == "__main__":
+    main()

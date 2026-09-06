@@ -2139,12 +2139,12 @@ def generate_contract_flows() -> list[dict[str, Any]]:
         "provider_id": "preflopr-explicit-rfi-heuristic",
         "source_version": (
             "preflopR/aed511d0451aea33a14f7e9204595fc2211f233f"
-            f":asset/1@{asset_sha}"
+            f":asset/2@{asset_sha}"
         ),
         "asset_hash": f"sha256:{asset_sha}",
     })
     provider["capability"].update({
-        "player_counts": [6, 9],
+        "player_counts": [6, 7, 8, 9],
         "stack_buckets_bb": [100],
         "action_lines": ["unopened"],
         "match_kind": "heuristic",
@@ -2184,8 +2184,61 @@ def generate_contract_flows() -> list[dict[str, Any]]:
     )
     fixtures.append(heuristic_rfi)
 
+    # 8-handed UTG is covered, but only by reading the same-named 9-handed
+    # chart, so this fixture pins the derived contract: a real hit, labelled
+    # and down-weighted, never a silent table-size fallback.
+    derived_rfi = _base_fixture(
+        "MOCK-PREFLOPR-8P-UTG-DERIVED",
+        "8-handed UTG read from the same-named 9-handed chart and disclosed",
+        8,
+    )
+    derived_state = derived_rfi["input"]["state"]
+    derived_seats = derived_state["seats"]
+    derived_hero = derived_seats[derived_state["hero_seat"]]
+    utg_seat = next(seat for seat in derived_seats if seat["position"] == "UTG")
+    derived_hero["position"], utg_seat["position"] = (
+        utg_seat["position"],
+        derived_hero["position"],
+    )
+    derived_state["legal_actions"] = [
+        {"action": "fold", "min": "0", "max": "0"},
+        {"action": "raise", "min": "2", "max": "100"},
+    ]
+    derived_state["action_line"] = "unopened"
+    derived_provider = copy.deepcopy(provider)
+    derived_rfi["input"]["providers"] = [derived_provider]
+    derived_rfi["expected"]["provider_lookups"] = [{
+        "provider_id": derived_provider["provider_id"],
+        "state": "HIT_APPROXIMATE",
+    }]
+    derived_rfi["expected"]["advice"].update({
+        "status": "READY",
+        "match_kind": "heuristic",
+        "strategy_source": derived_provider["provider_id"],
+        "strategy_version": derived_provider["source_version"],
+        "action_probabilities": {"fold": "0", "raise": "1"},
+        "confidence": "0.3",
+    })
+    derived_rfi["expected"]["assertions"].extend([
+        "derived_range_is_disclosed_in_evidence",
+        "derived_range_is_down_weighted_below_authored_advice",
+        "last_resort_9_btn_substitution_is_not_used",
+    ])
+    derived_rfi["tags"].extend([
+        "provider", "heuristic", "preflopr", "asset-backed", "derived",
+    ])
+    _set_requirements(
+        derived_rfi,
+        ["REQ-PRV-001", "REQ-RTR-001", "REQ-AUD-001", "REQ-OUT-001"],
+        ["PRV-006", "RTR-002", "ADV-003"],
+        ["T-PRV-004", "T-INT-012"],
+    )
+    fixtures.append(derived_rfi)
+
+    # 5-handed has no evidence-backed chart, so it must still refuse. 8-handed
+    # used to sit here; it moved above once derived coverage was accepted.
     for players, suffix, reason in (
-        (8, "8P-UNSUPPORTED", "unsupported_player_count"),
+        (5, "5P-UNSUPPORTED", "unsupported_player_count"),
         (9, "9P-BB", "unsupported_open_raise_position"),
     ):
         rejected = _base_fixture(

@@ -6,15 +6,20 @@ This module implements the *pixel reading* half of stage F section 9 for
 the seat fields. It takes a BGR frame (already normalized to the canvas)
 and reads, for each of the ``SLOT_COUNT`` visual slots:
 
-- ``occupancy`` -> ``OCCUPIED`` if an avatar box is present, ``EMPTY`` if
-  the slot shows a round "+" button;
+- ``occupancy`` -> ``OCCUPIED`` if an avatar picture or a readable stack
+  pill is present, ``EMPTY`` only on the positive "+" empty-button signal,
+  and ``UNKNOWN`` whenever neither side has positive evidence (a dimmed
+  avatar or an ambiguous band is never guessed);
 - ``stack``     -> the integer chip count in the dark-green stack pill;
 - ``dealer``    -> whether a circular white "D" badge sits under the slot.
 
 Design principles (mirroring the guide's failure-closed philosophy):
 
 - Every read returns a confident ``VALID`` value or ``UNKNOWN``. A slot
-  with no readable pixels is never guessed.
+  with no readable pixels is never guessed. In particular an EMPTY claim
+  requires the positive "+" cross evidence: ``map_snapshot_candidate``
+  mutates seat state on an EMPTY read, so a false EMPTY is a wrong state
+  transition, not a safe abstain.
 - Detection is threshold-driven on luminance: the white-on-green stack
   digits, the "+" empty button and the "D" badge are all bright against
   the green felt captured via the UVC card. AVATAR occupancy is decided by
@@ -38,6 +43,7 @@ from . import SLOT_COUNT
 from .schema import FieldValue, LabelStatus, Occupancy
 
 __all__ = [
+    "HERO_SLOT",
     "SLOT_LAYOUT_MULTI",
     "SLOT_LAYOUT_HEADS",
     "SLOT_LAYOUT_S002",
@@ -141,6 +147,20 @@ _WHITE_MIN = 150
 # Avatar occupancy: a picture is saturated (>80 chroma over 12% of pixels);
 # the "+" button and felt are not.
 _AVATAR_SAT = 80
+
+#: Luminance spread floor for the avatar picture. A real avatar is a dense,
+#: high-contrast picture (std well above 18); a bare dark empty-slot disc is
+#: nearly uniform. Below the floor we make NO occupancy claim (UNKNOWN):
+#: before this rule a dimmed/"away" avatar was misread as EMPTY, which is a
+#: wrong positive claim, not a fail-closed abstain.
+_AVATAR_STD_MIN = 18.0
+
+#: Hero visual slot. The hero seat has NO avatar disc: the band above its
+#: pill holds the hero cards and the white hand-type label (e.g. "对子"),
+#: whose text false-fires the "+" cross detector (measured on the private
+#: corpus: 54 of 62 occupancy misses were hero slots read EMPTY while
+#: occupied). Hero occupancy therefore never uses the avatar/cross path.
+HERO_SLOT = 0
 _AVATAR_FRAC = 0.12
 
 
@@ -384,27 +404,13 @@ def _has_white_cross(band: np.ndarray, *, floor: int = 150) -> bool:
     return False
 
 
-def _is_occupied(band: np.ndarray) -> bool:
-    """An occupied slot shows an avatar; an empty slot shows a "+" button.
-
-    Note the green felt is itself highly saturated, so occupancy cannot be
-    decided by chroma alone. Instead we treat a white cross (the "+"), or a
-    bright picture with no cross, as occupied; a bare dark disc means empty.
-
-    We invert the logic: an empty slot is *detected* by its white cross;
-    anything without a cross that is not flat felt counts as occupied.
-    """
+def _avatar_picture_std(band: np.ndarray) -> float:
+    """Luminance spread of an avatar band (0.0 for an empty band)."""
     import cv2
 
     if band is None or band.size == 0 or min(band.shape[:2]) < 3:
-        return False
-    # Empty slot -> white cross present.
-    if _has_white_cross(band):
-        return False
-    # A filled slot has a dense, high-contrast picture (the avatar) vs. the
-    # near-uniform dark disc of an empty slot. Measure luminance variance.
-    g = cv2.cvtColor(band, cv2.COLOR_BGR2GRAY)
-    return bool(float(g.std()) > 18.0)
+        return 0.0
+    return float(cv2.cvtColor(band, cv2.COLOR_BGR2GRAY).std())
 
 
 def build_digit_templates(
@@ -460,17 +466,32 @@ def read_slot(
             if digits.isdigit():
                 stack = FieldValue.valid(int(digits))
 
-    # Occupancy: a readable stack implies occupied. Otherwise fall back to
-    # the empty-slot signal (a dark disc with a white "+" cross).
-    if stack.status is LabelStatus.VALID:
-        occupied = True
+    # Occupancy, failure-closed:
+    # - a readable stack pill is positive OCCUPIED evidence (only a seated
+    #   player carries a chip count);
+    # - EMPTY requires the positive "+" cross signal — never inferred from
+    #   the mere absence of a picture (a dimmed "away" avatar is not an
+    #   empty seat);
+    # - the hero slot has no avatar disc at all (its band holds the hero
+    #   cards and the white hand-type label, which false-fires the cross
+    #   detector), so hero occupancy comes from the stack pill only;
+    # - anything ambiguous stays UNKNOWN.
+    if slot_id == HERO_SLOT:
+        if stack.status is LabelStatus.VALID:
+            occupancy = FieldValue.valid(Occupancy.OCCUPIED)
+        else:
+            occupancy = FieldValue.unknown()
+    elif stack.status is LabelStatus.VALID:
+        occupancy = FieldValue.valid(Occupancy.OCCUPIED)
+    elif avatar.size and _has_white_cross(avatar):
+        occupancy = FieldValue.valid(Occupancy.EMPTY)
     elif avatar.size:
-        # A bare dark disc means empty; any picture (avatar) means occupied.
-        occupied = _is_occupied(avatar)
+        if _avatar_picture_std(avatar) > _AVATAR_STD_MIN:
+            occupancy = FieldValue.valid(Occupancy.OCCUPIED)
+        else:
+            occupancy = FieldValue.unknown()
     else:
-        occupied = False
-
-    occupancy = FieldValue.valid(Occupancy.OCCUPIED if occupied else Occupancy.EMPTY)
+        occupancy = FieldValue.unknown()
 
     # Dealer: the badge hugs the pill (to the right for edge seats, below
     # for top/bottom seats), so we only extend right and down — never up,

@@ -172,6 +172,7 @@ class VisionEngine:
         dealer_recognizer=None,
         empty_slot_recognizer=None,
         actor_recognizer=None,
+        disable_hero_dynamic_fallback: bool = False,
     ) -> None:
         self._board_layout = board_layout
         self._hero_layout = hero_layout
@@ -187,6 +188,7 @@ class VisionEngine:
         self._calibrators = dict(calibrators)
         self._manifest = manifest
         self._require_action = require_action
+        self._no_hero_dynamic = disable_hero_dynamic_fallback
 
         # Validate the explicit scalar bet_size semantic declaration (plan §10).
         if bet_size_semantics is not None:
@@ -425,7 +427,11 @@ class VisionEngine:
 
         # Fixed coordinates are preferred when valid. Fall back only when the
         # table has moved because Chrome is fullscreen / its toolbar changed.
-        if status is not ValidationStatus.VALID:
+        # A stateful recognizer (temporal fusion) must NOT run the dynamic
+        # fallback: its per-slot buffer would receive two different card crops
+        # for the same slot in one frame, each resetting the other. Platforms
+        # with a fixed normalized canvas disable the fallback.
+        if status is not ValidationStatus.VALID and not self._no_hero_dynamic:
             dynamic_slots = _locate_bottom_hero_cards(frame.image)
             if len(dynamic_slots) == len(self._hero_layout.slots):
                 dynamic_cards, dynamic_raw = self._recognize_hero_slots(dynamic_slots)
@@ -447,8 +453,12 @@ class VisionEngine:
     def _recognize_hero_slots(self, slots):
         cards: list[Card] = []
         slot_scores: list[float] = []
-        for sub_img in slots:
-            rec = self._card.recognize(sub_img)
+        for i, sub_img in enumerate(slots):
+            # ``card_model`` doubles as the slot identity for the (optional)
+            # temporal-fusion card recognizer; single-frame recognizers ignore
+            # it. hero slots use ("hero", i) so they never share a buffer with
+            # the board's slots.
+            rec = self._card.recognize(sub_img, ("hero", i))
             # include rank AND suit: per-card raw feature is min(rank, suit).
             per_card = min(
                 (
@@ -629,7 +639,9 @@ class VisionEngine:
         out: list[tuple[int, Card | None, float]] = []
         for i, sub in enumerate(self._board_layout.slots):
             sub_img = _crop_slot(crop, sub)
-            rec = self._card.recognize(sub_img)
+            # slot identity ("board", i) feeds the temporal-fusion recognizer;
+            # single-frame recognizers ignore it.
+            rec = self._card.recognize(sub_img, ("board", i))
             card = rec.value[0] if rec.value is not None else None
             out.append((i, card, rec.raw_score))
         return out

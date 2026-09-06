@@ -153,8 +153,10 @@ exploitability。
 ### 4.3 已建立的 6/9 人 RFI Heuristic 资产审计
 
 `preflopr-explicit-rfi-ranges.json` 由固定的 `bmorrow10/preflopR` commit
-`aed511d0451aea33a14f7e9204595fc2211f233f` 生成。它只复制上游源码明确写出的 6/9 人
-unopened 牌表；3–5/7–8 人 fallback 和 BB→BTN last-resort 均被排除。生成/校验命令：
+`aed511d0451aea33a14f7e9204595fc2211f233f` 生成。资产 v2 复制上游源码明确写出的
+6/9 人 unopened 牌表；7/8 人通过解析上游 `get_positions()` 的位置表，逐位置映射到
+**同名** 9 人键（`7_UTG → 9_UTG`），BB 仍排除；上游的 `9_BTN` last-resort 兜底被显式
+禁用并由加载时校验钉死（指向非同名键会直接 `ValueError`）。生成/校验命令：
 
 ```bash
 python tools/import_preflopr_open_ranges.py \
@@ -163,9 +165,9 @@ python tools/import_preflopr_open_ranges.py \
   --revision aed511d0451aea33a14f7e9204595fc2211f233f --check
 ```
 
-`test_heuristic_provider.py` 遍历 13 个显式位置牌表的全部 169 手牌类别，并验证能力边界、
-来源/hash/限制、资产损坏、无 size/EV、Exact 优先和所有禁止 fallback。该证据只支持
-`PRV-006` 的 heuristic fallback，不支持 `PRV-003` 的 3–9 人精确策略。
+`test_heuristic_provider.py` 遍历 13 个显式位置牌表 + 13 个派生位置牌表的全部 169 手牌类别，并验证能力边界、来源/hash/限制、资产损坏、无 size/EV、Exact 优先、所有禁止 fallback，以及 derived 指向必须同名。7/8 人派生建议 confidence=0.3，evidence 标注
+`derived_range:{7|8}_X<-9_X:{hand}`，assumptions 增补「tighter than true table size」声明。
+该证据只支持 `PRV-006` 的 heuristic fallback，不支持 `PRV-003` 的 3–9 人精确策略。
 
 ### 4.4 当前可执行的策略核心覆盖
 

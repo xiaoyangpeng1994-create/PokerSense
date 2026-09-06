@@ -1,0 +1,46 @@
+{
+ "format": "mlp-v1",
+ "norm": [
+  40,
+  40
+ ],
+ "glyph_h": 26,
+ "hidden_activation": "relu",
+ "heads": {
+  "rank": {
+   "classes": [
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "A",
+    "J",
+    "K",
+    "Q",
+    "T"
+   ],
+   "hidden": 32,
+   "out_activation": "softmax"
+  },
+  "suit_red": {
+   "classes": [
+    "D",
+    "H"
+   ],
+   "hidden": 24,
+   "out_activation": "logistic"
+  },
+  "suit_black": {
+   "classes": [
+    "C",
+    "S"
+   ],
+   "hidden": 24,
+   "out_activation": "logistic"
+  }
+ }
+}

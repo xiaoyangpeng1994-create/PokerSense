@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "platform_id": "wepoker_android_capture_card",
+  "layout_id": "phone_samsung_galaxy_s25_ultra__card_ugreen__uvc_1920x1080_30__canvas_498x1080__v1",
+  "version": "wepoker-android-capture-card-seat-map-v1",
+  "stack_slot_to_seat": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+  },
+  "action_slot_to_seat": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+  },
+  "actor_slot_to_seat": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+  },
+  "dealer_slot_to_seat": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+  },
+  "occupancy_slot_to_seat": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+  },
+  "actor_observation_is_current": true
+}

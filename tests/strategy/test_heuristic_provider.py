@@ -94,7 +94,9 @@ def _rfi_context(players: int, position: Position, hand: str = "AKo"):
 def test_builtin_provider_declares_only_reviewed_scope_and_provenance():
     provider = PreflopRfiHeuristicProvider.from_builtin()
 
-    assert provider.capability.player_counts == frozenset({6, 9})
+    # 7/8-handed keys are derived, not authored upstream: they reach the
+    # router through derived_ranges rather than through player_counts alone.
+    assert provider.capability.player_counts == frozenset({6, 7, 8, 9})
     assert provider.capability.streets == frozenset({Street.PREFLOP})
     assert provider.capability.stack_buckets_bb == (Decimal("100"),)
     assert provider.capability.action_lines == frozenset({"unopened"})
@@ -134,8 +136,108 @@ def test_candidate_discloses_heuristic_limits_without_inventing_size_or_ev():
     assert any(item == "explicit_range:9_UTG:AA" for item in value.evidence)
 
 
-@pytest.mark.parametrize("players", (2, 3, 4, 5, 7, 8))
+# 7/8-handed tables: coverage exists, rebuilt from the same-named 9-handed key.
+DERIVED_POSITIONS = {
+    "7_UTG": (7, Position.UTG),
+    "7_MP": (7, Position.LJ),
+    "7_HJ": (7, Position.HJ),
+    "7_CO": (7, Position.CO),
+    "7_BTN": (7, Position.BTN),
+    "7_SB": (7, Position.SB),
+    "8_UTG": (8, Position.UTG),
+    "8_UTG+1": (8, Position.UTG1),
+    "8_MP": (8, Position.LJ),
+    "8_HJ": (8, Position.HJ),
+    "8_CO": (8, Position.CO),
+    "8_BTN": (8, Position.BTN),
+    "8_SB": (8, Position.SB),
+}
+
+
+@pytest.mark.parametrize("range_key", sorted(DERIVED_POSITIONS))
+def test_every_169_class_of_a_derived_key_matches_its_source(range_key):
+    """A derived key must reproduce its 9-handed source exactly, class by class.
+
+    This pins the substitution itself. If someone repoints a derived key at a
+    different chart -- reintroducing upstream's last-resort trick -- these
+    169 comparisons move.
+    """
+    provider = PreflopRfiHeuristicProvider.from_builtin()
+    payload = _payload()
+    source_key = payload["derived_ranges"][range_key]
+    expected_raise = frozenset(payload["ranges"][source_key])
+    players, position = DERIVED_POSITIONS[range_key]
+
+    for hand in _all_classes():
+        result = provider.query(_rfi_context(players, position, hand))
+        assert result.state is LookupState.HIT_APPROXIMATE
+        expected = Decimal("1") if hand in expected_raise else Decimal("0")
+        assert result.candidate.action_probabilities[ActionType.RAISE] == expected
+        assert result.candidate.action_probabilities[ActionType.FOLD] == 1 - expected
+
+
+@pytest.mark.parametrize("range_key", sorted(DERIVED_POSITIONS))
+def test_derived_candidate_is_labelled_and_down_weighted(range_key):
+    """Derived advice must be distinguishable from authored advice."""
+    provider = PreflopRfiHeuristicProvider.from_builtin()
+    payload = _payload()
+    source_key = payload["derived_ranges"][range_key]
+    players, position = DERIVED_POSITIONS[range_key]
+
+    value = provider.query(_rfi_context(players, position, "AA")).candidate
+
+    assert value is not None
+    assert value.confidence == pytest.approx(0.3)
+    assert f"derived_range:{range_key}<-{source_key}:AA" in value.evidence
+    assert "7_and_8_handed_derived_from_same_named_9_handed_ranges" in (
+        value.assumptions
+    )
+    assert "derived_range_is_tighter_than_true_table_size" in value.assumptions
+
+
+def test_authored_advice_keeps_full_confidence_and_no_derivation_label():
+    """The 6/9-handed path must be unchanged by the 7/8-handed addition."""
+    provider = PreflopRfiHeuristicProvider.from_builtin()
+
+    value = provider.query(_rfi_context(6, Position.UTG, "AA")).candidate
+
+    assert value is not None
+    assert value.confidence == 0.4
+    assert "explicit_range:6_UTG:AA" in value.evidence
+    assert not any(item.startswith("derived_range:") for item in value.evidence)
+
+
+def test_derived_range_can_only_point_at_the_same_named_9_handed_key():
+    """Repointing a derived key must abort loading instead of widening quietly.
+
+    Upstream's fallback ends at ``9_BTN`` -- the widest chart in the asset.
+    Accepting that substitution would render, say, an 8-handed UTG open as a
+    button open, so the loader refuses any target but the same-named key.
+    """
+    payload = _payload()
+    payload["derived_ranges"]["7_UTG"] = "9_BTN"
+
+    with pytest.raises(ValueError, match="must read 9_UTG"):
+        PreflopRfiHeuristicProvider(payload, asset_sha256="0" * 64)
+
+
+def test_derived_ranges_are_published_for_inspection():
+    provider = PreflopRfiHeuristicProvider.from_builtin()
+
+    assert provider.derived_ranges["7_UTG"] == "9_UTG"
+    assert provider.derived_ranges["8_UTG+1"] == "9_UTG+1"
+    # Authored keys are never listed as derived.
+    assert "6_UTG" not in provider.derived_ranges
+
+
+@pytest.mark.parametrize("players", (2, 3, 4, 5))
 def test_synthetic_or_unsupported_player_counts_are_never_claimed(players):
+    """3-5 handed still has no evidence-backed chart, so it stays closed.
+
+    7/8 handed moved to derived coverage (see above); 2-5 handed has no
+    same-named 9-handed key for every position and is not a table size the
+    owner plays, so it must still refuse rather than interpolate.
+    """
     provider = PreflopRfiHeuristicProvider.from_builtin()
     result = provider.query(context(players))
 

@@ -7,7 +7,7 @@
 
 ## 模块
 
-- `perceptual/capture/`：`Frame`（不可变帧）、`CaptureTarget`、`CaptureService`（抽象）、`AdbBackend`（生产）、`FakeBackend`（CI）。`MssBackend` / `QuartzBackend` 作为通用桌面捕获和历史 H5 兼容实现保留，但不是默认链路。`CaptureCardBackend` 为 USB 采集卡（手机 → UVC → PC）的**实时采集后端**（MSMF/DirectShow + YUY2 + 断流/黑屏检测），配合 `normalization.py` 完成阶段 C 的画面归一化；该后端已实现并单测，但采集卡平台的识别标定（ROI/阈值/模板）尚未完成，见 `configs/vision/wepoker_android_capture_card/README.md`。
+- `perceptual/capture/`：`Frame`（不可变帧）、`CaptureTarget`、`CaptureService`（抽象）、`AdbBackend`（生产）、`FakeBackend`（CI）。`MssBackend` / `QuartzBackend` 作为通用桌面捕获和历史 H5 兼容实现保留，但不是默认链路。`CaptureCardBackend` 为 USB 采集卡（手机 → UVC → PC）的**实时采集后端**（MSMF/DirectShow + YUY2 + 断流/黑屏检测），配合 `normalization.py` 完成阶段 C 的画面归一化。采集卡平台现状：几何（20 个实测 ROI + hero/board 槽位布局）与座位字段（occupancy 100% 精度、dealer 100%、stack 100% 精度）已标定，**座位映射已落地** `configs/platform/wepoker_android_capture_card__*_seat_mapping.json`（hero=seat 0，升序 slot=行动方向，证据见 AGENTS.md 2026-09-04 条目）；牌面花色已由 gray-fused-mlp-v3 时序融合管线解决（calibration 62/62、锁定 validation 116/116、零假 VALID，`card_fused` 已落地 `calibration.json`），动作徽章识别器已实现（action_reader.py，76/76 零错判）但尚未接入生产 profile。
 - `perceptual/vision/`：`ROIKind` / `ROI` / `TableMap`（含 JSON 序列化）+ `roi.py`（确定性裁剪 + layout 校验）。
 
 ## Frame 像素不可变（bytes-backed）

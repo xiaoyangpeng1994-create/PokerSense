@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
-"""Create the reviewed 6/9-handed PreflopR RFI asset.
+"""Create the reviewed 6/7/8/9-handed PreflopR RFI asset.
 
-This importer intentionally excludes PreflopR's synthetic 3-5/7-8 table-size
-fallbacks and its last-resort BB mapping.  The resulting PokerSense asset only
-contains range keys that are explicitly authored in the upstream ``RANGES``
-list, and every imported hand can be compared with the pinned source file.
+Upstream ``preflopR`` authors explicit range keys for 2, 6 and 9 players only.
+For every other table size its ``get_range_key()`` walks a fallback chain
+(``<n>_<pos>`` -> ``9_<pos>`` -> ``6_<pos>`` -> ``9_BTN``), and that last
+resort silently renders a BB open-raise as the chart's widest BTN range.
+PokerSense therefore refuses to replay the chain.
+
+What this importer does instead:
+
+* imports only keys explicitly authored upstream (``6_*`` and ``9_*``);
+* rebuilds 7- and 8-handed coverage from upstream's own ``get_positions()``
+  table, mapping each position to the **same-named** 9-handed key and nothing
+  else -- the last-resort ``9_BTN`` step stays disabled;
+* records every derived key in ``derived_ranges`` so the substitution is
+  auditable at runtime instead of being hidden inside a lookup.
+
+Positions come from parsing the pinned upstream source, never from a
+hand-maintained list, so a change in upstream's position map fails ``--check``.
 """
 
 from __future__ import annotations
@@ -13,6 +26,7 @@ import argparse
 import hashlib
 import json
 import re
+from collections.abc import Mapping
 from pathlib import Path
 
 
@@ -96,6 +110,64 @@ def _evaluate_call(value: str) -> list[str]:
     return ["".join(ranks) + suffix]
 
 
+def parse_upstream_positions(source: str) -> dict[int, tuple[str, ...]]:
+    """Read upstream's ``get_positions()`` table straight from the source.
+
+    Upstream defines the legal positions per table size here, so deriving 7/8
+    handed coverage must start from this table rather than a local guess.
+    """
+    marker = "get_positions <- function"
+    marker_index = source.find(marker)
+    if marker_index < 0:
+        raise ValueError("upstream get_positions() not found")
+    body, _ = _balanced_content(source, source.index("{", marker_index))
+    positions: dict[int, tuple[str, ...]] = {}
+    pattern = re.compile(r'"(\d)"\s*=\s*c\(([^)]*)\)', re.S)
+    for match in pattern.finditer(body):
+        names = re.findall(r'"([^"]+)"', match.group(2))
+        if not names:
+            raise ValueError(f"empty upstream position list: {match.group(1)}")
+        positions[int(match.group(1))] = tuple(names)
+    if not positions:
+        raise ValueError("upstream position table is empty")
+    return positions
+
+
+# Table sizes rebuilt from the same-named 9-handed key. 3-5 handed stays out:
+# upstream maps those through the same fallback chain, and the owner's games
+# are 6-8 handed, so there is no evidence-backed reason to widen the surface.
+DERIVED_PLAYER_COUNTS = (7, 8)
+
+
+def derive_same_name_ranges(
+    ranges: Mapping[str, list[str]],
+    positions: Mapping[int, tuple[str, ...]],
+) -> dict[str, str]:
+    """Map each 7/8-handed position onto the same-named 9-handed range key.
+
+    Only an exact same-name key is accepted. A position whose 9-handed key is
+    missing is a hard error instead of a silent fall back to ``6_*`` or to the
+    widest chart (``9_BTN``) -- replaying either would reintroduce exactly the
+    behaviour PokerSense's review rejected.
+    """
+    derived: dict[str, str] = {}
+    for players in DERIVED_PLAYER_COUNTS:
+        names = positions.get(players)
+        if names is None:
+            raise ValueError(f"upstream has no position table for {players} players")
+        for name in names:
+            if name == "BB":
+                continue  # BB never faces an unopened RFI decision.
+            source_key = f"9_{name}"
+            if source_key not in ranges:
+                raise ValueError(
+                    f"no same-named 9-handed range for {players}_{name}; "
+                    "refusing to fall back to another position"
+                )
+            derived[f"{players}_{name}"] = source_key
+    return derived
+
+
 def parse_explicit_ranges(source: str) -> dict[str, list[str]]:
     marker = "RANGES <- list("
     marker_index = source.find(marker)
@@ -130,18 +202,22 @@ def parse_explicit_ranges(source: str) -> dict[str, list[str]]:
 
 def build_asset(source_path: Path, revision: str) -> dict[str, object]:
     source_bytes = source_path.read_bytes()
-    ranges = parse_explicit_ranges(source_bytes.decode("utf-8"))
+    source_text = source_bytes.decode("utf-8")
+    ranges = parse_explicit_ranges(source_text)
+    derived = derive_same_name_ranges(
+        ranges, parse_upstream_positions(source_text)
+    )
     return {
         "schema_version": 1,
         "asset_id": "preflopr-explicit-rfi-ranges",
-        "asset_version": "1",
+        "asset_version": "2",
         "source_url": SOURCE_URL,
         "source_revision": revision,
         "source_file": source_path.name,
         "source_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "license": "MIT",
         "scope": {
-            "player_counts": [6, 9],
+            "player_counts": [6, 7, 8, 9],
             "street": "preflop",
             "action_line": "unopened",
             "stack_bb": "100",
@@ -153,9 +229,12 @@ def build_asset(source_path: Path, revision: str) -> dict[str, object]:
             "binary_raise_or_fold_frequency_only",
             "no_raise_size_or_ev",
             "bb_has_no_open_raise_decision",
-            "upstream_3_to_5_and_7_to_8_fallbacks_excluded",
+            "upstream_2_3_4_5_handed_ranges_excluded",
+            "upstream_last_resort_9_btn_fallback_disabled",
+            "7_and_8_handed_derived_from_same_named_9_handed_ranges",
         ],
         "ranges": ranges,
+        "derived_ranges": derived,
     }
 
 

@@ -9,6 +9,10 @@ const TRANSLATIONS = {
   en: {
     board: "Board", hero: "Hero", pot: "Pot", winRate: "Win Rate", settings: "Settings",
     language: "Language", languageAuto: "System default", languageHint: "Changes are saved automatically.",
+    bannerConnecting: "Connecting to the engine…",
+    bannerWaiting: "Connected — waiting for the first table frame…",
+    bannerDisconnected: "Engine disconnected. Retrying…",
+    bannerError: "Cannot reach the engine.",
     close: "Close", notCalibrated: "not calibrated", confidence: "confidence", tie: "tie",
     frame: "frame", noData: "no data", live: "PokerSense · live", connecting: "PokerSense · connecting",
     cannotReach: "PokerSense · cannot reach engine", waiting: "PokerSense · waiting for table",
@@ -24,6 +28,10 @@ const TRANSLATIONS = {
   zh: {
     board: "公共牌", hero: "底牌", pot: "底池", winRate: "胜率", settings: "设置",
     language: "语言", languageAuto: "跟随系统", languageHint: "更改会自动保存。",
+    bannerConnecting: "正在连接引擎…",
+    bannerWaiting: "已连接，等待首帧牌桌数据…",
+    bannerDisconnected: "引擎已断开，正在重试…",
+    bannerError: "无法连接引擎。",
     close: "关闭", notCalibrated: "尚未标定", confidence: "置信度", tie: "平局",
     frame: "帧", noData: "暂无数据", live: "PokerSense · 已连接", connecting: "PokerSense · 正在连接",
     cannotReach: "PokerSense · 无法连接引擎", waiting: "PokerSense · 等待牌桌",
@@ -39,6 +47,7 @@ const TRANSLATIONS = {
 };
 
 const els = {
+  app: document.getElementById("app"), statusBanner: document.getElementById("status-banner"),
   connDot: document.getElementById("conn-dot"), connLabel: document.getElementById("conn-label"),
   streetBadge: document.getElementById("street-badge"), boardSlots: document.getElementById("board-slots"),
   heroSlots: document.getElementById("hero-slots"), potValue: document.getElementById("pot-value"),
@@ -78,6 +87,58 @@ function activeLanguage() {
 }
 
 function t(key) { return TRANSLATIONS[activeLanguage()][key] || key; }
+
+/* ---------- presentation helpers ----------
+   These only change how existing data is displayed. They never interpret,
+   derive or repair a value; the advice contract stays owned by the backend. */
+
+// The root phase drives loading and empty styling in CSS. It is derived from
+// connection state only, never from recognised values.
+function setPhase(phase) {
+  els.app.dataset.phase = phase;
+}
+
+function phaseFor(message, tone) {
+  if (tone === "error") return "error";
+  if (message === "live") return "live";
+  if (message === "waiting") return "waiting";
+  if (message === "disconnected") return "disconnected";
+  return "connecting";
+}
+
+// An empty value is rendered as a styled placeholder so that "no data" can
+// never be misread as a measured number.
+function setEmptyValue(el, text) {
+  el.replaceChildren();
+  const placeholder = document.createElement("span");
+  placeholder.className = "empty-value";
+  placeholder.textContent = text;
+  el.appendChild(placeholder);
+}
+
+function setStreetBadge(value) {
+  const known = Boolean(value);
+  els.streetBadge.textContent = known ? value : "—";
+  els.streetBadge.dataset.empty = known ? "false" : "true";
+}
+
+// The banner repeats the connection state in words: the brand dot alone is not
+// accessible and is easy to miss when the panel is idle.
+function updateStatusBanner(message, raw) {
+  const BANNERS = {
+    connecting: { key: "bannerConnecting", tone: "info" },
+    waiting: { key: "bannerWaiting", tone: "info" },
+    disconnected: { key: "bannerDisconnected", tone: "warn" },
+  };
+  const entry = BANNERS[message];
+  if (!entry && !raw) {
+    els.statusBanner.hidden = true;
+    return;
+  }
+  els.statusBanner.hidden = false;
+  els.statusBanner.dataset.tone = raw ? "error" : entry.tone;
+  els.statusBanner.textContent = raw ? message : t(entry.key);
+}
 
 function applyLanguage() {
   document.documentElement.lang = activeLanguage() === "zh" ? "zh-CN" : "en";
@@ -220,7 +281,7 @@ function render(analysis) {
   lastAnalysis = analysis;
   showStatus("live", "live");
   const state = analysis.state;
-  els.streetBadge.textContent = statusOf(analysis, "street") === "valid" ? state.street : "—";
+  setStreetBadge(statusOf(analysis, "street") === "valid" ? state.street : null);
   const boardKnown = statusOf(analysis, "board_cards") === "valid";
   const heroKnown = statusOf(analysis, "hero_cards") === "valid" && state.hero_cards.length === 2;
   const boardCards = boardKnown ? state.board_cards : [];
@@ -234,12 +295,12 @@ function render(analysis) {
     els.potValue.append(document.createTextNode(state.pot));
     const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "bb";
     els.potValue.append(unit);
-  } else els.potValue.textContent = t("notCalibrated");
+  } else setEmptyValue(els.potValue, t("notCalibrated"));
   const winPct = analysis.equity.win_rate * 100;
   const tiePct = analysis.equity.tie_rate * 100;
   if (!heroKnown) {
     els.equityBar.classList.add("idle");
-    els.winRate.textContent = "—";
+    setEmptyValue(els.winRate, "—");
     els.winRate.className = "win idle";
     els.tieRate.textContent = `${t("tie")} —`;
     els.segWin.style.width = "0%";
@@ -262,18 +323,28 @@ function render(analysis) {
 
 function renderEmpty() {
   renderCardSlots(els.boardSlots, [], 5); renderCardSlots(els.heroSlots, [], 2);
-  els.streetBadge.textContent = "—"; els.potValue.textContent = "—"; els.potValue.classList.add("unknown");
-  els.winRate.textContent = "—"; els.winRate.className = "win idle"; els.tieRate.textContent = `${t("tie")} —`;
+  setStreetBadge(null);
+  setEmptyValue(els.potValue, t("noData")); els.potValue.classList.add("unknown");
+  setEmptyValue(els.winRate, "—"); els.winRate.className = "win idle";
+  els.tieRate.textContent = `${t("tie")} —`;
   els.segWin.style.width = "0%"; els.segTie.style.width = "0%"; els.equityBar.classList.add("idle");
-  els.confidenceValue.textContent = `${t("confidence")} —`; els.confidenceBadge.style.background = "var(--text-faint)";
-  renderFieldStatuses({}); els.footerLeft.textContent = `${t("frame")} —`; els.footerRight.textContent = "—";
+  setEmptyValue(els.confidenceValue, `${t("confidence")} —`);
+  els.confidenceBadge.style.background = "var(--text-faint)";
+  renderFieldStatuses({});
+  setEmptyValue(els.footerLeft, `${t("frame")} —`);
+  setEmptyValue(els.footerRight, "—");
   renderAdvice(null);
 }
 
 function showStatus(message, tone, raw = false) {
   status = { message, tone, raw };
-  els.connDot.className = "dot " + (tone || "");
+  // Nothing has been confirmed yet, so the dot pulses instead of claiming a
+  // steady state.
+  const dotTone = tone || (message === "live" ? "" : "pending");
+  els.connDot.className = ("dot " + dotTone).trim();
   els.connLabel.textContent = raw ? message : t(message);
+  setPhase(raw ? "error" : phaseFor(message, tone));
+  updateStatusBanner(message, raw);
 }
 
 function connect() {

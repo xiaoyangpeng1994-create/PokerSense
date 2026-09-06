@@ -3,14 +3,14 @@
     "advice_statuses": {
       "ABSTAIN": 91,
       "PARTIAL": 10,
-      "READY": 192,
+      "READY": 193,
       "STALE": 5
     },
     "dealt_player_counts": {
       "2": 111,
       "3": 48,
       "4": 16,
-      "5": 13,
+      "5": 14,
       "6": 64,
       "7": 13,
       "8": 15,
@@ -18,7 +18,7 @@
     },
     "fixture_types": {
       "benchmark": 8,
-      "synthetic": 290
+      "synthetic": 291
     },
     "preflop_action_lines": [
       "unopened",
@@ -63,15 +63,15 @@
     ],
     "streets": {
       "flop": 18,
-      "preflop": 253,
+      "preflop": 254,
       "river": 18,
       "turn": 9
     }
   },
-  "fixture_count": 298,
+  "fixture_count": 299,
   "fixture_file": "fixtures.jsonl",
   "fixture_schema_version": "1.0.0",
-  "fixture_sha256": "351859eb9d4f75ab4e97a9290cb6bda08c3d144dcdc1588641785f5e9fce16ca",
+  "fixture_sha256": "f9b36a24450674278f41ed4ddddbce8f88be8db66f68328e5324489eadbe364b",
   "generated_at": "2026-08-22T00:00:00Z",
   "generator": "tools/generate_strategy_mock_fixtures.py",
   "not_release_acceptance_evidence": [

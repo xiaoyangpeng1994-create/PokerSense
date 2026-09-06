@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "asset_id": "preflopr-explicit-rfi-ranges",
-  "asset_version": "1",
+  "asset_version": "2",
   "source_url": "https://github.com/bmorrow10/preflopR",
   "source_revision": "aed511d0451aea33a14f7e9204595fc2211f233f",
   "source_file": "preflopR.r",
@@ -10,6 +10,8 @@
   "scope": {
     "player_counts": [
       6,
+      7,
+      8,
       9
     ],
     "street": "preflop",
@@ -23,7 +25,9 @@
     "binary_raise_or_fold_frequency_only",
     "no_raise_size_or_ev",
     "bb_has_no_open_raise_decision",
-    "upstream_3_to_5_and_7_to_8_fallbacks_excluded"
+    "upstream_2_3_4_5_handed_ranges_excluded",
+    "upstream_last_resort_9_btn_fallback_disabled",
+    "7_and_8_handed_derived_from_same_named_9_handed_ranges"
   ],
   "ranges": {
     "9_UTG": [
@@ -743,5 +747,20 @@
       "65s",
       "54s"
     ]
+  },
+  "derived_ranges": {
+    "7_BTN": "9_BTN",
+    "7_CO": "9_CO",
+    "7_HJ": "9_HJ",
+    "7_MP": "9_MP",
+    "7_UTG": "9_UTG",
+    "7_SB": "9_SB",
+    "8_BTN": "9_BTN",
+    "8_CO": "9_CO",
+    "8_HJ": "9_HJ",
+    "8_MP": "9_MP",
+    "8_UTG+1": "9_UTG+1",
+    "8_UTG": "9_UTG",
+    "8_SB": "9_SB"
   }
 }
