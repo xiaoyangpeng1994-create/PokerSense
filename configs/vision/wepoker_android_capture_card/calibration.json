@@ -1,4 +1,18 @@
 {
+  "actor": {
+    "correct": 87,
+    "readable_score_floor": 0.7721247692294231,
+    "samples": 239,
+    "source": "AndroidHeroTurnRecognizer (blue decision circles) on capture_card_calibration_20260903; 87 hero-turn positives vs 152 negatives, zero false VALID; 32 auto-annotation misses fixed pixel-audit-r6-2026-09-06; bimodal: buttons visible>=0.829 or absent=0.0; floor=min-1ulp (inclusive abstain boundary)",
+    "unreadable_score_ceiling": 0.0
+  },
+  "amount": {
+    "correct": 20,
+    "readable_score_floor": 0.893623,
+    "samples": 35,
+    "source": "field_calibration.py on capture_card_calibration_20260903 (eval hold-out); zero false VALID, Wilson 95% lower bound 0.433643",
+    "unreadable_score_ceiling": 0.779256
+  },
   "card": {
     "correct": 0,
     "readable_score_floor": 1.0,
@@ -26,13 +40,6 @@
   "measured_at": "2026-09-04",
   "note": "Card recognition calibrated 2026-09-04 by the gray-fused-mlp-v3 pipeline (see AGENTS.md progress log). Earlier verdict that suits were physically unresolvable at 53x78 was reversed: the root causes were the HSV-hue colour router (undefined for black ink), letterbox jitter in temporal fusion, and ~3% suit mislabels \u2014 all fixed in software. The seat fields (occupancy/dealer/stack) and seat mapping were calibrated earlier (see the same progress log). Action-badge recognition remains UNCALIBRATED: action fields must keep reading UNKNOWN.",
   "platform_id": "wepoker_android_capture_card",
-  "pot": {
-    "correct": 20,
-    "readable_score_floor": 0.893623,
-    "samples": 35,
-    "source": "field_calibration.py on capture_card_calibration_20260903 (eval hold-out); zero false VALID, Wilson 95% lower bound 0.433643",
-    "unreadable_score_ceiling": 0.779256
-  },
   "schema_version": 1,
   "stack": {
     "correct": 34,
@@ -42,5 +49,12 @@
     "unreadable_score_ceiling": 0.79877
   },
   "status": "calibrated",
+  "street": {
+    "correct": 97,
+    "readable_score_floor": 0.4072653312346282,
+    "samples": 97,
+    "source": "occupancy-only derive on capture_card_calibration_20260903 (97 street-VALID stable frames, train+eval; zero false VALID; 3 dealing-transient frames relabeled CONFLICT pixel-audit-r4/r5-2026-09-06; slot thresholds card_min_presence=0.35/empty_min_evidence=0.35 measured on 505 slots, margins 0.264<->0.436; production identity cross-check via card_fused demotes transient backs to CONFLICT; floor=min-1ulp (inclusive abstain boundary)",
+    "unreadable_score_ceiling": 0.0
+  },
   "template_source": "wepoker"
 }

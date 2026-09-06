@@ -425,9 +425,19 @@ def load_calibration(
                 pass
 
     board_layout_path = vision_dir / "board_slot_layout.json"
+    # 阈值默认保持 ADB 标定值；布局 JSON 可选携带平台实测阈值
+    # （采集卡绿呢偏亮，empty 阈值需按测量下调，见
+    #  docs/DECISION-2026-09-06-pot-stack0-geometry.zh-CN.md）
+    board_card_min_presence = 0.50
+    board_empty_min_evidence = 0.55
     if board_layout_path.is_file():
-        board_layout = board_layout_from_dict(
-            json.loads(board_layout_path.read_text())
+        board_layout_dict = json.loads(board_layout_path.read_text())
+        board_layout = board_layout_from_dict(board_layout_dict)
+        board_card_min_presence = float(
+            board_layout_dict.get("card_min_presence", 0.50)
+        )
+        board_empty_min_evidence = float(
+            board_layout_dict.get("empty_min_evidence", 0.55)
         )
     else:
         board_layout = BoardSlotLayout(
@@ -547,8 +557,8 @@ def load_calibration(
         card_recognizer=card_recognizer,
         board_slot_detector=TemplateBoardSlotDetector(
             board_layout,
-            empty_min_evidence=0.55,
-            card_min_presence=0.50,
+            empty_min_evidence=board_empty_min_evidence,
+            card_min_presence=board_card_min_presence,
         ),
         street_detector=TemplateStreetDetector(),
         amount_recognizer=amount_recognizer,

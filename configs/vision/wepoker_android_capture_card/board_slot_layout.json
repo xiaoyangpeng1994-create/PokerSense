@@ -33,5 +33,7 @@
       "height": 1.0
     }
   ],
-  "version": 1
+  "version": 1,
+  "card_min_presence": 0.35,
+  "empty_min_evidence": 0.35
 }

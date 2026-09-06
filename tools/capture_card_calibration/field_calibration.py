@@ -342,8 +342,25 @@ def main() -> int:
             f"{report['wilson_lower_bound']}"
         )
         block = measurement.to_block(source)
-        backup = update_calibration_json(args.repo, {args.field: block})
-        print(f"written: {args.field} -> calibration.json (backup {backup})")
+        # The engine reads the pot amount under its generic field name
+        # "amount" (see live.load_measured_calibrations); a block keyed
+        # "pot" would be invisible to production and force UNKNOWN.
+        engine_name = "amount" if args.field == "pot" else args.field
+        backup = update_calibration_json(args.repo, {engine_name: block})
+        if engine_name != args.field:
+            path = (
+                args.repo / "configs" / "vision" / PLATFORM_ID
+                / "calibration.json"
+            )
+            data = json.loads(path.read_text(encoding="utf-8"))
+            stale = data.pop(args.field, None)
+            if stale is not None:
+                path.write_text(
+                    json.dumps(data, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                print(f"removed stale {args.field!r} key")
+        print(f"written: {engine_name} -> calibration.json (backup {backup})")
     return 0 if measurement.separable else 1
 
 
