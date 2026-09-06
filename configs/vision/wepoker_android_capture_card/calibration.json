@@ -36,9 +36,23 @@
     "validation_correct": 116,
     "validation_positive_samples": 116
   },
+  "dealer": {
+    "correct": 234,
+    "readable_score_floor": 0.7514240145683287,
+    "samples": 239,
+    "source": "TemplateSlotMarkerRecognizer (26x26 D badge) on capture_card_calibration_20260903; 8 seat windows, 163 auto-annotation gaps fixed pixel-audit-r7, 1 sub-pixel-degraded frame CONFLICT r8; zero false VALID; spurious top-left matches 0.73-0.744 abstain below floor; floor=min-1ulp",
+    "unreadable_score_ceiling": 0.7438280582427979
+  },
   "layout_id": "phone_samsung_galaxy_s25_ultra__card_ugreen__uvc_1920x1080_30__canvas_498x1080__v1",
   "measured_at": "2026-09-04",
   "note": "Card recognition calibrated 2026-09-04 by the gray-fused-mlp-v3 pipeline (see AGENTS.md progress log). Earlier verdict that suits were physically unresolvable at 53x78 was reversed: the root causes were the HSV-hue colour router (undefined for black ink), letterbox jitter in temporal fusion, and ~3% suit mislabels \u2014 all fixed in software. The seat fields (occupancy/dealer/stack) and seat mapping were calibrated earlier (see the same progress log). Action-badge recognition remains UNCALIBRATED: action fields must keep reading UNKNOWN.",
+  "occupancy": {
+    "correct": 952,
+    "readable_score_floor": 0.8613462448120116,
+    "samples": 952,
+    "source": "TemplatePerSlotMarkerRecognizer (55x55 binarized + marker) on capture_card_calibration_20260903; 6 measured seat windows (slots 2-7); slot0/slot1 omitted (never EMPTY in 239 stable frames, fail-closed via stack signal); 243 EMPTY detections min=0.8613 vs 709 OCCUPIED abstains max=0.3865; zero false VALID; floor=min-1ulp",
+    "unreadable_score_ceiling": 0.3864537477493286
+  },
   "platform_id": "wepoker_android_capture_card",
   "schema_version": 1,
   "stack": {
