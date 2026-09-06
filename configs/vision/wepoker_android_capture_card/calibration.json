@@ -1,32 +1,39 @@
 {
-  "schema_version": 1,
-  "platform_id": "wepoker_android_capture_card",
-  "layout_id": "phone_samsung_galaxy_s25_ultra__card_ugreen__uvc_1920x1080_30__canvas_498x1080__v1",
-  "template_source": "wepoker",
-  "status": "calibrated",
-  "measured_at": "2026-09-04",
   "card": {
-    "samples": 0,
     "correct": 0,
     "readable_score_floor": 1.0,
-    "unreadable_score_ceiling": 1.0,
-    "source": "legacy single-frame path intentionally kept fail-closed (floor=1.0): production card reading must go through the fused pipeline in card_fused, never the legacy corner-glyph matcher"
+    "samples": 0,
+    "source": "legacy single-frame path intentionally kept fail-closed (floor=1.0): production card reading must go through the fused pipeline in card_fused, never the legacy corner-glyph matcher",
+    "unreadable_score_ceiling": 1.0
   },
   "card_fused": {
     "algorithm": "gray-fused-mlp-v3 (temporal fusion of size-normalized gray glyphs + BGR colour router + per-family MLP)",
+    "calibration_correct": 62,
+    "calibration_positive_samples": 62,
+    "colour_router": "BGR (R-B) median over suit-band ink; threshold 30 (corpus bimodal: black=0, red>=35)",
+    "correct": 178,
+    "false_valid": 0,
     "models": "card_heads.npz",
     "models_sha256": "ddc15c8118a8c874e3945fb26c812189e08a1b79702e39ea9260fc4124ad15d8",
-    "samples": 178,
-    "correct": 178,
-    "calibration_positive_samples": 62,
-    "calibration_correct": 62,
-    "validation_positive_samples": 116,
-    "validation_correct": 116,
-    "false_valid": 0,
     "rank_floor": 0.0,
+    "samples": 178,
+    "source": "capture_card_calibration_20260903 evidence/field_metrics.json (gray-fused-mlp-v3); suits no longer require any hardware change",
     "suit_floor": 0.3,
-    "colour_router": "BGR (R-B) median over suit-band ink; threshold 30 (corpus bimodal: black=0, red>=35)",
-    "source": "capture_card_calibration_20260903 evidence/field_metrics.json (gray-fused-mlp-v3); suits no longer require any hardware change"
+    "validation_correct": 116,
+    "validation_positive_samples": 116
   },
-  "note": "Card recognition calibrated 2026-09-04 by the gray-fused-mlp-v3 pipeline (see AGENTS.md progress log). Earlier verdict that suits were physically unresolvable at 53x78 was reversed: the root causes were the HSV-hue colour router (undefined for black ink), letterbox jitter in temporal fusion, and ~3% suit mislabels — all fixed in software. The seat fields (occupancy/dealer/stack) and seat mapping were calibrated earlier (see the same progress log). Action-badge recognition remains UNCALIBRATED: action fields must keep reading UNKNOWN."
+  "layout_id": "phone_samsung_galaxy_s25_ultra__card_ugreen__uvc_1920x1080_30__canvas_498x1080__v1",
+  "measured_at": "2026-09-04",
+  "note": "Card recognition calibrated 2026-09-04 by the gray-fused-mlp-v3 pipeline (see AGENTS.md progress log). Earlier verdict that suits were physically unresolvable at 53x78 was reversed: the root causes were the HSV-hue colour router (undefined for black ink), letterbox jitter in temporal fusion, and ~3% suit mislabels \u2014 all fixed in software. The seat fields (occupancy/dealer/stack) and seat mapping were calibrated earlier (see the same progress log). Action-badge recognition remains UNCALIBRATED: action fields must keep reading UNKNOWN.",
+  "platform_id": "wepoker_android_capture_card",
+  "schema_version": 1,
+  "stack": {
+    "correct": 9,
+    "readable_score_floor": 0.807415,
+    "samples": 129,
+    "source": "field_calibration.py on capture_card_calibration_20260903 (eval hold-out); zero false VALID, Wilson 95% lower bound 0.041038",
+    "unreadable_score_ceiling": 0.798582
+  },
+  "status": "calibrated",
+  "template_source": "wepoker"
 }

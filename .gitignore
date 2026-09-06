@@ -73,3 +73,7 @@ android_dedup_full.zip
 video_leidian_*.mp4
 _dedup_report(1).json
 dedup_frames(1).py
+
+# Phase 2 debug scratch (2026-09-06)
+_debug*
+*.bak

@@ -132,29 +132,91 @@ def test_amount_multi_char(text):
     assert str(r.value) == text
 
 
-def test_amount_multi_char_white_on_dark():
-    def render(text):
-        width = max(50, 45 * len(text))
-        image = np.full((50, width, 3), (30, 80, 65), dtype=np.uint8)
-        cv2.putText(
-            image, text, (10, 39), cv2.FONT_HERSHEY_SIMPLEX,
-            1.2, (255, 255, 255), 2, cv2.LINE_AA,
-        )
-        return image
+def _render_dark_pill(text, bg=(30, 80, 65)):
+    width = max(50, 45 * len(text))
+    image = np.full((50, width, 3), bg, dtype=np.uint8)
+    cv2.putText(
+        image, text, (10, 39), cv2.FONT_HERSHEY_SIMPLEX,
+        1.2, (255, 255, 255), 2, cv2.LINE_AA,
+    )
+    return image
 
+
+def test_amount_multi_char_white_on_dark():
     templates = DigitTemplateSet(
         {
-            digit: segment_characters(render(digit))[0]
+            digit: segment_characters(_render_dark_pill(digit))[0]
             for digit in "0123456789"
         },
         version="dark-v1",
     )
     rec = TemplateAmountRecognizer(templates)
 
-    result = rec.recognize(render("790"))
+    result = rec.recognize(_render_dark_pill("790"))
 
     assert result.value is not None
     assert str(result.value) == "790"
+
+
+# ---------- segmentation robustness (capture-card pills, 2026-09-06) ------
+
+def _render_highlighted_pill(text):
+    """Dark pill on a bright highlighted seat: minority foreground collapses
+    the whole pill into one blob unless the polarity fallback kicks in."""
+    width = 30 * len(text) + 40
+    image = np.full((27, width, 3), (60, 190, 110), dtype=np.uint8)
+    cv2.rectangle(image, (2, 2), (width - 3, 24), (20, 90, 45), -1)
+    cv2.putText(
+        image, text, (12, 21), cv2.FONT_HERSHEY_SIMPLEX,
+        0.6, (240, 240, 240), 1, cv2.LINE_AA,
+    )
+    return image
+
+
+def test_segment_polarity_fallback_recovers_highlight_pill():
+    chars = segment_characters(_render_highlighted_pill("172"))
+    assert len(chars) == 3
+
+
+def test_segment_drops_detached_badge_cluster():
+    image = _render_highlighted_pill("254")
+    h, w = image.shape[:2]
+    # dealer badge: white circle with black D, detached from the digits
+    cx, cy = w - 12, h // 2
+    cv2.circle(image, (cx, cy), 9, (245, 245, 245), -1)
+    cv2.putText(
+        image, "D", (cx - 5, cy + 4), cv2.FONT_HERSHEY_SIMPLEX,
+        0.45, (20, 20, 20), 1, cv2.LINE_AA,
+    )
+    chars = segment_characters(image)
+    assert len(chars) == 3
+
+
+def test_segment_drops_specks():
+    image = _render_highlighted_pill("220")
+    image[23, 67] = (250, 250, 250)
+    chars = segment_characters(image)
+    assert len(chars) == 3
+
+
+def test_wide_pill_never_takes_whole_roi_fast_path():
+    # A wide multi-digit pill must not be whole-matched to a single glyph
+    # even when correlation is spuriously high: segmentation decides.
+    templates = DigitTemplateSet(
+        {
+            digit: segment_characters(_render_dark_pill(digit))[0]
+            for digit in "0123456789"
+        },
+        version="dark-v2",
+    )
+    rec = TemplateAmountRecognizer(templates)
+    result = rec.recognize(_render_dark_pill("790"))
+    assert result.value is not None
+    assert str(result.value) == "790"
+    # and a wide crop that resembles one glyph must not collapse to it
+    wide = _render_dark_pill("111")  # three narrow glyphs in a wide ROI
+    result2 = rec.recognize(wide)
+    assert result2.value is None or str(result2.value) == "111"
 
 
 # ---------- action recognizer ----------

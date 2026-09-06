@@ -86,12 +86,19 @@ def _normalize_char(img: np.ndarray) -> np.ndarray:
     """Resize a character image to the fixed grid, preserving aspect ratio.
 
     Letterboxed so a narrow '1' and a wide '8' keep their shape proportions.
+    The canvas takes the crop's own background (corner-median) value: on a
+    fixed white canvas a white-on-dark glyph would wash into the background,
+    destroying both correlation signal and hole topology (2026-09-06).
     """
     h, w = img.shape[:2]
+    corners = np.array(
+        [img[0, 0], img[0, -1], img[-1, 0], img[-1, -1]]
+    ).reshape(-1)
+    background = int(np.median(corners))
     scale = min(_NORM[0] / h, _NORM[1] / w)
     nh, nw = max(1, int(h * scale)), max(1, int(w * scale))
     resized = cv2.resize(img, (nw, nh))
-    canvas = np.full(_NORM, 255, dtype=resized.dtype)
+    canvas = np.full(_NORM, background, dtype=resized.dtype)
     y0 = (_NORM[0] - nh) // 2
     x0 = (_NORM[1] - nw) // 2
     canvas[y0 : y0 + nh, x0 : x0 + nw] = resized
@@ -128,20 +135,9 @@ def _match_char(char_img: np.ndarray, templates: Mapping[str, np.ndarray]):
     return best, best_score
 
 
-def segment_characters(roi_image: np.ndarray) -> list[np.ndarray]:
-    """Return character crops sorted left-to-right (deterministic).
-
-    Uses vertical projection (column ink mass) to find character spans, then
-    trims each span to its ink bounding box (both axes) so normalized matching
-    compares comparable shapes.
-    """
-    gray = _to_gray(roi_image)
-    # Support both black-on-light desktop text and white-on-dark Android UI.
-    # In a tight amount ROI the glyphs are the minority class; selecting the
-    # smaller foreground also avoids making the whole dark banner one glyph.
-    binary = _minority_foreground(gray)
-    col_ink = (binary > 0).sum(axis=0)  # ink mass per column
-
+def _column_spans(binary: np.ndarray) -> list[tuple[int, int]]:
+    """Find [x0, x1) ink spans via vertical projection (column ink mass)."""
+    col_ink = (binary > 0).sum(axis=0)
     spans: list[tuple[int, int]] = []
     in_span = False
     start = 0
@@ -155,8 +151,91 @@ def segment_characters(roi_image: np.ndarray) -> list[np.ndarray]:
             spans.append((start, x))
     if in_span:
         spans.append((start, len(col_ink)))
+    return spans
 
-    crops: list[np.ndarray] = []
+
+def _single_degenerate_blob(
+    spans: list[tuple[int, int]], width: int
+) -> bool:
+    """True when segmentation collapsed into one ROI-filling blob."""
+    return (
+        not spans
+        or (len(spans) == 1 and spans[0][1] - spans[0][0] >= 0.9 * width)
+    )
+
+
+def _remove_background_strips(binary: np.ndarray) -> np.ndarray:
+    """Zero full-bleed edge strips so they cannot bridge glyph spans.
+
+    A background sliver inside a loose ROI (bright seat edge above a dark
+    pill, pill border at the ROI boundary) shows up as rows/columns that are
+    >= 80% ink and touch the image edge. Glyphs never span 80% of the ROI
+    width, so stripping only edge-connected full-bleed bands is safe.
+    """
+    out = binary.copy()
+    height, width = out.shape
+    for y in range(height):
+        if (out[y] > 0).mean() >= 0.8:
+            out[y] = 0
+        else:
+            break
+    for y in range(height - 1, -1, -1):
+        if (out[y] > 0).mean() >= 0.8:
+            out[y] = 0
+        else:
+            break
+    for x in range(width):
+        if (out[:, x] > 0).mean() >= 0.8:
+            out[:, x] = 0
+        else:
+            break
+    for x in range(width - 1, -1, -1):
+        if (out[:, x] > 0).mean() >= 0.8:
+            out[:, x] = 0
+        else:
+            break
+    return out
+
+
+def segment_characters(roi_image: np.ndarray) -> list[np.ndarray]:
+    """Return character crops sorted left-to-right (deterministic).
+
+    Uses vertical projection (column ink mass) to find character spans, then
+    trims each span to its ink bounding box (both axes) so normalized matching
+    compares comparable shapes.
+
+    Robustness rules (capture-card pills, 2026-09-06):
+
+    - **Background-strip removal**: full-bleed edge bands (bright seat sliver
+      above a dark pill, pill border) are zeroed so they cannot bridge all
+      glyph columns into one blob.
+    - **Polarity fallback**: when the minority foreground still degenerates
+      into a single ROI-filling blob, retry with the inverted binary and keep
+      it when it segments cleanly.
+    - **Cluster isolation**: spans separated from the main cluster by a gap
+      far wider than the tightest inter-character gap are detached junk
+      (dealer badge, timer specks); keep the largest cluster.
+    - **Speck filter**: 1-2 px compression specks are dropped.
+    - **Oversize filter**: a span much taller *and* wider than the median
+      glyph (a circular badge next to the pill) is dropped.
+    Filters never empty the span list — when everything would be dropped the
+    unfiltered spans are returned, so a borderline read becomes UNKNOWN
+    downstream instead of silently inventing digits.
+    """
+    gray = _to_gray(roi_image)
+    # Support both black-on-light desktop text and white-on-dark Android UI.
+    # In a tight amount ROI the glyphs are the minority class; selecting the
+    # smaller foreground also avoids making the whole dark banner one glyph.
+    binary = _remove_background_strips(_minority_foreground(gray))
+    width = gray.shape[1]
+    spans = _column_spans(binary)
+    if _single_degenerate_blob(spans, width):
+        inverted = _remove_background_strips(cv2.bitwise_not(binary))
+        alt = _column_spans(inverted)
+        if alt and not _single_degenerate_blob(alt, width):
+            binary, spans = inverted, alt
+
+    items: list[tuple[int, int, int, int, np.ndarray]] = []
     for x0, x1 in spans:
         if x1 - x0 <= 0:
             continue
@@ -165,8 +244,44 @@ def segment_characters(roi_image: np.ndarray) -> list[np.ndarray]:
         if len(xs) == 0:
             continue
         y0, y1 = ys.min(), ys.max() + 1
-        crops.append(gray[y0:y1, x0:x1])
-    return crops
+        crop = gray[y0:y1, x0:x1]
+        items.append((x0, x1, x1 - x0, y1 - y0, crop))
+
+    if len(items) > 1:
+        # Detached-cluster isolation: a gap far wider than the tightest
+        # inter-character gap splits off detached junk (badges, specks).
+        gaps = [items[i + 1][0] - items[i][1] for i in range(len(items) - 1)]
+        tightest = min(gaps)
+        split_at = max(2.5 * tightest, 10)
+        clusters: list[list[int]] = [[0]]
+        for i, gap in enumerate(gaps):
+            if gap >= split_at:
+                clusters.append([])
+            clusters[-1].append(i + 1)
+        if len(clusters) > 1:
+            biggest = max(clusters, key=len)
+            if len(biggest) < len(items):
+                items = [items[i] for i in biggest]
+
+    if len(items) > 1:
+        non_speck = [c for c in items if not (c[2] <= 2 and c[3] <= 3)]
+        if non_speck:
+            items = non_speck
+
+    if len(items) > 1:
+        heights = sorted(c[3] for c in items)
+        widths = sorted(c[2] for c in items)
+        med_h = heights[len(heights) // 2]
+        med_w = widths[len(widths) // 2]
+        non_oversized = [
+            c
+            for c in items
+            if not (c[3] > 1.2 * med_h and c[2] > 1.5 * med_w)
+        ]
+        if non_oversized:
+            items = non_oversized
+
+    return [crop for _, _, _, _, crop in items]
 
 
 class TemplateAmountRecognizer:
@@ -191,13 +306,21 @@ class TemplateAmountRecognizer:
         return AmountRecognition(value=amount, raw_score=score)
 
     def _decode(self, roi_image: np.ndarray):
-        # Single-character fast path: match the whole ROI first. If it matches
-        # a single template strongly, use it (avoids fragile small-crop splits).
-        whole_label, whole_score = _match_char(
-            roi_image, self._templates.templates
-        )
-        if whole_label is not None and whole_score >= 0.8:
-            return whole_label, whole_score
+        # Single-character fast path: match the whole ROI first, but only
+        # when the ROI has a plausible single-glyph aspect ratio. A wide
+        # multi-digit pill can spuriously correlate with one template above
+        # 0.8 (observed on capture-card highlighted pills, 2026-09-06), so
+        # wide ROIs must always go through segmentation. All production
+        # amount ROIs are >= 2.27 aspect; a genuine single-glyph ROI is < 2.
+        height, width = roi_image.shape[:2]
+        whole_label = None
+        whole_score = 0.0
+        if width <= 2.0 * height:
+            whole_label, whole_score = _match_char(
+                roi_image, self._templates.templates
+            )
+            if whole_label is not None and whole_score >= 0.8:
+                return whole_label, whole_score
 
         chars = segment_characters(roi_image)
         if not chars:
