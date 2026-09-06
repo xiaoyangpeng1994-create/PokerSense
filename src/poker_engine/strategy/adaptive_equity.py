@@ -36,10 +36,11 @@ class EquityComputationStatus(str, Enum):
 
 @dataclass(frozen=True)
 class AdaptiveEquityPolicy:
-    engine_version: str = "adaptive-equity-v2-m1-pro"
+    engine_version: str = "adaptive-equity-v3-core-ultra-5-245kf"
     default_deadline_ms: int = 300
     exact_outcome_limit: int = 100_000
-    exact_outcomes_per_ms: int = 3
+    exact_outcomes_per_ms: int = 4
+    exact_method_hysteresis: Decimal = Decimal("0.10")
     minimum_mc_trials: int = 2_000
     maximum_mc_trials: int = 50_000
     mc_trials_per_ms: int = 2
@@ -67,6 +68,12 @@ class AdaptiveEquityPolicy:
                     raise ValueError("exact_outcome_limit must be >= 0")
             elif value <= 0:
                 raise ValueError(f"{name} must be > 0")
+        if not isinstance(self.exact_method_hysteresis, Decimal):
+            raise TypeError("exact_method_hysteresis must be a Decimal")
+        if not self.exact_method_hysteresis.is_finite() or not (
+            Decimal("0") <= self.exact_method_hysteresis <= Decimal("1")
+        ):
+            raise ValueError("exact_method_hysteresis must be in [0, 1]")
         if self.minimum_mc_trials > self.maximum_mc_trials:
             raise ValueError("minimum_mc_trials cannot exceed maximum_mc_trials")
         if not isinstance(self.target_half_width, Decimal):
@@ -190,7 +197,15 @@ def calculate_adaptive_equity(
         policy.exact_outcome_limit,
         deadline_ms * policy.exact_outcomes_per_ms,
     )
-    if assignments is not None and estimated_outcomes <= exact_budget:
+    # Hysteresis band: the conservative rate constants carry a 0.5 safety
+    # factor, so outcomes modestly above the deadline budget still finish
+    # well inside the deadline. This keeps the exact/MC boundary from
+    # flapping when deadline_ms jitters around the threshold.
+    hysteresis_budget = min(
+        policy.exact_outcome_limit,
+        int(exact_budget * (1 + policy.exact_method_hysteresis)),
+    )
+    if assignments is not None and estimated_outcomes <= hysteresis_budget:
         method = EquityMethod.EXACT
         trials = None
         seed = None
@@ -204,19 +219,48 @@ def calculate_adaptive_equity(
             ),
         )
         seed = policy.seed
-    query = EquityCacheQuery(
+    exact_query = EquityCacheQuery(
         hero_seat=context.hero_seat,
         hero_cards=context.hero_cards,
         board_cards=context.board_cards,
         villain_ranges=context.villain_ranges,
         pots=context.pots,
-        method=method,
+        method=EquityMethod.EXACT,
         engine_version=policy.engine_version,
-        trials=trials,
-        seed=seed,
+        trials=None,
+        seed=None,
     )
+    if method is EquityMethod.EXACT:
+        query = exact_query
+    else:
+        query = EquityCacheQuery(
+            hero_seat=context.hero_seat,
+            hero_cards=context.hero_cards,
+            board_cards=context.board_cards,
+            villain_ranges=context.villain_ranges,
+            pots=context.pots,
+            method=method,
+            engine_version=policy.engine_version,
+            trials=trials,
+            seed=seed,
+        )
     lookup_state = EquityCacheState.NOT_FOUND
     if cache is not None:
+        if method is EquityMethod.MONTE_CARLO:
+            # Exact results are deterministic and deadline-independent, so a
+            # cached exact entry stays valid even when the current (possibly
+            # shrunken) deadline would now select MC. Reusing it prevents
+            # exact -> MC quality regressions on re-evaluated decision points.
+            exact_lookup = cache.get(exact_query, now=now)
+            if exact_lookup.state is EquityCacheState.HIT:
+                return _report_from_cache(
+                    exact_lookup.entry,
+                    EquityMethod.EXACT,
+                    estimated_outcomes,
+                    None,
+                    policy,
+                    context.request.expires_at,
+                )
         lookup = cache.get(query, now=now)
         lookup_state = lookup.state
         if lookup.state is EquityCacheState.HIT:
@@ -285,7 +329,13 @@ def calculate_adaptive_equity(
             f"equity://monte-carlo/{policy.engine_version}"
             f"?trials={result.samples}&planned={trials}&seed={seed}",
         )
-    if cache is not None:
+    # Only completed runs enter the cache. An MC run cut short by the wall
+    # deadline has fewer samples than the planned trials encoded in the query
+    # key; caching it would let later requests inherit a precision that was
+    # never actually achieved (dirty hit).
+    if cache is not None and (
+        method is EquityMethod.EXACT or result.samples >= trials
+    ):
         cache.put(
             query,
             result,

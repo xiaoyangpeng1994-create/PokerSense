@@ -174,6 +174,52 @@ def test_cache_evicts_least_recently_used_entry():
     assert cache.get(third, now=NOW).state is EquityCacheState.HIT
 
 
+def test_entry_without_explicit_expiry_expires_after_default_ttl():
+    query = _query()
+    cache = EquityCache()
+    cache.put(
+        query,
+        _result(query),
+        created_at=NOW,
+        expires_at=None,
+        evidence=("equity://exact/v1",),
+    )
+
+    assert cache.get(
+        query, now=NOW + timedelta(seconds=299)
+    ).state is EquityCacheState.HIT
+    assert cache.get(
+        query, now=NOW + timedelta(seconds=300)
+    ).state is EquityCacheState.STALE
+    assert cache.get(
+        query, now=NOW + timedelta(seconds=301)
+    ).state is EquityCacheState.NOT_FOUND
+
+
+def test_default_ttl_can_be_disabled():
+    query = _query()
+    cache = EquityCache(default_ttl_seconds=None)
+    cache.put(
+        query,
+        _result(query),
+        created_at=NOW,
+        expires_at=None,
+        evidence=("equity://exact/v1",),
+    )
+
+    assert cache.get(
+        query, now=NOW + timedelta(days=365)
+    ).state is EquityCacheState.HIT
+
+
+@pytest.mark.parametrize(
+    "ttl", [0, -1, -0.5, float("inf"), float("nan"), "300"]
+)
+def test_default_ttl_must_be_a_positive_finite_number_or_none(ttl):
+    with pytest.raises((TypeError, ValueError)):
+        EquityCache(default_ttl_seconds=ttl)
+
+
 def test_cache_rejects_result_for_different_query_identity():
     query = _query()
     wrong_query = _query(

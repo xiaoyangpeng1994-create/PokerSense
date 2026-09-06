@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "benchmark": "adaptive-equity-target-calibration",
+  "measured_at": "2026-09-06T02:45:43+08:00",
+  "source_revision": "bdabd15960ea5d0a7d5a482e597179985d29f6cb+working-tree",
+  "benchmark_tool": "tools/benchmark_adaptive_equity.py",
+  "benchmark_tool_sha256": "1576c53a3e458c9564cf8f99b2289c0d3c04a2f5acbdbede9931901e503d20ea",
+  "command": "PYTHONPATH=src python tools/benchmark_adaptive_equity.py --repeats 7 --hardware-label 'Desktop Intel Core Ultra 5 245KF 32GB Windows'",
+  "environment": {
+    "model_identifier": "Desktop",
+    "chip": "Intel Core Ultra 5 245KF",
+    "cpu_cores": 14,
+    "memory_gb": 32,
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.14"
+  },
+  "cases": [
+    {
+      "name": "exact_hu_flop_8_assignments",
+      "units": 7920,
+      "repeats": 7,
+      "latency_ms": {"median": 821.529, "p95": 844.353, "maximum": 844.353},
+      "units_per_ms_at_p95": 9.38
+    },
+    {
+      "name": "mc_hu_flop_10000",
+      "units": 10000,
+      "repeats": 7,
+      "latency_ms": {"median": 1118.196, "p95": 1139.427, "maximum": 1139.427},
+      "units_per_ms_at_p95": 8.776
+    },
+    {
+      "name": "mc_3way_flop_10000",
+      "units": 10000,
+      "repeats": 7,
+      "latency_ms": {"median": 1591.993, "p95": 1766.222, "maximum": 1766.222},
+      "units_per_ms_at_p95": 5.662
+    }
+  ],
+  "recommended_conservative_policy": {
+    "exact_outcomes_per_ms": 4,
+    "mc_trials_per_ms": 2,
+    "safety_factor": 0.5
+  }
+}

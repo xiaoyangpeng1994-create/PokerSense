@@ -21,7 +21,9 @@ from .helpers import NOW, context
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CALIBRATION = ROOT / "configs" / "strategy" / "adaptive-equity-m1-pro-v1.json"
+CALIBRATION = (
+    ROOT / "configs" / "strategy" / "adaptive-equity-core-ultra-5-245kf-v1.json"
+)
 
 
 def _context():
@@ -44,12 +46,12 @@ def test_default_policy_matches_versioned_target_calibration():
     recommended = payload["recommended_conservative_policy"]
     policy = AdaptiveEquityPolicy()
 
-    assert payload["environment"]["chip"] == "Apple M1 Pro"
+    assert payload["environment"]["chip"] == "Intel Core Ultra 5 245KF"
     assert payload["environment"]["memory_gb"] == 32
     assert len(payload["cases"]) == 3
     assert policy.exact_outcomes_per_ms == recommended["exact_outcomes_per_ms"]
     assert policy.mc_trials_per_ms == recommended["mc_trials_per_ms"]
-    assert policy.engine_version == "adaptive-equity-v2-m1-pro"
+    assert policy.engine_version == "adaptive-equity-v3-core-ultra-5-245kf"
     exact_rate = payload["cases"][0]["units_per_ms_at_p95"]
     mc_rate = min(
         item["units_per_ms_at_p95"] for item in payload["cases"][1:]

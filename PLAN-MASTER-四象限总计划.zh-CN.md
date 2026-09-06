@@ -25,12 +25,12 @@
 
 ## 2. 阶段路线
 
-### Phase 1 · 稳定加固（先行，工作量小、风险高）
-1. 修 `adaptive_equity.py:252-268`：MC 实际采样数进缓存 key（消除"计划 trials 相同但负载截断不同"的脏命中）
-2. exact/MC 切换加滞回（±边界带），消除阶跃翻转
-3. `EquityCache` 补 TTL，与 `StrategyCache`（300s）语义对齐
-4. 重新实测 `exact_outcomes_per_ms`（当前 3，待校准），按实测值更新
-5. 每项带回归测试；基线不降
+### Phase 1 · 稳定加固（先行，工作量小、风险高）✅ 已完成 2026-09-06
+1. ✅ 修 `adaptive_equity.py`：被墙钟截断的 MC（`samples < planned trials`）一律不入缓存，脏命中消除
+2. ✅ exact/MC 滞回：`exact_method_hysteresis=0.10` 滞回带 + MC 路径优先探测 exact 缓存键（deadline 收缩不再退化为 MC PARTIAL）
+3. ✅ `EquityCache` 新增 `default_ttl_seconds=300.0`，与 `StrategyCache` 语义对齐
+4. ✅ 本机实测（Core Ultra 5 245KF）：exact 9.38 outcomes/ms → `exact_outcomes_per_ms` 3→4（0.5 安全系数），新标定文件 `adaptive-equity-core-ultra-5-245kf-v1.json`，engine_version → v3
+5. ✅ 新增 12 个测试全部钉死；回归 **2278 passed / 1 skipped**（基线 2266 → 2278）
 
 ### Phase 2 · 采集卡九字段全通（板块 B 收尾，B1–B6）
 pot 识别器 → actor 识别器 → street 派生 → 生产模板资产 → ROI/布局补全 → 标定落地工具。

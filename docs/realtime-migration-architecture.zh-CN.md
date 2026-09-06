@@ -369,6 +369,13 @@ S0 观测埋点 → S1 事件驱动帧泵 → S2 事件日志 WAL + 快照 → S
 | 11 | **Decimal / float 混用** | 项目用 `Decimal` 表示筹码和概率，但 `confidence` 历史上踩过一次坑（传 `Decimal` 破坏了 6-max 判定）。混用会在比较/排序处产生微妙差异 | lint 规则：概率类一律 `Decimal`，耗时/计数一律 `int/float`，跨类型转换只允许在显式边界函数内 |
 | 12 | **前视偏差** | 实时路径可能把"已经看到的下一帧"并入当前状态（例如 UI 为了流畅预取） | §7.4 的时间旅行检查：截断输入重算，结果必须不变 |
 
+> **修复状态（2026-09-06，PLAN-MASTER Phase 1）**：
+> - **#2 已修复**：`calculate_adaptive_equity` 只缓存完整跑完的结果（exact 或 `result.samples >= planned trials`），被墙钟截断的 MC 一律不入缓存 → 脏命中消除。钉死：`test_mc_run_cut_short_by_wall_deadline_is_not_cached`。
+> - **#3 已修复**：双管齐下 —— ① exact/MC 选择加滞回带（`AdaptiveEquityPolicy.exact_method_hysteresis = 0.10`，常数带 0.5 安全系数，带内仍可在 ~55% deadline 内跑完）；② MC 路径先探测 exact 缓存键（exact 结果确定性与 deadline 无关），同决策点 deadline 收缩时复用 exact，不再退化成 MC PARTIAL。钉死：`test_exact_hysteresis_band_extends_exact_just_past_budget` / `test_beyond_hysteresis_band_still_uses_monte_carlo` / `test_exact_result_is_reused_when_shrinking_deadline_would_force_mc`。
+> - **#6 已修复**：`EquityCache` 新增 `default_ttl_seconds=300.0`（与 `StrategyCache` 对齐，可传 `None` 关闭）；`expires_at=None` 的条目自动获得 `created_at + TTL`。钉死：`test_entry_without_explicit_expiry_expires_after_default_ttl` 等 3 个新用例。
+> - **#1 部分缓解**：脏命中后果已被 #2 修复切断；`benchmark_mode` 与 planned/actual 指标计量仍未做（P3-1/P3-2/P3-8 待办）。
+> - **#7 已确认**：`EquityCacheQuery.key` 的 `villain_ranges` 载荷本就含 `source` + `source_version`（`equity_cache.py` key payload），换资产不换引擎必然 MISS。
+
 ---
 
 ## 9. 关键实现要点清单（做什么 + 验证标准）
@@ -408,11 +415,11 @@ S0 观测埋点 → S1 事件驱动帧泵 → S2 事件日志 WAL + 快照 → S
 |---|---|---|
 | P3-1 | 权益改**续跑式 MC**：同 seed 追加 trials 不清零，避免重跑抖动 | 同一局面分两次各跑 2000 trials = 一次跑 4000 trials（误差 ≤ 1e-9） |
 | P3-2 | 增加 `benchmark_mode`：忽略墙钟 deadline，固定 trials 跑完 | 该模式下判据 1（确定性哈希）在 20 次独立运行中 100% 通过 |
-| P3-3 | 缓存 key 补全：`engine_version` + `source_version` + `asset_version` + `result.samples` + `created_at` + `ttl` | 构造"换资产不换引擎"的用例，缓存必须 MISS |
-| P3-4 | exact/MC 选择加**滞回带** | 边界附近连续 100 帧，method 切换次数 = 0 |
+| P3-3 ✅ 关键部分 2026-09-06 | 缓存语义补全：`EquityCache` 补 TTL（对齐 300s）；截断 MC 拒绝入缓存（等价于实际精度入 key 的效果）；`source_version` 确认已在 key 内。`asset_version` 独立字段入 key 待 P3 后续 | 构造"换资产不换引擎"的用例，缓存必须 MISS |
+| P3-4 ✅ 已完成 2026-09-06 | exact/MC 选择加**滞回带**（0.10）+ MC 路径 exact 键优先探测 | 边界附近连续 100 帧，method 切换次数 = 0 |
 | P3-5 | 影子进程：消费 WAL 副本，全量重算，输出逐手比对报告 | 每日报告自动生成；AAR ≥ 99%、flip = 0 |
 | P3-6 | 决策边界**滞回**：equity 落在切换边界 ±0.02 内不翻转，而是标 `BOUNDARY_UNCERTAIN` 给双候选 | 对抗基线中 flip 数 = 0 |
-| **P3-7** | **重新标定 `exact_outcomes_per_ms`**（现为 3，把 exact 预算压到 900 outcomes）。做法：实测河牌 exact 枚举的真实吞吐（assignments × 1 runout），用实测值替换常数 | ① 给出河牌 exact 的实测 outcomes/ms（附测量脚本与数据）；② 替换后，多人河牌不再落到 `trials=600 < minimum_mc_trials=2000` 的 `PARTIAL` 结果；③ 全量回归 + 判据 1 确定性哈希仍通过<br>⚠️ **不是**"强制河牌走 exact" —— 见 §0.2 的更正说明 |
+| **P3-7** ✅ 已完成 2026-09-06 | ~~重新标定 `exact_outcomes_per_ms`~~ 已在本机（Intel Core Ultra 5 245KF）实测：exact 9.38 outcomes/ms、MC 5.662 trials/ms（min），按 0.5 安全系数 → **`exact_outcomes_per_ms` 3→4**、`mc_trials_per_ms` 维持 2，`engine_version` → `adaptive-equity-v3-core-ultra-5-245kf`。标定文件 `configs/strategy/adaptive-equity-core-ultra-5-245kf-v1.json`（工具哈希钉死，M1 Pro 旧文件留档） | ① 实测数据附测量命令 ✅；② exact 预算 900→1200 outcomes（加滞回带 1320），多人河牌落 `PARTIAL` 的范围收窄 ✅；③ 全量回归 2278 passed / 1 skipped ✅ |
 | P3-8 | 翻前/翻牌/转牌的 MC：`trials` 按街固定（如 flop 2000 / turn 8000），**不随 deadline 浮动**；deadline 只作为"跑不完就标 PARTIAL"的兜底，不改变计划值 | 同一局面在 3 种不同 CPU 负载下跑，`planned trials` 完全相同；只有 `actual samples` 可能不同，且被单独计量 |
 
 ### P4 — 断线重连与补齐

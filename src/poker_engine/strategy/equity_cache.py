@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 from threading import RLock
@@ -197,16 +198,40 @@ class EquityCacheLookup:
 
 
 class EquityCache:
-    """Bounded LRU cache with explicit stale results and no silent reuse."""
+    """Bounded LRU cache with explicit stale results and no silent reuse.
 
-    def __init__(self, max_entries: int = 256):
+    Entries stored without an explicit ``expires_at`` receive the cache-level
+    ``default_ttl_seconds`` (aligned with ``StrategyCache`` at 300s) so equity
+    results cannot outlive the freshness window of the strategy layer.
+    """
+
+    def __init__(
+        self,
+        max_entries: int = 256,
+        default_ttl_seconds: float | None = 300.0,
+    ):
         if not isinstance(max_entries, int) or isinstance(max_entries, bool):
             raise TypeError("max_entries must be an int")
         if max_entries <= 0:
             raise ValueError("max_entries must be > 0")
+        if default_ttl_seconds is not None:
+            if not isinstance(default_ttl_seconds, (int, float)) or isinstance(
+                default_ttl_seconds, bool
+            ) or not math.isfinite(default_ttl_seconds) or (
+                default_ttl_seconds <= 0
+            ):
+                raise ValueError(
+                    "default_ttl_seconds must be finite and > 0, or None"
+                )
+            default_ttl_seconds = float(default_ttl_seconds)
         self._max_entries = max_entries
+        self._default_ttl_seconds = default_ttl_seconds
         self._entries: OrderedDict[str, EquityCacheEntry] = OrderedDict()
         self._lock = RLock()
+
+    @property
+    def default_ttl_seconds(self) -> float | None:
+        return self._default_ttl_seconds
 
     def put(
         self,
@@ -230,6 +255,10 @@ class EquityCache:
         query_total = sum((pot.amount.value for pot in query.pots), Decimal("0"))
         if result.total_pot.value != query_total:
             raise ValueError("result total_pot does not match query")
+        if expires_at is None and self._default_ttl_seconds is not None:
+            expires_at = created_at + timedelta(
+                seconds=self._default_ttl_seconds
+            )
         entry = EquityCacheEntry(
             query.key,
             result,

@@ -197,3 +197,77 @@ def test_adaptive_mc_returns_completed_samples_when_wall_deadline_fires():
     assert report.status is EquityComputationStatus.PARTIAL
     assert report.trials == 16
     assert "planned=100" in report.evidence[0]
+
+
+def test_exact_hysteresis_band_extends_exact_just_past_budget():
+    # Turn with two villain combos: 2 assignments x 44 runouts = 88 outcomes.
+    # deadline 20ms -> budget 80, hysteresis band lifts the limit to 88.
+    ctx = _decision_context(street=Street.TURN, deadline_ms=20)
+
+    report = calculate_adaptive_equity(
+        ctx, now=NOW, monotonic_clock=lambda: 0.0
+    )
+
+    assert report.estimated_outcomes == 88
+    assert report.method is EquityMethod.EXACT
+    assert report.status is EquityComputationStatus.COMPLETE
+
+
+def test_beyond_hysteresis_band_still_uses_monte_carlo():
+    # deadline 10ms -> budget 40, band limit 44 < 88 outcomes.
+    ctx = _decision_context(street=Street.TURN, deadline_ms=10)
+
+    report = calculate_adaptive_equity(
+        ctx, now=NOW, monotonic_clock=lambda: 0.0
+    )
+
+    assert report.method is EquityMethod.MONTE_CARLO
+
+
+def test_exact_result_is_reused_when_shrinking_deadline_would_force_mc():
+    cache = EquityCache()
+    generous = _decision_context(street=Street.TURN, deadline_ms=300)
+    tight = _decision_context(street=Street.TURN, deadline_ms=1)
+
+    first = calculate_adaptive_equity(generous, now=NOW, cache=cache)
+    second = calculate_adaptive_equity(tight, now=NOW, cache=cache)
+
+    assert first.method is EquityMethod.EXACT
+    assert second.method is EquityMethod.EXACT
+    assert second.cache_state is EquityCacheState.HIT
+    assert second.result == first.result
+
+
+def test_mc_run_cut_short_by_wall_deadline_is_not_cached():
+    ctx = _decision_context(street=Street.FLOP, deadline_ms=1)
+    policy = AdaptiveEquityPolicy(
+        exact_outcome_limit=0,
+        minimum_mc_trials=100,
+        maximum_mc_trials=100,
+        mc_trials_per_ms=100,
+    )
+    cache = EquityCache()
+
+    first_clock = iter((0.0, 2.0))
+    first = calculate_adaptive_equity(
+        ctx,
+        now=NOW,
+        policy=policy,
+        cache=cache,
+        monotonic_clock=lambda: next(first_clock),
+    )
+
+    assert first.trials == 16  # planned 100, wall deadline fired early
+    assert len(cache) == 0  # truncated run must not poison the cache
+
+    second_clock = iter((0.0, 2.0))
+    second = calculate_adaptive_equity(
+        ctx,
+        now=NOW,
+        policy=policy,
+        cache=cache,
+        monotonic_clock=lambda: next(second_clock),
+    )
+
+    assert second.cache_state is EquityCacheState.NOT_FOUND
+    assert second.trials == 16
