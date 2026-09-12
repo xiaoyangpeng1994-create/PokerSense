@@ -33,12 +33,19 @@ class DesktopFrame:
 
     analysis: RealtimeAnalysis
     advice: Advice | None = None
+    advice_unavailable_reason: str | None = None
+    table_rules_revision: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.analysis, RealtimeAnalysis):
             raise TypeError("analysis must be a RealtimeAnalysis")
         if self.advice is not None and not isinstance(self.advice, Advice):
             raise TypeError("advice must be an Advice or None")
+        if self.advice_unavailable_reason is not None:
+            if not isinstance(self.advice_unavailable_reason, str):
+                raise TypeError("advice_unavailable_reason must be a str or None")
+            if not self.advice_unavailable_reason or self.advice is not None:
+                raise ValueError("unavailable reason requires absent advice")
 
 
 def analysis_to_dict(
@@ -63,6 +70,13 @@ def analysis_to_dict(
         "equity": {
             "win_rate": analysis.equity.win_rate,
             "tie_rate": analysis.equity.tie_rate,
+            "opponent_count": analysis.equity.opponent_count,
+            "samples": analysis.equity.samples,
+            "expected_share": analysis.equity.expected_share,
+            "standard_error": analysis.equity.standard_error,
+            "basis": analysis.equity.basis,
+            "available": analysis.equity.unavailable_reason is None,
+            "unavailable_reason": analysis.equity.unavailable_reason,
         },
         "confidence": {
             "overall_confidence": analysis.confidence.overall_confidence,
@@ -90,7 +104,12 @@ def desktop_frame_to_dict(
 ) -> dict:
     """Serialize new atomic frames while retaining legacy analysis streams."""
     if isinstance(frame, DesktopFrame):
-        return analysis_to_dict(frame.analysis, frame.advice, now=now)
+        payload = analysis_to_dict(frame.analysis, frame.advice, now=now)
+        if frame.advice_unavailable_reason is not None:
+            payload["advice_unavailable_reason"] = frame.advice_unavailable_reason
+        if frame.table_rules_revision is not None:
+            payload["table_rules_revision"] = frame.table_rules_revision
+        return payload
     if isinstance(frame, RealtimeAnalysis):
         return analysis_to_dict(frame, now=now)
     raise TypeError("frame must be a DesktopFrame or RealtimeAnalysis")

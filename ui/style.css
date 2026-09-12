@@ -1019,7 +1019,9 @@ select:disabled:hover {
    ============================================================ */
 
 .settings-dialog {
-  width: min(320px, calc(100vw - 32px));
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   background: var(--panel);
@@ -1090,6 +1092,19 @@ select:disabled:hover {
   font-size: var(--fs-2xs);
   line-height: var(--lh-body);
 }
+
+.table-rules { border: 0; border-top: 1px solid var(--border); margin: var(--sp-5) 0 0; padding: var(--sp-4) 0 0; }
+.table-rules legend { font-size: var(--fs-sm); font-weight: var(--fw-semibold); padding-right: var(--sp-2); }
+.rules-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); margin-top: var(--sp-4); }
+.rules-grid label, .rules-extra { display: grid; gap: var(--sp-1); font-size: var(--fs-xs); color: var(--text-dim); }
+.rules-extra { margin-top: var(--sp-3); }
+.table-rules input, .table-rules select, .table-rules textarea {
+  width: 100%; min-width: 0; box-sizing: border-box; padding: var(--sp-2);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--panel-raised); color: var(--text); font: inherit;
+}
+.table-rules input:focus-visible, .table-rules textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rules-save { margin-top: var(--sp-4); padding: var(--sp-2) var(--sp-4); border: 1px solid var(--accent-border); border-radius: var(--r-sm); background: var(--accent-soft); color: var(--accent); }
 
 /* ============================================================
    Responsive adaptations

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "platform_id": "aa_android_capture_card",
+  "layout_id": "aa_green_8slots_498x1080_candidate_v1",
+  "status": "CANDIDATE_NOT_PRODUCTION",
+  "canvas": [498, 1080],
+  "hero_slot": 4,
+  "slot_order": "clockwise_from_top_visual_only",
+  "geometry_reference_sha256": "950c348258d2263defb4744605b2229121eb6d6eafc9c7857bf897a09769db2b",
+  "globals": {
+    "hero_cards": [192, 936, 114, 83],
+    "board_cards": [109, 472, 280, 81],
+    "pot": [198, 278, 104, 23],
+    "room_rules": [122, 590, 253, 103],
+    "table_logo": [211, 345, 76, 68]
+  },
+  "slots": [
+    {"slot": 0, "avatar": [213, 154, 72, 68], "stack": [211, 225, 76, 22]},
+    {"slot": 1, "avatar": [423, 296, 74, 71], "stack": [423, 370, 75, 22]},
+    {"slot": 2, "avatar": [423, 454, 74, 68], "stack": [423, 527, 75, 22]},
+    {"slot": 3, "avatar": [423, 611, 74, 68], "stack": [423, 684, 75, 22]},
+    {"slot": 4, "avatar": [213, 839, 72, 70], "stack": [211, 914, 76, 22]},
+    {"slot": 5, "avatar": [4, 611, 72, 68], "stack": [4, 684, 73, 22]},
+    {"slot": 6, "avatar": [4, 454, 72, 68], "stack": [4, 527, 73, 22]},
+    {"slot": 7, "avatar": [4, 296, 72, 71], "stack": [4, 370, 73, 22]}
+  ]
+}

@@ -116,6 +116,9 @@ class RealtimePipeline:
         hand_boundary_policy: HandBoundaryPolicy | None = None,
         new_hand_state_factory: Callable[[], PokerState] | None = None,
         monotonic_clock: Callable[[], float] = time.monotonic,
+        equity_input_guard: (
+            Callable[[PokerState, RawObservation], str | None] | None
+        ) = None,
     ) -> None:
         if not callable(getattr(frame_source, "next_frame", None)):
             raise TypeError("frame_source must provide next_frame()")
@@ -156,8 +159,12 @@ class RealtimePipeline:
         if not callable(monotonic_clock):
             raise TypeError("monotonic_clock must be callable")
         self._monotonic_clock = monotonic_clock
+        if equity_input_guard is not None and not callable(equity_input_guard):
+            raise TypeError("equity_input_guard must be callable or None")
+        self._equity_input_guard = equity_input_guard
         self._previous_obs: RawObservation | None = None
         self._current_analysis: RealtimeAnalysis | None = None
+        self._last_presented_analysis: RealtimeAnalysis | None = None
 
     def step(self) -> PipelineStep | None:
         """Advance one frame. Returns None when the frame source is exhausted."""
@@ -165,7 +172,11 @@ class RealtimePipeline:
         started = clock()
 
         mark = clock()
-        frame = self._frame_source.next_frame()
+        try:
+            frame = self._frame_source.next_frame()
+        except Exception:
+            self.invalidate_capture()
+            raise
         capture_ms = (clock() - mark) * 1000.0
         if frame is None:
             return None
@@ -266,6 +277,17 @@ class RealtimePipeline:
         )
         if equity_ms is not None:
             stages += ((STAGE_EQUITY, equity_ms),)
+        if self._equity_input_guard is not None and self._previous_obs is not None:
+            reason = self._equity_input_guard(self._latest_state(), self._previous_obs)
+            if reason is not None:
+                analysis = replace(analysis, equity=EquitySnapshot(
+                    0.0, 0.0, unavailable_reason=reason,
+                    basis="uniform_random_active_opponents",
+                ))
+        # Preserve the computational cache separately: per-frame confidence
+        # and guard decisions must be reflected by latest_analysis(), without
+        # poisoning reusable equity when a temporary guard later clears.
+        self._last_presented_analysis = analysis
         return PipelineStep(
             frame_seq=frame.frame_seq,
             analysis=analysis,
@@ -287,7 +309,15 @@ class RealtimePipeline:
         self._orchestrator.process_observation(obs)
         state = self._latest_state()
         equity_started = clock()
-        equity = self._compute_equity(state)
+        reason = (
+            self._equity_input_guard(state, obs)
+            if self._equity_input_guard is not None else None
+        )
+        equity = (
+            EquitySnapshot(0.0, 0.0, unavailable_reason=reason,
+                           basis="uniform_random_active_opponents")
+            if reason is not None else self._compute_equity(state)
+        )
         equity_ms = (clock() - equity_started) * 1000.0
         snapshot = RealtimeAnalysis(
             frame_seq=frame.frame_seq,
@@ -324,7 +354,26 @@ class RealtimePipeline:
         return self._equity_strategy.compute(state)
 
     def latest_analysis(self) -> RealtimeAnalysis | None:
-        return self._current_analysis
+        """Return the latest presented snapshot, not an older calculation."""
+        return self._last_presented_analysis
+
+    def invalidate_capture(self) -> None:
+        """Known source failure invalidates current evidence, not hand history."""
+        reset = getattr(self._vision, "reset_temporal", None)
+        if callable(reset):
+            reset()
+        self._temporal_consensus.reset_pending()
+        self._previous_obs = None
+        latest = self._last_presented_analysis
+        if latest is not None:
+            self._last_presented_analysis = replace(
+                latest,
+                confidence=ConfidenceSnapshot(
+                    0.0, tuple((name, "unknown")
+                               for name, _ in latest.confidence.field_status)),
+                equity=EquitySnapshot(
+                    0.0, 0.0, unavailable_reason="capture_unavailable"),
+            )
 
     def current_state(self) -> PokerState:
         """Return the canonical state backing the latest live analysis."""

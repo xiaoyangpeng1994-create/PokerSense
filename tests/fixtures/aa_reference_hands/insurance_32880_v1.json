@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source_sha256": "2638c3ea894fa6a342947b9c4a06b5d7746a6512360f4ef7d79a387fe89da82f",
+  "review_kind": "manual_visible_insurance_and_settlement_window",
+  "independent_holdout": false,
+  "quote_frame": 32820,
+  "purchase_notice_frame": 32880,
+  "settlement_frame": 32910,
+  "quote": {"outs": 13, "odds_multiplier": "1.8", "insured_pot": "626", "own_investment_in_quote": "313", "premium": "174", "displayed_compensation": "313"},
+  "purchase_notice_text": "投保174",
+  "turn_board": ["Kc", "5d", "Ac", "9h"],
+  "hero": ["3d", "Kd"],
+  "insured_opponent": ["9c", "8c"],
+  "other_revealed_cards_at_purchase_notice": ["Ah", "Qh", "2c", "2d"],
+  "displayed_outs": ["8h", "8d", "9d", "8s", "3c", "9s", "4c", "5c", "6c", "7c", "Tc", "Jc", "Qc"],
+  "river": "6h",
+  "displayed_total_pot": "1264",
+  "displayed_pot_components": ["329", "174", "626", "135"],
+  "before_balances": {"0": "131", "1": "516", "3": "0", "4": "909", "5": "0", "6": "351", "7": "1262", "8": "0"},
+  "after_balances": {"0": "131", "1": "651", "3": "0", "4": "909", "5": "452", "6": "351", "7": "1262", "8": "503"},
+  "excluded_waiting_slot": 2,
+  "limitations": ["Settlement window only; not complete betting history.", "Other revealed cards are verified by frame32880, not claimed available at earlier decisions.", "135 credit matches a visible component but refund semantics still require action reconstruction.", "Insurance premium and a pot component both read174; they remain distinct semantic fields.", "No general rake rate, trigger policy or rounding policy is inferred."]
+}

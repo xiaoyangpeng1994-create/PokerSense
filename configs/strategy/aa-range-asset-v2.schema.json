@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PokerSense AA Concrete Range Asset v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "asset_id", "asset_version", "asset_status", "rule_fingerprint", "source", "limitations", "nodes"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "asset_id": {"type": "string", "minLength": 1},
+    "asset_version": {"type": "string", "minLength": 1},
+    "asset_status": {"enum": ["test_only", "shadow_reviewed", "live_approved"]},
+    "rule_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "revision", "license_spdx"],
+      "properties": {
+        "url": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1},
+        "license_spdx": {"type": "string", "minLength": 1}
+      }
+    },
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["node_id", "player_count", "position", "stack_bb", "action_line", "prior", "action_likelihoods", "confidence", "effective_sample_size", "evidence"],
+        "properties": {
+          "node_id": {"type": "string", "minLength": 1},
+          "player_count": {"enum": [6, 7, 8]},
+          "position": {"enum": ["SB", "BB", "UTG", "UTG1", "LJ", "HJ", "CO", "BTN"]},
+          "stack_bb": {"type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?$"},
+          "action_line": {"type": "string", "minLength": 1},
+          "prior": {"$ref": "#/$defs/priorRows"},
+          "action_likelihoods": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "fold": {"$ref": "#/$defs/likelihoodRows"},
+              "check": {"$ref": "#/$defs/likelihoodRows"},
+              "call": {"$ref": "#/$defs/likelihoodRows"},
+              "aggressive": {"$ref": "#/$defs/likelihoodRows"},
+              "all_in": {"$ref": "#/$defs/likelihoodRows"}
+            }
+          },
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "effective_sample_size": {"type": "integer", "minimum": 0},
+          "evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "priorRows": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["combo", "weight"],
+        "properties": {
+          "combo": {"type": "string", "pattern": "^[2-9TJQKA][cdhs][2-9TJQKA][cdhs]$"},
+          "weight": {"type": "string"}
+        }
+      }
+    },
+    "likelihoodRows": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["combo", "likelihood"],
+        "properties": {
+          "combo": {"type": "string", "pattern": "^[2-9TJQKA][cdhs][2-9TJQKA][cdhs]$"},
+          "likelihood": {"type": "string"}
+        }
+      }
+    }
+  }
+}

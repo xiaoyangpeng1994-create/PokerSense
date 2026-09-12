@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "hand_id": "wpk_session002_acqh_allin_01",
+  "reviewer": "codex-visual-review",
+  "single_board_reviewed": true,
+  "runout_count": 1,
+  "chip_unit": "1",
+  "scope": "One observed board through settlement; chip unit is a reviewed-case accounting grid, not a global WPK rule. Cash timestamps mean first visible source frames, not server transaction times.",
+  "reveal_evidence": {
+    "0": "show",
+    "6": "show"
+  },
+  "board_evidence": {
+    "river": "river"
+  },
+  "insurance_notices": [
+    {
+      "evidence": "insured",
+      "status": "insured_notice",
+      "amount": "12"
+    },
+    {
+      "evidence": "river",
+      "status": "missed_insurance_premium_deduction_announced",
+      "amount": null
+    }
+  ],
+  "cash_observations": [
+    {
+      "evidence": "hero_credit",
+      "balances": {
+        "0": "324"
+      }
+    },
+    {
+      "evidence": "refund_credit",
+      "balances": {
+        "6": "238"
+      }
+    },
+    {
+      "evidence": "cash_all",
+      "balances": {
+        "0": "324",
+        "1": "358",
+        "2": "220",
+        "3": "365",
+        "4": "194",
+        "5": "726",
+        "6": "238",
+        "7": "197"
+      }
+    }
+  ],
+  "next_hand_first_post_evidence": "next_post",
+  "visibility_intervals": {
+    "hero_credit_last_zero": "hero_before",
+    "hero_credit_first_visible": "hero_credit",
+    "refund_last_masked": "refund_before",
+    "refund_first_visible": "refund_credit"
+  },
+  "evidence": {
+    "show": {
+      "window": "hand",
+      "source_frame": 8700,
+      "image_sha256": "5b2af0bb58955071d690216376ee129cb1a567f069e37908d7b1d839f347c0fb",
+      "pixel_sha256": "12fd7fd104dd3ded0bd82229b469f4f47063b1b44b2bd9e508320bb1ae3c682b"
+    },
+    "insured": {
+      "window": "hand",
+      "source_frame": 8720,
+      "image_sha256": "10e2ea06c3b900a615ccace70c8a332859eb14a040259ff5412705584f83dad6",
+      "pixel_sha256": "c9e6a9bd29267f33644a9f8a1c431860184bfe368ead8ff8c641179cb0a29edd"
+    },
+    "river": {
+      "window": "hand",
+      "source_frame": 8760,
+      "image_sha256": "6a28e8f4f45e83f78776ba1a4faee90ec2ed0c07c0663888d60fbf3132d10ec4",
+      "pixel_sha256": "7a3913f78b29d3983fa1e931b628f9d9a31108f7154b43ae1211e9961cac7864"
+    },
+    "hero_before": {
+      "window": "cash",
+      "source_frame": 8792,
+      "image_sha256": "8e1891baa84edc8678fd4be6318b44f36bd96e17e207c7bfac8811d9d27cbb0d",
+      "pixel_sha256": "7ed80025b250e03b52f118509cc72c1b08504b74bbf4a37f80e5ba5b00873b62"
+    },
+    "hero_credit": {
+      "window": "cash",
+      "source_frame": 8793,
+      "image_sha256": "703ef91690d01718f925e9066ec8b6792b521658b2231c4c5c76210c8890df18",
+      "pixel_sha256": "4021f938e20b7a04821dfba11b82f5aff70df4a60d56330131798b649c9fb2cc"
+    },
+    "refund_before": {
+      "window": "cash",
+      "source_frame": 8832,
+      "image_sha256": "4e41f9ce88d09fbd0b9230fb914615a7416d5e1bef1cdb4eeef2fe7e4a92715c",
+      "pixel_sha256": "035851bd1ef566c8f42695a7eb6e4107c8ca4848fba5437f829e68ff2cac0d66"
+    },
+    "refund_credit": {
+      "window": "cash",
+      "source_frame": 8833,
+      "image_sha256": "0e26860050219d118c6dc31de82f43721cba587b7f0048702207ae57f207a739",
+      "pixel_sha256": "eedb392d83b326860d6fef300d1e1e0ce5249d311aeb38b0a7198aa69971bb8e"
+    },
+    "cash_all": {
+      "window": "cash",
+      "source_frame": 8835,
+      "image_sha256": "0e26860050219d118c6dc31de82f43721cba587b7f0048702207ae57f207a739",
+      "pixel_sha256": "eedb392d83b326860d6fef300d1e1e0ce5249d311aeb38b0a7198aa69971bb8e"
+    },
+    "next_post": {
+      "window": "cash",
+      "source_frame": 8836,
+      "image_sha256": "1aabe7ffa98d688177a1e8d3df4a06e9d079bdbb2b5c4925dfeb5822dc4e83dc",
+      "pixel_sha256": "6d7fff3da370c4a866f85e2222fd7b7ea29501a1a328cbd380930bda201fda6f"
+    }
+  }
+}

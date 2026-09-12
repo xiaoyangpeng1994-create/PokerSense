@@ -98,13 +98,16 @@ from poker_engine.state_engine.platform_mapping import (
     PlatformSeatMapping,
 )
 from poker_engine.strategy.action_line import build_action_line_resolver
-from poker_engine.strategy.contracts import GameConfig, GameType
 from poker_engine.strategy.orchestration import StrategyOrchestrator
 from poker_engine.strategy.registry import build_strategy_router
 
 from .errors import LiveCaptureError
+from .equity_guard import build_equity_input_guard
 from .serialize import DesktopFrame
 from .strategy_live import LiveStrategySession
+from .table_rules import (
+    TableRulesResult, load_user_table_rules, validate_table_rules, table_rules_revision,
+)
 
 
 def _resource_root() -> Path:
@@ -416,7 +419,10 @@ def load_calibration(
                         heads,
                         rank_floor=calibrated.get("rank_floor", 0.0),
                         suit_floor=calibrated.get("suit_floor", 0.3),
-                    )
+                    ),
+                    max_frame_gap_seconds=calibrated.get("max_frame_gap_seconds", 1.0),
+                    accept_candidates=not calibrated.get(
+                        "requires_revalidation", False),
                 )
                 fused_card_pipeline = True
             except (FileNotFoundError, ValueError, OSError):
@@ -545,7 +551,8 @@ def load_calibration(
         template_set_version=f"{platform}-v1",
         calibration_version=3,
         recognizer_versions={
-            "card": "1", "amount": "2", "stack": "1", "dealer": "1",
+            "card": "gray-fused-v4" if fused_card_pipeline else "1",
+            "amount": "2", "stack": "1", "dealer": "1",
             "action": "2", "occupancy": "1", "actor": "1",
             "street": "2", "board": "2",
         },
@@ -633,6 +640,7 @@ def build_pipeline(
     device_index: int = 0,
     api: str = "MSMF",
     normalization=None,
+    frame_source=None,
 ) -> RealtimePipeline:
     """Assemble a pipeline reading raw portrait frames from the capture source.
 
@@ -657,14 +665,26 @@ def build_pipeline(
         )
 
     table_map, vision = load_calibration(platform, layout)
+    if source == "capture-card":
+        from poker_engine.perceptual.capture.normalization import NormalizationConfig
+        if normalization is None:
+            path = _REPO_ROOT / "configs/vision" / platform / "normalization.json"
+            normalization = NormalizationConfig.from_json(
+                path.read_text(encoding="utf-8")
+            )
+        if normalization.output_size != table_map.reference_size:
+            raise LiveCaptureError(
+                "capture normalization does not match calibrated canvas"
+            )
     measured = load_measured_calibrations(
         _REPO_ROOT / "configs" / "vision" / platform
     )
     seat_mapping = load_platform_seat_mapping(platform, layout)
+    confidence_gate = build_confidence_gate(measured)
     orchestrator = ApplicationOrchestrator(
         state_engine=PlatformMappedStateEngine(seat_mapping),
         hand_memory=InMemoryHandMemory(),
-        confidence_gate=build_confidence_gate(measured),
+        confidence_gate=confidence_gate,
     )
     next_hand_number = 1
 
@@ -674,15 +694,16 @@ def build_pipeline(
         return _seed_state(hand_id=f"live-{next_hand_number}")
 
     orchestrator.start_hand(_seed_state(hand_id="live-1"))
-    frame_source = DeviceFrameSource(
-        build_capture_backend(
-            source,
-            device_index=device_index,
-            api=api,
-            normalization=normalization,
-        ),
-        device_serial,
-    )
+    if frame_source is None:
+        frame_source = DeviceFrameSource(
+            build_capture_backend(
+                source,
+                device_index=device_index,
+                api=api,
+                normalization=normalization,
+            ),
+            device_serial,
+        )
     return RealtimePipeline(
         frame_source,
         vision,
@@ -706,6 +727,7 @@ def build_pipeline(
             "slot_occupancies": 2,
         },
         new_hand_state_factory=next_hand_state,
+        equity_input_guard=build_equity_input_guard(confidence_gate, seat_mapping),
     )
 
 
@@ -714,7 +736,8 @@ class LiveStreamHealth:
     """Observable health of the capture loop.
 
     Emitted through :func:`live_analysis_stream`'s ``on_health`` hook so a
-    caller can alert or degrade without the stream changing what it yields.
+    caller can alert or log failures. After a previously presented frame,
+    the stream also yields an unavailable snapshot before retry backoff.
     ``exhausted`` means the frame source ran out (a finite replay), which is
     a clean stop rather than a failure.
     """
@@ -801,19 +824,9 @@ async def live_analysis_stream(
     # growth never touches this wiring again.  When no registered Provider
     # covers a spot, advice still emits an auditable ABSTAIN rather than
     # inventing a strategy.
-    strategy_session = LiveStrategySession(
-        StrategyOrchestrator(build_strategy_router()),
-        GameConfig(
-            variant="NLHE",
-            game_type=GameType.CASH,
-            max_seats=8,
-            dealt_player_count=8,
-            small_blind=ChipAmount("1"),
-            big_blind=ChipAmount("2"),
-            minimum_chip=ChipAmount("1"),
-        ),
-        action_line_resolver=build_action_line_resolver(),
-    )
+    rules_key = None
+    rules = TableRulesResult(None, "table_rules_unverified")
+    strategy_session = None
     if isinstance(interval_seconds, bool) or not isinstance(
         interval_seconds, (int, float)
     ):
@@ -840,6 +853,17 @@ async def live_analysis_stream(
             # instead of tearing the whole stream down on one dropped frame.
             consecutive_failures += 1
             total_failures += 1
+            if strategy_session is not None:
+                strategy_session.invalidate()
+            latest = getattr(pipeline, "latest_analysis", None)
+            unavailable = latest() if callable(latest) else None
+            if unavailable is not None:
+                # Deliver the invalidated snapshot before backoff. It reuses
+                # the last captured frame id, not a fabricated new frame.
+                yield DesktopFrame(
+                    unavailable, advice_unavailable_reason="capture_unavailable",
+                    table_rules_revision=rules_key,
+                )
             if on_health is not None:
                 on_health(
                     LiveStreamHealth(
@@ -876,11 +900,45 @@ async def live_analysis_stream(
             return
         consecutive_failures = 0
         backoff = float(backoff_initial_seconds)
-        yield strategy_session.frame(
-            step.analysis,
-            pipeline.current_state(),
-            action_history=pipeline.action_history(),
-        )
+        try:
+            document = load_user_table_rules(
+                _REPO_ROOT / "configs/game/wpk-capture-card.json"
+            )
+            next_key = table_rules_revision(document)
+            if next_key != rules_key:
+                rules = validate_table_rules(document)
+                if strategy_session is not None:
+                    strategy_session.invalidate()
+                strategy_session = (
+                    LiveStrategySession(
+                        StrategyOrchestrator(build_strategy_router()),
+                        rules.game_config,
+                        action_line_resolver=build_action_line_resolver(),
+                    ) if rules.game_config is not None else None
+                )
+                rules_key = next_key
+        except (OSError, ValueError):
+            if strategy_session is not None:
+                strategy_session.invalidate()
+            strategy_session = None
+            rules_key = None
+            rules = TableRulesResult(None, "table_rules_invalid")
+        if strategy_session is None:
+            yield DesktopFrame(
+                step.analysis, advice_unavailable_reason=rules.unavailable_reason,
+                table_rules_revision=rules_key,
+            )
+        else:
+            desktop_frame = strategy_session.frame(
+                step.analysis,
+                pipeline.current_state(),
+                action_history=pipeline.action_history(),
+            )
+            yield DesktopFrame(
+                desktop_frame.analysis, desktop_frame.advice,
+                desktop_frame.advice_unavailable_reason,
+                table_rules_revision=rules_key,
+            )
         remaining = interval_seconds - (time.monotonic() - started)
         if remaining > 0:
             await asyncio.sleep(remaining)

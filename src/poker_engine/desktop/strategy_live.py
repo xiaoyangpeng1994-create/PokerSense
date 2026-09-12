@@ -98,6 +98,23 @@ class LiveStrategySession:
         if not isinstance(now, datetime):
             raise TypeError("clock must return a datetime")
         _require_aware_dt(now)
+        active_players = tuple(
+            player for player in state.players
+            if player.status in (PlayerStatus.ACTIVE, PlayerStatus.ALL_IN)
+            and player.has_cards
+        )
+        hero = next((player for player in state.players if player.is_hero), None)
+        unavailable = None
+        if len(active_players) < 2:
+            unavailable = "waiting_for_active_players"
+        elif hero is not None and hero not in active_players:
+            unavailable = "hero_not_in_hand"
+        if unavailable is not None:
+            # No valid DecisionContext exists during initial recognition or
+            # after a hand ends. Do not invent two players to satisfy Advice's
+            # contract, and never retain a previous hand's actionable result.
+            self.invalidate()
+            return DesktopFrame(analysis, advice_unavailable_reason=unavailable)
         quality_key = (
             analysis.confidence.overall_confidence,
             analysis.confidence.field_status,
@@ -200,6 +217,17 @@ class LiveStrategySession:
     @property
     def current_context(self) -> DecisionContext | None:
         return self._context
+
+    def invalidate(self) -> None:
+        """Discard all old rules/state outputs before a live configuration change."""
+        if self._slow_handle is not None:
+            self._slow_handle.future.cancel()
+        self._slow_handle = None
+        self._context = None
+        self._advice = None
+        self._quality_key = None
+        self._action_history = ()
+        self._math_report = {}
 
 
 __all__ = ["ActionLineResolver", "LiveStrategySession"]

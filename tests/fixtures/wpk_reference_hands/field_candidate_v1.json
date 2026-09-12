@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "canvas": [498, 1080],
+  "scope": "Offline development geometry measured on the AcQh hand; not production calibration.",
+  "action_floor": 0.85,
+  "action_margin": 0.10,
+  "slots": [
+    {"slot": 0, "badge": [210, 815, 78, 28], "avatar": [214, 865, 70, 30], "stack": [219, 1046, 60, 21]},
+    {"slot": 1, "badge": [9, 580, 78, 28], "avatar": [13, 627, 70, 30], "stack": [17, 681, 60, 21]},
+    {"slot": 2, "badge": [9, 393, 78, 28], "avatar": [13, 440, 70, 30], "stack": [17, 494, 60, 21]},
+    {"slot": 3, "badge": [9, 213, 78, 28], "avatar": [13, 259, 70, 30], "stack": [17, 314, 60, 21]},
+    {"slot": 4, "badge": [210, 112, 78, 28], "avatar": [214, 159, 70, 30], "stack": [219, 214, 60, 21]},
+    {"slot": 5, "badge": [411, 213, 78, 28], "avatar": [416, 259, 70, 30], "stack": [421, 314, 60, 21]},
+    {"slot": 6, "badge": [411, 393, 78, 28], "avatar": [416, 440, 70, 30], "stack": [421, 494, 60, 21]},
+    {"slot": 7, "badge": [411, 580, 78, 28], "avatar": [416, 627, 70, 30], "stack": [421, 681, 60, 21]}
+  ],
+  "new_templates": [
+    {"action": "fold", "source_frame": 8500, "rect": [232, 164, 34, 20]},
+    {"action": "all_in", "source_frame": 8700, "rect": [222, 868, 54, 24]}
+  ]
+}

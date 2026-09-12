@@ -223,3 +223,37 @@ def test_analysis_and_state_identity_mismatch_is_rejected():
         assert str(exc) == "analysis and canonical state identity must match"
     else:
         raise AssertionError("identity mismatch must fail")
+
+
+def test_initial_empty_table_withholds_advice_and_can_recover():
+    state = _state()
+    waiting = replace(state, players=tuple(
+        replace(p, status=PlayerStatus.SITTING_OUT, has_cards=False)
+        for p in state.players
+    ), hero_cards=(), actor=None, state_version=0)
+    provider = FakeProvider(
+        "live-fast", "v1", capability((2,)),
+        lambda context: hit_result(candidate(
+            context, provider_id="live-fast", provider_version="v1")),
+    )
+    session = LiveStrategySession(
+        StrategyOrchestrator(StrategyRouter((provider,))), _config(),
+        clock=lambda: NOW, action_line_resolver=lambda s, h: "unopened",
+    )
+    frame = session.frame(_analysis(waiting, valid=False), waiting)
+    assert frame.advice is None
+    assert frame.advice_unavailable_reason == "waiting_for_active_players"
+    assert session.current_context is None
+    ready = session.frame(_analysis(state), state)
+    assert ready.advice.status is AdviceStatus.READY
+    ended = replace(state, state_version=2, players=(
+        replace(state.players[0], status=PlayerStatus.FOLDED, has_cards=False),
+        state.players[1],
+    ))
+    frame = session.frame(_analysis(ended), ended)
+    assert frame.advice is None
+    assert session.current_context is None
+    from poker_engine.desktop.serialize import desktop_frame_to_dict
+    payload = desktop_frame_to_dict(frame, now=NOW)
+    assert "advice" not in payload
+    assert payload["advice_unavailable_reason"] == "waiting_for_active_players"

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "hand_id": "aa8_dev_56dd_001",
+  "audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "registry_sha256": "97d8319d96506ad8681e6c7b3f13ff80cc0280f71c5e27da5081995f90cb5877",
+  "role": "development",
+  "opening_slots": [0, 1, 2, 3, 4, 5, 7],
+  "seed_frame": 1320,
+  "seed_pot": "23",
+  "seed_wagers": {"0":"1","1":"2","2":"4","3":"0","4":"2","5":"0","7":"0"},
+  "seed_collected_pot": "14",
+  "notes": [
+    "Manual visual reference, not recognizer output or independent holdout.",
+    "Each window is (last reviewed pre-action frame, reviewed post-action frame]; not exact first-visible timing.",
+    "UI badge 加注 maps to canonical bet when no current-street wager exists.",
+    "Blue Hero 加注 control is an available action, not a completed action.",
+    "Initial posting components and mushroom routing remain unresolved; seed amounts are visible observations.",
+    "All-in is a stack condition, not necessarily a raise: Hero river action is a short call."
+  ],
+  "streets": [
+    {"street":"preflop","board":[],"first_actor":3,"end_pot":"115","actions":[
+      {"slot":3,"kind":"raise","ui":"加注","debit":"20","window":[1440,1470],"pot_after":"43"},
+      {"slot":4,"kind":"call","ui":"跟注","debit":"18","window":[1530,1560],"pot_after":"61"},
+      {"slot":5,"kind":"call","ui":"跟注","debit":"20","window":[1560,1590],"pot_after":"81"},
+      {"slot":7,"kind":"fold","ui":"弃牌","debit":"0","window":[1710,1740],"pot_after":"81"},
+      {"slot":0,"kind":"fold","ui":"弃牌","debit":"0","window":[1800,1830],"pot_after":"81"},
+      {"slot":1,"kind":"call","ui":"跟注","debit":"18","window":[1890,1920],"pot_after":"99"},
+      {"slot":2,"kind":"call","ui":"跟注","debit":"16","window":[1950,1980],"pot_after":"115"}
+    ]},
+    {"street":"flop","board":["5h","6c","6s"],"board_frame":2070,"first_actor":1,"end_pot":"289","actions":[
+      {"slot":1,"kind":"check","ui":"看牌","debit":"0","window":[2070,2100],"pot_after":"115"},
+      {"slot":2,"kind":"check","ui":"看牌","debit":"0","window":[2190,2220],"pot_after":"115"},
+      {"slot":3,"kind":"check","ui":"看牌","debit":"0","window":[2280,2310],"pot_after":"115"},
+      {"slot":4,"kind":"bet","ui":"加注","debit":"58","window":[2370,2400],"pot_after":"173"},
+      {"slot":5,"kind":"call","ui":"跟注","debit":"58","window":[2460,2490],"pot_after":"231"},
+      {"slot":1,"kind":"call","ui":"跟注","debit":"58","window":[2610,2640],"pot_after":"289"},
+      {"slot":2,"kind":"fold","ui":"弃牌","debit":"0","window":[2670,2700],"pot_after":"289"},
+      {"slot":3,"kind":"fold","ui":"弃牌","debit":"0","window":[2760,2790],"pot_after":"289"}
+    ]},
+    {"street":"turn","board":["5h","6c","6s","Tc"],"board_frame":2820,"first_actor":1,"end_pot":"289","actions":[
+      {"slot":1,"kind":"check","ui":"看牌","debit":"0","window":[2850,2880],"pot_after":"289"},
+      {"slot":4,"kind":"check","ui":"看牌","debit":"0","window":[2970,3000],"pot_after":"289"},
+      {"slot":5,"kind":"check","ui":"看牌","debit":"0","window":[3000,3030],"pot_after":"289"}
+    ]},
+    {"street":"river","board":["5h","6c","6s","Tc","3d"],"board_frame":3060,"first_actor":1,"end_pot":"623","actions":[
+      {"slot":1,"kind":"bet","ui":"All in","all_in":true,"debit":"214","window":[3090,3120],"pot_after":"503"},
+      {"slot":4,"kind":"call","ui":"All in","all_in":true,"debit":"120","window":[3166,3168],"pot_after":"623"},
+      {"slot":5,"kind":"fold","ui":"弃牌","debit":"0","window":[3170,3172],"pot_after":"623"}
+    ]}
+  ],
+  "expected_unmatched_return": "94",
+  "expected_contested_pot_before_unallocated_deduction": "529",
+  "exact_event_frames_verified": false,
+  "automatic_recognition_verified": false,
+  "full_visual_acceptance": false
+}

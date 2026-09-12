@@ -1,0 +1,13 @@
+{
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "scope": "All82 extracted transition crops visually reviewed after initial probe; development rescore, not independent holdout. Location truth remains lower under dimming even when candidate abstains.",
+  "templates": {"lower": 11000, "raised": 10700},
+  "floor": 0.70,
+  "intervals": [
+    {"start": 10530, "end": 10541, "location": "lower", "visible_digits": "0"},
+    {"start": 10542, "end": 10580, "location": "raised", "visible_digits": "0", "context": "buy-in then waiting-approval placeholder, not playable cash"},
+    {"start": 10860, "end": 10870, "location": "raised", "visible_digits": "200"},
+    {"start": 10871, "end": 10871, "location": "lower", "visible_digits": "200"},
+    {"start": 10872, "end": 10890, "location": "lower", "visible_digits": "160", "context": "dimming from10874; BOMB POT overlay confirmed10880, rules not inferred"}
+  ]
+}

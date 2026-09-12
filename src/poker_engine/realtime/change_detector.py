@@ -27,6 +27,8 @@ _TRACKED = (
     "stacks",
     "bet_size",
     "action",
+    "actor",
+    "dealer_pos",
 )
 
 
@@ -60,6 +62,21 @@ def detect_change(previous: RawObservation, current: RawObservation) -> ChangeRe
             continue
         if prev_val is None or prev_val != curr_val:
             changed_fields.append(name)
+
+    # A slot may change without changing the aggregate field (for example a
+    # different player acts, or the dealer moves while card/pot values match).
+    # Losing validity still clears presentation without rewriting history.
+    for name in ("slot_stacks", "slot_actions", "slot_occupancies"):
+        old = {
+            slot.slot_id: slot.field.value for slot in getattr(previous, name)
+            if slot.field.validation_status is ValidationStatus.VALID
+        }
+        for slot in getattr(current, name):
+            if (slot.field.validation_status is ValidationStatus.VALID
+                    and (slot.slot_id not in old
+                         or slot.field.value != old[slot.slot_id])):
+                changed_fields.append(name)
+                break
 
     return ChangeReport(
         changed=bool(changed_fields),

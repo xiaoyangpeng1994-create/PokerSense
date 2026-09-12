@@ -1,0 +1,10 @@
+{
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "scope": "Three later frames visually labeled before candidate check; used previously for card development, not a pristine project holdout. No action or stack retuning on these frames.",
+  "stack_semantics": "Visible numeric text only. Waiting-review and buy-in placeholder zero does not establish actual usable stack or player participation.",
+  "checkpoints": [
+    {"source_frame": 10400, "actions": ["all_in", "fold", "fold", null, null, "fold", "fold", "fold"], "stacks": ["0", "330", "192", "0", "0", "714", "249", "336"]},
+    {"source_frame": 11000, "actions": [null, null, null, null, null, null, null, null], "stacks": ["160", "266", "150", "742", null, "672", "185", "290"]},
+    {"source_frame": 11340, "actions": [null, null, "call", null, null, null, null, null], "stacks": ["156", "260", "148", "740", "0", "485", "0", "926"], "placeholder_zero_slots": [4, 6]}
+  ]
+}

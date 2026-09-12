@@ -30,6 +30,10 @@ from .errors import LiveCaptureError
 from .live import DEFAULT_DEVICE_SERIAL, live_analysis_stream
 from .serialize import DesktopFrame, desktop_frame_to_dict
 from .settings import load_settings, save_language
+from .table_rules import (
+    load_user_table_rules, save_user_table_rules, validate_table_rules,
+    table_rules_revision,
+)
 
 
 def _resolve_ui_dir() -> Path:
@@ -110,6 +114,30 @@ def build_stream_factory(
 
 def create_app(stream_factory: AnalysisStreamFactory = _default_stream) -> FastAPI:
     app = FastAPI()
+
+    def rules_view(document):
+        result = validate_table_rules(document)
+        return {"rules": document, "rules_supported": result.game_config is not None,
+                "revision": table_rules_revision(document),
+                "unavailable_reason": result.unavailable_reason,
+                "pending_fields": result.pending_fields}
+
+    @app.get("/table-rules")
+    def get_table_rules() -> dict:
+        try:
+            from .live import _resource_root
+            return rules_view(load_user_table_rules(
+                _resource_root() / "configs/game/wpk-capture-card.json"
+            ))
+        except (ValueError, OSError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.put("/table-rules")
+    def put_table_rules(payload: dict) -> dict:
+        try:
+            return rules_view(save_user_table_rules(payload))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/settings")
     def get_settings() -> dict[str, str]:

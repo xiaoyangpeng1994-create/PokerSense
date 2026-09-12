@@ -10,6 +10,7 @@ No real platform is touched.
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
 
 import pytest
 
@@ -94,6 +95,71 @@ def test_realtime_pipeline_state_accumulates_across_streets():
     # board grows 0 -> 3 -> 4 -> 5, street advances preflop -> river.
     assert board_sizes == [0, 3, 4, 5]
     assert [s.value for s in streets] == ["preflop", "flop", "turn", "river"]
+
+
+def test_latest_analysis_cannot_return_stale_card_confidence_after_loss(monkeypatch):
+    frames = tuple(_frame(["QH", "JD", "TC"], ["AS", "KD"], "FLOP", "25", "10",
+                          ("100", "200", "300"), ("CHECK", "BET"), seq)
+                   for seq in range(2))
+    pipe = _build_pipeline(frames)
+    first = pipe.step()
+    original = pipe._vision.process
+
+    def unreadable(frame, table):
+        obs = original(frame, table)
+        return replace(obs, hero_cards=replace(
+            obs.hero_cards, value=None, confidence=0.0,
+            validation_status=ValidationStatus.UNKNOWN))
+
+    monkeypatch.setattr(pipe._vision, "process", unreadable)
+    lost = pipe.step()
+    assert dict(lost.analysis.confidence.field_status)["hero_cards"] == "unknown"
+    assert lost.analysis.state.hero_cards == first.analysis.state.hero_cards
+    assert pipe.latest_analysis() == lost.analysis
+
+
+def test_latest_analysis_matches_guarded_snapshot_without_poisoning_equity_cache():
+    frames = tuple(_frame(["QH", "JD", "TC"], ["AS", "KD"], "FLOP", "25", "10",
+                          ("100", "200", "300"), ("CHECK", "BET"), seq)
+                   for seq in range(3))
+    pipe = _build_pipeline(frames)
+    first = pipe.step()
+    pipe._equity_input_guard = lambda state, obs: "temporary_test_guard"
+    blocked = pipe.step()
+    assert blocked.analysis.equity.unavailable_reason == "temporary_test_guard"
+    assert pipe.latest_analysis() == blocked.analysis
+    pipe._equity_input_guard = None
+    recovered = pipe.step()
+    assert recovered.analysis.equity == first.analysis.equity
+    assert pipe.latest_analysis() == recovered.analysis
+
+
+def test_capture_failure_invalidates_snapshot_and_restarts_consensus(monkeypatch):
+    frames = tuple(_frame(["QH", "JD", "TC"], ["AS", "KD"], "FLOP", "25", "10",
+                          ("100", "200", "300"), ("CHECK", "BET"), seq)
+                   for seq in range(3))
+    pipe = _build_pipeline(frames, hero_confirmation_frames=2)
+    pipe.step()
+    before = pipe.step()
+    assert dict(before.analysis.confidence.field_status)["hero_cards"] == "valid"
+    next_frame = pipe._frame_source.next_frame
+
+    def failed():
+        raise RuntimeError("injected capture interruption")
+
+    resets = []
+    monkeypatch.setattr(pipe._vision, "reset_temporal", lambda: resets.append(True))
+    monkeypatch.setattr(pipe._frame_source, "next_frame", failed)
+    with pytest.raises(RuntimeError, match="injected capture"):
+        pipe.step()
+    unavailable = pipe.latest_analysis()
+    assert unavailable.state == before.analysis.state
+    assert unavailable.equity.unavailable_reason == "capture_unavailable"
+    assert all(status == "unknown" for _, status in unavailable.confidence.field_status)
+    assert resets == [True]
+    monkeypatch.setattr(pipe._frame_source, "next_frame", next_frame)
+    resumed = pipe.step()
+    assert dict(resumed.analysis.confidence.field_status)["hero_cards"] == "unknown"
 
 
 def test_change_detector_skips_duplicate_frames():

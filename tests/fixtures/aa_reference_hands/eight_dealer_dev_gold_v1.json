@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "role": "development",
+  "independent_holdout": false,
+  "full_visual_acceptance": false,
+  "review_method": "Manual full-frame review of the visible white D badge before reading detector output.",
+  "checkpoints": [
+    {"frame": 1320, "source_sha256": "6e4e3a073b698717dca763cb2bdc160f79ce74314aa0213f187871106c580776", "dealer_seat": 7},
+    {"frame": 1500, "source_sha256": "300ea4232761894d5c1b6797373d29db31f299ddd5e3a96555a2a56930fd0bfe", "dealer_seat": 7},
+    {"frame": 2070, "source_sha256": "cf7746f85df0fc08615288f3dc6e5f8b7bdb1e0912e337aabf7c041bf34e7fda", "dealer_seat": 7},
+    {"frame": 2400, "source_sha256": "3c2b381e9e8da740a27961e8a9019a959b720ca61f02a550c6aa42036fbde419", "dealer_seat": 7},
+    {"frame": 2503, "source_sha256": "2893d33a48c59895ac5c530280af621f3cfe6eb9020dd9376aa6ac0e8dc385c2", "dealer_seat": 7},
+    {"frame": 2700, "source_sha256": "43ee2aed85142d8c36bdbf4ce9ca4ad26fe7a880f4026682fd61f532aad8860e", "dealer_seat": 7},
+    {"frame": 3150, "source_sha256": "a0efb710410494ff9a0c4f8c173c573df3a358e08e8cca0914d64963eee19347", "dealer_seat": 7},
+    {"frame": 3319, "source_sha256": "53c3735e823086a6dac94a0e10ca6b6396788b11b5abc3992d8b2d6e00cd72d6", "dealer_seat": 7},
+    {"frame": 3390, "source_sha256": "a8793ec821e64c7744b56a1a31827db40bce3fe702f4f6baf5341b28d339baf4", "dealer_seat": 0},
+    {"frame": 4402, "source_sha256": "ba80fbf4b867b152b8d44eec9069c119c8c92a25b70cb596b3ac61d1f7b63f10", "dealer_seat": 0},
+    {"frame": 4755, "source_sha256": "6c57db276c92f35784594370e43655c72d74391c169a13ecd5bfa2d4dcceba5c", "dealer_seat": 0},
+    {"frame": 5050, "source_sha256": "5cf571fa66a6353e5947ce6739eb6c2f71175468ff2c7e7ed227472516fadae7", "dealer_seat": 0},
+    {"frame": 27469, "source_sha256": "e80f3647b731fe40525815ac3da63ebfd86bab38ccfee5db9275401121590497", "dealer_seat": 4},
+    {"frame": 27499, "source_sha256": "32510abc352dba88394b2153324e35e18e811b264016201bb37f17039a517f32", "dealer_seat": 5},
+    {"frame": 27559, "source_sha256": "8521a8ae962f446f8bf9c45b69a51f55f2ef04d0e2579024da9b3bc7c67d5751", "dealer_seat": 5}
+  ]
+}

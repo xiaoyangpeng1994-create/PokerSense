@@ -7,7 +7,24 @@ const LANGUAGE_STORAGE_KEY = "pokersense.language";
 const FIELD_ORDER = ["hero_cards", "board_cards", "street", "pot", "stacks", "bet_size", "action"];
 const TRANSLATIONS = {
   en: {
-    board: "Board", hero: "Hero", pot: "Pot", winRate: "Win Rate", settings: "Settings",
+    board: "Board", hero: "Hero", pot: "Pot", winRate: "Showdown win rate", settings: "Settings",
+    chips: "chips", randomBasis: "Uniform random ranges · {count} opponents · actions not modeled",
+    equityWaiting: "Waiting for verified cards and all seats.",
+    waitingPlayers: "Waiting for at least two confirmed active players.",
+    heroInactive: "Hero is not active in this hand.",
+    tableRulesPending: "Confirm ante, rake cap and straddle rules before strategy advice.",
+    straddleUnsupported: "Straddle strategy is not supported yet. Advice is withheld.",
+    simulationRules: "Simulation parameters are selected. Confirm the real table rules before using strategy advice.",
+    simulationPreview: "SIMULATION · sample cards and random-range equity only. No capture device is connected.",
+    extraEffectsUnsupported: "Extra table effects are recorded, but their strategy model is not implemented.",
+    tableRulesInvalid: "Table rules could not be loaded. Check the settings.",
+    tableRules: "WPK table rules", rulesMode: "Use", simulationMode: "Simulation assumptions", liveRulesMode: "Confirmed table rules",
+    rulesHint: "Defaults include simulation assumptions. Check them against the current table, then save.",
+    tableSize: "Table size", smallBlind: "Small blind", bigBlind: "Big blind", ante: "Ante per player", minimumChip: "Smallest chip",
+    rakePercent: "Rake (%)", rakeCap: "Rake cap (BB; blank = unknown)", straddle: "Straddle", straddleAmount: "Straddle amount (chips)",
+    straddleNone: "None", straddleMandatory: "Mandatory", straddleOptional: "Optional", straddleUnknown: "Unconfirmed",
+    extraEffects: "Extra rules / bonus effects (notes only)", saveRules: "Save table rules", rulesSaved: "Saved. Previous strategy results have been cleared.",
+    rulesSupportHint: "Saving rules does not imply strategy coverage. Unsupported straddles and bonus effects withhold advice.",
     language: "Language", languageAuto: "System default", languageHint: "Changes are saved automatically.",
     bannerConnecting: "Connecting to the engine…",
     bannerWaiting: "Connected — waiting for the first table frame…",
@@ -26,7 +43,24 @@ const TRANSLATIONS = {
     fields: { hero_cards: "Hero", board_cards: "Board", street: "Street", pot: "Pot", stacks: "Stacks", bet_size: "Bet", action: "Action" },
   },
   zh: {
-    board: "公共牌", hero: "底牌", pot: "底池", winRate: "胜率", settings: "设置",
+    board: "公共牌", hero: "底牌", pot: "底池", winRate: "摊牌胜率", settings: "设置",
+    chips: "筹码", randomBasis: "随机范围 · {count} 名对手 · 尚未结合行动",
+    equityWaiting: "等待确认牌面和全部座位后计算。",
+    waitingPlayers: "正在确认牌局，至少需要两名有效在局玩家。",
+    heroInactive: "本手已不在局，暂不提供行动建议。",
+    tableRulesPending: "前注、抽水封顶与 straddle 规则待确认，暂不输出策略建议。",
+    straddleUnsupported: "straddle 策略尚未接通，暂不输出行动建议。",
+    simulationRules: "当前为模拟参数，请按真实牌桌确认规则后再使用策略建议。",
+    simulationPreview: "模拟演示 · 示例牌面与随机范围胜率，未连接采集卡。",
+    extraEffectsUnsupported: "额外规则已记录，但对应策略模型尚未实现。",
+    tableRulesInvalid: "牌桌规则读取失败，请检查设置。",
+    tableRules: "WPK 牌桌规则", rulesMode: "使用方式", simulationMode: "模拟参数", liveRulesMode: "已按牌桌确认",
+    rulesHint: "默认值含模拟假设，请按当前牌桌调整并保存。",
+    tableSize: "牌桌人数", smallBlind: "小盲", bigBlind: "大盲", ante: "每人前注", minimumChip: "最小筹码单位",
+    rakePercent: "抽水比例（%）", rakeCap: "抽水封顶（BB，留空=未知）", straddle: "Straddle", straddleAmount: "Straddle 金额（筹码）",
+    straddleNone: "无", straddleMandatory: "强制", straddleOptional: "可选", straddleUnknown: "尚未确认",
+    extraEffects: "额外规则 / 暴击说明（仅记录）", saveRules: "保存牌桌规则", rulesSaved: "已保存，旧策略结果已清除。",
+    rulesSupportHint: "保存参数不代表已支持该策略；straddle 和未建模的暴击规则会暂缓行动建议。",
     language: "语言", languageAuto: "跟随系统", languageHint: "更改会自动保存。",
     bannerConnecting: "正在连接引擎…",
     bannerWaiting: "已连接，等待首帧牌桌数据…",
@@ -52,6 +86,7 @@ const els = {
   streetBadge: document.getElementById("street-badge"), boardSlots: document.getElementById("board-slots"),
   heroSlots: document.getElementById("hero-slots"), potValue: document.getElementById("pot-value"),
   winRate: document.getElementById("win-rate"), tieRate: document.getElementById("tie-rate"),
+  equityBasis: document.getElementById("equity-basis"),
   segWin: document.getElementById("seg-win"), segTie: document.getElementById("seg-tie"),
   equityBar: document.querySelector(".equity-bar"), confidenceBadge: document.getElementById("confidence-badge"),
   confidenceValue: document.getElementById("confidence-value"), confidenceFields: document.getElementById("confidence-fields"),
@@ -193,8 +228,26 @@ function addMeta(label, value) {
   els.adviceMeta.append(term, detail);
 }
 
-function renderAdvice(advice) {
-  if (!advice) { els.advicePanel.hidden = true; return; }
+function renderAdvice(advice, unavailableReason = null) {
+  if (!advice) {
+    els.advicePanel.hidden = !unavailableReason;
+    els.advicePanel.dataset.status = "ABSTAIN";
+    els.adviceStatus.textContent = TRANSLATIONS[activeLanguage()].adviceStates.ABSTAIN;
+    els.adviceConfidence.textContent = "";
+    els.adviceHero.replaceChildren(); els.adviceActions.replaceChildren();
+    els.adviceBadges.replaceChildren(); els.adviceMeta.replaceChildren();
+    els.adviceEvidenceContent.textContent = ""; els.adviceEvidence.hidden = true;
+    const reasonKeys = { hero_not_in_hand: "heroInactive",
+      table_rules_unverified: "tableRulesPending",
+      straddle_strategy_not_supported: "straddleUnsupported",
+      simulation_rules_only: "simulationRules",
+      simulation_preview: "simulationPreview",
+      extra_table_effects_not_supported: "extraEffectsUnsupported",
+      table_rules_invalid: "tableRulesInvalid" };
+    els.adviceMessage.textContent = unavailableReason
+      ? t(reasonKeys[unavailableReason] || "waitingPlayers") : "";
+    return;
+  }
   els.advicePanel.hidden = false;
   els.advicePanel.dataset.status = advice.status;
   els.adviceStatus.textContent = TRANSLATIONS[activeLanguage()].adviceStates[advice.status] || advice.status;
@@ -278,6 +331,9 @@ function renderAdvice(advice) {
 }
 
 function render(analysis) {
+  if (pendingRulesRevision && analysis.table_rules_revision !== pendingRulesRevision) {
+    analysis = { ...analysis, advice: null, advice_unavailable_reason: "table_rules_unverified" };
+  } else if (analysis.table_rules_revision === pendingRulesRevision) pendingRulesRevision = null;
   lastAnalysis = analysis;
   showStatus("live", "live");
   const state = analysis.state;
@@ -293,12 +349,16 @@ function render(analysis) {
   els.potValue.replaceChildren();
   if (potKnown) {
     els.potValue.append(document.createTextNode(state.pot));
-    const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "bb";
+    const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = t("chips");
     els.potValue.append(unit);
   } else setEmptyValue(els.potValue, t("notCalibrated"));
   const winPct = analysis.equity.win_rate * 100;
   const tiePct = analysis.equity.tie_rate * 100;
-  if (!heroKnown) {
+  const equityAvailable = heroKnown && analysis.equity.available !== false;
+  els.equityBasis.textContent = !equityAvailable ? t("equityWaiting")
+    : (analysis.equity.basis === "uniform_random_active_opponents"
+      ? t("randomBasis").replace("{count}", analysis.equity.opponent_count) : "");
+  if (!equityAvailable) {
     els.equityBar.classList.add("idle");
     setEmptyValue(els.winRate, "—");
     els.winRate.className = "win idle";
@@ -316,7 +376,7 @@ function render(analysis) {
   els.confidenceValue.textContent = `${t("confidence")} ${(confidence * 100).toFixed(0)}%`;
   els.confidenceBadge.style.background = confidence >= 0.9 ? "var(--good)" : confidence >= 0.6 ? "var(--warn)" : "var(--bad)";
   renderFieldStatuses(Object.fromEntries(analysis.confidence.field_status));
-  renderAdvice(analysis.advice);
+  renderAdvice(analysis.advice, analysis.advice_unavailable_reason);
   els.footerLeft.textContent = `${t("frame")} ${analysis.frame_seq}`;
   els.footerRight.textContent = new Date().toLocaleTimeString(activeLanguage() === "zh" ? "zh-CN" : "en");
 }
@@ -327,6 +387,7 @@ function renderEmpty() {
   setEmptyValue(els.potValue, t("noData")); els.potValue.classList.add("unknown");
   setEmptyValue(els.winRate, "—"); els.winRate.className = "win idle";
   els.tieRate.textContent = `${t("tie")} —`;
+  els.equityBasis.textContent = t("equityWaiting");
   els.segWin.style.width = "0%"; els.segTie.style.width = "0%"; els.equityBar.classList.add("idle");
   setEmptyValue(els.confidenceValue, `${t("confidence")} —`);
   els.confidenceBadge.style.background = "var(--text-faint)";
@@ -362,7 +423,62 @@ function connect() {
   socket.onclose = () => { showStatus("disconnected", "error"); setTimeout(connect, 3000); };
 }
 
-els.settingsButton.addEventListener("click", () => els.settingsDialog.showModal());
+let tableRuleDocument = null;
+let pendingRulesRevision = null;
+const ruleIds = {
+  mode: "rules-mode", table_size: "rules-table-size", small_blind: "rules-small-blind",
+  big_blind: "rules-big-blind", ante: "rules-ante", minimum_chip: "rules-minimum-chip",
+  rake_percent: "rules-rake-percent", rake_cap_bb: "rules-rake-cap",
+  straddle_mode: "rules-straddle-mode", straddle_amount: "rules-straddle-amount",
+  extra_effects: "rules-extra-effects",
+};
+async function loadTableRules() {
+  const feedback = document.getElementById("rules-feedback");
+  const save = document.getElementById("save-table-rules");
+  save.disabled = true;
+  try {
+    const response = await fetch("/table-rules", { cache: "no-store" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.detail || t("tableRulesInvalid"));
+    tableRuleDocument = payload.rules;
+    for (const [field, id] of Object.entries(ruleIds)) {
+      let value = tableRuleDocument[field];
+      if (field === "rake_percent" && value !== null) value = Number(value) * 100;
+      document.getElementById(id).value = value ?? "";
+    }
+    feedback.textContent = "";
+    save.disabled = false;
+  } catch (error) { feedback.textContent = error.message; }
+}
+document.getElementById("save-table-rules").addEventListener("click", async () => {
+  const feedback = document.getElementById("rules-feedback");
+  const button = document.getElementById("save-table-rules");
+  if (!tableRuleDocument || !document.querySelector(".settings-dialog form").reportValidity()) return;
+  const rules = { ...tableRuleDocument };
+  for (const [field, id] of Object.entries(ruleIds)) {
+    const value = document.getElementById(id).value.trim();
+    rules[field] = field === "table_size" ? Number(value)
+      : field === "rake_percent" ? (value ? (Number(value) / 100).toFixed(8) : null)
+      : (["mode", "straddle_mode", "extra_effects"].includes(field) ? value : (value || null));
+  }
+  rules.evidence = { source: "user_settings", mode: rules.mode };
+  button.disabled = true;
+  try {
+    const response = await fetch("/table-rules", { method: "PUT",
+      headers: { "Content-Type": "application/json" }, body: JSON.stringify(rules) });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.detail || t("tableRulesInvalid"));
+    tableRuleDocument = payload.rules;
+    pendingRulesRevision = payload.revision;
+    if (lastAnalysis) {
+      lastAnalysis = { ...lastAnalysis, advice: null, advice_unavailable_reason: payload.unavailable_reason || "table_rules_unverified" };
+      render(lastAnalysis);
+    }
+    feedback.textContent = t("rulesSaved");
+  } catch (error) { feedback.textContent = error.message; }
+  finally { button.disabled = false; }
+});
+els.settingsButton.addEventListener("click", () => { els.settingsDialog.showModal(); loadTableRules(); });
 els.languageSelect.addEventListener("change", () => {
   savedLanguagePreference = els.languageSelect.value;
   // Keep this as an upgrade fallback, but the desktop server is the durable

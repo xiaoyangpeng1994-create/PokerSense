@@ -84,6 +84,41 @@ def test_normalize_rejects_blank_and_tiny():
     assert GlyphNormalizer.normalize(np.zeros((2, 2, 3), np.uint8)) is None
 
 
+@pytest.mark.parametrize("color", [(0, 0, 0), (30, 30, 200)])
+@pytest.mark.parametrize("gain,offset", [(0.4, 0), (0.6, 20)])
+def test_normalize_preserves_shape_under_affine_brightness(color, gain, offset):
+    bright = _glyph("6", color=color)
+    dim = (bright.astype(np.float32) * gain + offset).astype(np.uint8)
+    reference = GlyphNormalizer.normalize(bright)
+    adjusted = GlyphNormalizer.normalize(dim)
+    assert reference is not None and adjusted is not None
+    np.testing.assert_allclose(adjusted, reference, atol=2)
+
+
+@pytest.mark.parametrize("background", [0, 102, 255])
+def test_normalize_abstains_on_flat_backgrounds(background):
+    glyph = np.full((26, 14), background, np.uint8)
+    assert GlyphNormalizer.normalize(glyph) is None
+
+
+def test_normalize_abstains_on_low_contrast():
+    glyph = np.full((26, 14), 102, np.uint8)
+    glyph[5:20, 4:9] = 95
+    assert GlyphNormalizer.normalize(glyph) is None
+
+
+@pytest.mark.parametrize("grayscale", [True, False])
+def test_normalize_does_not_mutate_source(grayscale):
+    glyph = _glyph("6")
+    if grayscale:
+        glyph = cv2.cvtColor(glyph, cv2.COLOR_BGR2GRAY)
+    before = glyph.copy()
+    first = GlyphNormalizer.normalize(glyph)
+    second = GlyphNormalizer.normalize(glyph)
+    np.testing.assert_array_equal(glyph, before)
+    np.testing.assert_array_equal(first, second)
+
+
 # --- colour router -----------------------------------------------------------
 
 
@@ -310,3 +345,166 @@ def test_adapter_keeps_hero_and_board_slots_separate():
     adapter.recognize(sub, ("hero", 0))
     adapter.recognize(sub, ("board", 0))
     assert set(adapter._buffers) == {("hero", 0), ("board", 0)}
+
+
+def test_registered_mean_preserves_inputs_and_repeated_result():
+    glyph = np.full((40, 40), 255, np.float32)
+    cv2.putText(glyph, "A", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, 0, 2)
+    samples = [glyph.copy() for _ in range(4)]
+    before = [sample.copy() for sample in samples]
+    first = FusedSlotBuffer._registered_mean(samples)
+    second = FusedSlotBuffer._registered_mean(samples)
+    for sample, original in zip(samples, before):
+        np.testing.assert_array_equal(sample, original)
+    np.testing.assert_allclose(first, second, atol=1e-5)
+
+
+def test_registration_moves_a_displaced_glyph_back_toward_anchor():
+    anchor = np.full((40, 40), 255, np.float32)
+    cv2.putText(anchor, "A", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, 0, 2)
+    shifted = cv2.warpAffine(
+        anchor, np.float32([[1, 0, 3], [0, 1, 0]]), (40, 40), borderValue=255)
+    unaligned = (anchor + shifted) / 2
+    aligned = FusedSlotBuffer._registered_mean([anchor.copy(), shifted.copy()])
+    assert np.mean(np.abs(aligned - anchor)) < np.mean(np.abs(unaligned - anchor))
+
+
+def test_slot_buffer_bounds_memory_for_a_long_unchanged_hand():
+    buffer = FusedSlotBuffer(BOX, max_glyphs=4)
+    image = _roi_with_card(BOX, "S", color=(10, 10, 10))
+    for _ in range(30):
+        buffer.ingest(image)
+    assert buffer.glyph_count == 4
+    assert len(buffer._rank_glyphs) == 4
+
+
+def test_pending_calibration_withholds_even_a_confident_candidate():
+    from poker_engine.core.value_objects import Card
+    from poker_engine.perceptual.vision.fused_card_adapter import (
+        FusedCardRecognizerAdapter,
+    )
+    from poker_engine.perceptual.vision.protocols import CardRecognition
+
+    class ConfidentRecognizer:
+        def recognize_fused(self, *args):
+            return CardRecognition(value=(Card(Rank.ACE, Suit.CLUBS),),
+                                   raw_score=1.0, slots=())
+
+    adapter = FusedCardRecognizerAdapter(ConfidentRecognizer(), accept_candidates=False)
+    image = _roi_with_card(BOX, "S", color=(10, 10, 10))
+    x0, y0, x1, y1 = BOX
+    for _ in range(4):
+        result = adapter.recognize(image[y0:y1, x0:x1], ("hero", 0))
+    assert result.value is None
+
+
+def _always_ace_adapter():
+    from poker_engine.core.value_objects import Card
+    from poker_engine.perceptual.vision.protocols import CardRecognition
+    from poker_engine.perceptual.vision.fused_card_adapter import (
+        FusedCardRecognizerAdapter,
+    )
+
+    class Recognizer:
+        def recognize_fused(self, *args):
+            return CardRecognition(value=(Card(Rank.ACE, Suit.CLUBS),),
+                                   raw_score=1.0, slots=())
+
+    # Deliberately neutralize the coarse signature gate: fresh glyph evidence
+    # must be mandatory independently of that heuristic.
+    return FusedCardRecognizerAdapter(Recognizer(), slot_gate=255)
+
+
+def test_unreadable_current_frame_cannot_reuse_a_previous_card():
+    adapter = _always_ace_adapter()
+    card = _card("A")
+    for _ in range(3):
+        result = adapter.recognize(card, ("hero", 0))
+    assert result.value is not None
+    blank = np.full_like(card, 255)
+    assert adapter.recognize(blank, ("hero", 0)).value is None
+    assert adapter._buffers[("hero", 0)].fused() is None
+    for _ in range(2):
+        assert adapter.recognize(card, ("hero", 0)).value is None
+    assert adapter.recognize(card, ("hero", 0)).value is not None
+
+
+def test_missing_current_colour_cannot_reuse_cached_colour(monkeypatch):
+    adapter = _always_ace_adapter()
+    card = _card("A")
+    for _ in range(3):
+        adapter.recognize(card, ("hero", 0))
+    monkeypatch.setattr(
+        "poker_engine.perceptual.vision.fused_card_recognizer.ink_red_stat",
+        lambda *args: None)
+    assert adapter.recognize(card, ("hero", 0)).value is None
+
+
+@pytest.mark.parametrize("invalid", [None, np.empty((0, 0, 3), np.uint8),
+                                     np.zeros((78, 53), np.uint8)])
+def test_missing_or_malformed_crop_abstains_and_forgets_history(invalid):
+    adapter = _always_ace_adapter()
+    for _ in range(3):
+        adapter.recognize(_card("A"), ("hero", 0))
+    assert adapter.recognize(invalid, ("hero", 0)).value is None
+    assert ("hero", 0) not in adapter._buffers
+
+
+def test_slot_geometry_change_starts_new_evidence_window():
+    adapter = _always_ace_adapter()
+    card = _card("A")
+    for _ in range(3):
+        adapter.recognize(card, ("hero", 0))
+    resized = cv2.resize(card, (60, 90))
+    assert adapter.recognize(resized, ("hero", 0)).value is None
+
+
+def test_confident_current_identity_cannot_be_outvoted_by_old_fusion():
+    from poker_engine.core.value_objects import Card
+    from poker_engine.perceptual.vision.protocols import CardRecognition
+    from poker_engine.perceptual.vision.fused_card_adapter import (
+        FusedCardRecognizerAdapter,
+    )
+
+    class Recognizer:
+        contradict = False
+        calls = 0
+
+        def recognize_fused(self, *args):
+            self.calls += 1
+            rank = Rank.KING if self.contradict and self.calls % 2 == 0 else Rank.ACE
+            return CardRecognition(value=(Card(rank, Suit.CLUBS),),
+                                   raw_score=.99, slots=())
+
+    model = Recognizer()
+    adapter = FusedCardRecognizerAdapter(model, slot_gate=255)
+    for _ in range(10):
+        result = adapter.recognize(_card("A"), ("hero", 0))
+    assert result.value is not None
+    model.contradict = True
+    assert adapter.recognize(_card("A"), ("hero", 0)).value is None
+    assert adapter._buffers[("hero", 0)].glyph_count == 1
+    assert adapter.identity_conflict_count == 1
+
+
+def test_uncertain_current_read_does_not_invent_an_identity_conflict():
+    from poker_engine.core.value_objects import Card
+    from poker_engine.perceptual.vision.protocols import CardRecognition
+    from poker_engine.perceptual.vision.fused_card_adapter import (
+        FusedCardRecognizerAdapter,
+    )
+
+    class Recognizer:
+        calls = 0
+
+        def recognize_fused(self, *args):
+            self.calls += 1
+            return CardRecognition(
+                value=(Card(Rank.ACE, Suit.CLUBS),) if self.calls % 2 else None,
+                raw_score=.99 if self.calls % 2 else .1, slots=())
+
+    adapter = FusedCardRecognizerAdapter(Recognizer())
+    for _ in range(3):
+        result = adapter.recognize(_card("A"), ("hero", 0))
+    assert result.value is not None
+    assert adapter.identity_conflict_count == 0

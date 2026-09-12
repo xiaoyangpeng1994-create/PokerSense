@@ -24,12 +24,14 @@ recordings and remains ``UNKNOWN`` until that evidence exists.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import time
 from typing import Any, Callable
 
 import numpy as np
 
 from .base import CaptureError, CaptureTarget, CaptureService, Frame, WindowRect
 from .normalization import NormalizationConfig, normalize
+from .pixel_repeat import PixelRepeatObserver
 
 try:
     import cv2  # type: ignore
@@ -109,6 +111,12 @@ class CaptureCardBackend(CaptureService):
         self._detect_signal_loss = detect_signal_loss
         self._factory = video_capture_factory or cv2.VideoCapture
         self._cap: Any | None = None
+        self._pixel_repeat = PixelRepeatObserver()
+
+    @property
+    def pixel_repeat_evidence(self):
+        """Last pixel observation, not proof of current source liveness."""
+        return self._pixel_repeat.evidence
 
     @property
     def device_index(self) -> int:
@@ -146,6 +154,7 @@ class CaptureCardBackend(CaptureService):
 
     def release(self) -> None:
         """Release the underlying device; safe to call multiple times."""
+        self._pixel_repeat.reset()
         if self._cap is not None:
             try:
                 self._cap.release()
@@ -185,6 +194,7 @@ class CaptureCardBackend(CaptureService):
 
         image = np.asarray(frame)
         if self._detect_signal_loss and _is_black_frame(image):
+            self._pixel_repeat.reset()
             raise CaptureError(
                 f"capture-card device {self._device_index} reported signal loss "
                 f"(all-black frame); re-plug the card and confirm the phone is "
@@ -195,7 +205,7 @@ class CaptureCardBackend(CaptureService):
             image = normalize(image, self._normalization)
 
         height, width = image.shape[:2]
-        return Frame(
+        captured = Frame(
             frame_seq=self._next_seq(),
             timestamp=datetime.now(timezone.utc),
             window_id=f"uvc-{self._device_index}",
@@ -204,6 +214,10 @@ class CaptureCardBackend(CaptureService):
             width=width,
             height=height,
         )
+        # Host receipt time/frame id is not an authoritative device sequence.
+        # Track identical pixels for diagnostics, without rejecting static play.
+        self._pixel_repeat.observe(captured.image, captured.frame_seq, time.monotonic())
+        return captured
 
 
 def _parse_device_index(window_id: str) -> int | None:

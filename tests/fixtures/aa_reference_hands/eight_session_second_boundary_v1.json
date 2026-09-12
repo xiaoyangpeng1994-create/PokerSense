@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "hand_id": "aa8_dev_9dQd_002",
+  "role": "development",
+  "start_global_frame": 3320,
+  "end_global_frame": 5050,
+  "next_hand_post_frame": 5051,
+  "hero_cards": ["9d", "Qd"],
+  "initial_posting_slots": [0, 1, 2, 3, 4, 5, 6, 7],
+  "hero_balance_before_start": "516",
+  "hero_balance_at_start": "514",
+  "hero_balance_at_end": "510",
+  "hero_balance_next_post": "504",
+  "full_state_truth_verified": false,
+  "initial_post_components_verified": false,
+  "independent_holdout": false,
+  "notes": [
+    "Manual boundary review, not an automatic boundary detector.",
+    "5050 has Hero510 and cleared board/pot0;5051 new posting/deal Hero504 and STR badge. Do not mistake earlier pot reset5036 for the next hand posts.",
+    "Slot0 is reserving seat at end, not participating in next hand by occupancy alone.",
+    "Slot1 cash replenishment coincides with next posts; not rake/profit inference."
+  ],
+  "evidence": [
+    {"kind":"before_start","frame":3319,"pool":"entry"},
+    {"kind":"first_posts","frame":3320,"pool":"entry"},
+    {"kind":"before_next_posts","frame":5050,"pool":"exit"},
+    {"kind":"next_posts","frame":5051,"pool":"exit"}
+  ]
+}

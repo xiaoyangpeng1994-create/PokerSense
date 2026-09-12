@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "platform": "wpk",
+  "mode": "simulation",
+  "table_size": 8,
+  "table_sizes": [6, 7, 8],
+  "small_blind": "2",
+  "big_blind": "4",
+  "rake_percent": "0.03",
+  "rake_cap_bb": "2",
+  "ante": "2",
+  "minimum_chip": "1",
+  "straddle_mode": "mandatory",
+  "straddle_amount": "8",
+  "extra_effects": "",
+  "evidence": {
+    "confirmed_by_user": ["2/4 blinds", "3% rake", "ante present", "6-8 players"],
+    "awaiting_confirmation": ["2BB rake cap", "ante amount", "mandatory straddle and amount"],
+    "observed_blind_label": "2/4(2)",
+    "observed_frame": "session_002__t_00056700__f_001701__66fc2b485f78.png",
+    "note": "Ante 2, cap 2BB, and mandatory straddle 8 are editable simulation assumptions, not verified live rules. AA is phase two."
+  }
+}

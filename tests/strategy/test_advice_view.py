@@ -100,7 +100,7 @@ def test_approximate_view_exposes_requested_matched_distance_and_score():
         "maximum_distance": "1",
         "score": 0.5,
     }]
-    source = (ROOT / "ui" / "app.js").read_text()
+    source = (ROOT / "ui" / "app.js").read_text(encoding="utf-8")
     assert "advice.match_dimensions" in source
     assert 't("differences")' in source
 
@@ -119,7 +119,7 @@ def test_view_exposes_structured_hard_gate_results():
     assert {
         "name": "range_integrity", "status": "PASS", "reasons": [],
     } in view["gate_results"]
-    source = (ROOT / "ui" / "app.js").read_text()
+    source = (ROOT / "ui" / "app.js").read_text(encoding="utf-8")
     assert "advice.gate_results" in source
     assert 't("gates")' in source
 
@@ -222,9 +222,9 @@ def test_view_rejects_wrong_type_and_naive_clock():
 
 
 def test_ui_contains_all_advice_contract_targets_and_no_inline_html_sink():
-    html = (ROOT / "ui/index.html").read_text()
-    javascript = (ROOT / "ui/app.js").read_text()
-    stylesheet = (ROOT / "ui/style.css").read_text()
+    html = (ROOT / "ui/index.html").read_text(encoding="utf-8")
+    javascript = (ROOT / "ui/app.js").read_text(encoding="utf-8")
+    stylesheet = (ROOT / "ui/style.css").read_text(encoding="utf-8")
     for element_id in (
         "advice-panel", "advice-status", "advice-confidence",
         "advice-actions", "advice-message", "advice-meta",

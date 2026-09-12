@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "component_provenance_complete": false,
+  "boundary_convention": "inclusive owned frames from first visible hand posting through last frame before next hand posting; context frames excluded from scoring/training",
+  "hands": [
+    {
+      "hand_id": "s002_001197_td3h", "role": "reconstruction_development",
+      "start": 1197, "end": 1595, "opening_players": 6,
+      "hero_cards": ["Td", "3h"], "mode": "ordinary_observed",
+      "boundary_reviewed": true, "full_action_truth_ready": false,
+      "context_start": 1196, "context_end": 1596,
+      "boundary_evidence": [
+        {"window": "hand_registry/td3h_full", "frame": 1196, "purpose": "before_first_post"},
+        {"window": "hand_registry/td3h_full", "frame": 1197, "purpose": "first_post"},
+        {"window": "hand_registry/td3h_full", "frame": 1595, "purpose": "last_owned_frame"},
+        {"window": "hand_registry/td3h_full", "frame": 1596, "purpose": "next_hand_post"}
+      ],
+      "opening_seats": [0,1,2,4,6,7],
+      "target_full_window": "hand_registry/td3h_full",
+      "coverage_notes": ["hero acts then folds; preserve post-fold hand", "seat6 leaves before the hand ends", "seat5 joins waiting but was not dealt into this hand", "action count is not assumed; exact action truth remains pending"],
+      "review_checkpoints": [
+        {"frame": 1220, "hero_participation": "in_hand", "hero_stack": "198", "pot_ribbon": "18"},
+        {"frame": 1291, "hero_participation": "transition_unresolved", "note": "cards dim before fold word fully appears"},
+        {"frame": 1293, "hero_participation": "folded", "hero_stack": "198"},
+        {"frame": 1500, "hero_participation": "folded", "pot_ribbon": "64", "note": "turn continues after hero folded"},
+        {"frame": 1580, "hero_participation": "folded", "hero_stack": "198", "seat2_visible_stack": "240", "fee_attribution": "UNKNOWN"}
+      ]
+    },
+    {
+      "hand_id": "s002_008376_acqh", "role": "frozen_regression",
+      "start": 8376, "end": 8835, "opening_players": 8,
+      "hero_cards": ["Ac", "Qh"], "mode": "ordinary_observed",
+      "boundary_reviewed": true, "full_action_truth_ready": false,
+      "context_start": 8375, "context_end": 8836,
+      "boundary_evidence": [
+        {"window": "hand_registry/aq_start", "frame": 8375, "purpose": "before_first_post"},
+        {"window": "hand_registry/aq_start", "frame": 8376, "purpose": "first_post"},
+        {"window": "settlement/credit_8780_8845", "frame": 8835, "purpose": "last_owned_frame"},
+        {"window": "settlement/credit_8780_8845", "frame": 8836, "purpose": "next_hand_post"}
+      ],
+      "coverage_notes": ["old reference betting ledger exists, exact action timings remain partial", "extensively used for development; not independent acceptance"]
+    },
+    {
+      "hand_id": "s002_010872_4sjd_bomb", "role": "frozen_regression",
+      "start": 10872, "end": 11315, "opening_players": 7,
+      "hero_cards": ["4s", "Jd"], "mode": "bomb_pot_observed_rules_unverified",
+      "boundary_reviewed": true, "full_action_truth_ready": false,
+      "context_start": 10871, "context_end": 11316,
+      "boundary_evidence": [
+        {"window": "hero_layout/transitions_10530_10890", "frame": 10871, "purpose": "before_first_post"},
+        {"window": "hero_layout/transitions_10530_10890", "frame": 10872, "purpose": "first_post"},
+        {"window": "transitions/boundary_11310_11340", "frame": 11315, "purpose": "last_owned_frame"},
+        {"window": "transitions/boundary_11310_11340", "frame": 11316, "purpose": "next_hand_post"}
+      ],
+      "opening_seats": [0,1,2,3,5,6,7],
+      "coverage_notes": ["7 displayed40 posts; special-mode rules not inferred", "does not satisfy ordinary7-player acceptance by itself", "hero folds; dealer/late-join transitions preserved"]
+    }
+  ]
+}

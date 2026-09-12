@@ -1,0 +1,11 @@
+# Historical V6 reproduction only: CPython 3.13.14, Windows x64.
+# Wheel hashes from the retained pip install report; not release dependencies.
+# Exactly one OpenCV distribution. Do not install project dependency extras here.
+cloudpickle==3.1.2 --hash=sha256:9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a
+joblib==1.6.0 --hash=sha256:3dbbf9f6e4b592a2357b854608e980fe6390d131d7a82f011a377ef2ebef7aba
+narwhals==2.25.0 --hash=sha256:1f0f403e8c7e4463cde9bfe78b12fdd809e3ae3dda6d9b2f802934fb9c7a6a8f
+numpy==2.3.5 --hash=sha256:00dc4e846108a382c5869e77c6ed514394bdeb3403461d25a829711041217d5b
+opencv-contrib-python==4.10.0.84 --hash=sha256:47ec3160dae75f70e099b286d1a2e086d20dac8b06e759f60eaf867e6bdecba7
+scikit-learn==1.9.0 --hash=sha256:5808d98f15c6bf6d9d96d2348c1997392a5888ce7097e664105f930c4bca1277
+scipy==1.18.1 --hash=sha256:559ed65f60c1af5a03f3912605a1b5114f522c7c32fb23c3376ae8f03219fe28
+threadpoolctl==3.6.0 --hash=sha256:43a0b8fd5a2928500110039e43a5eed8480b918967083ea48dc3ab9f13c4a7fb

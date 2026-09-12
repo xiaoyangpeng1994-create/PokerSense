@@ -19,6 +19,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+vision-training = [
+    "scikit-learn==1.9.0",
+]
+solver-tools = [
+    "pokerkit==0.7.5",
+    "phevaluator==0.6.0",
+]
 dev = [
     "pytest",
     "pytest-cov",

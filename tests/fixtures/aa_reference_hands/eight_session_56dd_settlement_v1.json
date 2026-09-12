@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "hand_id": "aa8_dev_56dd_001",
+  "audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "registry_sha256": "97d8319d96506ad8681e6c7b3f13ff80cc0280f71c5e27da5081995f90cb5877",
+  "opening_slots": [0, 1, 2, 3, 4, 5, 7],
+  "excluded_waiting_slot": 6,
+  "hero_slot": 4,
+  "opponent_slot": 1,
+  "hero": ["5d", "6d"],
+  "opponent": ["Kh", "6h"],
+  "board": ["5h", "6c", "6s", "Tc", "3d"],
+  "starting_balances": {"0": "258", "1": "294", "2": "528", "3": "340", "4": "200", "5": "286", "7": "256"},
+  "posted_balances": {"0": "255", "1": "290", "2": "522", "3": "338", "4": "196", "5": "284", "7": "248"},
+  "before_settlement": {"0": "255", "1": "0", "2": "506", "3": "318", "4": "0", "5": "206", "7": "248"},
+  "after_settlement": {"0": "255", "1": "94", "2": "506", "3": "318", "4": "516", "5": "206", "7": "248"},
+  "displayed_pot": "623",
+  "displayed_components": ["529", "94"],
+  "displayed_hero_win": "316",
+  "displayed_mushroom_setting_bb": "3",
+  "displayed_big_blind": "2",
+  "displayed_mushroom_after_posts": "6",
+  "evidence_frames": {"starting": 1262, "posted": 1263, "before_settlement": 3180, "after_settlement": 3195},
+  "monetary_checkpoints": [
+    {"frame": 1500, "pot": "43", "balances": {"0": "255", "1": "290", "2": "522", "3": "318", "4": "196", "5": "284", "7": "248"}},
+    {"frame": 1650, "pot": "81", "balances": {"0": "255", "1": "290", "2": "522", "3": "318", "4": "178", "5": "264", "7": "248"}},
+    {"frame": 1950, "pot": "99", "balances": {"0": "255", "1": "272", "2": "522", "3": "318", "4": "178", "5": "264", "7": "248"}},
+    {"frame": 2400, "pot": "173", "balances": {"0": "255", "1": "272", "2": "506", "3": "318", "4": "120", "5": "264", "7": "248"}},
+    {"frame": 2550, "pot": "231", "balances": {"0": "255", "1": "272", "2": "506", "3": "318", "4": "120", "5": "206", "7": "248"}},
+    {"frame": 2700, "pot": "289", "balances": {"0": "255", "1": "214", "2": "506", "3": "318", "4": "120", "5": "206", "7": "248"}},
+    {"frame": 3150, "pot": "503", "balances": {"0": "255", "1": "0", "2": "506", "3": "318", "4": "120", "5": "206", "7": "248"}},
+    {"frame": 3180, "pot": "623", "balances": {"0": "255", "1": "0", "2": "506", "3": "318", "4": "0", "5": "206", "7": "248"}}
+  ],
+  "independent_holdout": false,
+  "full_action_truth": false,
+  "notes": [
+    "Manual full-frame observations for seven opening slots; no source model predictions used.",
+    "Current mushroom display6 does not prove the routing/reset of the prior displayed42.",
+    "13 is an observed payout difference, not a verified rake rate or insurance premium.",
+    "Checkpoint conservation is conditional on the separately displayed3BB*2=6 outside-pot contribution, not proof of its routing.",
+    "The waiting newcomer in slot6 must not enter this hand's cash conservation."
+  ]
+}

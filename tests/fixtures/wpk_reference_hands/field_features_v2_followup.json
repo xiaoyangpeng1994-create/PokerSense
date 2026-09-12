@@ -1,0 +1,10 @@
+{
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "group": "new_action_checks",
+  "scope": "Frames visually reviewed before this v2 action check. Existing card-development footage, not a pristine project holdout; do not tune this candidate on these results.",
+  "checkpoints": [
+    {"source_frame": 10700, "actions": [null, null, "fold", null, null, "fold", null, "fold"], "stacks": ["200", "306", "190", "702", null, "712", "225", "330"], "note": "Hero is waiting with balance200 moved up to y937; fixed bottom-stack ROI is not valid here."},
+    {"source_frame": 11050, "actions": ["fold", null, null, null, null, null, null, "bet"], "stacks": ["160", "266", "150", "742", null, "672", "185", "194"]},
+    {"source_frame": 11250, "actions": ["fold", "fold", "fold", "fold", null, null, "all_in", "check"], "stacks": ["160", "266", "150", "742", "0", "487", "0", "105"], "placeholder_zero_slots": [4]}
+  ]
+}

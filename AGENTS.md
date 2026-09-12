@@ -29,6 +29,1111 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **LOCAL HANDOFF CHECKPOINT 2026-09-12:** current cross-model entry is
+  handoff/2026-09-12/START-HERE.zh-CN.md; old HANDOFF-CODEX-GPT6.md marked
+  historical. Pre-checkpoint audit:34modified tracked,371untracked/1,690,272B,
+  no large/private media,nested git,reparse point or high-risk secret pattern.
+  Full3216passed/1skipped/2dependencywarnings,lint0,43changed JSON parse0fail.
+  Repository/private SHA manifests and read-only VERIFY.ps1 included. Expected
+  local tag handoff-2026-09-12-aa-strategy-task6 must resolve to clean HEAD;
+  no remote push. New agents run VERIFY.ps1 -Full before edits and start only
+  NEXT-TASK strategy task7. AA is active;WPK regression. Do not use older
+  historical chat claims over this package.
+- **STRATEGY TASK6 RANGE ASSET/TRACKER COMPLETE, NO REAL RANGE DATA:** additive
+  AAConcreteRangeAssetV2+strict schema pins rule/source/node dimensions and only
+  sorted concrete combos; reversed holding duplicates, bad weights/likelihoods,
+  missing exact nodes reject. Reuses blocker filter+Bayesian update. Per-hand
+  AARangeShadowTrackerV2 logs all action events, requires>=.80 likelihood coverage;
+  no-likelihood/unseeded/reordered/collision taints snapshot. Readiness requires
+  exact pot-eligible opponent seats,no extras,current rule source versions and
+  confidence>=.25. Equity now requires identical permitted tracker snapshot by
+  default; untracked only explicit test disclosure. Existing MIT preflopR is not
+  relabeled for ante/rake/straddle.23range+11equity/tool focused tests pass;
+  full3216passed/1skipped/2warnings,lint0,V1freeze280files0changed. No realAA
+  prior/likelihood,visual equity,Provider,Advice. See
+  docs/AA8-RANGE-ASSET-TRACKER-TASK6.zh-CN.md.
+- **STRATEGY TASK5 VERSIONED ASSET + EQUITY SHADOW COMPLETE, no real asset:**
+  additive AAStrategyAssetBindingV2 pins asset/capability/rules/provider/player/
+  street/source/license/status; test_only cannot shadow, mismatches reject.
+  AA rake distribution now fingerprinted. Rule-aware equity reuses adaptive
+  exact/MC+multi-pot shares; requires exact rules/context/opening/ranges, explicit
+  simulation, computes gross/configured-net with proportional or main-first rake,
+  never Advice. Synthetic6/7/8 exact river report has gross150,rake4,net146 only
+  as engine wiring proof. WAL whitelist now records math/provider state but rejects
+  preferred_action/unknown fields. Latest real v8 shadow20260910-v2:3839records,
+  provider0/equity0/advice0, WAL8939b345308dea033edf39ba9e169657f073c605c2bbaad353a25a255e3e47bc,
+  chain/receipt/current implementations match. No realAA range/strategy nodes,
+  settings UI,holdout/device/live approval. Full3192passed/1skipped/2warnings,
+  lint0,V1freeze280files0changed. See
+  docs/AA8-ASSET-AND-EQUITY-SHADOW-TASK5.zh-CN.md.
+- **STRATEGY TASK4 AA RULE V2 + PROVIDER GATE COMPLETE, no real strategy asset:**
+  additive aa_rules_v2 encodes6-8 players,per-player ante,none/mandatory/explicit
+  UTG straddle,exact blinds/rake/cap/application/rounding/minchip and fingerprints;
+  old frozen contracts unchanged. Checked aa-shadow profile1/2/4(2),3%,2BB is
+  explicit SIMULATION not live truth. Forced-bet plan derives positions,first actor,
+  raise floor and reconciles all8 slots; real dev first7p differs seat4+2/seat7+6
+  total+8 UNALLOCATED, second has missing seat6 and cannot reconcile. Rake unknown
+  policy abstains. AARuleBoundShadowRouter requires live rules,exact fingerprint,
+  exact opening/context and correct straddle raise floor; only preflop unopened,
+  shadow candidate never Advice. FakeProvider is tests only; existing no-ante/rake
+  RFI remains blocked.24focused tests pass;full3165passed/1skipped/2warnings,
+  lint0,V1freeze280files0changed. No settings UI/real asset/equity/advice.
+  See docs/AA8-RULES-AND-PROVIDER-GATE-TASK4.zh-CN.md.
+- **STRATEGY TASK3 P0 CANDIDATES COMPLETE, NOT CANONICAL:** reused existing D
+  detector with AA8 ROIs+2frame/epoch gate.15manual development dealerPNG checks
+  match; full3839 dev_v6 stable dealer7=2043,0=1491,next1=38,unknown267;
+  single moving5/6 rejected. Added per-epoch hand ledger from opening debits plus
+  exactly-once action debits, never fee/rake attribution, and preflop action-line
+  vocabulary. Base frames3732: ledger candidate3610/unknown122; all identified
+  preflop1896/1896 have line candidate. Long differences6/2 and next-window-2
+  remain UNALLOCATED; canonical/strategy flags false. V7 preserved21+17 actions,
+  sparse59fields and2740/1099 wager coverage;9 dev checkpoints x5 fields=45/45.
+  Current dev_v8 output ee6e6240876f62b1dd2a730b8efe6d93d5c6ce486e522c342546b7f32c1b3d20
+  byte-identical tov7 after malformed-input guard. Shadow v8 WAL
+  7c600afbcdda7540e86f19a25c4975e3ce6e63434223446c9e9b6d7523bbc40f.
+  Full3141passed/1skipped/2warnings,lint0;V1freeze280files0changed. No
+  holdout/device/provider/equity/advice. See
+  docs/AA8-DEALER-LEDGER-ACTIONLINE-TASK3.zh-CN.md.
+- **STRATEGY TASK2 SHADOW BACKEND COMPLETE OFFLINE, not live strategy:** added
+  tamper-evident append-only ShadowWalWriter, bounded incremental follower,
+  exact offline analyzer and AA8 source-hash runner. Final owned dev session
+  aa8-dev-v5-shadow-20260909-v4 has3839records,3732ABSTAIN,107DEFERRED,0READY;
+  no provider/equity/advice. WAL3906ea230e60ef30d3dd45d7e75266ff573f5154caf9d6a4c48d08f75b2c3242,
+  chain/receipt/current implementation hashes verified. Gate p50.0151ms/
+  p95.0211/p99.0296/max.1095 only,NOT E2E. Base optimization queue P0 action
+  line/dealer/hand-ledger all3732,actor-visible-blocked2945; P1wager992,hero349,
+  street278,stack118. Special107excluded from base tuning. No live capture/UI,
+  auto-tuning or holdout read. Final3115passed/1skipped/2dependencywarnings,
+  lint0; bounded follower reread3839/3839 without failure or partial line. See
+  docs/AA8-SHADOW-LOG-BACKEND-TASK2.zh-CN.md.
+- **STRATEGY TASK1 COMPLETE, overall strategy NOT complete:** added fail-closed
+  aa8_shadow bridge for8physical/Hero4 and6-8dealt players, plus saved-log audit.
+  It reuses PokerState/context/legal actions/sidepots/ranges/multiway equity/router,
+  but requires ten explicit canonical authority flags and full conservation.
+  Actual dev_v5 3839frames:3732ABSTAIN,107DEFERRED_SPECIAL,0structurallyready;
+  no provider/equity/advice executed. Existing RFI heuristic is only unopened,
+  ante0/rake0;7/8derived9max and notGTO. HU is not multiplayer; postflop/straddle
+  assets remain missing.16new tests +155reused-core tests pass; full3099passed/
+  1skipped/2dependencywarnings and lint0. No new holdout,capture,strategyUI or
+  game action. See docs/AA8-STRATEGY-BRIDGE-TASK1.zh-CN.md.
+- **LATEST scope-adjusted V2 dev_v5, still PARTIAL:**3839developmentframes,
+  2740causalwagercandidate/1099UNKNOWN versusv3 2556/1283 (+184coverage,notaccuracy).
+  38visibleactions21+17match,noextra/streetmismatch;sparse59fieldsallmatch.
+  Fixed missingcenter and unknownROI mistaken permanent conflict; private ledger
+  never published until fresh reconciliation. Newbank wager58 adds2reviewed2503
+  glyphs,.90/.05unchanged,148oldchecks0regression. Sourcecenter nowlogged inV2.
+  diagnostics aa8_unknown_audit_v5_logged:331actor-cuedUNKNOWN,107positive-special,
+  cannot classify remainingunknown as normal/safe automatically. New BASE_VISUAL
+  gate implemented separately; no realBASEPASS/freeze/holdout/device run yet.
+  Newbank ece873a6c8eccc31ce6391d71abe6e33892027a7a221fa40c7bcfcc71c0eaf95.
+  Final3083passed/1skipped/2dependencywarnings;full lint0 with existing recorder
+  exclusion. Details docs/AA8-BASE-VISUAL-ITERATION-V5.zh-CN.md.
+- **USER SCOPE UPDATE:** insurance/mushroom/bomb detailed rules and cash semantics
+  deferred pending later evidence. Preserve templates, modal guards, unknown cash
+  and source footage. Base ordinary-state and independent/hardware acceptance are
+  still required; NOT a model freeze or release PASS. Scope profile/receipt added
+  in base_visual_scope.json / aa8_base_scope.py, V2 visual_scope output. Unknown
+  mode is not normal; no automatic frame exemptions or changes to full V1 gate.
+  See docs/AA8-BASE-VISUAL-SCOPE.zh-CN.md.23focused tests passed; changed lint clean.
+  Investigating ordinary-state gaps in existing1283UNKNOWN development frames.
+- **LATEST V2 integrated_v3 / score_v3, PARTIAL:** 1260-1262 real development
+  preroll plus3839scoredframes. Modal guard now drops ambiguous insurance-entry
+  unmarked104: CURRENT38actions not39; visible21+17 matched,noextra/street errors.
+  Sparse59fields match; causalwager2556candidate/1283UNKNOWN is NOT accuracy.
+  Positivecash94/516/559/192 eachonce UNALLOCATED, no profit/rake/fee attribution.
+  Main evidence docs/AA8-V2-INTEGRATED-STATUS.zh-CN.md. Do NOT burn fresh300-600
+  holdout while known canonical-state/action gaps remain; V2 harness preparation
+  only. No physical capture/reconnect verification or strategy launch performed.
+  Final software check3045passed/1skipped/2dependencywarnings; full lint0
+  (existingaa_record_session.pyexcluded); frozenV1 280files rehashed0changes.
+- **ACTIVE V2 2026-09-09, NOT visual acceptance:** V1 independent sparse A/B
+  review found stack/actor abstentions; 600-820s is now previously evaluated,
+  never fresh V2 holdout. Reserve untouched300-600s with candidate_v2 split.
+  V2 integrated center142-feature bank, coin-only smoothing, waiting cues,
+  state adapter and causal wager ledger; latest development_v2 replay3839frames,
+  39/39 actions with amounts, gold38visible+1unmarked104 matched, no extra or
+  street mismatch; sparse59 fields match. Ledger2062candidate/1777UNKNOWN is
+  coverage NOT accuracy. Keep original V1 files/freeze/results unchanged.
+  Next: mode-boundary action reset and all-positive-cash UNALLOCATED ledger,
+  explicit existing1260-1262preroll, rerun, freeze V2 then fresh whole-hand test.
+  Full suite3012passed/1skipped/2warnings before these final pending fixes.
+  No live capture or strategy started; physical chain test still needs user start.
+- **ACTIVE 2026-09-09 comprehensive task, not finished:** latest integrated
+  first_v5/second_v5 full3839frames complete. Manual sparse DEVELOPMENT gold
+  comparison_v5 now actor11/11,hero12/12,board12/12,pot12/12,8-stackvectors12/12;
+  this59field match is NOT independent or full temporal PASS. New s-component
+  normalization+two-button Hero cue fixes2700/2850/3150; explicitwaiting_next2400
+  template resolves current waiting-seatNA withouthistoryfill. Rootpipeline
+  includes hand candidate, participation, card smoothing and spatial insurance
+  +buyin overlay. Read hashes from reports, not old summary counts.
+- **FROZEN candidate_v1** G:/PokerSense_private/aa8_candidate_freeze_v1/freeze.json
+  SHA f3b55436de2ad21933b2561d921d72ba03aead23830b287dd9478bc68feaf696,
+  280runtime/model/parameter/training files. DO NOT modify existing frozen source
+  while independent boundary review runs. Isolated acceptance agent now doing
+  holdout600-820 boundary-only sampling with checked --boundary-freeze; outputs
+  explicitlyroleholdout, never relabeldevelopment. Root/tuningagents have NOT
+  seen heldoutcard/actioncontent. Coarse44frames,census3potentialboundaries/2whole
+  candidates pendingexactregistration. Only metadata shared back to root.
+- New evaluation-only harness/dataset helper being authored AFTERbasefreeze but
+  BEFOREprediction; mustrecord supplementaryhash/chronology, no backdating,
+  no ASTexec, no inventorymonkeypatch/relabel. Existing frozenrecognizers/params
+  unchanged. Isolated reviewer mustnotreadpredictions orsharevisualgoldwithtuning.
+- Hardware validation still requires user's explicit newrecordingstart; async
+  question requested phone+card ready inlobby/nonlive replay and phrase可以开始验收录制.
+  NO recorder/device reopened orstrategy advice. Specialmodecash semantics,
+  triggerpositiveevidence and independentacceptance stillNOTpassed.
+
+- **IN PROGRESS 2026-09-09 comprehensive AA8 visual integration (user explicitly
+  authorized parallel agents):** continuous-state, special-mode and independent
+  acceptance workstreams implemented as new offline tools/tests/docs; root
+  aa8_visual_pipeline integrates money,glyphs,actor/wagers,cards,participation,
+  automatic candidate boundary and overlay guards. Not released or accepted.
+- Completed full private aa8_integrated_first_v3/v4 (2057) and second_v3/v4(1782).
+  Multi reviewed first-hand pot-prefix variants improve second knownpot994->1762;
+  first knownpot2045. Coverage is NOT accuracy. Continuous4-frame inferred
+  shortcall104 at4825 now uses AUTOMATIC actor/wager/cash evidence; remains
+  CASH_SUPPORTED_SHORT_CALL_CANDIDATE, not legal-event truth.
+- Automatic candidate newposts5051 confirmed5052, not potclear5036; manually
+  bound secondhand3320-5050/1731frames registry aa8_second_hand_registry_v1.
+  Source-slot1 refill192 remains unallocated, not profit. Full hand/cash state
+  truth still incomplete. Root fixtures sparse12checkpointgold manually read
+  without modelpredictions. V4 hero/board/pot12/12;actor8/11;stackvector6/12 due
+  awaiting-seat6 NA unknown. Actor andWAITING_NEXT_HAND repairs being integrated.
+- Cards opt-in gaussian_050 (uniform currentcrop, no threshold drop), unchanged
+  existingWPKheads; development47card anchor reads47/47. Full sparsegoldhero12/12
+  vs9/12 raw. Hash-pin aa8_card_preflight too. Not independent card calibration.
+- Special3/5/7 insurancecountdowns and BUYIN_APPLICATION blockingoverlay positive
+  samples discovered in late DEVELOPMENT820-995.366,36coarse frames;96coarse total.
+  Added dense915-921/24frames: counter12->6 associated withnewposts,27cashdebit
+  vs21pot leaves6 unallocated. No explicit critical-hit/mushroom trigger/payout
+  semantics verified; do NOT guess fromcounter/rulelabels. Old failures retained.
+- Acceptance/holdout freeze tools reject manual/UNKNOWN/overlap/missing evidence,
+  includehero+boardidentities and contextualNA; no holdout600-820 read yet.
+  No capture device, recorder, emulator or strategy started. Hardware end-to-end
+  acceptance and full independent handgold still outstanding. Continue integration,
+  do not equate these development candidates or software test counts with PASS.
+
+- **2026-09-09 AA8 insurance false-raise + unmarked cash check:** aggressive now
+  requires white 加注 text similarity>=0.80 as well as0.90 coloured badge. Source
+  template remains1470/slot3. Full first2057 frames21/21,no extras; second1782
+  frames17/17,no extras,投保6 no longer raises. Second hand is now DEVELOPMENT
+  REGRESSION, not untouched generalization. Insurance semantics still unimplemented.
+- New aa8_unmarked_money trains gray digits on first-hand reviewed checkpoints;
+  auto target4822/23/24/25 stacks all eight read correctly, pot474->578,slot0
+  104->0,others unchanged. V1 pot UNKNOWN retained; V2 prefix-disambiguation works;
+  V3 confirms two stable frames each side. With MANUAL4755 actor0,price221,
+  own-wager63 and reviewed single-action interval, conditional short-call104
+  passes. Actor/context/window selection NOT automated, no invented All in glyph.
+  Missing/invalid/multiple-change data abstains. No strategy eligibility.
+- Private aa8_auto_actions_dev_v6,second_hand_transfer_v2/comparison_v2,
+  aa8_unmarked_money_v1/v2/v3; docs/AA8-INSURANCE-GUARD-AND-UNMARKED-CALL.zh-CN.md.
+  NEXT: automatic actor/street-wager context + continuous money/action integration;
+  special modes and exact boundaries remain. No recording/device/holdout accessed.
+  Verification: full2753 passed,1 skip,2 dependency warnings; changed-file lint clean;
+  10 new tests. Real two-hand glyph reruns and four-frame cash OCR executed.
+
+- **2026-09-09 AA8 frozen V5 transfer:** extracted ONLY new development window
+  frames3320-5101 (1782); reused first-hand template masks/layout and0.90/2/5
+  parameters unchanged, predictions do not read target labels. Source-disjoint,
+  NOT independent holdout or blinded gold. Exact ending boundary still unregistered.
+- Post-prediction review:17 visible glyph transitions all matched;1 false aggressive
+  proposal4886 slot3 is orange insurance label 投保6 (full frame4890). Preserve
+  failure; don't claim cross-hand PASS. Frame4823->4824 slot0 cash104->0,pot474->578
+  jumps timer->revealed cards/insurance without visible All in glyph in4816-4831.
+  This requires money/context action reconstruction, NOT invented glyph truth.
+  Slot6 participates this hand despite waiting last hand; Hero-folded context kept.
+- Tools aa8_action_transfer and7 input-guard tests; private aa8_second_hand_window_v1,
+  transfer_v1/comparison_v1 and review sheets. See docs/AA8-CROSS-HAND-TRANSFER.zh-CN.md.
+  NEXT: insurance-vs-raise rejection, unmarked monetary action reconstruction,
+  exact boundary/cash registration. No reader tuning this turn, no holdout/live work.
+  Verification: full2743 passed,1 skip,2 dependency warnings; changed-file lint clean.
+
+- **2026-09-09 AA8 glyph V5 development hand closure:** all2057 existing frames
+  processed;21/21 reference glyph events matched,0 missed,0 unmatched proposals.
+  V4 matched21 but repeated slot1 all-in after3-frame dropout; V5 confirms2 frames,
+  clears/rearms only after5 unknown frames. Per-frame UNKNOWN remains unchanged.
+  Badge largest-component/bbox normalization and7x7 sigma1 smoothing; fold raw
+  crop retained; all-in border-component removal plus additional frame3120/slot1
+  template. Same0.90 floor, SAME DEVELOPMENT HAND template/parameter selection.
+  This is NOT independent accuracy, legal actor or complete visual acceptance.
+- Private aa8_auto_actions_dev_v4/v5 retained, diagnostic sheets v1/v2; updated
+  docs/AA8-AUTO-ACTIONS-DEV.zh-CN.md. Full2736 passed,1 skip,2 warnings, changed-file
+  lint clean;5 new tests. NEXT: freeze V5 templates/parameters for other development
+  hands, compare predictions without injecting reference actions. No holdout,
+  device, live advice or recording. Nine-slot combined-reader guard still intact.
+
+- **2026-09-09 AA8 automatic glyph development baseline:** new offline
+  aa8_action_reader processes all2057 existing owned frames with source hashes;
+  five visible-label templates,2-frame transitions, one-to-one reference comparison.
+  V1 matched11/21, missed10, no unmatched proposals; higher badge V threshold180
+  V2 matched14/21, missed7, none extra, but regressed two slot5 calls fromV1.
+  Preserve both failures. Templates/evaluation use SAME DEVELOPMENT HAND; these
+  are NOT independent accuracy, legal actions, actor truth or visual acceptance.
+- Remaining: slot5 preflop/flop calls,slot3 flop check,slots2/3 flop folds,
+  slot5 turn check,slot1 river all-in. Do not relax thresholds just to pass.
+  V3 same-parameter reproduction adds implementation/template-mask fingerprints.
+  Private aa8_auto_actions_dev_v1/v2/v3, docs/AA8-AUTO-ACTIONS-DEV.zh-CN.md.
+  Six new tests; full2731 passed,1 skip,2 dependency warnings. No device/recording,
+  no holdout, no strategy; old nine-slot combined-reader guard retained.
+
+- **2026-09-09 AA8 first-hand voluntary action reference:** reviewed existing
+  development frames only; added21-action four-street reference and source-bound
+  replay verifier. Turn1/4/5 explicit checks; river1 all-in214,4 short-call120,
+  then5 fold (3166-3168,3170-3172 witnesses). Replayed pot623 and cash match;
+  unmatched94 explains prior observed return; contested529, payout difference13
+  still unallocated, NOT verified rake. Initial post/mushroom routing unresolved.
+- Added private hash-checked AA8 action contact sheets, not model predictions.
+  Blue Hero raise CONTROL is not an action; orange flop raise badge maps to bet;
+  all-in Hero river maps to call. Frame windows are bounded observations, NOT
+  exact first-visible timestamps or continuous actor truth. No recording started.
+  See `docs/AA8-FIRST-HAND-ACTION-REVIEW.zh-CN.md`; NEXT: compare actual AA8
+  automatic recognition against reference, then other development hands and
+  independent acceptance. Full visual acceptance remains false. Verification:
+  full2725 passed,1 platform skip,2 dependency warnings; changed-file flake8 clean;
+  real private frame binding/replay passed.13 new action tests include wrong calls,
+  waiting actors, omitted checks, future boards, false raises and reversed timing.
+
+- **2026-09-09 AA8 first-hand cash review:** extracted all2057 owned frames
+  to private aa8_first_hand_full_v1; ordered IDs and first/last PNG hashes match
+  frozen registry. No calibration/holdout exposure or live capture.
+- Reviewed8 monetary checkpoints,pots43/81/99/173/231/289/503/623; all seven-
+  seat cash totals plus displayed pot plus hypothesized3BB*2=6 equal2162.
+  Late waiting seat6 excluded. This supports observed consistency, not verified
+  mushroom routing or ordinary-post decomposition.
+- Source3180->3195 settlement: Hero0->516,opponent0->94,total credits610,
+  pot623 difference13 unallocated; display components529+94=623. Starting to
+  ending cash gap19 decomposes6+13 (algebraic identity, not independent proof).
+  Hero200->516 matches+316 label; evaluator confirms5d6d beatsKh6h on5h6c6sTc3d.
+  No rake policy, profitability or earlier-decision use of revealed cards claimed.
+- Added source-bound verify_aa8_settlement and10 tests; full2712 passed,
+  1 platform skip,2 dependency warnings; lint clean. Report
+  `docs/AA8-FIRST-HAND-CASH-REVIEW.zh-CN.md`, private
+  `aa8_first_hand_cash_checkpoints_v2`. Full action truth and automated visual
+  extraction remain false. NEXT: exact checks/folds/order and complete reference
+  action line, then AA8 automatic recognition comparison. Do not rerecord.
+
+- **2026-09-09 AA8 first development hand registered:** development-only0-300s
+  sampling (60 coarse points), entry/exit half-second refinement and36 dense
+  boundary frames. No new recording or calibration/holdout tuning.
+  First5d6d hand has exact visible-post ownership1263-3319 (2057 frames,
+  PTS42.100-110.633), before-start1262 and next-post3320 bound to PNG hashes.
+  Hero200->196 at first posts,516->514 at next posts; no fee/profit inference.
+  Initial posting slots0/1/2/3/4/5/7;6 empty initially, waiting newcomer at end
+  is NOT an opening opponent. Joining-hand post components remain unverified.
+- Other candidates9dQd/2cTd/4cQd retain uncertain boundaries; explicit Hero fold
+  images4351/5851 reviewed, top slot0 waiting at5851 must not be active by census.
+  Registry repeat SHA97d8319d96506ad8681e6c7b3f13ff80cc0280f71c5e27da5081995f90cb5877.
+  Boundary registration is not full state truth or independent acceptance.
+  See `docs/AA8-FIRST-HAND-BOUNDARY.zh-CN.md`; private directories listed there.
+  Full2702 passed/1 skip/2 warnings, lint clean. NEXT: full action/amount/settlement
+  review of2057 owned frames, then AA8 recognition integration. Do not re-audit
+  original source or repeat completed boundary extraction without a concrete need.
+
+- **2026-09-09 AA8 recording baseline:** fully hashed/strictly decoded all17
+  new segments,29865 frames exactly match recorder,5807664790B,995.366s.
+  All frames1920x1080,monotonic PTS,no gaps>67ms; CSV/file list/start PTS match.
+  This is integrity/timeline evidence, not black-frame/freshness/recognition proof.
+  Private audit G:/PokerSense_private/aa_phone_audit_20260909_v1. Do not repeat
+  hashing/full decode unnecessarily; reuse frozen hashes and frame_index.jsonl.
+- Added separate8-seat candidate layout,top0/Hero4,using pre-recording reference
+  SHA950c348258d2263defb4744605b2229121eb6d6eafc9c7857bf897a09769db2b.
+  Old9-seat config retained. Combined legacy reader explicitly rejects8-seat
+  input pending actual adaptation; don't describe draft geometry as recognition.
+- Frozen AA8 split-plan candidate time ranges:development0-300,calibration
+  300-600,holdout600-820,development820-end. Known preview60/840.023 in dev.
+  Needs complete hand boundaries before assignment; no independent hand verified.
+  No model tuning or recognition on new recording yet. See
+  `docs/AA8-RECORDING-BASELINE-20260909.zh-CN.md`. Full2686 passed/1 skip/
+  2 dependency warnings. No live recording restarted or strategy activated.
+  NEXT: hand-boundary annotation/registration, then8-seat full-state development.
+
+- **STOPPED 2026-09-09 03:27:06 Asia/Shanghai, user ended capture:** latest
+  aa_phone_record_20260909_031030_54322c62 finalized via STOP/q, status stopped,
+  user_stop,exit0; recorder40004/ffmpeg28356 no longer present.17 MKV files,
+  5807664790 actual bytes, CSV end995.366s (~16m35s), FFmpeg reports29865 frames.
+  Last segment starts960.005; its duration field995.366 is an absolute timeline
+  end, not a995-second segment. Full decode/integrity hashing still pending.
+  Files retained, no recognition/strategy was running. Do not restart recording
+  without another explicit user start. Source is now available for offline work.
+
+- **Historical start, now STOPPED: 2026-09-09 03:10:30 Asia/Shanghai:**
+  G:/PokerSense_private/aa_phone_record_20260909_031030_54322c62.
+  Recorder PID40004, ffmpeg28356, exec session38186 at launch. Verify current
+  status/process identity before any stop. Graceful stop: create STOP in THIS
+  session directory, not the earlier stopped test directory. User requested
+  start and subsequent health check; no recognition/advice is running.
+- Health check~03:11:56: status recording, video bytes increasing, second
+  segment writing; first finalized segment60.000s/346730712B, MJPEG1920x1080
+  30FPS. FFmpeg progress around68s reportsdup0/drop0 (not independent source
+  freshness proof). Extracted frame from segment0001 shows full AA phone table,
+  not black/logo. No second live device opened. No betting analysis performed.
+  Limits remain1800s/about20GiB/20GiB free reserve. No auto-restart/scheduler.
+
+- **STOPPED 2026-09-09 ~02:54:47 Asia/Shanghai:** user says they had not
+  started playing and explicitly requests NO recording until they say start.
+  Created STOP for aa_phone_test_20260909_0245; verified state=stopped,
+  stop_reason=user_stop,exit_code=0 and recorder/ffmpeg PIDs no longer present.
+  Five segments finalized, last CSV endpoint255.977s. Files retained, not
+  deleted or treated as gameplay acceptance. Do not restart capture/recording
+  automatically; wait for an explicit user start instruction.
+
+- **Historical recording start, now STOPPED (see above), ~02:50:30:** user clarified this
+  session is for video testing and later review, not consulting live advice.
+  Started bounded phone-card video-only recording in
+  G:/PokerSense_private/aa_phone_test_20260909_0245 (name is an identifier;
+  actual timestamps are in status.json). Recorder PID16332, ffmpeg29796,
+  exec session16892 at launch. Check status/process identity before acting.
+  STOP safely by creating file STOP in THIS session folder; recorder sends q
+  to its own ffmpeg and finalizes. Do not terminate unrelated capture processes.
+  Limit1800s video, approximate20GiB bytes, stop below20GiB disk free,1s checks;
+  wall-clock watchdog duration+20s and up to15s graceful finalization.
+  No automation/scheduler created. Process runs until stop/limit/failure.
+- Recording source UGREEN25854,1920x1080/30FPS MJPEG stream-copy, no audio,
+  no new compression/cropping,60s MKV segments with CSV timestamps and progress.
+  First completed segment verified60.000s /369567291B; screenshot from recorded
+  file showed AA lobby. Later check2 files623846971B and recording status.
+  No eight-seat recognizer or strategy running; do NOT claim synchronized
+  recognition predictions exist. Preview/status checks are not whole-recording
+  decode validation. Do not open a second live capture while recording.
+
+- **2026-09-09 phone AA frame confirmed:** bounded single-frame capture now
+  shows AA TABLE, not lobby, with complete portrait UI and black sidebars.
+  Current visual layout has8 physical positions (one top,3 left,3 right,bottom),
+  unlike prior AA nine-slot prototype's two top positions. Do not apply existing
+  nine-slot geometry unchanged. User participation is UNKNOWN from this frame;
+  lack of own hole cards/buttons is not proof of observing/folding.
+  Source1920x1080/30FPS MJPEG; process exited, no strategy or game controls.
+  Private frame G:/PokerSense_private/aa_lobby_check_ec201b0bfbb5482588083b60e55ebf13/aa_check.png.
+
+- **2026-09-09 capture recheck after phone reconnect:** one bounded DirectShow
+  frame after3s warmup now visibly shows the unlocked portrait phone home
+  screen and AA Poker icon, centred with black side bars. UGREEN25854 stream
+ 1920x1080/30FPS MJPEG; capture process exited normally. Phone picture link
+  is confirmed for this snapshot, NOT AA in-app recognition or long-run stability.
+  Private frame G:/PokerSense_private/capture_recheck_b6903e50a7724f31960af0f3d2095c92/desktop_check.png.
+  No ADB, gameplay, strategy or continuous recording. Next permitted basic
+  check: user opens phone AA lobby; no need to enter a table for capture QA.
+
+- **2026-09-09 phone capture connection check:** user reports platform confirmed
+  phone+capture-card use allowed and emulator use disallowed; this is user-
+  supplied policy information, not independent confirmation of RTA permission.
+  Authorized bounded video-link check only, no strategy/gameplay/ADB actions.
+  Windows/DirectShow enumerate UGREEN25854 OK; opened1920x1080/30FPS MJPEG.
+  Two initial PNGs show black then UGREEN logo; an additional frame after5s
+  warmup is black. Thus capture-device link works, usable phone/AA picture NOT
+  confirmed. Capture process exited/released device. Private snapshots:
+  G:/PokerSense_private/capture_check_20260909_1e41561e250e4e36bd9962289891fff1.
+  Next: user unlock/keep phone screen on and verify video input/adapter/cable;
+  test phone home screen before any gameplay. Do not call this a vision pass.
+
+- **2026-09-09 platform warning supersedes emulator live-work plans:** user
+  supplied AA dialog stating this table has a data-collection-software shield,
+  claiming the user used such a plugin and prohibiting entry to this table
+  category today; requests removal of third-party plugins and official client.
+  This does NOT establish permanent account ban/deletion or identify a detector.
+  Do not run further emulator capture/debug investigations or attempt repeated
+  entry, concealment, fingerprint changes, component disabling or bypass.
+  Keep current work offline; resolve applicable policy and restriction through
+  official support before considering live integration. Prior ADB package/
+  permission inspection and installed-APK copying occurred; causation is unknown.
+  Firewall and filesystem privacy protections are not anti-ban measures.
+- File-privacy batch immediately before warning: expanded .gitignore for
+  media/APKs/credentials/databases/private dirs, preserving legitimate PNG assets
+  and sanitized .env example filenames. Added read-only check_private_files tool;
+  filename-only checks found0 flagged among446 current index /447 local history
+  paths; no content/remote audit claimed.16 focused tests passed.
+  Created new empty G:/PokerSense_private with protected ACL allowing current
+  user, Administrators and SYSTEM only. No existing media moved or deleted.
+  G:/PokerSense_archive retains broad inherited Users/Authenticated Users ACLs;
+  not tightened pending explicit scope confirmation. No independent media backup
+  created, no encryption or automatic cleanup, no old blocked-delete retry.
+
+- **2026-09-09 AA/LD9 read-only package security audit:** exact connected
+  emulator-5554; com.plusaa.amula1.9.1, target34 on guestAndroid9 reporting
+  patch2019-07-05. Installer is Android package installer, publisher provenance
+  not verified. Pulled only installed base APK temporarily for aapt manifest/
+  FileProvider XML inspection; no private data, memory, traffic, root or bypass.
+  Fine location granted; external-storage runtime denied despite AppOps allow.
+  allowBackup=true but system backup disabled; usesCleartextTraffic=true does
+  not prove actual cleartext sensitive traffic. Some components exported,
+  providers checked not exported but sharing paths broad; no exploit claim.
+  EmulatorCheckService declared: do not disable, spoof or infer exact ban rules.
+  No app permissions/config/firewall/gameplay mutations. AA PID remained present.
+  Report: `docs/AA-LD9-PACKAGE-SECURITY-AUDIT.zh-CN.md`.
+
+- **2026-09-09 LD9 basic security follow-up:** added persistent inbound rules
+  `PokerSense-LD9-ADB-Server-External-v1` (LD9 adb.exe TCP5037, nonloopback
+  IPv4 plus2000::/3,fc00::/7,fe80::/10) and
+  `PokerSense-LD9-VM-Debug-IPv6-v1` (existing VM program TCP5555/2222, same
+  three IPv6 ranges). Original IPv4 VM rule unchanged. ActiveStore filters
+  verified for all3;127.0.0.1 TCP5037/5555/2222 still connect; processes alive.
+  Shared folders are dedicated nonlinked LD directories; inspected metadata
+  only, not contents/subtrees. No8876/8877 listener observed at this check.
+  No external-host ingress test, no game-login continuity claim, no clipboard/
+  macro-state claim. No restart, client/device/identity change or anti-detection.
+  Report and scoped rollback appended to
+  `docs/LD9-BASIC-NETWORK-HARDENING.zh-CN.md`. Not a ban-prevention guarantee.
+
+- **2026-09-09 user-authorized LD9 basic security:** inspected running LD9,
+  verified1080x1920/DPI480/60FPS and rootMode=false without modifying VM config.
+  VM process listened0.0.0.0:5555/2222; ADB server127.0.0.1:5037.
+  Added one persistent Windows firewall rule
+  `PokerSense-LD9-Block-External-Debug-TCP-v1`, scoped to
+  `C:/Program Files/ldplayer9box/Ld9BoxHeadless.exe`, inbound TCP5555/2222,
+  remote IPv4 ranges excluding127/8. ActiveStore filters verified; loopback
+  TCP tests5037/5555/2222 succeed; processes still running. No remote-host
+  ingress test, no IPv6-rule coverage, no macro-state verification claimed.
+  No restart, AA login/account/gameplay/client modification, device spoofing,
+  anti-detection or strategy activation. This is NOT a ban-prevention guarantee.
+  Report/rollback: `docs/LD9-BASIC-NETWORK-HARDENING.zh-CN.md`.
+
+- **2026-09-09 pot rejection repair v8:** centre coin uses source-template
+  localization in combined reader; added reviewed1380 centre14 glyphs (bank52
+  total), same.90/.05 gates. Wager numeric strip follows coin vertical bounds
+  so grey preaction-button edge no longer clips Hero60. Title480 accepts a
+  verified one-column blank separator after colon with background padding;
+  no-separator still rejects. No arithmetic relabeling or holdout tuning.
+- Same1801-frame replay: pot reconciliation4/11 ->7/11,4 still abstain at
+  0(cold start),720(collection animation),1200(settlement evidence incomplete),
+  1320(title0 vs14+2+4+8). Static title11/11; continuous title10/11 plus cold
+  abstain. Cards36 correct/36 negative rejects, cash10 correct/1 abstain unchanged.
+  Keep display-title truth separate from canonical pot truth in score reports.
+- Full2656 passed/1 skip/2 warnings; lint clean. Evidence/report
+  `docs/AA-POT-REJECTION-REPAIR-V8.zh-CN.md`. v8~85.76s with concurrent tests,
+  not a performance calibration. NEXT: action/settlement evidence for remaining
+  unreconciled amounts, full participation and special-mode automation, exact
+  reserved-hand boundaries/independent acceptance. Four gates remain PARTIAL.
+
+- **2026-09-09 requested all four gates / actual result still PARTIAL:** added
+  separate centre-font bank (+13 reviewed glyphs from0/1050/8700/23640/32880,
+  total50 including parent bank) with unchanged.90/.05 gates. Added nine-slot
+  visible wager reader (coin side differs left/right; multiple coins reject;
+  positive blank-green evidence only). Title need not equal centre: e.g.
+  frame180 centre16 + visible2/4/8 == title30. Missing wagers stay unknown.
+- Continuous1801 frames: pot correct1/11 v4 ->3/11 centre-font v5 ->4/11 v6/v6b,
+  remaining7 abstain. Card slots36 correct/36 negatives and Hero cash10 correct/
+  1 abstain unchanged. v6b~73.42s offline. These are development scores, not
+  independent acceptance. No pass flags/production gates changed.
+- Reserved boundary-only annotation saved48 samples, NO recognition/tuning on
+  them. 2sJc interval2701-3599 continues into exposed3600;6h2d18001-18899 into
+  exposed18900. Neither qualifies as a full reserved hand. Interval6301-7199
+  has a possible complete2sQs hand (after6421 clearing, new backs6481, visible
+  pair6901, still old hand7081 with approval overlay, next deal7141). Need exact
+  post/settlement boundaries and census before registration; eligible count0.
+  These frames must remain excluded from tuning, including newly reviewed images.
+- Full2654 passed/1 platform skip/2 warnings, lint clean. Evidence/report:
+  `docs/AA-WAGER-ACCOUNTING-V6.zh-CN.md`. NEXT: precise2sQs reserved boundaries
+  (annotation only), complete pot/action/participation reconstruction and actual
+  mushroom/insurance recognizers; no full-gate or strategy-ready claim.
+
+- **2026-09-09 four-gate execution / dual-pot and Hero-turn v4:** added
+  coin-prefixed centre amount observation, separate pot_title/pot_center and
+  numeric agreement gate. Frame0 title30/centre16 and8700 title0/centre120 do
+  not produce a merged pot;23640 centre90 and32880 centre329 still abstain.
+  Equality is not canonical pot proof. This conservative gate regresses pot
+  recall and must not be claimed as completed financial reconstruction.
+- Hero-turn candidate requires three coloured active buttons plus current
+  face cards, two sequential-frame confirmation and no current fold badge.
+  Verified development positives1050/1110/29700, negatives0/8700/32820/40650;
+  never infer observer from absent buttons. Legal actor/opponent turns remain open.
+- Continuous1801-frame `combined_dual_pot_turn_v4`:~70.16s, unchanged card
+  checkpoints36 correct/36 negative rejects, cash10 correct/1 abstain, strict
+  pot1 correct/10 abstain.672 Hero candidate frames are NOT672 verified frames.
+  All strategy flags closed. Full2650 passed/1 platform skip/2 warnings;
+  see `docs/AA-DUAL-POT-TURN-V4.zh-CN.md`. NEXT: centre amount coverage and pot
+  semantic reconstruction, full action/participation, mushroom/insurance,
+  independent hand and stability acceptance. Four required gates remain partial.
+
+- **2026-09-09 AA lucky-bomb title / posts v1:** new offline title detector
+  scans1292 existing non-holdout samples, returns8640 and23610, both visually
+  confirmed. Reference8640 is development;23580 glare phase not detected.
+  No full-animation recall/false-positive rate or live wiring is claimed.
+- Bound two contribution cases: BB4 six seats ->6*20=120 collected, new dealer6
+  extra8; BB2 nine seats ->9*10=90, new dealer1 extra4. These extra debits match
+  displayed mushroom2BB, not proven general rake. Second-case slot4 starting
+  balance is obscured and stays unknown (do not invent200).
+- Mushroom first case16->8 does NOT close as a simple deposit; prior winning
+  frames8550/8580 still show16. Second56->60 matches extra4. Full mushroom
+  routing remains unverified. At8700/23640 pot title0 lags collection120/90;
+  keep these display sources separate in future canonical reconstruction.
+- See `docs/AA-BOMB-POSTS-V1.zh-CN.md`, fixture `bomb_posts_v1.json`, private
+  `bomb_title_v1` and `bomb_posts_pool_audit_v2`. Added4 tests; full2639 passed,
+  1 platform skip,2 dependency warnings; lint clean. No strategy activation.
+  NEXT: dense mushroom payout/reset/post window and dual-pot-display handling;
+  continue full action/participation, independent hands and hardware gates.
+
+- **2026-09-09 latest user correction: this AA recording has 种蘑菇, NOT 鱿鱼.**
+  Current recorded-mode work is mushroom, critical-hit and insurance/settlement.
+  Keep squid as separate future support, unverified; never alias mushroom to
+  squid or keep mining this recording for an asserted squid instance.
+  User requests inference/calculation from video, not waiting for rule screenshots.
+  Record visible transactions and unallocated differences, not guessed fees.
+- Pot candidate added: verified literal prefix + unique colon before gray OCR;
+  source0/720 prefix variants, floor.90; static11 checkpoints10 correct/1
+  clipped-digit abstain. AA branding-text backup to logo restores scene44/44
+  development positives;2/2 non-table rejects. Not independent calibration.
+- AA physical-seat candidate added (positive empty-plus or avatar+balance).
+  Frame0 nine slots agree with8 occupied/1 empty;17100 and29700 each7 observed/
+  2 unknown. Hero action-button replacement remains unknown. Never use physical
+  occupancy as a dealt-in hand roster. Combined tool emits explicit semantics.
+- Continuous1801-frame `combined_pot_brand_v2` / `combined_pot_seats_v3`:
+  reviewed card slots36 correct/36 negative rejects, Hero cash10 correct/1
+  cold-start abstain, pot9 correct/2 abstain. Hero presentation transitions now
+  only152 Jc9h,1261 unknown,1433 Ac9c; prior4 spurious interruptions removed.
+  Throughput v3~72.06s is offline, not hardware latency. Full fields still open.
+- Read-only source-bound1s mode mining saved1292 frames (reserved intervals
+  excluded),46 raw anchors match. `mode_diversity_v1` selects80 representatives;
+  this is visual mining, NOT mode labels. Includes private identity/chat pages:
+  never put raw images in repo/public artifacts. No source media changed.
+- Located lucky-bomb animations8640/23580, insurance32820->32880->32910,
+  mushroom hand-history34290 and No Signal40650. Insurance case has bound
+  reviewed quote626/313/premium174/payout313/outs13, then 投保174, credits
+  135+452+503=1090;1264-1090=174 and626-174=452. Window closes after premium,
+  not a general rake formula. Independently enumerate40 possible rivers from
+  cards visible by32880:13 outs exactly match listed outs; no actual river used.
+  Display1.8*174=313.2 vs313 leaves0.2 rounding-policy uncertainty.
+  Fixture `tests/fixtures/aa_reference_hands/insurance_32880_v1.json`, tool
+  `verify_aa_insurance_case`, private `insurance_32880_audit_v1`. Manual visual
+  labels plus automatic arithmetic, NOT end-to-end automatic insurance reading.
+- Keep action_smooth_v2 as an experiment, default remains binary. On29700 still
+ 4/6 target accepts; on17100 accepts fold0/1/3, rejects fold5/6/7. Seats2/4/8
+  show cards, not folds; don't label seat8 folded. Strategy remains closed.
+  NEXT: full action/participation truth, mushroom/bomb contribution windows,
+  insurance-region recognizers, complete reserved hands and long-run/hardware.
+- Verification after this batch:2635 passed,1 platform skip,2 dependency
+  warnings; full flake8 and git diff --check pass. No strategy/live activation.
+
+- **2026-09-08 AA combined fields v1 (user requests all four gaps):** continue
+  actual implementation, but all four acceptance gates remain PARTIAL. Never
+  describe tests/static checkpoints as AA-ready or strategy-ready. See
+  `docs/AA-COMBINED-FIELDS-V1.zh-CN.md` for exact unfinished items.
+- AA own gray bank from reviewed frame0 plus previously bound1200/1320/1740
+  Hero glyphs:29700 development stacks6/9 ->8/9 correct,1 abstain1054; no floor
+  reduction (.90/.05). Fold/all-in text candidate only4/6 accepts on template
+  frame29700,2 abstain; actor/full actions/seat census not completed.
+- Dynamic-card first attempt regressed27 correct/9 abstain, failure retained.
+  Nominal-first, image-only raised-top search fixes reviewed static72 slots:
+  36 correct/36 negative rejects. Not independent acceptance.
+- New AACombinedReader processes1801 genuine sequential frames, fuses cards
+  with source lifecycle, per-slot ROI resets and current-frame amount/action
+  consensus. Replay ~58.59s, repeat ~52.14s (not hardware latency). Saved
+  observations are byte-identical SHA256
+  7f86f4cd631dfae997b2fe7dc8ce42fda819f6b52d8b0127f56e6173e18161bc.
+  Eleven reviewed points:27 correct card slots/9 abstain/36 negative rejects;
+  Hero cash9 correct/2 abstain. Static success is NOT continuous success.
+  Pot, seat_presence, current_actor, participation/full actions and special
+  modes still incomplete; every output strategy_eligible=false.
+- Reserved untouched-with-respect-to-tuning intervals2701-3599,6301-7199,
+  18001-18899 in `configs/reproduction/aa_holdout_reservations_v1.json`.
+  Training rejects these frames. No complete eligible hand has been verified;
+  only full hands within one interval may qualify, not crossing exposed900-frame
+  anchors. Do not sweep these intervals for development or tune on their output.
+- Agent Reach/Exa search found generic/other-platform special-mode descriptions,
+  not verified AA rules. Jina brand-domain read failed; web-reader unavailable.
+  See `docs/AA-SPECIAL-MODES-EVIDENCE.zh-CN.md`. No invented mutual-exclusion,
+  penalty, insurance or forced-post rules; no client login or media upload.
+- Full2626 passed/1 platform skip/2 dependency warnings; full lint and diff checks
+  clean. New research and candidate code remain local; heartbeat stays paused.
+  NEXT: improve full fields/occupancy, continuous abstentions, mode cue mining,
+  then reviewed complete reserved hands and hardware/long-run acceptance.
+
+- **2026-09-08 AA geometry/card baseline v1:** independent nine-slot candidate
+  (clockwise top-left0, Hero5), global card/pot/room-rule zones; NOT production.
+  Scene probe43/44 table supports,2/2 non-table rejects;17100 logo obscured by
+  collection chips abstains. Hero avatar is covered by action UI, so no census
+  from that patch. Special-mode/participation fields remain UNKNOWN.
+- Generalized VisualTimeline slot_count/hero_slot (default8/0 unchanged).
+  Saved WPK399 observations replay to identical events and summary; original
+  WPK labels/production heads hashes unchanged. AA timeline not yet integrated.
+- AA bounded0-1800 extraction:121 samples/15-frame step, original pixel anchors
+  0/900/1800 verified.11 displayed-card/cash/pot checkpoints frozen before model
+  probing. Old-pair disappearance bracket1260-1320, new Ac9c visible1440; no
+  exact hand boundary or complete-hand truth is claimed.
+- Static WPK-head transfer on72 scored slots:33 correct,1 wrong,2 abstain,
+  32 negative rejects,4 card-back false accepts. AA face-background/top-crop
+  gate yields33 correct,3 abstain,36 negative rejects,0 wrong/false accepts on
+  SAME development points. Preserved failure; no new model or lowered floors.
+  Raised winning cards currently abstain; no dynamic-card tracking yet.
+  See `docs/AA-GEOMETRY-CARD-BASELINE-V1.zh-CN.md`; private directories recorded
+  there. NEXT: exact transition boundaries, moving-card/AA glyph coverage,
+  nine-slot fields/participation, explicit special-mode evidence. No readiness.
+- Verification: full2612 passed,1 Quartz skip,2 dependency deprecation warnings;
+  full flake8 clean and git diff --check passes. No live pipeline activation.
+
+- **2026-09-08 latest user priority: AA PRIMARY, WPK REGRESSION ONLY.**
+  This supersedes older WPK-first / AA-phase-two sequencing below.
+  Follow `PLAN-AA-vision-first.zh-CN.md`. Reuse existing AA FFV1 footage;
+  independently measure nine physical slots, normalization and AA field art.
+  Do not inherit WPK geometry/calibration or claim occupied == dealt players.
+  Strategy and real-play activation remain deferred; heartbeat stays paused.
+  AA source audit starts with immutable originals and separate derived evidence.
+  Completion notification requires AA_VISION_READY_FOR_STRATEGY / needs_review,
+  not sparse screenshot success. Existing WPK evidence must be preserved.
+- AA user scope addition: both 暴击 and 鱿鱼游戏 require explicit visual
+  coverage and later dedicated rule/strategy support. Distinguish room-enabled,
+  hand-triggered and settlement evidence; unknown is not ordinary mode.
+  Do not invent mechanics from names or equate a settings caption with a trigger.
+- AA source audit v1 complete: original SHA256
+  2638c3ea894fa6a342947b9c4a06b5d7746a6512360f4ef7d79a387fe89da82f;
+  41339 sequential frames, header count matches, no nonincreasing OpenCV times.
+  46 source-bound exploration samples and candidate498x1080 crops; no AA truth,
+  training, independent acceptance or production calibration yet. Lobby10800
+  and non-table40500 are negatives, not crop shifts. See
+  `docs/AA-SOURCE-AUDIT-V1.zh-CN.md`. Source tests plus full suite passed;
+  later exploration tests/focused lint passed. NEXT: hand/scene/mode truth and
+  nine-slot geometry. Do not repeat completed source hashing/full decode.
+
+- **2026-09-08 Td3h causal evidence timeline:**399 owned PNG frames now feed
+  CombinedVisionCandidate then new `state_engine/visual_timeline.py`, without
+  passing reviewed actions/roster/future money into inference. Two-frame evidence
+  confirmation, bounded12-frame unique debit/badge pairing, persistent badge/fold
+  deduplication, gap reset and nonopening-seat exclusion. It emits observational
+  TimelineEvidence, NOT canonical StateEvents or a verified betting ledger.
+- First11/14 ordinary actions improved to14/14 with unchanged truth after an
+  opt-in±5% badge-size tolerance and a reviewed source001 check-badge variant;
+  0.85/0.10 gates unchanged. Three old action groups have no new errors/lost
+  correct accepts. Target remains development, not independent validation.
+  Seat6 vacancy never becomes an invented fold; newcomer5 never gets a hand
+  action; Hero is folded, observed roster0/1/2/4/6/7 correct. Cash146->240 is only
+  net+94, not an inferred fee/refund decomposition. Repeated same-kind/new-debit
+  ambiguity still needs betting context, and forced posts are not fully sealed.
+- Added17 tests; full2581 passed/1 Quartz skip/2 dependency warnings, lint clean.
+  Repeat report and observation JSONL are byte-identical; no extra independent
+  samples are claimed from this reproduction.
+  Report `docs/WPK-TD3H-VISUAL-TIMELINE.zh-CN.md`; private `td3h_timeline/final_v1`.
+  All release/canonical reconstruction flags remain false; default production
+  configuration/weights and original labels unchanged. Heartbeat stays paused.
+  NEXT: reconcile visual evidence with forced-post/departure/collection/refund
+  rules and broaden hand coverage. Do not mark full_action_truth_ready true yet.
+
+- **2026-09-08 true-hand registry v1:** froze3 reviewed ownership intervals:
+  six-player Td3h1197-1595 (current reconstruction development target), eight-
+  player AcQh8376-8835, seven-player4sJd BOMB POT10872-11315 (regression).
+  Adjacent before/after-post frames are boundary context, not scored/training
+  frames. Full Td3h401 PNGs contain399 owned frames and2 sentinels; all owned
+  file/pixel hashes checked. Hero dims1291, definite fold1293; retain post-fold
+  play, departed seat6 and waiting newcomer5. Full action truth remains pending.
+- Registry validates ownership overlap, duplicate ids, boundary anchors and
+  known train/calibration/development exposure. All3 have known exposure; clean
+  whole-model independent acceptance count remains0. Another Tc3d candidate
+  also hits train lists. Existing hand_0100 spans beyond Td3h into next hand;
+  never split solely by legacy names. Seven-player special mode is not ordinary
+  seven-player acceptance. No classifier was scored during this registry work.
+- Actual current code/config/model snapshots and hashes frozen under private
+  `hand_registry/frozen_delivery`; report `docs/WPK-HAND-REGISTRY-V1.zh-CN.md`.
+  Added15 tests; full2564 passed/1 Quartz skip/2 dependency warnings, lint clean.
+  Original labels/weights unchanged; heartbeat remains paused. NEXT: label
+  Td3h event/state truth then automatically reconstruct its399 owned frames,
+  while independently tracing provenance/reserving genuinely eligible hands.
+
+- **2026-09-08 immediate execution / gray banks and combined vision:** user
+  rejected scheduling; heartbeat pokersense is PAUSED and must stay paused.
+  Rebuilt session001-only source gray bank:60 proposals visually audited,51
+  retained,9 rejected including mislabeled4/5 and Chinese two-pair text. Full
+  source images confirm174 vs old173 and255 vs old266. Original labels unchanged.
+  Stack bank NPZ rebuild byte-identical;51 real glyphs ->765 augmented vectors.
+  Separate pot bank has33 reviewed source001 glyphs, with147/72 supplements.
+- New normal-package GrayAmountRecognizer implements AmountRecognizer, with
+  0.90 top score/0.05 class gap and explicit ambiguity/crop/punctuation rejection.
+  Session002 checks: stacks33->62/63;12->23/23;10->22/22; later four-frame check
+  19->29/31. Waiting200 now reads; layout13/13 visible numeric values correct.
+  No measured false accepts. These overlapping/development checks are not full
+  independent-hand acceptance; original legacy labels have demonstrated errors.
+- Offline CombinedVisionCandidate routes cards, amounts, actions, layout and
+  existing occupancy/dealer/actor/street through one VisionEngine. Dedicated
+  pot bank fixes the original5 numeric points, including visible156 at8560.
+  Source8360-8845:486 sequential frames; checkpoints hero12+board16 correct,
+  28 absent card slots rejected, stacks62/63, pot5/5, actions34/35. 404 frames
+  have8 numeric slot values, NOT404 fully ground-truth-verified states.
+- Source1180-1240:61 frames; six occupied seats at actual1220 (not nominal1281)
+  have6 correct stacks,2 empty rejects,18 pot,Td3h, correct occupancy/dealer2.
+  Added positive green/ribbon scene support and full temporary-state clearing;
+  all34 deduplicated legacy menu candidates reject (not new gold labels).
+- Added23 tests; full2549 passed/1 Quartz skip/2 dependency warnings; lint clean.
+  Production weights/labels unchanged; no strategy, real-play or default UI
+  activation. All combined results remain release_eligible=false and calibration
+  unverified; production action/card gates stay closed. Report:
+  `docs/WPK-GRAY-BANK-COMBINED-VISION.zh-CN.md`; evidence `gray_amount/` and
+  `combined_vision/aq_guarded`, `six_seats_guarded`. NEXT: independent calibration,
+  participation eligibility, event/state reconstruction, UI and long-run gates.
+  Visual subsystem remains PARTIAL; do not announce VISION_OFFLINE_READY.
+
+- **2026-09-08 user priority lock:** finish the WPK visual subsystem first;
+  strategy development is deferred, real play requires a separate decision.
+  Use `docs/WPK-VISION-ACCEPTANCE.zh-CN.md` and `docs/WPK-VISION-WORKQUEUE.zh-CN.md`.
+  Do not mistake offline-ready for independent real-play readiness. Continue
+  actual video-first implementation, not repeated planning-only status turns.
+  Next concrete item: source-audited grayscale digit templates/amount coverage.
+  Completion requires the documented independent coverage, integration and
+  offline long-run gates; then notify and stop at needs_review. Keep original
+  data, dirty worktree changes, production safety gates and isolated runtime.
+  User rejected scheduled work and requested immediate current-turn execution.
+  Heartbeat `pokersense` was verified PAUSED; do not recreate/resume scheduling.
+  Continue implementing in this conversation. Do not stop at a planning-only
+  update or imply work will continue invisibly after the reply ends.
+
+- **2026-09-08 Hero balance location v1:** offline positive capsule-edge selector
+  chooses lower(y1056) or raised(y937) without reading numeric centre or missing
+  action buttons. Both signals -> CONFLICT, neither -> UNKNOWN. Composition
+  reads only the current selected crop through existing amount recognizer/gate;
+  no stateful carry, participation inference, playable-cash claim or live wiring.
+- Original13 visual checkpoints:13 layout correct, amounts6->7 correct. New82
+  sequentially extracted frames in two intervals:10530-10580 and10860-10890.
+  Manual crop review confirms upward move10542, downward10871. Dense82 rescore:
+  65 layout correct/17 abstain/0 wrong;10874-10890 dims with BOMB POT animation.
+  Do not treat sampled10900 recovery as its exact first recovery frame.
+- Dense amount reads14->31 correct,51 abstain. All17 additional accepts are
+  displayed0 from buy-in/approval states, NOT usable stack or equity evidence.
+  Waiting200 still fails original digit gate.13+82 reviews overlap4 frames;
+  183 unique source frames processed,91 unique visually scored frames. Dense
+  labels were reviewed after first probe; this is development, not holdout.
+- Added15 tests; full2526 passed/1 Quartz skip/2 dependency warnings, lint clean.
+  Evidence `hero_layout/coarse_final`, `dense_final`; report
+  `docs/WPK-HERO-BALANCE-LAYOUT.zh-CN.md`. Production assets/gates unchanged.
+  Next: independently sourced gray digit templates and opponent all-in variants;
+  keep geometry, visible digits, actual participation and usable cash separate.
+
+- **2026-09-08 field features v2:** offline action masks now use3x3 sigma0.7
+  smoothing; yellow all-in masks additionally use5x5 top-hat >20 to suppress
+  broad glow. Same0.85/0.10 engineering gate, not a calibrated probability.
+  No new action templates, source-seat remapping, production changes or events.
+- AcQh action checkpoints improve20->34/35 correct,1 abstain,29 negative rejects.
+  Prior followup improves4->7/7 with17 negative rejects. Three newly action-
+  reviewed frames10700/11050/11250 improve2->10/11 with13 negative rejects;
+  remaining11250/seat6 all-in stays out (~0.704). No false accepts in these
+  measured slots. Development includes template sources; all later frames have
+  prior card-development exposure, so not independent project holdout.
+- Numeric binary-feature experiment was NOT adopted: first12/63 correct, then
+  removing old template uniform letterbox improves21/63 but still below v1's33.
+  Prior followup11/23 vs v1's12; new check7/22 vs v1's10. All other positives
+  abstain, negatives reject. Keep v1 stack candidate; do not lower gates or
+  conceal failed prototypes.10700 waiting Hero balance200 moves to y937, outside
+  bottom y1056 ROI; source layout needs explicit recognition, not inferred cash.
+- Added13 tests; full2511 passed/1 Quartz skip/2 dependency warnings, lint clean.
+  Report `docs/WPK-FIELD-FEATURES-V2.zh-CN.md`; private evidence
+  `field_candidates/features_v2_final` and `features_v2_transfer_final`.
+  Next: independently sourced opponent all-in/font variants, grayscale digit
+  template provenance and waiting/active layout selection. Production remains
+  requires_revalidation=true and no full action timeline acceptance is claimed.
+
+- **2026-09-08 offline field candidate v1:** added eight-slot two-zone action
+  candidate (badge for bet/call/check/raise, avatar for fold/all_in). New masks
+  are source-bound to AcQh8500/8700; 0.85 floor/0.10 gap are engineering choices,
+  NOT production calibration. All code/geometry stays in offline tools/fixtures.
+  Old production ACTION ROIs and gates are intentionally unchanged.
+- AcQh96 cached samples/8 checkpoints: actions20 correct/15 abstain/29 negative
+  rejections (including template-source frames, not holdout). Same recognizer/
+  gates with tighter stack crops improve21->33 correct out of63;30 abstain,
+  masked negative rejected. No prior accepted checkpoint stack regresses.
+  Visual crop audit confirms old slots2/5 clip digit tops; slot7 includes a
+  pill edge that collapses segmentation. Correct raw text below gate stays out.
+- Frozen later10400/11000/11340 transfer check: actions4 correct/3 abstain/17
+  negative rejections; stacks5->12 correct out of23,11 abstain/1 negative reject.
+  No false accepts in measured points. These are prior card-development frames,
+  NOT untouched project holdout. Placeholder0 at11340 slots4/6 is only visible
+  text, not proof of usable stack/participation. No action events emitted.
+- Added11 tests; full2498 passed/1 Quartz skip/2 dependency warnings, lint clean.
+  Evidence `field_candidates/v1_final` and `followup_verified`; report
+  `docs/WPK-FIELD-CANDIDATE-V1.zh-CN.md`. Production weights/gates unchanged.
+  Remaining: dim fold glyph variants, opponent all-in effects, stack segmentation/
+  template robustness and independent calibration; temporal event wiring stays
+  blocked on measured field coverage, not on lack of more live recordings.
+
+- **2026-09-08 observation-field baseline:** added a source-bound production
+  VisionEngine probe with frozen source/config and screen-only truth.96 unique
+  cached frames processed,8 visually reviewed checkpoints/136 field checks;
+  no raw-video redecode, continuous event reconstruction or independent holdout
+  claimed. Pot3 correct/2 abstain plus3 negative rejections; stacks21 correct/
+  42 abstain plus1 masked rejection; actions35 abstain/29 negative rejections.
+  No false accepts in those checkpoints, but coverage is not release-ready.
+- Concrete gaps: ACTION ROI lacks slots6/7, templates lack fold/all_in, and
+  action calibration is absent. Raw candidates never become accepted actions.
+  Added15 tests; full2487 passed/1 Quartz skip/2 dependency warnings; lint clean.
+  Repeated96-frame run produces byte-identical report. Production assets and
+  requires_revalidation unchanged. Report `docs/WPK-OBSERVATION-FIELDS.zh-CN.md`;
+  private evidence `observation_fields/aq_measured_v1`.
+- Important evidence erratum: f8560 ribbon actually displays156, NOT218.
+  The legacy raw_total_pot218 is the reviewed logical post-call target. Old
+  fixtures/reports preserved; new screen truth separates it, checkpoint helper
+  docs/new CLI metadata no longer imply simultaneous displayed-money parity.
+  Prior5 checkpoint checks are logical, not5 direct screen agreements. Final
+  346 gross/324 visible/22 unallocated settlement findings remain unchanged.
+  Next: offline eight-slot action regions/fold+all-in templates and calibration,
+  stack crop/segmentation diagnostics, then causal state-event integration.
+
+- **2026-09-08 reviewed hand completion v1:** continued the same PokerKit betting
+  session through single-board runout, showdown, gross awards and separate cash
+  observations in `state_engine/reviewed_completion.py`. AcQh now has30 logical
+  states (19 betting+11 completion); all serialize/deserialize unchanged.
+  Project independent evaluator/side pots agree with PokerKit: Hero gross346.
+- Sequential cash review8780-8845 confirms Hero324 first visible8793 in that
+  interval, seat6 refund balance238 directly visible8833-8835, and all8 balances
+  visible8835. Next-hand ante starts8836 and is rejected as this hand's fee.
+  Net22 outflow remains unallocated; insurance notices are not transactions.
+  These are visibility boundaries, NOT server transaction times or latency.
+- 21 original+9 supplemental image references (27 unique frames) are bound by
+  file/pixel hashes. Full2472 passed/1 Quartz skip/2 dependency warnings; lint
+  clean. Twelve new tests include synthetic distinct main/side-pot winners and
+  exact splits; unsupported odd chips/multi-board/external inflows fail closed.
+  Original input, labels and production weights unchanged; requires_revalidation
+  remains true. No Frozen Core enum or live event-store integration changed.
+- Report: `docs/WPK-REVIEWED-HAND-COMPLETION.zh-CN.md`; private output
+  `state_replay/completed_aq_v1`. Reviewed completion PASS; fee attribution,
+  automatic OCR-to-state and strategy acceptance remain PARTIAL/unverified.
+  Next: measured action/stack OCR integration and causal state comparison on
+  existing videos; do not invent missing multi-action sequences. The earlier
+  state-ledger entry below describes the preceding betting-only milestone.
+
+- **2026-09-08 reviewed state ledger v1:** added offline
+  `state_engine/reviewed_replay.py`: reviewed action line -> PokerKit legality ->
+  immutable core PokerState snapshots.13 player actions pass existing project
+  action reconstruction; forced posts/collections/refunds are separate ledger
+  entries, NOT new Frozen Core event enums or automatic live event-store writes.
+- Source-bound AcQh case:21 image references verified,5 money checkpoints checked,
+  19 logical states roundtrip through core serialization. Raw last-call pot584
+  is preserved before a distinct238 return yields346. Rules-derived refund
+  balance is NOT the screen's exact credit time. Antes are hand, not street,
+  commitments. Every betting state conserves initial chips2644.
+- Prefix through action12 computes conditional64 call ->346 eligible pot,
+  238 return, fee-free32/173 threshold without consuming later actions, opponent
+  cards, river or settlement. Settlement remains PARTIAL: observed324 relative
+  to logical refund balances,22 unallocated net difference; insurance12 is a
+  notice, not an assumed debit. River/showdown/gross award are NOT replayed yet.
+- 29 new tests cover inconsistent evidence, exact money, visibility/prefix safety,
+  6/7/8-seat synthetic main60+side80/return40, and explicitly mapped UTG straddles.
+  Unknown straddle position and other variants fail closed. Full2460 passed,
+  1 Quartz skip,2 dependency warnings; lint clean. Report:
+  `docs/WPK-REVIEWED-STATE-LEDGER.zh-CN.md`; private final output
+  `state_replay/reviewed_aq_final`. OCR-to-state and strategy acceptance remain
+  false. Next: runout/showdown/payout/cash-observation events, then measured
+  action/stack OCR integration without inventing missing multi-action sequences.
+
+- **2026-09-08 V9 identity consistency:** an accepted current-frame card that
+  contradicts accepted fused history now causes abstention and reseeding from
+  the current frame. Same heads/floors; no rank-specific mapping or retraining.
+  Uncertain current reads do not invent a conflict; correlated model errors
+  are still possible. Production acceptance remains closed.
+- Controlled no-gap splices of reviewed crops: first12 cases, V8 outputs the old
+  card on all144 post-switch observations; V9 has120 correct/24 abstain/0 wrong.
+  Remaining26 cases (same development crop pool) have260 correct/52 abstain/0
+  wrong. These are artificial swaps, not38 independent recorded hands.
+- Normal111+8 checkpoint scores unchanged, but full traces differ. Pixel review
+  of all12 changed-output frames confirms V8 errors at11148(Qc->Tc),14931(5s->Ts)
+  and15451(As->Ks); V9 abstains on the first and corrects the other two. Across
+  58 positive slots in these selected frames: V8 44 correct/3 wrong/11 abstain;
+  V9 37 correct/0 wrong/21 abstain. Nine formerly correct reads temporarily
+  abstain. This difference-directed audit is development evidence, not holdout.
+- CaptureCardBackend now exposes passive PixelRepeatEvidence (counts/time/pixel
+  changes), always source_freshness=UNKNOWN. It neither rejects legitimate
+  static frames nor treats advancing host ids as proof of source freshness.
+  No independent device/app heartbeat exists in this path; hardware freshness
+  remains unresolved. Diagnostics are not yet wired to the UI.
+- Full2431 passed/1 Quartz skip/2 dependency warnings, lint/diff clean. Evidence
+  private corpus `handoffs/`; report `docs/WPK-V9-HANDOFF-REVIEW.zh-CN.md`.
+  Next: complete hand/action/stack/main-side-pot state traces; source freshness
+  requires independent signals and final hardware evidence, not more pixel
+  threshold tuning. Original labels, media and production weights unchanged.
+
+- **2026-09-08 V8 continuity protection:** VisionEngine now forwards optional
+  frame/source/time/ROI lifecycle to fused recognition; recording wrappers also
+  forward it. Frame gaps/duplicates, backwards or >budget timestamps, source/
+  canvas/layout changes reset evidence; missing/moved ROIs reset only their group.
+  A slot cannot accumulate twice in one frame or bridge missed invocations.
+  `card_fused.max_frame_gap_seconds=1.0` is an engineering budget, not hardware
+  calibration. Direct crop-only diagnostics do not prove lifecycle protection.
+- Source exceptions invalidate visual/consensus temporary evidence and latest
+  confidence/equity without erasing canonical history. Desktop retry loop clears
+  cached advice and emits an unavailable snapshot before backoff after any prior
+  frame; the notification reuses the last capture frame id, not a fabricated one.
+- 6 fault-injection scenarios on reviewed source11340 pass V8; V7 baseline fails
+  the fresh-evidence recovery requirement. This repeats one real image with
+  injected metadata, NOT observed hardware outages. Normal1101+2551-frame replay
+  traces are byte-identical to V7, with original111+8 visual checkpoint scores.
+  Replay timestamps now use container PTS, never processing wall time; container
+  time is not the phone wall clock or true capture latency.
+- 24 new tests; full2420 passed/1 Quartz skip/2 dependency warnings, lint/diff
+  checks pass. Evidence under private `interruptions/`, report
+  `docs/WPK-V8-CONTINUITY-REVIEW.zh-CN.md`. Production remains closed and weights
+  unchanged. Next: similar-card changes with no observable gap, source sessions/
+  hidden stale device buffers, then complete action/stack/pot state reconstruction.
+  Browser/network-loss and real capture-card reconnection acceptance remain open.
+
+- **2026-09-08 V7 transition/freshness repair:** failed current rank/suit/colour
+  extraction now clears fusion history; adapter respects failed ingest. Missing/
+  empty/non-BGR crops abstain, changed crop shape starts a new window.6 regression
+  tests fail on old code and pass after repair. This is a demonstrated code risk;
+  the examined real window did NOT exhibit stale accepts before the repair.
+- Source10400–11500:1101 continuous frames,111 visually reviewed checkpoints.
+  V6 baseline andV7 traces are exactly equal: hero144 correct/6 abstain/0 wrong,
+  board266 correct/11 abstain/0 wrong;72 empty/unreadable hero slots and278 board
+  slots have no false accepts. All-frame accepted-without-current-glyph count0
+  in both versions. V7 original-batch03 regression:2551 frames, original8 points,
+  hero15 correct/1 abstain/0 wrong, board20 correct,20 empty board slots correct.
+- Dense31-frame follow-up at11310–11340 confirms old cards clear on11316;
+  partial new deal11328, full7s/2c accepted11332. Dense review rescores saved
+  predictions, not a new independent holdout;4 points overlap main review.
+  BOMB POT overlay observed10880/10890, rules still unknown, no rule invented.
+- `RealtimePipeline.latest_analysis()` now returns the last per-frame presented
+  snapshot, separate from cached computations.2 tests pin current UNKNOWN/guard
+  results and recovery without corrupting equity cache. No production caller
+  of this accessor was found; this fixes its contract, not a witnessed UI bug.
+- Full regression2396 passed/1 Quartz skip/2 dependency warnings; Flake8 passes.
+  See `docs/WPK-V7-TRANSITION-REVIEW.zh-CN.md` and private corpus `transitions/`.
+  Production weights unchanged, v7 candidate requires revalidation and remains
+  closed. Next: broader interruptions/ROI loss/similar-hand transitions, then
+  actual action/stack/pot/participation state traces. Latest-snapshot fix has
+  synthetic pipeline evidence, not full real-video state reconstruction.
+
+- **2026-09-08 isolated V6 reproduction PASS:** new interpreter
+  `C:/Users/Administrator/.codex/runtimes/pokersense-v6-clean-20260908/Scripts/python.exe`.
+  Use it for subsequent WPK training/replay/tests with `PYTHONPATH=src`,
+  `PYTHONUTF8=1`, `PYTHONNOUSERSITE=1`; do not add shared site-packages.
+  One OpenCV distribution (contrib4.10.0.84), numpy2.3.5, Python3.13.14.
+  Loaded cv2.pyd matches prior actual bytes and wheel RECORD. Shared WorkBuddy
+  packages and application release pins are unchanged. Do not install default
+  project extras here: this is a historical candidate reproduction environment.
+- Regenerated2150 training inputs and weights are byte-identical to V6 baseline;
+  original frozen-source batch03 replay has exactly identical checkpoint fields,
+  scores and summary. This is environment reproduction, NOT additional holdout
+  evidence. Production card acceptance remains closed.
+- Fixed training inventory/development-freeze tools requiring the wrong OpenCV
+  distribution metadata; clean contrib-only env now works. Runtime isolation
+  and exact NPZ/replay comparison have10 new tests. Clean full regression:
+  2388 passed/1 Quartz skip/2 dependency deprecation warnings; Flake8/diff checks
+  pass. Initial failing clean test XML preserved alongside successful rerun.
+- Reproduction locks in `configs/reproduction/`;37 wheel archives (120471495B)
+  hash-verified and retained in private `reproduction/v6_clean_20260908/wheelhouse`.
+  See `docs/WPK-V6-CLEAN-REPRODUCTION.zh-CN.md` and private `verification.json`.
+  Next: empty/dealing/hand-transition temporal negatives, then full state-chain
+  evidence. Hand-level independence, live hardware and strategy gates stay open.
+
+- **2026-09-08 V6 reproducible rank candidate:** reviewed91 unique session_001
+  rank crops (212 origins), approved86 across all13 ranks and rejected5 clipped/
+  contaminated crops. Training uses only session_001; synthetic same-glyph
+  fusion yields2150 inputs, not2150 real observations. New64-hidden rank MLP,
+  seed7; repeated training produces identical arrays and NPZ hash
+  `ba73c17601a37f53726cf78da5954e7818ded452a3362059559bef7449693d1a`.
+  All10 suit arrays remain unchanged; production weights are NOT replaced.
+- V6 batch02 original-floor continuous development test fixes both red6 errors
+  (boards32/32) but misreads folded5c as6c. First FAIL is preserved. A declared
+  .05 grid using batch02 only selects offline rank-floor0.50: saved-score
+  calibration projects21 correct hero/1 abstain/0 wrong and32 correct board.
+- Third batch, frozen BEFORE inference: continuous14500–16900 (2401 frames),
+  8 visual checkpoints, hero15 correct/1 folded abstain/0 wrong, required6/6;
+  board20 correct/0 wrong, required8/8; empty board slots20/20. PASS for this
+  limited candidate batch only. Frame14500 continues the previous QhTc hand
+  and is warmup only. Legacy suit training overlap and hand boundaries remain
+  unverified; no empty-hero checkpoints in this new batch. Production stays
+  `requires_revalidation=true`; this is not full-state/strategy acceptance.
+- Artifacts: private corpus `training/rank_v6_source001_frozen`,
+  `rank_v6_candidate_frozen`, `rank_v6_candidate_repeat`, and validation
+  `v6_batch_02_development`, `v6_batch_03`; see
+  `docs/WPK-V6-RANK-TRAINING.zh-CN.md`. Full regression2378 passed/1 Quartz skip,
+  Flake8/diff checks pass. PokerKit unknown burn handling is now deterministic.
+- Runtime audit found overlapping OpenCV distributions: actual cv2.pyd matches
+  opencv-contrib-python4.10.0.84 RECORD, not installed opencv-python5.0.0.93
+  metadata. Actual numpy2.3.5/OpenCV4.10 differs from project pins. Training
+  runtime text is metadata inventory, NOT a clean install lock. Fingerprint
+  retained under private `training/runtime-fingerprint.json`; shared Python
+  environment unchanged. Next: isolated runtime reproduction, then broader
+  negative/transition/full-hand evidence and state-chain work. Never claim
+  86 crops or35 accepted card checkpoints prove production-level reliability.
+
+- **2026-09-08 V5 contrast repair and rank audit:** integrated 5/95 percentile
+  glyph contrast normalization before fixed-height centroid placement. Flat/
+  low-contrast glyphs abstain; source arrays remain untouched. Batch-02 remains
+  DEVELOPMENT: continuous frames10700–14100, 12 corrected visual checkpoints
+  now have hero21 correct/1 abstain/0 wrong (required6/6); boards30 correct/
+  2 wrong (required10/12). All30 absent slots stay absent. Overall FAIL;
+  `requires_revalidation=true`, weights and decision floors unchanged.
+- Rank-only diagnosis reproduces both red6->5 errors without temporal fusion.
+  Their normalized features are identical. +/-1px width experiments flip
+  multiple sixes between5/6 with high margins; do not deploy a width hack or
+  a5->6 mapping. Existing private script trains suit heads only; exact rank
+  training/export provenance was not found in the searched repo/archive
+  scripts/logs. Old feature collection contains the now-fixed v3 fusion bugs.
+- Tools: `replay_wpk_card_development` preserves parent results and snapshots
+  source/config/tools before continuous replay; `diagnose_wpk_rank_features`
+  writes private glyph-only evidence. Outputs live under private corpus
+  `validation/v5_batch_02_development` and `v5_rank_diagnostics_aspect`.
+  The former snapshot retains pre-report calibration metadata (v4 label),
+  but contains the actual v5 normalizer; only descriptive metadata was updated
+  afterward. Next: reproducible rank-feature dataset/trainer with reviewed
+  hand-disjoint splits, then third-batch validation. Do not spend the remaining
+  new batch on tuning known batch-02 errors. Full regression:2364 passed,
+  1 Quartz/macOS skip; Flake8 and git diff --check pass. Original batch and
+  new evidence manifests verify; parent corpus manifest refreshed.
+
+- **2026-09-08 V4 batch-02 evaluation:** 12 visually frozen checkpoints were
+  scored during continuous frames10700–14100 (3401 frames). First results
+  are retained under the private corpus `validation/v4_batch_02`. One manual
+  suit label was corrected from Kd to Kh with source-pixel evidence; saved
+  predictions were rescored without rerunning/changing the model. Corrected
+  V4: required live hero checkpoints6/6, but 3 wrong accepted dim hero cards
+  and 2 wrong red-six board cards remain; complete boards10/12. Do not lift
+  `requires_revalidation`. The same-recording batch was unused for selecting
+  the prior fusion repair, but old-v3 training overlap is not ruled out.
+- A separate static contrast-normalization experiment removes the three
+  dim-hero wrong accepts (two correct, one abstain), but does not fix red6→5.
+  No production algorithm/weights/thresholds changed in this evaluation turn.
+  This batch is now development material; a new batch must validate a future
+  change. Tools: `validate_wpk_card_batch`, `rescore_wpk_card_batch`, and
+  `experiment_wpk_contrast`. Preserve the first-run files and model snapshot.
+
+- **2026-09-08 first source-bound hand and fusion repair:** V2 now has a
+  redacted AcQh all-in trace (`tests/fixtures/wpk_reference_hands/aq_allin_v1.json`).
+  PokerKit independently reproduces 13 actions, contestable pot 346 and
+  unmatched return 238. Project side-pot math agrees; post-reveal turn equity
+  is 37/44. Insurance notice 12 and settlement difference 22 are observed;
+  the remaining fee decomposition is not verified. Never use later revealed
+  villain cards for the earlier decision.
+- This hand exposed in-place Hanning mutation in `phaseCorrelate`, reversed
+  registration direction and unbounded glyph storage. Fixed with input copies,
+  inverse shifts and a 64-glyph window. Candidate-only replay on 421 reviewed
+  frames accepts the correct AcQh on 414 and abstains on 7, with no wrong
+  accepted hero; 8 board/hero checkpoints agree. This is a development case,
+  not independent validation. `card_fused.requires_revalidation=true` now
+  withholds production card candidates; historical v3 counts must not be
+  reused as v4 acceptance. See `docs/WPK-INSURANCE-NOTES.zh-CN.md` and the
+  private hand report under the video-first corpus.
+
+- **2026-09-08 video-first execution:** follow `PLAN-WPK-video-first.zh-CN.md`
+  for current sequencing: existing WPK recordings first, real capture-card
+  acceptance last, AA later. V1 completed; V2 anchor/hand review started.
+  Private artifacts are under `G:\PokerSense_archive\wpk_video_first_20260908`.
+  Full session_002 sequential decode: 17063 frames, no PTS regression.
+  All 257 old labeled images matched exact source pixels (242 unique,
+  15 repeated); 64 nominal source indices were wrong. Old labels/hand IDs
+  remain development hints, not accepted truth. 57 sparse anchors were
+  visually reviewed by Codex and 66 candidate hand windows generated;
+  neither interval completeness nor Golden eligibility is claimed.
+- The user requested distilled poker-rule knowledge. Maintain
+  `docs/WPK-RULEBOOK.zh-CN.md` alongside `tools/verify_nlhe_rulebook.py`.
+  Its 12 PokerKit examples cover posts, straddle, short/full all-in reopening,
+  side pots/uncalled return and rake. Passing the external oracle does not
+  mean our production state/rule adapter has passed parity.
+
+- **2026-09-08 local WPK scope supersedes the older ADB-first notes below:**
+  phone + capture card, 6/7/8-player tables; AA is phase two. Work stays local.
+  The user requests open-source-first components and editable table rules.
+  WPK 2/4 and 3% rake are examples, not immutable constants. Ante, rake cap,
+  straddle and special effects are user-configurable; bundled defaults are
+  explicitly simulation assumptions. See `docs/wpk-progress-2026-09-08.md`.
+- The local native desktop entry now defaults to capture-card and loads the
+  measured 1920x1080 -> 498x1080 crop. The CLI retains explicit ADB support.
+  Incomplete initial state yields a waiting frame; it does not invent players.
+  Rule edits invalidate old Advice, with a rule revision carried to the UI.
+- Live equity now counts ACTIVE/ALL_IN opponents, excludes folded/sitting-out
+  seats, and requires a complete calibrated seat census and current cards.
+  It remains **uniform-random showdown equity**, not inferred-range strategy,
+  side-pot EV, or expected profit. Optional `phevaluator` is preferred when
+  installed; an independently tested Python fallback remains available.
+- Capture-card `board` and `action` calibration, low pot/stack recall,
+  train/eval hand overlap, straddle production strategy, postflop providers,
+  continuous ground-truth Replay and live hardware acceptance remain open.
+  PokerKit has only been exercised as an independent ante/straddle oracle,
+  not promoted to a live rules engine. Do not mark the project complete.
+
 - Default branch: `main`.
 - Current release: `v0.1.11` — [GitHub Release](https://github.com/windgeek/PokerSense/releases/tag/v0.1.11), source commit `f963181`.
 - The `main` desktop path reads WePoker Android from a portrait LDPlayer

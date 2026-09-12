@@ -80,6 +80,10 @@ class TemporalConsensus:
         if value < 1:
             raise ValueError(f"{name} confirmation frames must be >= 1")
 
+    def reset_pending(self) -> None:
+        """Discard confirmation runs without weakening frame ordering checks."""
+        self._pending.clear()
+
     def apply(self, observation: RawObservation) -> TemporalConsensusResult:
         if not isinstance(observation, RawObservation):
             raise TypeError("observation must be a RawObservation")

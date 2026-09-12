@@ -1,0 +1,13 @@
+{
+  "scope": "Existing visually reviewed AcQh development checkpoints, not independent holdout",
+  "checkpoints": [
+    {"source_frame": 8400, "hero": ["Ac", "Qh"], "board": []},
+    {"source_frame": 8500, "hero": ["Ac", "Qh"], "board": []},
+    {"source_frame": 8560, "hero": ["Ac", "Qh"], "board": ["Jh", "5s", "Qs"]},
+    {"source_frame": 8600, "hero": ["Ac", "Qh"], "board": ["Jh", "5s", "Qs", "9s"]},
+    {"source_frame": 8700, "hero": ["Ac", "Qh"], "board": ["Jh", "5s", "Qs", "9s"]},
+    {"source_frame": 8800, "hero": ["Ac", "Qh"], "board": ["Jh", "5s", "Qs", "9s", "8c"]},
+    {"source_frame": 8835, "hero": [], "board": []},
+    {"source_frame": 8836, "hero": [], "board": []}
+  ]
+}

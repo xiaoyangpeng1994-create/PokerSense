@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "hand_id": "aa8_dev_56dd_001",
+  "role": "development",
+  "start_global_frame": 1263,
+  "end_global_frame": 3319,
+  "next_hand_post_frame": 3320,
+  "hero_cards": ["5d", "6d"],
+  "hero_first_reviewed_face_frame": 1500,
+  "initial_posting_slots": [0, 1, 2, 3, 4, 5, 7],
+  "empty_slot_before_start": 6,
+  "waiting_nonopening_slot_at_end": 6,
+  "hero_balance_before_start": "200",
+  "hero_balance_at_start": "196",
+  "hero_balance_at_end": "516",
+  "hero_balance_next_post": "514",
+  "full_state_truth_verified": false,
+  "initial_post_components_verified": false,
+  "independent_holdout": false,
+  "notes": [
+    "Generated development ID, not a platform hand ID.",
+    "First hand after join/waiting phase; extra entry-post semantics must be reviewed.",
+    "Boundary convention: first observed new-hand posts through frame before next-hand posts.",
+    "Opening seven posting slots are not proof of subsequent active opponent count.",
+    "Balance changes are observations, not an inferred rake or profit formula."
+  ],
+  "evidence": [
+    {"kind": "before_start", "frame": 1262, "pool": "entry"},
+    {"kind": "first_posts", "frame": 1263, "pool": "entry"},
+    {"kind": "before_next_posts", "frame": 3319, "pool": "exit"},
+    {"kind": "next_posts", "frame": 3320, "pool": "exit"}
+  ],
+  "other_development_candidates": [
+    {"id": "aa8_dev_9dQd_002", "hero": ["9d", "Qd"], "start_frame": 3320, "last_old_cards_frame": 4951, "next_backs_frame": 5101, "explicit_hero_fold_frame": 4351, "exact_end_verified": false},
+    {"id": "aa8_dev_2cTd_003", "hero": ["2c", "Td"], "backs_frame": 5101, "last_old_cards_frame": 6151, "clear_frame": 6301, "next_backs_frame": 6451, "explicit_hero_fold_frame": 5851, "waiting_slot_at_flop": 0, "exact_boundaries_verified": false},
+    {"id": "aa8_dev_4cQd_004", "hero": ["4c", "Qd"], "backs_frame": 6451, "last_old_cards_frame": 8251, "next_deal_frame": 8401, "participation_review": "PENDING", "exact_boundaries_verified": false}
+  ]
+}

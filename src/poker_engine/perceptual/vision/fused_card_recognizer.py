@@ -1,7 +1,7 @@
-"""Fused-glyph card recognizer (capture-card platform, stage I v3).
+"""Fused-glyph card recognizer (capture-card candidate v7 freshness repair).
 
 Single-frame corner-glyph matching cannot separate same-colour suits at
-53x78 on this platform, and naive temporal averaging blurs shapes (an
+53x78 in the original prototype, and naive temporal averaging blurs shapes (an
 aspect-fit letterbox jitters every glyph a few px per frame, so a club's
 three lobes smear into a spade). This recognizer is the measured fix:
 
@@ -12,7 +12,7 @@ three lobes smear into a spade). This recognizer is the measured fix:
    pass: the street gate (board strip signature, same street) and the
    slot gate (the slot's own card region — at PRE_FLOP an empty board is
    indistinguishable between two hands, so only the slot signature stops
-   the next hand's glyphs bleeding in; measured: an 8S fused into a K
+the next hand's glyphs bleeding in; measured: an 8S fused into a K
    ghost without it). Phase correlation removes residual sub-pixel
    jitter before the float mean;
 3. **Colour router** — suit colour family from the BGR (R-B) ink
@@ -29,7 +29,15 @@ gated glyphs AND both margins clear the calibrated floors
 (``suit_floor``/``rank_floor`` from the locked-split calibration, see the
 platform ``calibration.json``); anything else is UNKNOWN. Evidence
 (private dataset ``evidence/field_metrics.json``): calibration 62/62,
-locked validation 116/116, zero false VALID for the full card.
+locked validation 116/116, zero false VALID for the full card. Those are
+historical v3 figures. V4 fixes destructive phase-correlation inputs,
+registration direction and unbounded storage; independent recalibration is
+required before production acceptance. V5 adds per-glyph contrast normalization
+for dimmed cards; the unchanged v3 heads still require fresh validation.
+V7 clears temporal evidence when current glyph/colour extraction fails;
+offline V6 rank weights are separate, not automatically installed here.
+Gate independence and accuracy must
+be evaluated against actual sequences, not assumed from this description.
 """
 
 from __future__ import annotations
@@ -78,7 +86,7 @@ BLACK_SUITS = frozenset(("S", "C"))
 
 
 class GlyphNormalizer:
-    """Fixed-height + ink-centroid glyph normalization (deterministic)."""
+    """Contrast + fixed-height + ink-centroid normalization (deterministic)."""
 
     @staticmethod
     def normalize(
@@ -94,6 +102,17 @@ class GlyphNormalizer:
         h, w = gray.shape
         if h < 3 or w < 2:
             return None
+        # Folded cards have a dim background, not white. Computing ink mass
+        # directly against 255 makes that background count as glyph ink and
+        # moves the centroid. Restore local contrast before resizing/centering.
+        # Percentiles suppress isolated extreme pixels; near-flat crops abstain.
+        # Allocate a new array: callers may retain the original source glyph.
+        low, high = np.percentile(gray, (5, 95))
+        if high - low < 10:
+            return None
+        gray = np.clip(
+            (gray.astype(np.float32) - low) * 255 / (high - low), 0, 255,
+        ).astype(np.uint8)
         scale = GLYPH_H / h
         nw = max(1, int(round(w * scale)))
         if nw > NORM[0] - 4:
@@ -225,11 +244,16 @@ class FusedSlotBuffer:
         box: tuple[int, int, int, int],
         *,
         min_glyphs: int = 3,
+        max_glyphs: int = 64,
         slot_gate: float = 10.0,
         geometry: CornerGlyphGeometry = DEFAULT_GEOMETRY,
     ) -> None:
         self._box = box
+        if (not isinstance(max_glyphs, int) or isinstance(max_glyphs, bool)
+                or max_glyphs < min_glyphs):
+            raise ValueError("max_glyphs must be an integer >= min_glyphs")
         self._min = min_glyphs
+        self._max = max_glyphs
         self._gate = slot_gate
         self._geometry = geometry
         self._anchor: np.ndarray | None = None
@@ -249,17 +273,30 @@ class FusedSlotBuffer:
     def glyph_count(self) -> int:
         return len(self._suit_glyphs)
 
+    @property
+    def region_shape(self) -> tuple[int, int]:
+        x0, y0, x1, y1 = self._box
+        return y1 - y0, x1 - x0
+
+    def reset(self) -> None:
+        """Discard identity evidence when continuity is no longer supported."""
+        self._anchor = None
+        self._rank_glyphs.clear()
+        self._suit_glyphs.clear()
+        self._red_stat = None
+
     def ingest(self, roi_image: np.ndarray) -> bool:
         import cv2
 
+        if (roi_image is None or roi_image.size == 0 or roi_image.ndim != 3
+                or roi_image.shape[2] != 3):
+            self.reset()
+            return False
         sig = self._sig(roi_image, self._box)
         if self._anchor is not None:
             diff = float(np.mean(cv2.absdiff(sig, self._anchor)))
             if diff > self._gate:
-                self._anchor = None
-                self._rank_glyphs = []
-                self._suit_glyphs = []
-                self._red_stat = None
+                self.reset()
         if self._anchor is None:
             self._anchor = sig
         x0, y0, x1, y1 = self._box
@@ -267,12 +304,21 @@ class FusedSlotBuffer:
         rank = GlyphNormalizer.from_card(card, "rank", self._geometry)
         suit = GlyphNormalizer.from_card(card, "suit", self._geometry)
         if rank is None or suit is None:
+            # A coarse whole-card signature may miss a local obstruction.
+            # Missing current glyphs invalidate temporal continuity even when
+            # that signature gate passes. Do not average across the gap.
+            self.reset()
+            return False
+        stat = ink_red_stat(card, self._geometry)
+        if stat is None:
+            self.reset()
             return False
         self._rank_glyphs.append(rank)
         self._suit_glyphs.append(suit)
-        stat = ink_red_stat(card, self._geometry)
-        if stat is not None:
-            self._red_stat = stat
+        if len(self._rank_glyphs) > self._max:
+            del self._rank_glyphs[0]
+            del self._suit_glyphs[0]
+        self._red_stat = stat
         return True
 
     @staticmethod
@@ -287,12 +333,17 @@ class FusedSlotBuffer:
         used = 1
         for g in glyphs[1:]:
             try:
-                (dx, dy), _ = cv2.phaseCorrelate(anchor, g, win)
+                # OpenCV may multiply the supplied arrays by the Hanning
+                # window in place. Cached glyphs must survive repeated fusion
+                # unchanged; otherwise a stable A can drift into a Q.
+                (dx, dy), _ = cv2.phaseCorrelate(anchor.copy(), g.copy(), win)
             except cv2.error:
                 continue
             if abs(dx) > 6 or abs(dy) > 6:
                 continue
-            m = np.float32([[1, 0, dx], [0, 1, dy]])
+            # phaseCorrelate(anchor, g) reports g's displacement FROM anchor.
+            # Align g by the inverse displacement, not farther away from it.
+            m = np.float32([[1, 0, -dx], [0, 1, -dy]])
             acc += cv2.warpAffine(g, m, NORM, borderValue=255.0)
             used += 1
         return (acc / used).astype(np.float32) if used >= 2 else anchor
@@ -307,6 +358,13 @@ class FusedSlotBuffer:
             return None
         is_red = (self._red_stat > RED_FLOOR) if self._red_stat is not None else None
         return rank, suit, is_red
+
+    def latest_glyphs(self) -> tuple[np.ndarray, np.ndarray, bool | None] | None:
+        """Current valid input for a non-mutating identity-consistency check."""
+        if not self._rank_glyphs or self._red_stat is None:
+            return None
+        return (self._rank_glyphs[-1], self._suit_glyphs[-1],
+                self._red_stat > RED_FLOOR)
 
 
 class FusedCardRecognizer:

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_sha256": "2638c3ea894fa6a342947b9c4a06b5d7746a6512360f4ef7d79a387fe89da82f",
+  "review_kind": "manual_visual_display_checkpoints_before_card_inference",
+  "reviewer": "Codex",
+  "independent_holdout": false,
+  "complete_hand_truth": false,
+  "participation": "UNKNOWN",
+  "critical_hit_triggered": "UNKNOWN",
+  "squid_triggered": "UNKNOWN",
+  "boundary_bracket": {"old_pair_last_reviewed": 1260, "old_pair_absent_by": 1320, "new_backs_visible": 1380, "new_pair_visible_by": 1440},
+  "checkpoints": [
+    {"frame": 0, "hero": null, "hero_display": "card_backs", "board": [], "cash": "728", "pot": "30"},
+    {"frame": 180, "hero": ["Jc", "9h"], "hero_display": "face_up", "board": [], "cash": "728", "pot": "30"},
+    {"frame": 720, "hero": ["Jc", "9h"], "hero_display": "face_up", "board": [], "cash": "682", "pot": "120"},
+    {"frame": 780, "hero": ["Jc", "9h"], "hero_display": "face_up", "board": ["Js", "2c", "8h"], "cash": "682", "pot": "120"},
+    {"frame": 960, "hero": ["Jc", "9h"], "hero_display": "face_up", "board": ["Js", "2c", "8h", "Qd"], "cash": "622", "pot": "180"},
+    {"frame": 1080, "hero": ["Jc", "9h"], "hero_display": "face_up", "board": ["Js", "2c", "8h", "Qd", "8d"], "cash": "622", "pot": "240"},
+    {"frame": 1200, "hero": ["Jc", "9h"], "hero_display": "face_up", "board": ["Js", "2c", "8h", "Qd", "8d"], "board_display": "first_two_dim", "cash": "502", "pot": "480"},
+    {"frame": 1320, "hero": null, "hero_display": "absent_transition", "board": null, "board_display": "moving_card_backs", "cash": "492", "pot": "0"},
+    {"frame": 1380, "hero": null, "hero_display": "card_backs", "board": [], "cash": "492", "pot": "28"},
+    {"frame": 1440, "hero": ["Ac", "9c"], "hero_display": "face_up", "board": [], "cash": "492", "pot": "36"},
+    {"frame": 1740, "hero": ["Ac", "9c"], "hero_display": "dim_face_up", "board": ["6d", "Jh", "7h"], "cash": "484", "pot": "50"}
+  ]
+}

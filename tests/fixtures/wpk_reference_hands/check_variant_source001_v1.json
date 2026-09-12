@@ -1,0 +1,7 @@
+{
+  "source_frame_file": "session_001__t_00065099__f_001953__4bd50af51820.png",
+  "image_sha256": "4bd50af5182007e0a22958c34ca8b05fd02f8064121ae5225c14ae02af6fb2e4",
+  "action": "check", "rect": [9,580,78,28],
+  "review": "agent full-image verification of seat1 green completed-check badge; not Hero clickable check button",
+  "inference_target_pixels_used_for_template": false
+}

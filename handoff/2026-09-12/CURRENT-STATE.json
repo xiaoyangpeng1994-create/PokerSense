@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-09-12T15:28:34+08:00",
+  "repository": "C:/Users/Administrator/WorkBuddy/扑克/PokerSense",
+  "branch": "main",
+  "checkpoint_ref": "handoff-2026-09-12-aa-strategy-task6",
+  "checkpoint_parent_before_local_commit": "37e7bc41e2a580df0cf0a323f5054f4d7d8378cf",
+  "remote_push_authorized": false,
+  "expected_clean_worktree": true,
+  "python": "C:/Users/Administrator/.codex/runtimes/pokersense-v6-clean-20260908/Scripts/python.exe",
+  "environment": {
+    "PYTHONPATH": "src;.",
+    "PYTHONUTF8": "1",
+    "PYTHONNOUSERSITE": "1"
+  },
+  "last_full_test": {
+    "passed": 3216,
+    "skipped": 1,
+    "warnings": 2,
+    "flake8_issues": 0,
+    "verified_at": "2026-09-12T15:28:34+08:00",
+    "status": "PASS_FINAL_HANDOFF_CHECKPOINT"
+  },
+  "pre_checkpoint_audit": {
+    "porcelain_entries": 368,
+    "modified_tracked_files": 34,
+    "untracked_files": 371,
+    "untracked_bytes": 1690272,
+    "high_risk_secret_pattern_files": 0,
+    "large_or_private_media_in_untracked": 0,
+    "nested_git_directories": 0,
+    "reparse_points": 0
+  },
+  "product": {
+    "active_platform": "AA Poker",
+    "regression_platform": "WPK/WePoker",
+    "physical_slots": 8,
+    "hero_slot": 4,
+    "supported_player_count_target": [6, 7, 8],
+    "capture": "phone plus UVC capture card",
+    "autoplay": false
+  },
+  "current_status": {
+    "visual": "PARTIAL_NOT_INDEPENDENTLY_ACCEPTED",
+    "strategy": "TASKS_1_TO_6_INFRASTRUCTURE_COMPLETE_NO_REAL_AA_ASSET",
+    "provider_executions_real_wal": 0,
+    "equity_executions_real_wal": 0,
+    "advice_real_wal": 0,
+    "profitability_verified": false
+  },
+  "holdout": {
+    "fresh_v2_seconds": "[300,600)",
+    "fresh_v2_consumed": false,
+    "previously_evaluated_v1_seconds": "[600,820)"
+  },
+  "next_task": "strategy_task_7_simulation_only_complete_combo_baseline_and_adversarial_regression",
+  "latest_private_evidence_manifest": "PRIVATE-ARTIFACTS.json",
+  "repository_hash_manifest": "FILES.sha256"
+}

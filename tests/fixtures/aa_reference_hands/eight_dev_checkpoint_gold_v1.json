@@ -1,0 +1,825 @@
+{
+  "schema_version": 1,
+  "status": "DEVELOPMENT_CHECKPOINT_GOLD_NOT_FULL_FRAME_GOLD",
+  "role": "development",
+  "independent_holdout": false,
+  "full_visual_acceptance": false,
+  "review_method": "Manual direct visual reading of full PNGs; no prediction files or inferred action order used for labels.",
+  "geometry": {
+    "seat_count": 8,
+    "hero_slot": 4,
+    "slot_order": "clockwise_from_top"
+  },
+  "source_pools": {
+    "first": "G:/PokerSense_private/aa8_first_hand_full_v1",
+    "second": "G:/PokerSense_private/aa8_second_hand_window_v1"
+  },
+  "limitations": [
+    "12 sparse selected checkpoints, not complete temporal truth or independent acceptance.",
+    "Action sequence, per-frame special-mode semantics and rake are not labeled.",
+    "N/A stack means empty/waiting seat has no numeric balance displayed; never invented zero.",
+    "4890 lacks explicit betting actor cue; no actor or participation inferred from future settlement."
+  ],
+  "checkpoints": [
+    {
+      "frame": 1500,
+      "pts_seconds": "50.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_001500.png",
+      "source_sha256": "300ea4232761894d5c1b6797373d29db31f299ddd5e3a96555a2a56930fd0bfe",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 4
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": []
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "preflop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "43"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "290",
+            "2": "522",
+            "3": "318",
+            "4": "196",
+            "5": "284",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "active",
+            "1": "active",
+            "2": "active",
+            "3": "active",
+            "4": "active",
+            "5": "active",
+            "6": "empty",
+            "7": "active"
+          }
+        }
+      },
+      "visual_evidence": "Hero actionable fold/raise/call18 buttons and running fold-button ring; opponent backs visible."
+    },
+    {
+      "frame": 1650,
+      "pts_seconds": "55.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_001650.png",
+      "source_sha256": "db8de1c8a28cd8ae77d5806518176c8f0b315d8ddbc20739d0bff6422d6a07f3",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 7
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": []
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "preflop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "81"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "290",
+            "2": "522",
+            "3": "318",
+            "4": "178",
+            "5": "264",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "active",
+            "1": "active",
+            "2": "active",
+            "3": "active",
+            "4": "active",
+            "5": "active",
+            "6": "empty",
+            "7": "active"
+          }
+        }
+      },
+      "visual_evidence": "Slot7 visible13s timer and green ring; Hero gray automatic controls are not current turn."
+    },
+    {
+      "frame": 1950,
+      "pts_seconds": "65.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_001950.png",
+      "source_sha256": "a77f0cc6b45090329ef05bb28ac234e96237064f0c470ab92c9965654c5d7c19",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 2
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": []
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "preflop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "99"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "272",
+            "2": "522",
+            "3": "318",
+            "4": "178",
+            "5": "264",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "active",
+            "2": "active",
+            "3": "active",
+            "4": "active",
+            "5": "active",
+            "6": "empty",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot2 visible13s timer and green ring; slots0/7 explicit fold text."
+    },
+    {
+      "frame": 2400,
+      "pts_seconds": "80.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_002400.png",
+      "source_sha256": "3c2b381e9e8da740a27961e8a9019a959b720ca61f02a550c6aa42036fbde419",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 5
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5h",
+            "6c",
+            "6s"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "flop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "173"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "272",
+            "2": "506",
+            "3": "318",
+            "4": "120",
+            "5": "264",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "active",
+            "2": "active",
+            "3": "active",
+            "4": "active",
+            "5": "active",
+            "6": "waiting",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot5 visible14s timer; slot6 explicitly waiting next hand; orange Hero raise badge is completed action."
+    },
+    {
+      "frame": 2550,
+      "pts_seconds": "85.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_002550.png",
+      "source_sha256": "837d46ef1529b9820ef6c1740d6a1d0c79d1111809a20636f6a47f8d553d3d4f",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 1
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5h",
+            "6c",
+            "6s"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "flop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "231"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "272",
+            "2": "506",
+            "3": "318",
+            "4": "120",
+            "5": "206",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "active",
+            "2": "active",
+            "3": "active",
+            "4": "active",
+            "5": "active",
+            "6": "waiting",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot1 visible13s timer; slot6 waiting next hand."
+    },
+    {
+      "frame": 2700,
+      "pts_seconds": "90.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_002700.png",
+      "source_sha256": "43ee2aed85142d8c36bdbf4ce9ca4ad26fe7a880f4026682fd61f532aad8860e",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 3
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5h",
+            "6c",
+            "6s"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "flop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "289"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "214",
+            "2": "506",
+            "3": "318",
+            "4": "120",
+            "5": "206",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "active",
+            "2": "folded",
+            "3": "active",
+            "4": "active",
+            "5": "active",
+            "6": "waiting",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot3 visible14s timer; slot2 explicit fold text."
+    },
+    {
+      "frame": 2850,
+      "pts_seconds": "95.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_002850.png",
+      "source_sha256": "556c50e72b9cd9e71e23db18d57184ea8ef3a9ed4e7bba6ed5371b87121cfca9",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 1
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5h",
+            "6c",
+            "6s",
+            "Tc"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "turn"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "289"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "214",
+            "2": "506",
+            "3": "318",
+            "4": "120",
+            "5": "206",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "active",
+            "2": "folded",
+            "3": "folded",
+            "4": "active",
+            "5": "active",
+            "6": "waiting",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot1 visible14s timer; slot3 explicit fold text; fourth board card Tc."
+    },
+    {
+      "frame": 3000,
+      "pts_seconds": "100.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_003000.png",
+      "source_sha256": "d14892faff0b2d2f55146247044af12638edc3c1d5dd77c15d8f9f69c48433e8",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 5
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5h",
+            "6c",
+            "6s",
+            "Tc"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "turn"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "289"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "214",
+            "2": "506",
+            "3": "318",
+            "4": "120",
+            "5": "206",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "active",
+            "2": "folded",
+            "3": "folded",
+            "4": "active",
+            "5": "active",
+            "6": "waiting",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot5 visible15s timer; Hero green check badge is prior action."
+    },
+    {
+      "frame": 3150,
+      "pts_seconds": "105.000000",
+      "role": "development",
+      "source_pool": "first",
+      "source_file": "frames/frame_003150.png",
+      "source_sha256": "a0efb710410494ff9a0c4f8c173c573df3a358e08e8cca0914d64963eee19347",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 4
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5d",
+            "6d"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "5h",
+            "6c",
+            "6s",
+            "Tc",
+            "3d"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "river"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "503"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "255",
+            "1": "0",
+            "2": "506",
+            "3": "318",
+            "4": "120",
+            "5": "206",
+            "6": {
+              "status": "NOT_APPLICABLE"
+            },
+            "7": "248"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "folded",
+            "1": "all_in",
+            "2": "folded",
+            "3": "folded",
+            "4": "active",
+            "5": "active",
+            "6": "waiting",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Hero fold and All in actionable controls with ring; slot1 explicit All in and0; slot5 still has backs, not folded."
+    },
+    {
+      "frame": 4050,
+      "pts_seconds": "134.996000",
+      "role": "development",
+      "source_pool": "second",
+      "source_file": "frames/frame_004050.png",
+      "source_sha256": "eca33c2ce482cabb87a67644337078ebb37538cec015fadd1e40b3716709a9b1",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 4
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "9d",
+            "Qd"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": []
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "preflop"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "76"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "243",
+            "1": "88",
+            "2": "502",
+            "3": "274",
+            "4": "510",
+            "5": "204",
+            "6": "194",
+            "7": "246"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "active",
+            "1": "folded",
+            "2": "folded",
+            "3": "active",
+            "4": "active",
+            "5": "folded",
+            "6": "active",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Hero fold/raise/call38 actionable buttons with ring; slot6 backs and call badge, unlike waiting in previous hand."
+    },
+    {
+      "frame": 4755,
+      "pts_seconds": "158.492000",
+      "role": "development",
+      "source_pool": "second",
+      "source_file": "frames/frame_004755.png",
+      "source_sha256": "6c57db276c92f35784594370e43655c72d74391c169a13ecd5bfa2d4dcceba5c",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "KNOWN",
+          "value": 0
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "9d",
+            "Qd"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "7h",
+            "5h",
+            "2s",
+            "Tc"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "turn"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "474"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "104",
+            "1": "88",
+            "2": "502",
+            "3": "15",
+            "4": "510",
+            "5": "204",
+            "6": "194",
+            "7": "246"
+          }
+        },
+        "participation": {
+          "status": "KNOWN",
+          "value": {
+            "0": "active",
+            "1": "folded",
+            "2": "folded",
+            "3": "active",
+            "4": "folded",
+            "5": "folded",
+            "6": "folded",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "Slot0 visible15s timer and green ring; Hero explicit fold but9dQd remain readable."
+    },
+    {
+      "frame": 4890,
+      "pts_seconds": "162.992000",
+      "role": "development",
+      "source_pool": "second",
+      "source_file": "frames/frame_004890.png",
+      "source_sha256": "b85c3603f2b2846b2875f4b0e8beaeffaba9993c362d64cced175410c05d754f",
+      "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+      "source_hash_checked_against_manifest": true,
+      "fields": {
+        "actor": {
+          "status": "UNKNOWN",
+          "value": null
+        },
+        "hero_cards": {
+          "status": "KNOWN",
+          "value": [
+            "9d",
+            "Qd"
+          ]
+        },
+        "board_cards": {
+          "status": "KNOWN",
+          "value": [
+            "7h",
+            "5h",
+            "2s",
+            "Tc"
+          ]
+        },
+        "street": {
+          "status": "KNOWN",
+          "value": "turn"
+        },
+        "pot": {
+          "status": "KNOWN",
+          "value": "578"
+        },
+        "stacks": {
+          "status": "KNOWN",
+          "value": {
+            "0": "0",
+            "1": "88",
+            "2": "502",
+            "3": "15",
+            "4": "510",
+            "5": "204",
+            "6": "194",
+            "7": "246"
+          }
+        },
+        "participation": {
+          "status": "PARTIAL",
+          "value": {
+            "0": null,
+            "1": "folded",
+            "2": "folded",
+            "3": null,
+            "4": "folded",
+            "5": "folded",
+            "6": "folded",
+            "7": "folded"
+          }
+        }
+      },
+      "visual_evidence": "No visible betting timer: actor UNKNOWN, not NONE. Slot3 orange purchase insurance6, not raise. Slots0/3 revealed cards; current betting participation not inferred from showdown."
+    }
+  ]
+}

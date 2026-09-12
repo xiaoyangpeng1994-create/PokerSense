@@ -1,0 +1,4 @@
+[
+  {"session_id": "session_001", "frame": "session_001__t_00084000__f_002520__4c598ad1ead7.png", "sha256": "4c598ad1ead723d0c3b0af25d33a661880ddd868d29eb4240edc1f746cd41ace", "hand_id": "reviewed_source_frame_2520", "stable": true, "pot": {"status": "VALID", "value": 147}, "review": "agent_full_image_visible_top_ribbon; source-frame id is not a complete hand grouping"},
+  {"session_id": "session_001", "frame": "session_001__t_00133700__f_004011__45800b438513.png", "sha256": "45800b438513654b8c61d49c6a6335cf1a2d13f360f80fc3ace643430ed8fd0d", "hand_id": "reviewed_source_frame_4011", "stable": true, "pot": {"status": "VALID", "value": 72}, "review": "agent_full_image_visible_top_ribbon; source-frame id is not a complete hand grouping"}
+]

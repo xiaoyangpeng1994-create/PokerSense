@@ -1,0 +1,9 @@
+Last verified 2026-09-12T15:28:34+08:00 before final handoff commit:
+PYTHONPATH=src;. PYTHONUTF8=1 PYTHONNOUSERSITE=1
+python -m pytest -q -o addopts=''
+3216 passed, 1 skipped, 2 warnings
+
+python -m flake8 src tests tools --exclude=aa_record_session.py --statistics --count
+0
+
+This file is a receipt summary, not a substitute for VERIFY.ps1 -Full.

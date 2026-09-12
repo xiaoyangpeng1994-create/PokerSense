@@ -324,9 +324,25 @@ class VisionEngine:
 
     # ----------------------------------------------------------------- process
 
+    def reset_temporal(self) -> None:
+        """Forget recognizer evidence after an explicit capture interruption."""
+        reset = getattr(self._card, "reset", None)
+        if callable(reset):
+            reset()
+
     def process(self, frame: Frame, table_map: TableMap) -> RawObservation:
         ts = frame.timestamp
         self._validate_manifest(table_map)
+        begin_frame = getattr(self._card, "begin_frame", None)
+        if callable(begin_frame):
+            hero_roi = _global_roi(table_map, ROIKind.HERO_CARDS)
+            board_roi = _global_roi(table_map, ROIKind.BOARD_CARDS)
+            begin_frame(frame.frame_seq, ts,
+                        (frame.window_id, frame.width, frame.height,
+                         table_map.platform_id, table_map.layout_id),
+                        {"hero": (hero_roi, self._hero_layout) if hero_roi else None,
+                         "board": (board_roi, self._board_layout)
+                         if board_roi else None})
 
         # Bet Semantic Gap (plan §10): scalar bet_size is only written when the
         # Vision config EXPLICITLY declares an allowed scalar semantic

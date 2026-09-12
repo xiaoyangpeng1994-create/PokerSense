@@ -1,0 +1,522 @@
+{
+  "schema_version": 1,
+  "hand_id": "wpk_session002_acqh_allin_01",
+  "source_session": "session_002",
+  "source_video_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "reviewer": "codex-gpt6-visual",
+  "review_window": [
+    8240,
+    8900
+  ],
+  "hand_start_interval": [
+    8360,
+    8380
+  ],
+  "settlement_interval": [
+    8780,
+    8820
+  ],
+  "next_hand_start_interval": [
+    8820,
+    8840
+  ],
+  "status": {
+    "visual_betting_sequence": "structurally_reconciled",
+    "exact_event_timing": "PARTIAL",
+    "settlement_fee_components": "PARTIAL",
+    "capture_to_state_parity": false,
+    "strategy_golden_eligible": false
+  },
+  "rules": {
+    "player_count": 8,
+    "small_blind": 2,
+    "big_blind": 4,
+    "ante_each": 2,
+    "observed_straddle": 0,
+    "dealer_source_seat": 1,
+    "hero_source_seat": 0,
+    "rake_fraction_user_example": "0.03",
+    "rake_cap_confirmed": null,
+    "rule_note": "This hand reconciles with 2/4 plus ante 2, no additional straddle; not a global room rule."
+  },
+  "source_seats": [
+    {
+      "seat": 0,
+      "geometry": "bottom",
+      "position": "CO",
+      "starting_stack": 162,
+      "settled_stack": 324,
+      "hand_contributed": 162
+    },
+    {
+      "seat": 1,
+      "geometry": "lower_left",
+      "position": "BTN",
+      "starting_stack": 360,
+      "settled_stack": 358,
+      "hand_contributed": 2
+    },
+    {
+      "seat": 2,
+      "geometry": "middle_left",
+      "position": "SB",
+      "starting_stack": 224,
+      "settled_stack": 220,
+      "hand_contributed": 4
+    },
+    {
+      "seat": 3,
+      "geometry": "upper_left",
+      "position": "BB",
+      "starting_stack": 371,
+      "settled_stack": 365,
+      "hand_contributed": 6
+    },
+    {
+      "seat": 4,
+      "geometry": "top",
+      "position": "UTG",
+      "starting_stack": 200,
+      "settled_stack": 194,
+      "hand_contributed": 6
+    },
+    {
+      "seat": 5,
+      "geometry": "upper_right",
+      "position": "UTG1",
+      "starting_stack": 728,
+      "settled_stack": 726,
+      "hand_contributed": 2
+    },
+    {
+      "seat": 6,
+      "geometry": "middle_right",
+      "position": "LJ",
+      "starting_stack": 400,
+      "settled_stack": 238,
+      "hand_contributed": 400
+    },
+    {
+      "seat": 7,
+      "geometry": "lower_right",
+      "position": "HJ",
+      "starting_stack": 199,
+      "settled_stack": 197,
+      "hand_contributed": 2
+    }
+  ],
+  "pokerkit_index_to_source_seat": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    0,
+    1
+  ],
+  "cards": [
+    {
+      "seat": 0,
+      "cards": [
+        "Ac",
+        "Qh"
+      ],
+      "first_verified_visible_frame": 8400
+    },
+    {
+      "seat": 6,
+      "cards": [
+        "Kc",
+        "Ah"
+      ],
+      "first_verified_visible_frame": 8700,
+      "usage": "post-allin validation only; must not enter earlier decision inputs"
+    }
+  ],
+  "board": [
+    {
+      "street": "flop",
+      "cards": [
+        "Jh",
+        "5s",
+        "Qs"
+      ],
+      "first_verified_visible_frame": 8520
+    },
+    {
+      "street": "turn",
+      "cards": [
+        "Jh",
+        "5s",
+        "Qs",
+        "9s"
+      ],
+      "first_verified_visible_frame": 8580
+    },
+    {
+      "street": "river",
+      "cards": [
+        "Jh",
+        "5s",
+        "Qs",
+        "9s",
+        "8c"
+      ],
+      "first_verified_visible_frame": 8760
+    }
+  ],
+  "actions": [
+    {
+      "order": 1,
+      "street": "preflop",
+      "source_seat": 4,
+      "kind": "call",
+      "amount": 4,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8440"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 2,
+      "street": "preflop",
+      "source_seat": 5,
+      "kind": "fold",
+      "amount": 0,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8440"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 3,
+      "street": "preflop",
+      "source_seat": 6,
+      "kind": "raise_to",
+      "amount": 34,
+      "amount_semantics": "total_street",
+      "all_in": false,
+      "evidence": [
+        "f8460"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 4,
+      "street": "preflop",
+      "source_seat": 7,
+      "kind": "fold",
+      "amount": 0,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8480"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 5,
+      "street": "preflop",
+      "source_seat": 0,
+      "kind": "call",
+      "amount": 34,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8480",
+        "f8500"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 6,
+      "street": "preflop",
+      "source_seat": 1,
+      "kind": "fold",
+      "amount": 0,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8500"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 7,
+      "street": "preflop",
+      "source_seat": 2,
+      "kind": "fold",
+      "amount": 0,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8500"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 8,
+      "street": "preflop",
+      "source_seat": 3,
+      "kind": "fold",
+      "amount": 0,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8500"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 9,
+      "street": "preflop",
+      "source_seat": 4,
+      "kind": "fold",
+      "amount": 0,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8500"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 10,
+      "street": "flop",
+      "source_seat": 6,
+      "kind": "bet_to",
+      "amount": 62,
+      "amount_semantics": "total_street",
+      "all_in": false,
+      "evidence": [
+        "f8540"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 11,
+      "street": "flop",
+      "source_seat": 0,
+      "kind": "call",
+      "amount": 62,
+      "amount_semantics": "additional",
+      "all_in": false,
+      "evidence": [
+        "f8560"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 12,
+      "street": "turn",
+      "source_seat": 6,
+      "kind": "bet_to",
+      "amount": 302,
+      "amount_semantics": "total_street",
+      "all_in": true,
+      "evidence": [
+        "f8600"
+      ],
+      "exact_action_frame": null
+    },
+    {
+      "order": 13,
+      "street": "turn",
+      "source_seat": 0,
+      "kind": "call",
+      "amount": 64,
+      "amount_semantics": "additional",
+      "all_in": true,
+      "evidence": [
+        "f8660",
+        "f8680"
+      ],
+      "exact_action_frame": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "evidence": "f8400",
+      "stage": "forced_posts",
+      "raw_total_pot": 22
+    },
+    {
+      "evidence": "f8500",
+      "stage": "preflop_closed",
+      "raw_total_pot": 94,
+      "hero_stack": 126,
+      "villain_stack": 364
+    },
+    {
+      "evidence": "f8560",
+      "stage": "flop_called",
+      "raw_total_pot": 218,
+      "hero_stack": 64,
+      "villain_stack": 302
+    },
+    {
+      "evidence": "f8600",
+      "stage": "turn_facing_shove",
+      "raw_total_pot": 520,
+      "hero_stack": 64,
+      "villain_stack": 0
+    },
+    {
+      "evidence": "f8700",
+      "stage": "hero_called_allin",
+      "raw_total_pot": 584,
+      "displayed_pot_parts": [
+        346,
+        238
+      ],
+      "hero_stack": 0,
+      "villain_stack": 0
+    },
+    {
+      "evidence": "f8800",
+      "stage": "settled",
+      "hero_stack": 324,
+      "villain_stack": 238,
+      "hero_displayed_net_win": 162
+    }
+  ],
+  "settlement": {
+    "gross_contributions": 584,
+    "contestable_pot": 346,
+    "uncalled_return_to_seat_6": 238,
+    "hero_received": 324,
+    "observed_difference": 22,
+    "insurance_premium_displayed": 12,
+    "insurance_evidence": "f8720",
+    "insurance_note": "Hero-avatar main-pot notice explicitly says insured 12. Exact debit timing/account not proven.",
+    "remaining_difference_if_insurance_debited_from_award": 10,
+    "fee_model_confirmed": false,
+    "compatible_hypothesis": "3% rounded to 10 without an 8-chip cap, plus insurance 12, matches 324; other fee decompositions remain possible."
+  },
+  "derived_reference": {
+    "post_reveal_turn_win_outcomes": 37,
+    "post_reveal_turn_total_outcomes": 44,
+    "turn_call_additional": 64,
+    "turn_contestable_pot_after_call": 346,
+    "turn_noncontestable": 238,
+    "not_valid_as_prior_strategy_label": true
+  },
+  "limitations": [
+    "Preflop fold order is rules-constrained reconstruction; some pre-fold indicators appear early. Exact fold timestamps are not gold labels.",
+    "Source seat identities use the versioned visual mapping; no player names or screenshots are included in this redacted fixture.",
+    "The 84% display and villain hole cards appear after the hero calls all-in. Earlier strategy must not use them.",
+    "22 settlement difference is measured. Fee components and rounding/cap are not fully established."
+  ],
+  "evidence": {
+    "f8360": {
+      "source_frame": 8360,
+      "pixel_sha256": "7ae1c1d83a136ad1f47c7c0516e8e16d642f9aa167deba37244735db918a1984",
+      "image_sha256": "14469dcf0818bce78508152bd69651ea53cbd1e1739be516bc155ccc1e434d0e"
+    },
+    "f8380": {
+      "source_frame": 8380,
+      "pixel_sha256": "ddbad810ef276880979659e475139959ce27d16e04b2e04d1b98158566405d3c",
+      "image_sha256": "2b4d9a4b7400562ae57d71771a2381ed98ccdf8657df145b42ad7403a54e2e3d"
+    },
+    "f8400": {
+      "source_frame": 8400,
+      "pixel_sha256": "20bf5f4fab94f0a821751661010e95cef06bb3b5c176669a1434c975b6430082",
+      "image_sha256": "000d3aa7e9c64e7085318946b20ad09bdfcfa9c1d17178a4cd1be72c362bc1a4"
+    },
+    "f8440": {
+      "source_frame": 8440,
+      "pixel_sha256": "d8625f91c54c137b843db41d53944e1eb36b84807101b6616aeff14d29ff715d",
+      "image_sha256": "553baa533bee3fca454c5dbe3e33efdedc346504fdec18ac5e7334fd2cae4291"
+    },
+    "f8460": {
+      "source_frame": 8460,
+      "pixel_sha256": "488a40f406254addcd85b59581e28c30751cc8c435e4e99ad85dfc94d1efd79c",
+      "image_sha256": "668301710ae2ae7d7ff34fde66499d46d90966f2fede83aee4fc779c0c2d72fe"
+    },
+    "f8480": {
+      "source_frame": 8480,
+      "pixel_sha256": "22adf2b325d5b408916ceeef2f4a839acd348cf6de27acd92a4c12979de0bb1a",
+      "image_sha256": "fa8c4feb4797171c421af0e5c1528226d0c030f88b99e63c70fd920fc68849f0"
+    },
+    "f8500": {
+      "source_frame": 8500,
+      "pixel_sha256": "c173baad6baa4cf6f5e7476bf55b26660b8f5246a252c6469845841ca74aadd5",
+      "image_sha256": "4f27049db238f0cf2ac425b52465b1232ad0e128adc746b58870344d1d6771e6"
+    },
+    "f8520": {
+      "source_frame": 8520,
+      "pixel_sha256": "831454918a1e8961c9492c4e9611df7c325b51cf4b8f472f8f2ed9d2f5face0a",
+      "image_sha256": "be6f9c95993071d12ce5842876828557509e8e9ed99eb5a94878990df02f16d0"
+    },
+    "f8540": {
+      "source_frame": 8540,
+      "pixel_sha256": "a076a1f85473d295866dd6415d78bf11625600442acca3576c702f85b97385b8",
+      "image_sha256": "0aa097ce92a3f58cad2303172323982359a087d618d2ead120adc6ed0ca70073"
+    },
+    "f8560": {
+      "source_frame": 8560,
+      "pixel_sha256": "29ae52a88c96ab19f48782e6aa646542574db2b8feea21989ecec54f6945c094",
+      "image_sha256": "11bcb5be5c3c96b007a61ecdf4189ef3e2c4bfeec5038f8895b900662dd89e2b"
+    },
+    "f8580": {
+      "source_frame": 8580,
+      "pixel_sha256": "8ef22c36d7adc761b76d08ce2c9ff0b50f86b338b945cd2e7da3551d9c949d75",
+      "image_sha256": "434391e2b379b7e05fe2758418272bfe8dfe08058559c70ab12eb71c52ddc053"
+    },
+    "f8600": {
+      "source_frame": 8600,
+      "pixel_sha256": "040b96c7f48014ac72ae708e7d4c8a3701350ace0a0fecdefbf4750f42bd3e6a",
+      "image_sha256": "5cec9e07c68360cab1bddcba8338cc5ad3939b7f2c6d3604055072e54162782d"
+    },
+    "f8660": {
+      "source_frame": 8660,
+      "pixel_sha256": "cc9a394c317f0b7e0549bb0c22920a144fbde636fb6ee2712d18d2480b632fa2",
+      "image_sha256": "cab29aace440dff5c80a42c75fd9119babc5e2492937726c1dbf3f23881a5284"
+    },
+    "f8680": {
+      "source_frame": 8680,
+      "pixel_sha256": "0555afdfe99795f5dd72df693da89101a922b388e892623ea7ccea516d5bcef0",
+      "image_sha256": "5f923ee04bb8342faaef2e199af1b198b7a1507af302367784fd59c76fc7ab22"
+    },
+    "f8700": {
+      "source_frame": 8700,
+      "pixel_sha256": "12fd7fd104dd3ded0bd82229b469f4f47063b1b44b2bd9e508320bb1ae3c682b",
+      "image_sha256": "5b2af0bb58955071d690216376ee129cb1a567f069e37908d7b1d839f347c0fb"
+    },
+    "f8720": {
+      "source_frame": 8720,
+      "pixel_sha256": "c9e6a9bd29267f33644a9f8a1c431860184bfe368ead8ff8c641179cb0a29edd",
+      "image_sha256": "10e2ea06c3b900a615ccace70c8a332859eb14a040259ff5412705584f83dad6"
+    },
+    "f8760": {
+      "source_frame": 8760,
+      "pixel_sha256": "7a3913f78b29d3983fa1e931b628f9d9a31108f7154b43ae1211e9961cac7864",
+      "image_sha256": "6a28e8f4f45e83f78776ba1a4faee90ec2ed0c07c0663888d60fbf3132d10ec4"
+    },
+    "f8800": {
+      "source_frame": 8800,
+      "pixel_sha256": "28d585bd54167025fba1f72cd0ddfaa49a0c9e50ea4e95f0f203344cdfdb6ec4",
+      "image_sha256": "35af132e38bcecc04bf5dc0ada408b65ab3de708cb5a437bf09115e5991d00cb"
+    },
+    "f8820": {
+      "source_frame": 8820,
+      "pixel_sha256": "77556fc11eea7e648385937cc544151c1eb6d31279e659f5241b4367c3397ecb",
+      "image_sha256": "12e64507598381567bfe7a9db8c20c3de73ab849afaa5aba9af187bae4672fc2"
+    },
+    "f8840": {
+      "source_frame": 8840,
+      "pixel_sha256": "193aa3cd771bda78afa9da497f7d24a84e67cb0ac659349d0d9e746a8ff4fb2d",
+      "image_sha256": "c5a89506e69a003cd13a6cec45c6e591bbf0a299d98c614c040edc8b681f0006"
+    },
+    "f8860": {
+      "source_frame": 8860,
+      "pixel_sha256": "aa457de1670d901e59741be5db94bfd668ba9d9a38c8ca1e0d092a252ff18a00",
+      "image_sha256": "640e1af8e133c7ba949fc9c06fe506cf9ce5e83b3c4ca05b8fb88402cff1ed3c"
+    }
+  }
+}

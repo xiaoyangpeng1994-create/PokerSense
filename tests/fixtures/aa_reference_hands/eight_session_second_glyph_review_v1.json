@@ -1,0 +1,48 @@
+{
+  "role": "development",
+  "audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "review_type": "post_prediction_visual_review_not_blinded_gold",
+  "hand_boundaries_verified": false,
+  "streets": [
+    {"street":"preflop","actions":[
+      {"slot":4,"kind":"call","window":[3390,3450]},
+      {"slot":5,"kind":"fold","window":[3450,3510]},
+      {"slot":6,"kind":"call","window":[3510,3570]},
+      {"slot":7,"kind":"fold","window":[3630,3690]},
+      {"slot":0,"kind":"call","window":[3750,3810]},
+      {"slot":1,"kind":"call","window":[3810,3870]},
+      {"slot":2,"kind":"fold","window":[3930,3990]},
+      {"slot":3,"kind":"raise","window":[3990,4050]},
+      {"slot":4,"kind":"fold","window":[4170,4230]},
+      {"slot":6,"kind":"fold","window":[4230,4290]},
+      {"slot":0,"kind":"call","window":[4320,4335]},
+      {"slot":1,"kind":"fold","window":[4320,4335]}
+    ]},
+    {"street":"flop","actions":[
+      {"slot":3,"kind":"bet","window":[4395,4410]},
+      {"slot":0,"kind":"call","window":[4485,4500]}
+    ]},
+    {"street":"turn","actions":[
+      {"slot":3,"kind":"check","window":[4530,4590]},
+      {"slot":0,"kind":"bet","window":[4590,4650]},
+      {"slot":3,"kind":"raise","window":[4740,4755]}
+    ]}
+  ],
+  "unmarked_action_evidence": [{
+    "slot":0,"window":[4823,4824],"inferred_kind":"short_all_in_call",
+    "stack_before":"104","stack_after":"0","pot_before":"474","pot_after":"578",
+    "visible_all_in_glyph":false,
+    "note":"Continuous4816-4831 reviewed: timer directly replaced by revealed88 and insurance phase; not a visible-glyph false negative. Full action reconstruction still needs money/context."
+  }],
+  "negative_observations":[{
+    "frame":4890,"slot":3,"visible_text":"投保6",
+    "not_a_betting_action":true,
+    "note":"Prediction4886 aggressive is insurance badge confusion, not a raise."
+  }],
+  "notes":[
+    "17 visible action glyph transitions; one further monetary action has no visible action glyph in reviewed transition.",
+    "Slot6 now participates; previous-hand waiting status must not carry forward.",
+    "Coarse evidence windows may overlap; this is not a full legal-action or exact-boundary registry.",
+    "Model and thresholds were not modified using this target hand. Review is not blinded or independent holdout."
+  ]
+}

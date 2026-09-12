@@ -2,22 +2,41 @@
 
 [简体中文](README.zh-CN.md) | **English**
 
-PokerSense is a real-time Texas Hold'em training companion for authorized,
-self-hosted games. It reads a table from LDPlayer over ADB and displays analysis in a
-separate window. The current `main` build recognizes hero and board cards,
-the total pot, seat occupancy, visual-slot stacks, the Dealer marker, the
-Hero decision turn, and completed action labels, derives the street,
-and reports visible-card equity against a random range;
-the v0.3 target adds explainable action frequencies, sizes, EVs, and confidence.
+Current execution: [AA vision-first plan](PLAN-AA-vision-first.zh-CN.md), with
+the [video-first WPK plan](PLAN-WPK-video-first.zh-CN.md) retained for regression.
+Use the existing recordings for development before final hardware acceptance.
+The [NLHE rulebook](docs/WPK-RULEBOOK.zh-CN.md) has independent executable examples.
+
+Capture-card temporal protection has reached the local v9 candidate. Production
+card acceptance stays disabled; offline diagnostics remain available. Historical
+metrics do not validate the current pipeline. After a frame-source fault, the
+local build discards temporary evidence and emits an unavailable, no-advice
+snapshot before retrying, without deleting hand history. Controlled continuity
+tests pass; real device/browser recovery still needs acceptance. See the
+[continuity report](docs/WPK-V8-CONTINUITY-REVIEW.zh-CN.md).
+Conflicting accepted current/fused card identities trigger abstention and a new
+evidence window; see the [v9 tradeoffs](docs/WPK-V9-HANDOFF-REVIEW.zh-CN.md).
+Pixel repetition is diagnostic only: still images do not prove a freeze, and
+advancing host frame ids do not prove that the source is current.
+
+PokerSense is a real-time Texas Hold'em training companion. Current local work
+targets **AA Poker on a phone through a capture card: eight physical slots and
+6–8 dealt players**. WPK remains a regression platform. The local build counts
+active opponents for uniform-random showdown
+equity and provides editable blinds, antes, rake/cap and straddle settings.
+Dynamic capture-card recognition and postflop strategy are not yet accepted;
+a working simulation or saved configuration is not proof of strategy coverage
+or profitability. See [local WPK progress](docs/wpk-progress-2026-09-08.md).
+The native app now defaults to capture-card; select `--source adb` for LDPlayer.
 
 PokerSense is not an autoplay bot. It never clicks, types, places bets, or
 controls a poker client. The human remains the only executor. The intended
 environment is a private table with friends, coaching, and deliberate practice.
 
-## Current support
+## Retained ADB support
 
-The current `main` target is **WePoker Android in portrait LDPlayer**. H5 is no
-longer the primary product path.
+The table below describes the separately calibrated **portrait LDPlayer** path.
+These measurements must not be reused as capture-card acceptance evidence.
 
 | Feature | Availability |
 |---|---|
@@ -53,9 +72,9 @@ The published v0.1.11 installers still use the legacy H5 path and do not contain
 this Android/ADB change. The Android path is currently on `main`; a new installer
 will be published after real LDPlayer integration and Windows packaging checks.
 
-## Run with LDPlayer (default)
+## Run with LDPlayer (alternative)
 
-PokerSense no longer needs an H5 page or a Chrome window. Its default live
+PokerSense no longer needs an H5 page or a Chrome window. This alternative
 input is the Android framebuffer from LDPlayer over ADB. Before launching, you
 need a Windows LDPlayer instance, WePoker Android, and one authorized ADB
 device. The currently calibrated profile is **1440×2560 portrait**.
@@ -63,9 +82,9 @@ device. The currently calibrated profile is **1440×2560 portrait**.
 1. Run WePoker Android in a 1440×2560 portrait LDPlayer instance and enable ADB.
 2. Run `adb devices` and note the target serial, such as `emulator-5556`.
 3. If `adb.exe` is not on PATH, point `POKERSENSE_ADB_PATH` to LDPlayer's copy.
-4. With one authorized instance, start normally with `make run-desktop`.
+4. With one authorized instance, use `make run-desktop ARGS="--source adb"`.
    With more than one instance, select it explicitly with
-   `make run-desktop ARGS="--device-serial emulator-5556"`.
+   `make run-desktop ARGS="--source adb --device-serial emulator-5556"`.
 
 Cards, street, total pot, occupancy, stacks, Dealer, Hero actor, and completed
 action labels have been measured for this platform. The live pipeline maps
@@ -77,13 +96,13 @@ remain withheld and the displayed equity is still a visible-card calculation
 against a random opponent range.
 
 With exactly one authorized ADB device, PokerSense uses `auto` and starts the
-default Android path. With multiple instances it fails closed and lists the
+selected ADB path. With multiple instances it fails closed and lists the
 serials instead of choosing one. `--device-serial` (or
 `POKERSENSE_ADB_SERIAL`) is then required.
 
 ```bash
 adb devices
-make run-desktop ARGS="--device-serial emulator-5556"
+make run-desktop ARGS="--source adb --device-serial emulator-5556"
 ```
 
 ADB returns the emulator framebuffer, so moving, scaling, occluding, or
@@ -98,13 +117,15 @@ PokerSense does not keep screenshots, video, or a frame history on disk.
 Private calibration captures are excluded from GitHub and packages; only a
 small, redacted, labeled regression set needs long-term retention.
 
-The only persisted setting is the interface language:
+The interface language is persisted separately from editable table rules:
 
 - macOS: `~/Library/Application Support/PokerSense/settings.json`
 - Windows: `%APPDATA%\\PokerSense\\settings.json`
 
 The file contains one of `auto`, `en`, or `zh`. `auto` follows the system
-language.
+language. Table rules are stored in `table-rules.json` in the same directory;
+changing language does not overwrite them. Diagnostic video tools read only the
+explicit local archive supplied by the operator.
 
 ## Development
 

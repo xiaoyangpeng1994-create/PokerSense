@@ -1,0 +1,11 @@
+{
+  "source": "G:/PokerSense_private/aa8_first_hand_full_v1",
+  "context_source": "G:/PokerSense_private/aa8_second_hand_window_v1",
+  "late_source": "G:/PokerSense_private/aa8_late_dev_special_search_v1",
+  "bank_path": "G:/PokerSense_private/aa8_reviewed_money_bank_v2_wager58/bank.npz",
+  "profile_path": "C:/Users/Administrator/WorkBuddy/扑克/PokerSense/configs/vision/aa_android_capture_card/layout.8seat.candidate.json",
+  "heads_path": "C:/Users/Administrator/WorkBuddy/扑克/PokerSense/configs/vision/wepoker_android_capture_card/card_heads.npz",
+  "audit": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "bomb_pool": "G:/PokerSense_archive/aa_video_first_20260908/mode_mining_1s_v1",
+  "reservations": "C:/Users/Administrator/WorkBuddy/扑克/PokerSense/configs/reproduction/aa_holdout_reservations_v1.json"
+}

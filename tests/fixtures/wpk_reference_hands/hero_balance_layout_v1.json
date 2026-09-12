@@ -1,0 +1,21 @@
+{
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "scope": "Offline visual-location truth, not participation or usable balance. Existing development recording.",
+  "templates": {"lower": 11000, "raised": 10700},
+  "floor": 0.70,
+  "checkpoints": [
+    {"source_frame": 10400, "location": "lower", "visible_digits": "0"},
+    {"source_frame": 10530, "location": "lower", "visible_digits": "0"},
+    {"source_frame": 10550, "location": "raised", "visible_digits": "0", "context": "buy-in modal, no usable-stack claim"},
+    {"source_frame": 10570, "location": "raised", "visible_digits": "0", "context": "waiting approval placeholder"},
+    {"source_frame": 10600, "location": "raised", "visible_digits": "200"},
+    {"source_frame": 10700, "location": "raised", "visible_digits": "200"},
+    {"source_frame": 10800, "location": "raised", "visible_digits": "200"},
+    {"source_frame": 10860, "location": "raised", "visible_digits": "200"},
+    {"source_frame": 10900, "location": "lower", "visible_digits": "160"},
+    {"source_frame": 11000, "location": "lower", "visible_digits": "160"},
+    {"source_frame": 11050, "location": "lower", "visible_digits": "160", "context": "folded cards still visible"},
+    {"source_frame": 11250, "location": "lower", "visible_digits": "160", "context": "folded cards still visible"},
+    {"source_frame": 11340, "location": "lower", "visible_digits": "156"}
+  ]
+}

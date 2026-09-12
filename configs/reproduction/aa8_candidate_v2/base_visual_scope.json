@@ -1,0 +1,20 @@
+{
+  "id": "aa8_base_visual_v1",
+  "status": "SCOPE_AGREED_NOT_ACCEPTED",
+  "seat_count": 8,
+  "hero_slot": 4,
+  "required": ["actor", "street_wagers", "actions", "pot", "stacks", "street", "hand", "participation", "hero_cards", "board_cards", "independent_whole_hand_test", "capture_chain_stability"],
+  "deferred_semantics": ["insurance", "mushroom", "bomb"],
+  "retain_mode_guards": true,
+  "unknown_mode_means_inactive": false,
+  "ambiguous_cash_policy": "UNALLOCATED",
+  "resume_requires_fresh_context": true,
+  "full_visual_acceptance": false,
+  "strategy_eligible": false,
+  "user_reported_rule": {
+    "statement": "Insurance appears only after both players are all in",
+    "source": "user_statement",
+    "independently_verified": false,
+    "infer_actor_or_payment_from_insurance_alone": false
+  }
+}

@@ -21,6 +21,11 @@
     "unreadable_score_ceiling": 1.0
   },
   "card_fused": {
+    "requires_revalidation": true,
+    "candidate_recognizer_version": "gray-fused-v9-identity-consistency",
+    "max_frame_gap_seconds": 1.0,
+    "historical_metrics_only": true,
+    "revalidation_reason": "2026-09-08: v9 rejects accepted current-frame identities that contradict fused history, reseeding the window without promoting a guessed card. V6 rank weights remain offline. Controlled splice and normal replay validation do not establish live profitability or device freshness; production stays closed and v3 metrics remain historical.",
     "algorithm": "gray-fused-mlp-v3 (temporal fusion of size-normalized gray glyphs + BGR colour router + per-family MLP)",
     "calibration_correct": 62,
     "calibration_positive_samples": 62,

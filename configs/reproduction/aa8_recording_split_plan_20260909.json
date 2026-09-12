@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "CANDIDATE_RANGES_NOT_A_VERIFIED_HAND_REGISTRY",
+  "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "timeline_units": "seconds from decoded recording PTS",
+  "ranges": [
+    {"start_inclusive": "0", "end_exclusive": "300", "role": "development"},
+    {"start_inclusive": "300", "end_exclusive": "600", "role": "calibration_candidate"},
+    {"start_inclusive": "600", "end_exclusive": "820", "role": "holdout_candidate"},
+    {"start_inclusive": "820", "end_exclusive": "995.366", "role": "development"}
+  ],
+  "known_visual_preview_pts": ["60.000", "840.023"],
+  "verified_independent_hands": 0,
+  "rules": [
+    "Assign complete hands only after boundary annotation; a segment is not a hand.",
+    "A calibration or holdout hand must lie wholly within one candidate range.",
+    "Do not train, choose templates, tune thresholds or alter geometry from held-out frames.",
+    "Boundary annotation is permitted; do not use recognition results to cherry-pick easy hands.",
+    "Hands intersecting previously viewed preview frames are development only.",
+    "An unreviewed range may contain no eligible complete hands and does not count as acceptance.",
+    "Same-session holdout is not independent-device or independent-session validation."
+  ]
+}

@@ -298,6 +298,39 @@ def test_exceeding_max_consecutive_failures_raises(monkeypatch):
         asyncio.run(run())
 
 
+def test_midstream_capture_fault_emits_unavailable_frame_before_retry(monkeypatch):
+    _record_sleeps(monkeypatch)
+    frames = _frames()
+
+    class Interrupted:
+        def __init__(self):
+            self.count = 0
+
+        def next_frame(self):
+            self.count += 1
+            if self.count == 1:
+                return frames[0]
+            if self.count == 2:
+                raise LiveCaptureError("injected disconnection")
+            return frames[1] if self.count == 3 else None
+
+    pipe = _pipeline(Interrupted())
+    monkeypatch.setattr(live, "build_pipeline", lambda *a, **k: pipe)
+
+    async def run():
+        return await _collect(live.live_analysis_stream(
+            interval_seconds=0, backoff_initial_seconds=0), limit=3)
+
+    normal, unavailable, resumed = asyncio.run(run())
+    assert unavailable.analysis.frame_seq == normal.analysis.frame_seq
+    assert unavailable.advice is None
+    assert unavailable.advice_unavailable_reason == "capture_unavailable"
+    assert unavailable.analysis.equity.unavailable_reason == "capture_unavailable"
+    assert all(status == "unknown" for _, status
+               in unavailable.analysis.confidence.field_status)
+    assert resumed.analysis.frame_seq > normal.analysis.frame_seq
+
+
 def test_programming_fault_is_not_retried(monkeypatch):
     """A bug is not a device fault — retrying it would only hide it."""
     _record_sleeps(monkeypatch)

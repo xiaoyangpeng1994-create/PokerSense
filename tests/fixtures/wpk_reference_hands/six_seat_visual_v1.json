@@ -1,0 +1,7 @@
+{
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "scope": "Six occupied positions on the observed eight-slot layout; not a claim to cover every six-max app layout. Source frame1220 is UNIQUE pixel map, not filename nominal1281.",
+  "checkpoints": [
+    {"source_frame": 1220, "pixel_sha256": "fce7372b4f11bc5960d2cf44ef5e5166e2c1eabd9349a250c85fbd6170a44be4", "pot": "18", "stacks": ["198", "198", "198", null, "196", null, "194", "198"], "actions": [null, null, null, null, null, null, null, null], "occupied_slots": [0,1,2,4,6,7], "dealer_slot": 2, "hero_ui_turn": null}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "role": "development",
+  "independent_holdout": false,
+  "full_visual_acceptance": false,
+  "review_method": "Previously reviewed opening debits and action references accumulated once; displayed-pot differences remain unallocated.",
+  "checkpoints": [
+    {"frame": 1320, "source_sha256": "6e4e3a073b698717dca763cb2bdc160f79ce74314aa0213f187871106c580776", "epoch": "observed_deal_1263", "dealer": 7, "commitment_total": "29", "unallocated_difference": "6", "action_line": "unopened"},
+    {"frame": 1459, "source_sha256": "439b43737dc2ffeed765de5ac416885f5f69891ce2237e93dee367d5d88a3b5c", "epoch": "observed_deal_1263", "dealer": 7, "commitment_total": "49", "unallocated_difference": "6", "action_line": "raise"},
+    {"frame": 1978, "source_sha256": "770268acd97b1ec2de556bc7a19469c0e25b89d8d8fd28ceeecf78e906a9621d", "epoch": "observed_deal_1263", "dealer": 7, "commitment_total": "121", "unallocated_difference": "6", "action_line": "raise"},
+    {"frame": 3390, "source_sha256": "a8793ec821e64c7744b56a1a31827db40bce3fe702f4f6baf5341b28d339baf4", "epoch": "observed_deal_3320", "dealer": 0, "commitment_total": "27", "unallocated_difference": "2", "action_line": "unopened"},
+    {"frame": 3432, "source_sha256": "ecfa0029bc6d4c78ee96e8b188feb8cc88001c4fb3d2d87188981afcd8470aa1", "epoch": "observed_deal_3320", "dealer": 0, "commitment_total": "31", "unallocated_difference": "2", "action_line": "limp"},
+    {"frame": 3535, "source_sha256": "bca2f994f1d43047c1007b11c559b6a85b96155a6a817f71fdfe1788e11253a8", "epoch": "observed_deal_3320", "dealer": 0, "commitment_total": "33", "unallocated_difference": "2", "action_line": "multi_limp"},
+    {"frame": 4027, "source_sha256": "152060d653475b835fce3e2b8ef046bb8ab9ff09f8f2b8fb0d7c13b96acc0456", "epoch": "observed_deal_3320", "dealer": 0, "commitment_total": "78", "unallocated_difference": "2", "action_line": "iso_raise"},
+    {"frame": 4823, "source_sha256": "1ef5af86253e04abbc6119f37d87323cf307fe91ad23093784876ce900b60d3d", "epoch": "observed_deal_3320", "dealer": 0, "commitment_total": "476", "unallocated_difference": "2", "action_line": null},
+    {"frame": 5101, "source_sha256": "92819101824909add0b2fdde6c94d0132df9c7249dbed5fd657701b2fdc3f53d", "epoch": "observed_deal_5051", "dealer": 1, "commitment_total": "19", "unallocated_difference": "-2", "action_line": "unopened"}
+  ]
+}

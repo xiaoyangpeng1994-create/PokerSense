@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "version": "capture-card-normalization-v1",
+  "source_size": [1920, 1080],
+  "rotate_degrees": 0,
+  "mirror_horizontal": false,
+  "crop_after_rotation": [711, 0, 1209, 1080],
+  "output_size": [498, 1080],
+  "color_transform": "none"
+}

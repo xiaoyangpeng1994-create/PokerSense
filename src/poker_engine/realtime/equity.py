@@ -14,11 +14,15 @@ range-equity capability), which is the bridge to the future opponent model.
 from __future__ import annotations
 
 from itertools import combinations
+from collections import OrderedDict
+import math
+import random
 from typing import Protocol
 
+from poker_engine.core.enums import PlayerStatus
 from poker_engine.core.state import PokerState
 from poker_engine.equity._deck import remaining_deck
-from poker_engine.equity.montecarlo import MonteCarloEquity
+from poker_engine.equity.backend import select_evaluator
 from poker_engine.equity.range import enumeration_range_equity
 from poker_engine.core.value_objects import Card
 
@@ -42,19 +46,75 @@ def _random_range(state: PokerState) -> tuple[tuple[Card, Card], ...]:
 
 
 class MonteCarloRandomRangeEquity:
-    """Hero equity vs a random opponent range, via Monte Carlo (realtime)."""
+    """Showdown equity against every active opponent, with uniform ranges.
 
-    def __init__(self, trials: int = 2000, seed: int = 0) -> None:
-        self._mc = MonteCarloEquity(trials=trials, seed=seed)
+    Uniform ranges are an explicit baseline, not action-conditioned strategy
+    or rake/side-pot EV. Deal all unknown cards without replacement so a
+    multiway trial never needs collision rejection. Reuse identical queries
+    with a bounded cache; all runs use the same fixed trial count and seed.
+    """
+
+    def __init__(self, trials: int = 2000, seed: int = 0,
+                 evaluator: str = "auto") -> None:
+        if isinstance(trials, bool) or not isinstance(trials, int) or trials <= 0:
+            raise ValueError("trials must be a positive integer")
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise TypeError("seed must be an integer")
+        self._trials = trials
+        self._seed = seed
+        self._evaluate, self.evaluator_backend = select_evaluator(evaluator)
+        self._cache: OrderedDict[tuple, EquitySnapshot] = OrderedDict()
 
     def compute(self, state: PokerState) -> EquitySnapshot:
         hero = tuple(state.hero_cards)
         board = tuple(state.board_cards)
-        if len(hero) != 2:
-            return EquitySnapshot(win_rate=0.0, tie_rate=0.0)
-        rng = _random_range(state)
-        res = self._mc.estimate_range(hero, (rng,), board)
-        return EquitySnapshot(win_rate=res.win, tie_rate=res.tie)
+        count, reason = _opponent_count(state)
+        if reason is not None:
+            return _unavailable(reason, count)
+        key = (tuple(sorted(hero)), tuple(sorted(board)), count)
+        if key in self._cache:
+            self._cache.move_to_end(key)
+            return self._cache[key]
+        deck = remaining_deck(hero + board)
+        rng = random.Random(self._seed)
+        need = 5 - len(board)
+        wins = ties = 0
+        shares = squares = 0.0
+        for _ in range(self._trials):
+            draw = rng.sample(deck, need + 2 * count)
+            full_board = board + tuple(draw[:need])
+            hero_value = self._evaluate(hero + full_board)
+            tied = 0
+            lost = False
+            for opponent in range(count):
+                offset = need + 2 * opponent
+                value = self._evaluate(tuple(draw[offset:offset + 2]) + full_board)
+                if value > hero_value:
+                    lost = True
+                    break
+                tied += value == hero_value
+            share = 0.0
+            if not lost:
+                wins += tied == 0
+                ties += tied > 0
+                share = 1.0 / (tied + 1)
+            shares += share
+            squares += share * share
+        mean = shares / self._trials
+        error = None
+        if self._trials > 1:
+            variance = max(0.0, (squares - shares * mean) / (self._trials - 1))
+            error = math.sqrt(variance / self._trials)
+        result = EquitySnapshot(
+            win_rate=wins / self._trials, tie_rate=ties / self._trials,
+            opponent_count=count, samples=self._trials,
+            expected_share=mean, standard_error=error,
+            basis="uniform_random_active_opponents",
+        )
+        self._cache[key] = result
+        if len(self._cache) > 128:
+            self._cache.popitem(last=False)
+        return result
 
 
 class ExactRandomRangeEquity:
@@ -67,11 +127,49 @@ class ExactRandomRangeEquity:
     def compute(self, state: PokerState) -> EquitySnapshot:
         hero = tuple(state.hero_cards)
         board = tuple(state.board_cards)
-        if len(hero) != 2:
-            return EquitySnapshot(win_rate=0.0, tie_rate=0.0)
+        count, reason = _opponent_count(state)
+        if reason is not None:
+            return _unavailable(reason, count)
+        if count != 1:
+            return _unavailable("exact_random_equity_requires_heads_up", count)
         rng = _random_range(state)
         res = enumeration_range_equity(hero, (rng,), board)
-        return EquitySnapshot(win_rate=res.win, tie_rate=res.tie)
+        return EquitySnapshot(
+            win_rate=res.win, tie_rate=res.tie, expected_share=res.equity,
+            opponent_count=count, samples=res.samples, standard_error=0.0,
+            basis="uniform_random_active_opponents",
+        )
+
+
+def _unavailable(reason: str, count: int | None = None) -> EquitySnapshot:
+    return EquitySnapshot(
+        0.0, 0.0, opponent_count=count,
+        basis="uniform_random_active_opponents", unavailable_reason=reason,
+    )
+
+
+def _opponent_count(state: PokerState) -> tuple[int | None, str | None]:
+    if len(state.hero_cards) != 2:
+        return None, "hero_cards_unavailable"
+    if len(state.board_cards) != {"preflop": 0, "flop": 3, "turn": 4,
+                                  "river": 5}.get(state.street.value):
+        return None, "board_street_mismatch"
+    cards = tuple(state.hero_cards) + tuple(state.board_cards)
+    if len(set(cards)) != len(cards):
+        return None, "card_conflict"
+    live_statuses = (PlayerStatus.ACTIVE, PlayerStatus.ALL_IN)
+    if any(p.status is PlayerStatus.UNKNOWN or
+           (p.status in live_statuses and not p.has_cards) for p in state.players):
+        return None, "player_status_unavailable"
+    active = tuple(
+        p for p in state.players if p.status in live_statuses and p.has_cards
+    )
+    if not any(p.is_hero for p in active):
+        return None, "hero_not_in_hand"
+    count = len(active) - 1
+    if count < 1:
+        return 0, "waiting_for_active_players"
+    return count, None
 
 
 __all__ = [

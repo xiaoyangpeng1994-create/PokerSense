@@ -118,7 +118,9 @@ def test_every_documented_test_id_has_fixture_coverage(fixtures):
         "strategy-requirements-matrix.md",
         "strategy-regression-test-matrix.md",
     ):
-        documented.update(pattern.findall((ROOT / "docs" / name).read_text()))
+        documented.update(pattern.findall(
+            (ROOT / "docs" / name).read_text(encoding="utf-8")
+        ))
     covered = {test for fixture in fixtures for test in fixture["test_ids"]}
     assert documented <= covered, sorted(documented - covered)
 

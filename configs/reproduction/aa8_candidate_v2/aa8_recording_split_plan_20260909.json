@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "V2_FUTURE_HOLDOUT_RESERVED_BEFORE_V2_TUNING",
+  "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "ranges": [
+    {"start_inclusive":"0","end_exclusive":"300","role":"development"},
+    {"start_inclusive":"300","end_exclusive":"600","role":"holdout_candidate"},
+    {"start_inclusive":"600","end_exclusive":"820","role":"previously_evaluated_v1_holdout"},
+    {"start_inclusive":"820","end_exclusive":"995.366","role":"development"}
+  ],
+  "verified_independent_hands": 0,
+  "known_visual_preview_pts": ["60.000", "840.023"],
+  "rules": [
+    "The formerly calibration-candidate300-600 interval has not been opened or used for tuning; reserve it as fresh V2 holdout before V2 work.",
+    "Do not modify the original V1 split, freeze, labels, predictions or source roles.",
+    "V1 holdout600-820 has now been evaluated and cannot validate future tuned models as untouched data.",
+    "V2 tuning remains confined to0-300 and820-end; do not inspect the fresh holdout until a new candidate freeze.",
+    "Chronologically retain every whole hand inside the new reservation after isolated boundary review; no selection by model performance.",
+    "This same-session holdout never substitutes for physical capture-chain validation."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "scope": "Four later frames labeled from raw PNGs before gray-bank inference. No session002 glyph is added to the bank. Prior card-development exposure means not a pristine project holdout.",
+  "checkpoints": [
+    {"source_frame": 12000, "stacks": ["132", "196", "120", "716", null, "0", "0", "902"]},
+    {"source_frame": 13200, "stacks": ["0", "160", "114", "0", "794", "1077", "269", "898"]},
+    {"source_frame": 14400, "stacks": ["308", "76", "88", "760", "708", "1047", "200", "872"], "waiting_slots": [6]},
+    {"source_frame": 15600, "stacks": ["190", "418", "410", "1344", "666", "200", "198", "754"], "waiting_slots": [5]}
+  ]
+}

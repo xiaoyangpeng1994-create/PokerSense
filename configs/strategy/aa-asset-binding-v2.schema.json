@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PokerSense AA Strategy Asset Binding v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "asset_sha256", "capability_sha256", "rule_fingerprint", "provider_id", "source_version", "player_counts", "streets", "asset_status", "source_url", "source_revision", "license_spdx", "limitations"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "asset_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "capability_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "rule_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "provider_id": {"type": "string", "minLength": 1},
+    "source_version": {"type": "string", "minLength": 1},
+    "player_counts": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": [6, 7, 8]}},
+    "streets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["preflop", "flop", "turn", "river"]}},
+    "asset_status": {"enum": ["test_only", "shadow_reviewed", "live_approved"]},
+    "source_url": {"type": "string", "minLength": 1},
+    "source_revision": {"type": "string", "minLength": 1},
+    "license_spdx": {"type": "string", "minLength": 1},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  }
+}

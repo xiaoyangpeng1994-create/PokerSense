@@ -58,6 +58,12 @@ class EquitySnapshot:
 
     win_rate: float
     tie_rate: float
+    opponent_count: int | None = None
+    samples: int = 0
+    expected_share: float | None = None
+    standard_error: float | None = None
+    basis: str = "unspecified"
+    unavailable_reason: str | None = None
 
     def __post_init__(self) -> None:
         for name in ("win_rate", "tie_rate"):
@@ -66,6 +72,32 @@ class EquitySnapshot:
                 raise TypeError(f"{name} must be a float")
             if not (0.0 <= float(v) <= 1.0):
                 raise ValueError(f"{name} must be in [0,1], got {v}")
+        if self.win_rate + self.tie_rate > 1.0 + 1e-12:
+            raise ValueError("win_rate + tie_rate must not exceed one")
+        if self.opponent_count is not None and (
+            isinstance(self.opponent_count, bool)
+            or not isinstance(self.opponent_count, int)
+            or not 0 <= self.opponent_count <= 8
+        ):
+            raise ValueError("opponent_count must be in [0, 8] or None")
+        if isinstance(self.samples, bool) or not isinstance(self.samples, int):
+            raise TypeError("samples must be an int")
+        if self.samples < 0:
+            raise ValueError("samples must not be negative")
+        for name in ("expected_share", "standard_error"):
+            value = getattr(self, name)
+            if value is not None and (
+                isinstance(value, bool) or not isinstance(value, (int, float))
+                or not 0.0 <= value <= 1.0
+            ):
+                raise ValueError(f"{name} must be in [0,1] or None")
+        if not isinstance(self.basis, str) or not self.basis:
+            raise ValueError("basis must be a non-empty string")
+        if self.unavailable_reason is not None and (
+            not isinstance(self.unavailable_reason, str)
+            or not self.unavailable_reason
+        ):
+            raise ValueError("unavailable_reason must be a non-empty string or None")
 
 
 @dataclass(frozen=True)

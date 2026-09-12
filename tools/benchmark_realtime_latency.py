@@ -54,7 +54,7 @@ _SCENARIOS = (
      ("CHECK", "BET")),
     (["QH", "JD", "TC", "2S"], ["AS", "KD"], "50", "20",
      ("150", "250", "350"), ("BET", "CALL")),
-    (["QH", "JD", "TC", "2S", "7H"], ["AS", "7H"], "100", "40",
+    (["QH", "JD", "TC", "2S", "7H"], ["AS", "KD"], "100", "40",
      ("200", "300", "400"), ("BET", "FOLD")),
 )
 
@@ -110,7 +110,12 @@ def _run_path(equity_strategy, scenarios, repeats: int) -> dict[str, list[float]
             t = time.perf_counter()
             active = orch._hand_memory.active_hand_id
             state = orch._hand_memory.latest_state(active)
-            eq.compute(state)
+            result = eq.compute(state)
+            if result.unavailable_reason is not None or result.samples == 0:
+                raise RuntimeError(
+                    "benchmark did not perform valid equity evaluation: "
+                    f"{result.unavailable_reason}"
+                )
             equity_ms.append((time.perf_counter() - t) * 1000)
 
             total_ms.append((time.perf_counter() - t_total) * 1000)
@@ -151,8 +156,9 @@ def run_latency_benchmark(repeats: int) -> dict:
 
     report = {
         "note": (
-            "Realtime pipeline latency. Realtime criterion: Monte Carlo path "
-            "p50 < 500ms AND p95 < 500ms."
+            "Synthetic diagnostic: capture is a no-op and strategy/transport/"
+            "render are excluded. This is not the 300ms live acceptance gate. "
+            "Legacy benchmark threshold: MC p50 and p95 < 500ms."
         ),
         "repeats": repeats,
         "monte_carlo": {k: _summarize(v) for k, v in mc.items()},

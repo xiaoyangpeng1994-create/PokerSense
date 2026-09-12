@@ -51,6 +51,7 @@
       <div class="seg-win" id="seg-win" style="width:0%"></div>
       <div class="seg-tie" id="seg-tie" style="width:0%"></div>
     </div>
+    <p class="equity-secondary" id="equity-basis" aria-live="polite"></p>
   </section>
 
   <section class="advice-panel" id="advice-panel" hidden aria-live="polite">
@@ -101,6 +102,36 @@
       <option value="en">English</option>
     </select>
     <p class="settings-note" data-i18n="languageHint">Changes are saved automatically.</p>
+    <fieldset class="table-rules" id="table-rules">
+      <legend data-i18n="tableRules">WPK table rules</legend>
+      <p class="settings-note" data-i18n="rulesHint">Simulation defaults must be checked against the current table. Save to apply.</p>
+      <div class="rules-grid">
+        <label><span data-i18n="rulesMode">Use</span><select id="rules-mode">
+          <option value="simulation" data-i18n="simulationMode">Simulation assumptions</option>
+          <option value="live" data-i18n="liveRulesMode">Confirmed table rules</option>
+        </select></label>
+        <label><span data-i18n="tableSize">Table size</span><select id="rules-table-size">
+          <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+        </select></label>
+        <label><span data-i18n="smallBlind">Small blind</span><input id="rules-small-blind" type="number" min="0.000001" step="any"></label>
+        <label><span data-i18n="bigBlind">Big blind</span><input id="rules-big-blind" type="number" min="0.000001" step="any"></label>
+        <label><span data-i18n="ante">Ante per player</span><input id="rules-ante" type="number" min="0" step="any"></label>
+        <label><span data-i18n="minimumChip">Smallest chip</span><input id="rules-minimum-chip" type="number" min="0.000001" step="any"></label>
+        <label><span data-i18n="rakePercent">Rake (%)</span><input id="rules-rake-percent" type="number" min="0" max="100" step="any"></label>
+        <label><span data-i18n="rakeCap">Rake cap (BB; blank = unknown)</span><input id="rules-rake-cap" type="number" min="0" step="any"></label>
+        <label><span data-i18n="straddle">Straddle</span><select id="rules-straddle-mode">
+          <option value="none" data-i18n="straddleNone">None</option>
+          <option value="mandatory" data-i18n="straddleMandatory">Mandatory</option>
+          <option value="optional" data-i18n="straddleOptional">Optional</option>
+          <option value="unconfirmed" data-i18n="straddleUnknown">Unconfirmed</option>
+        </select></label>
+        <label><span data-i18n="straddleAmount">Straddle amount (chips)</span><input id="rules-straddle-amount" type="number" min="0" step="any"></label>
+      </div>
+      <label class="rules-extra"><span data-i18n="extraEffects">Extra rules / bonus effects (notes only)</span><textarea id="rules-extra-effects" maxlength="500" rows="2"></textarea></label>
+      <p class="settings-note" data-i18n="rulesSupportHint">Saving rules does not imply strategy coverage. Unsupported straddles and bonus effects withhold advice.</p>
+      <button id="save-table-rules" class="rules-save control" type="button" data-i18n="saveRules">Save table rules</button>
+      <p class="settings-note" id="rules-feedback" role="status" aria-live="polite"></p>
+    </fieldset>
   </form>
 </dialog>
 <script src="app.js"></script>

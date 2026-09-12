@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "policy": "reference_and_hash_only_never_commit_private_payloads",
+  "artifacts": [
+    {"path": "G:/PokerSense_private/aa8_candidate_freeze_v1/freeze.json", "bytes": 72385, "sha256": "f3b55436de2ad21933b2561d921d72ba03aead23830b287dd9478bc68feaf696", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa8_candidate_v2_development_v8/report.json", "bytes": 31488, "sha256": "f50006e43f042b109de8809e748003efa2bebd747c176150088e8360290a25c5", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa8_candidate_v2_development_v8/observations.jsonl", "bytes": 56848879, "sha256": "ee6e6240876f62b1dd2a730b8efe6d93d5c6ce486e522c342546b7f32c1b3d20", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa8_shadow_sessions/aa8-dev-v8-shadow-20260910-v2/wal.jsonl", "bytes": 10989218, "sha256": "8939b345308dea033edf39ba9e169657f073c605c2bbaad353a25a255e3e47bc", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa8_shadow_sessions/aa8-dev-v8-shadow-20260910-v2/receipt.json", "bytes": 300, "sha256": "10228dd8f7fddb940dc66dd7e00e79e173d330deef059c375e620bab569625e5", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa8_shadow_sessions/aa8-dev-v8-shadow-20260910-v2/analysis.json", "bytes": 56237, "sha256": "60ac4ad5c8cd29b4eccceb7c9a96c61f0d07e6f9bf75e8119fa59d8f8a5d3a32", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa_equity_shadow_synthetic_v3/report.json", "bytes": 1710, "sha256": "30c4aabbf33371de64caf857ea2e0305130f04d329cba68ffdf24326989f0baa", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa8_reviewed_money_bank_v2_wager58/bank.npz", "bytes": 226766, "sha256": "ece873a6c8eccc31ce6391d71abe6e33892027a7a221fa40c7bcfcc71c0eaf95", "required_same_host": true},
+    {"path": "G:/PokerSense_private/aa_phone_audit_20260909_v1/report.json", "bytes": 7663, "sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61", "required_same_host": true}
+  ]
+}

@@ -70,3 +70,39 @@ def test_normalization_ignored_for_adb(monkeypatch):
     backend = live.build_capture_backend("adb", normalization="should-be-ignored")
     assert captured["adb"] is True
     assert backend is not None
+
+
+def test_production_pipeline_loads_the_measured_phone_crop(monkeypatch):
+    from poker_engine.realtime.frame_source import SyntheticFrameSource
+    captured = {}
+
+    def backend(source, **kwargs):
+        captured.update(kwargs)
+        return object()
+
+    monkeypatch.setattr(live, "build_capture_backend", backend)
+    monkeypatch.setattr(live, "DeviceFrameSource",
+                        lambda *args: SyntheticFrameSource(()))
+    live.build_pipeline(source="capture-card")
+    normalization = captured["normalization"]
+    assert normalization.source_size == (1920, 1080)
+    assert normalization.crop_after_rotation == (711, 0, 1209, 1080)
+    assert normalization.output_size == (498, 1080)
+
+
+def test_desktop_shell_defaults_to_capture_card_and_forwards_device(monkeypatch):
+    from poker_engine.desktop import app
+    captured = {}
+
+    def stream(serial, **kwargs):
+        captured.update(kwargs)
+        return None
+
+    def create(factory):
+        factory()
+        return object()
+
+    monkeypatch.setattr(app, "live_analysis_stream", stream)
+    monkeypatch.setattr(app, "create_app", create)
+    app._create_server("auto", device_index=2)
+    assert captured == {"source": "capture-card", "device_index": 2, "api": "MSMF"}

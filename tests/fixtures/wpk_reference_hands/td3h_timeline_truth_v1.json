@@ -1,0 +1,34 @@
+{
+  "hand_id": "s002_001197_td3h", "start": 1197, "end": 1595,
+  "source_sha256": "de41142148df00d1dca0ae8005474b6644e7d98592cc0c071aa459ab376fb8b6",
+  "truth_method": "agent review of raw strips every5 source frames, plus dense prior boundary/fold review; intervals are screen visibility, not server action timestamps",
+  "independent_holdout": false,
+  "full_action_truth_ready": false,
+  "partial_reasons": ["seat6 becomes empty without a confirmed normal turn-fold event", "exact server timing unknown", "fee attribution unknown"],
+  "opening_seats": [0,1,2,4,6,7],
+  "actions": [
+    {"order":1,"street":"preflop","seat":7,"action":"call","visible_interval":[1223,1227],"amount_additional":"4","balance_after":"194","money_visible_by":1232},
+    {"order":2,"street":"preflop","seat":0,"action":"fold","visible_interval":[1291,1293],"amount_additional":"0","balance_after":"198","money_visible_by":1293},
+    {"order":3,"street":"preflop","seat":1,"action":"call","visible_interval":[1328,1332],"amount_additional":"4","balance_after":"194","money_visible_by":1332},
+    {"order":4,"street":"preflop","seat":2,"action":"call","visible_interval":[1338,1342],"amount_additional":"4","balance_after":"194","money_visible_by":1347},
+    {"order":5,"street":"preflop","seat":4,"action":"call","visible_interval":[1368,1372],"amount_additional":"2","balance_after":"194","money_visible_by":1377},
+    {"order":6,"street":"flop","seat":4,"action":"check","visible_interval":[1403,1407],"amount_additional":"0","balance_after":"194","money_visible_by":1407},
+    {"order":7,"street":"flop","seat":7,"action":"check","visible_interval":[1413,1417],"amount_additional":"0","balance_after":"194","money_visible_by":1417},
+    {"order":8,"street":"flop","seat":1,"action":"bet","visible_interval":[1433,1437],"amount_additional":"16","balance_after":"178","money_visible_by":1442},
+    {"order":9,"street":"flop","seat":2,"action":"call","visible_interval":[1448,1452],"amount_additional":"16","balance_after":"178","money_visible_by":1452},
+    {"order":10,"street":"flop","seat":4,"action":"fold","visible_interval":[1458,1462],"amount_additional":"0","balance_after":"194","money_visible_by":1462},
+    {"order":11,"street":"flop","seat":7,"action":"fold","visible_interval":[1473,1477],"amount_additional":"0","balance_after":"194","money_visible_by":1477},
+    {"order":12,"street":"turn","seat":1,"action":"check","visible_interval":[1493,1497],"amount_additional":"0","balance_after":"178","money_visible_by":1497},
+    {"order":13,"street":"turn","seat":2,"action":"bet","visible_interval":[1508,1512],"amount_additional":"32","balance_after":"146","money_visible_by":1512},
+    {"order":14,"street":"turn","seat":1,"action":"fold","visible_interval":[1533,1537],"amount_additional":"0","balance_after":"178","money_visible_by":1537}
+  ],
+  "special_observations": [
+    {"kind":"opening_posts_visible","frame":1197,"seats":[0,1,2,4,6,7],"visible_balance":"198","not_inference_input":"before1197 balances200 remain boundary-review context only"},
+    {"kind":"seat_becomes_empty","seat":6,"visible_interval":[1278,1287],"normal_fold_not_verified":true},
+    {"kind":"late_nonopening_player","seat":5,"visible_interval":[1323,1337],"displayed_numeric_zero_by":1357,"waiting200_by":1382,"is_opening_player":false},
+    {"kind":"board_flop_visible","visible_interval":[1383,1387],"cards":["9c","2h","Js"]},
+    {"kind":"board_turn_visible","visible_interval":[1478,1487],"cards":["9c","2h","Js","Ac"]},
+    {"kind":"cash_balance_observed","seat":2,"visible_interval":[1558,1562],"balance":"240","unallocated_cash_increase":"94","fee_verified":false}
+  ],
+  "comparison": {"max_additional_confirmation_frames":8,"amount_pair_window_frames":12,"must_not_emit_actions_for_seat5":true,"must_not_invent_fold_for_departed_seat6":true,"must_not_repeat_persistent_badges":true}
+}

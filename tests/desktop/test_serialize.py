@@ -113,10 +113,11 @@ def test_recognizes_hero_cards_from_real_capture(live_analysis):
     assert [str(c) for c in live_analysis.state.hero_cards] == ["Qd", "Ts"]
 
 
-def test_equity_is_computed_for_the_recognized_hand(live_analysis):
+def test_hero_only_recognition_does_not_invent_an_active_opponent(live_analysis):
     equity = live_analysis.equity
-    assert 0.0 < equity.win_rate < 1.0
-    assert 0.0 <= equity.tie_rate < 1.0
+    assert equity.unavailable_reason == "hero_not_in_hand"
+    assert equity.samples == 0
+    assert analysis_to_dict(live_analysis)["equity"]["available"] is False
 
 
 def test_calibrated_and_uncalibrated_fields_are_separated(live_analysis):
