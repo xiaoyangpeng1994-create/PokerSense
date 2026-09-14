@@ -34,6 +34,18 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 OBSERVER REPLAY TARGETED FIXES: development PASS, no live
+  promotion.** Added session-specific layout candidate: slot 4 stack y914->912,
+  old frozen layout and model unchanged. All13415 old failures clipped_or_border;
+  current candidate coverage13415/13415,one manual frame2700 reads1107,not full
+  accuracy acceptance. Added explicit offline manual-boundary context,not an
+  automatic deal detector fix. Epoch12320/13415;1095 remain cleared after old
+  insurance VISIBLE labels at3931/17114,requiring visual verification. Wrong
+  source/interval/start rejected;overlay clears context without auto-reanchoring.
+  Legal state/strategy remain false.7focused;full3386passed/7skipped/1warning,
+  lint0,generator299. Private targeted output aa8e5ae7624d77bc006f4e45715295039315607d5ba3bde21f14f87977db614f.
+  See docs/AA-OBSERVER-REPLAY-FIXES.zh-CN.md. No new capture or training.
+
 - **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW + EXACT BOUNDARIES:
   source-specific PASS;9 ordinary development hands,not validation.** Owner
   authorized decode/review of session aa-live-observer-development-20260914-001
