@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_ACTION_CANDIDATES_NOT_ALL_OPPORTUNITIES_OR_DATA",
+  "registry_sha256": "dd9780e12222360726b1ba60b6e2838b3db330e129fccd92148aa7b0b5581785",
+  "review_config_sha256": "d50e5825b80f869686972371ec53103201e84a85d5624dd203edf85e073d3b93",
+  "review_result_sha256": "264be3050dc1fd7834caaff8358dd1cd1938b00073503a8a21065eed52850e73",
+  "v2_report_sha256": "0c794250f6a222bc294dab1b4418cd6f3ad783e08f0c95e6cf8b613420735f65",
+  "observations_sha256": "b3e206aadda8738454a1e620fc1c9360bbe149585ea4ff93f376d7ea763d8ff9",
+  "expected_reviewed_candidates": 36,
+  "expected_matched_actions": 30,
+  "expected_false_candidates": 6,
+  "expected_opponent_matches": 25,
+  "expected_hero_matches": 5,
+  "constraints": [
+    "json_and_jsonl_metadata_only_no_media_read",
+    "all_reviewed_matches_seed_queue_but_do_not_prove_all_opportunities",
+    "glyph_confirmation_is_not_predecision_or_action_onset",
+    "seat_is_not_stable_player_identity",
+    "legal_menus_rules_and_special_modes_remain_unknown",
+    "one_recording_session_cannot_be_train_and_validation",
+    "model_fit_strategy_advice_and_live_use_forbidden"
+  ]
+}

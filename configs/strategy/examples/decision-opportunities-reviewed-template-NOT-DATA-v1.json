@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "dataset_id": "decision-opportunities-template-NOT-DATA-v1",
+  "source_kind": "template_not_data",
+  "dataset_scope": {
+    "calibration_unit": "per_stable_opponent",
+    "target_player_ids": [],
+    "hero_player_id": null,
+    "included_streets": [
+      "river"
+    ],
+    "included_active_counts": [
+      2
+    ],
+    "included_modes": [
+      "ordinary"
+    ],
+    "contiguous_session_policy": "all_complete_hands_and_explicit_censored_edges",
+    "all_table_decisions_required": true
+  },
+  "platform_binding": {
+    "platform_id": "REPLACE_ME",
+    "capture_path": "not_data",
+    "emulator_used": false
+  },
+  "rule_profiles": [
+    {
+      "rule_profile_id": "REPLACE_ME_RULE",
+      "rule_fingerprint": null,
+      "table_size": 6,
+      "small_blind": null,
+      "big_blind": null,
+      "ante": null,
+      "ante_mode": "unknown",
+      "straddle_mode": "unknown",
+      "straddle_amount": null,
+      "rake_percent": null,
+      "rake_cap_bb": null,
+      "rake_application": "unknown",
+      "rake_rounding": "unknown",
+      "rake_distribution": "unknown",
+      "minimum_chip": null,
+      "verification_status": "unknown",
+      "source": "REPLACE_ME",
+      "source_sha256": null,
+      "independent_review_status": "PENDING"
+    }
+  ],
+  "split_protocol": {
+    "frozen_before_label_review": false,
+    "training_session_ids": [
+      "REPLACE_ME_SESSION"
+    ],
+    "validation_session_ids": [],
+    "split_evidence_sha256": null
+  },
+  "coverage_review": {
+    "status": "INCOMPLETE",
+    "author_reviewer": "template-not-data",
+    "independent_reviewer": null,
+    "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "expected_opportunity_count": 1,
+    "listed_opportunity_count": 1
+  },
+  "sessions": [
+    {
+      "session_id": "REPLACE_ME_SESSION",
+      "source_recording_group_id": "REPLACE_ME_RECORDING_GROUP",
+      "split": "training",
+      "platform_id": "REPLACE_ME",
+      "rule_profile_id": "REPLACE_ME_RULE",
+      "rule_fingerprint": null,
+      "source_recording_sha256": null,
+      "source_audit_sha256": null,
+      "sample_manifest_sha256": null,
+      "first_frame": 0,
+      "last_frame": 10,
+      "start_pts": "0",
+      "end_pts_exclusive": "11",
+      "complete_hand_ids": [
+        "REPLACE_ME_HAND"
+      ],
+      "censored_edge_intervals": [],
+      "coverage_status": "INCOMPLETE",
+      "coverage_evidence_sha256": null
+    }
+  ],
+  "participants": [],
+  "hands": [
+    {
+      "hand_id": "REPLACE_ME_HAND",
+      "session_id": "REPLACE_ME_SESSION",
+      "start_frame": 0,
+      "last_gameplay_frame": 9,
+      "end_frame": 10,
+      "next_start_frame": null,
+      "temporal_complete": true,
+      "dealer_seat": null,
+      "occupied_seats": [],
+      "seat_player_map": {
+        "0": null,
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+        "5": null,
+        "6": null,
+        "7": null
+      },
+      "table_size": 6,
+      "rule_profile_id": "REPLACE_ME_RULE",
+      "rule_fingerprint": null,
+      "observed_optional_straddle": null,
+      "special_mode_summary": {
+        "insurance": "UNKNOWN",
+        "mushroom": "UNKNOWN",
+        "bomb": "UNKNOWN",
+        "buyin_overlay": "UNKNOWN"
+      },
+      "public_action_timeline_sha256": null,
+      "expected_opportunity_count": 1,
+      "coverage_status": "INCOMPLETE",
+      "timeline_binding_status": "UNVERIFIED",
+      "last_gameplay_pts": null
+    }
+  ],
+  "opportunity_ledger": [
+    {
+      "opportunity_id": "REPLACE_ME_OPPORTUNITY",
+      "canonical_opportunity_id": "REPLACE_ME_CANONICAL",
+      "session_id": "REPLACE_ME_SESSION",
+      "hand_id": "REPLACE_ME_HAND",
+      "decision_sequence": 1,
+      "actor_player_id": null,
+      "actor_seat": null,
+      "is_hero": false
+    }
+  ],
+  "opportunities": [
+    {
+      "opportunity_id": "REPLACE_ME_OPPORTUNITY",
+      "canonical_opportunity_id": "REPLACE_ME_CANONICAL",
+      "session_id": "REPLACE_ME_SESSION",
+      "hand_id": "REPLACE_ME_HAND",
+      "decision_sequence": 1,
+      "actor_player_id": null,
+      "actor_seat": null,
+      "is_hero": false,
+      "position": null,
+      "street": null,
+      "table_size": 6,
+      "active_count": null,
+      "pot_eligible_seats": [],
+      "rule_fingerprint": null,
+      "predecision_snapshot": {
+        "dealer_seat": null,
+        "board": null,
+        "actor_status": null,
+        "actor_stack": null,
+        "actor_street_committed": null,
+        "actor_hand_committed": null,
+        "current_bet": null,
+        "pot_before": null,
+        "to_call": null,
+        "minimum_raise_increment": null,
+        "betting_reopened": null,
+        "public_history_through_sequence": null,
+        "state_quality": null,
+        "decision_price_fraction": null
+      },
+      "evidence": {
+        "actor_frame": null,
+        "actor_pts": null,
+        "actor_sha256": null,
+        "menu_frame": null,
+        "menu_pts": null,
+        "menu_sha256": null,
+        "state_frame": null,
+        "state_pts": null,
+        "state_sha256": null,
+        "action_onset_frame": null,
+        "action_onset_pts": null,
+        "action_onset_sha256": null,
+        "action_confirmation_frame": null,
+        "action_confirmation_pts": null,
+        "action_confirmation_sha256": null,
+        "review_bundle_sha256": null
+      },
+      "legal_menu": null,
+      "observed_action": {
+        "action": null,
+        "amount": null,
+        "amount_semantics": null
+      },
+      "special_mode_state": {
+        "insurance": "UNKNOWN",
+        "mushroom": "UNKNOWN",
+        "bomb": "UNKNOWN",
+        "buyin_overlay": "UNKNOWN",
+        "block_state_updates": true,
+        "evidence_sha256": null
+      },
+      "rule_binding_status": "UNKNOWN",
+      "row_status": "UNKNOWN",
+      "audit_status": "unreviewed",
+      "unknown_reasons": [
+        "template_not_data",
+        "all_fields_require_evidence"
+      ],
+      "author_review": "PENDING",
+      "independent_review": "PENDING",
+      "pending_action_seats": []
+    }
+  ]
+}
