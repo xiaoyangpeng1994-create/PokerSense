@@ -45,6 +45,8 @@ changing desktop capture, recognition, packaging, or project documentation.
   No recognizer/template/threshold/layout changes. See
   docs/AA-GLYPH-HOLDOUT-V1.zh-CN.md. Engineering verification tracked in task PR;
   external independence, real recognition metrics and live eligibility untested.
+  Engineering:23focused/full3417passed/7skipped/1warning,lint0,diff0.
+  Frozen eligibility d9429ade at2026-09-15T03:12:26+08:00;result ee261f3a.
 
 - **2026-09-15 TC-20260915-03 historical baseline reconciliation.**
   The FIRST offline replay entry below is preserved verbatim as a historical
