@@ -42,4 +42,4 @@ README 中英文版和 AA 客户端说明同步更新。当前主线仍是录像
 
 ## 工程复验
 
-28 项聚焦测试通过；全仓 3237 passed、1 skipped、2 项依赖弃用警告（28.08s）。全仓 flake8 为 0，策略夹具生成器检查通过，公开文件名检查 0 项命中，`git diff --check` 通过。最终私有报告 SHA-256 为 `1836cfe4deb3ceacc724aca2d7b2c0bd02136c1d4e88e2d75c2087152c19205f`。独立复审与 GitHub PR 检查另行记录。
+28 项聚焦测试通过；全仓 3237 passed、1 skipped、2 项依赖弃用警告（28.08s）。全仓 flake8 为 0，策略夹具生成器检查通过，公开文件名检查 0 项命中，`git diff --check` 通过。最终私有报告 SHA-256 为 `1836cfe4deb3ceacc724aca2d7b2c0bd02136c1d4e88e2d75c2087152c19205f`。独立复审发现并推动修复三轮隔离问题；最终复验保护区 PTS 反例在读取 0 个 PNG 的情况下拒绝，结论 PASS。GitHub PR 检查另行记录。
