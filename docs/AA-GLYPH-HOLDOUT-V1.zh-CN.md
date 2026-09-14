@@ -1,5 +1,39 @@
 # AA V3 模板隔离同session留出资格审计
 
+## 2026-09-15 R1 更正：negative-only exclusion audit
+
+下文V1工程记录保留为历史；其正向资格曾只依据手写声明，不能作为可靠的
+fail-closed审计。R1在代码中完全关闭正向输出：任何候选形式上全NO且两个证明
+标志都为true，freeze/conclude均拒绝POSITIVE_ELIGIBILITY_UNSUPPORTED。
+本版仅能冻结NO_ELIGIBLE_HOLDOUT，绝不产生ELIGIBLE。
+
+配置升至version2，source显式声明first/last。工具强制媒体和候选区间有序无缝、
+无重叠地精确覆盖完整来源；媒体SHA与receipt逐段绑定，帧数由边界登记的分段
+帧数与receipt.progress.frame交叉核对。候选media_ids精确等于相交媒体集合。
+历史手牌区间必须与候选逐条相同，不能以补偿区间凑相同总数。
+
+严格历史v1适配器限定八个已知JSON角色及顶层字段；消费的媒体段、开发手牌、
+V3事件、人工动作行均进行结构和hand/frame/slot/类别/计数检查。训练选择与边界
+登记、receipt之间验证哈希和session身份；两轮V3报告的帧数、事件手牌集合和模板
+帧集合必须一致。模板4565/8680/11761从两份验证后的V3报告读取并核对已知集合，
+每帧必须唯一对应一个整手包围区，配置template和episode_overlap必须为YES。
+不能通过删除或缩小episodes绕过。
+
+YES结论仅来自实际解析的暴露证据：模板归属、开发选择加两轮回归的hand/frame
+覆盖、人工动作行。手写YES不能自行成立。H02/H11的人工动作复核字段在现有动作
+报告中无直接支持，R1配置和有效结论改为UNKNOWN；保险画面复核不冒充动作复核。
+HEAD/H01/H08/TAIL保持无法证明清洁，排除。未消费的历史说明或图像内容不作为
+资格证明，本轮不审计历史所有断言的真实性；证据不足不会升级为NO或clean。
+
+JSON重复键、非有限值、bool冒充整数、未知配置字段、重复ID/SHA格式错误、证据
+文件缺失/多余/重复和symlink/reparse/hardlink均拒绝。缺失、解析失败或冲突
+无法形成可信闭包时直接安全拒绝，不能继续生成“已验证污染”报告。conclude复核
+配置、工具、证据与外部manifest哈希；commit以工具仓库cwd读取。
+
+原eligibility-manifest和result保持原字节。R1另存rework-1中的冻结manifest、
+NOT_RUN标签/输出、报告和覆盖新旧工件的SHA清单。R1仍未读取媒体或执行V3，
+不提供任何真实误报/召回率、独立数据或实时资格验收。
+
 任务TC-20260915-04，基线a24d10ab55f5748166de82b68cdff4c90e9e4adb。
 范围仅为 `template-disjoint intra-session holdout`。本次只读既有元数据，
 不调用V3、不解码录像、不调整任何模板、阈值、布局或旧识别器。

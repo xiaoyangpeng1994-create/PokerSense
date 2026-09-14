@@ -34,6 +34,17 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 TC-20260915-04-R1: negative-only audit rework.** V1 positive
+  eligibility trusted declarations and is not accepted audit evidence. R1 rejects
+  any formally clean candidate with POSITIVE_ELIGIBILITY_UNSUPPORTED; never emits
+  ELIGIBLE. Enforces full media/candidate tiling,receipt SHA/frame closure,exact
+  media intersections and one whole-hand enclosure per verified V3 template.
+  Historical-v1 adapters derive YES only from bound selection/regression/review
+  hand/frame records;unsupported fields UNKNOWN,malformed/conflicting evidence
+  safely rejected. H02/H11 manual-action exposure corrected to UNKNOWN.
+  Original freeze/result untouched,new evidence under rework-1.41focused tests
+  pass;full3435passed/7skipped/1warning,lint0,diff0. No V3/media/tuning.
+
 - **2026-09-15 TC-20260915-04 holdout eligibility audit: NO_ELIGIBLE_HOLDOUT.**
   Metadata-only inventory covers all 13 registered intervals/18003 frames of
   session-001. Nine hands entered V3 development regression/debug; three contain
