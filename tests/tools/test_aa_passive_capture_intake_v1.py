@@ -485,6 +485,7 @@ def test_valid_capture_is_one_shot_hashed_and_quarantined(tmp_path):
     assert receipt["source_partition"] == "UNASSIGNED_QUARANTINE"
     assert receipt["data_readiness"] == "BLOCKED"
     assert receipt["strategy_eligible"] is False
+    assert not (tmp_path / ".aa-passive-capture-v1.device.lock").exists()
     with pytest.raises(ValueError, match="directory_must_be_new"):
         run_authorized_capture(
             plan_path, sha(plan_path), auth_path, sha(auth_path),
@@ -778,6 +779,42 @@ def test_existing_device_lock_blocks_before_recorder_call(tmp_path):
     assert not (tmp_path / plan["authorization"]["session_id"]).exists()
 
 
+def test_unchanged_device_lock_is_released_after_recorder_exception(tmp_path):
+    auth_path, plan_path, plan = plan_file(tmp_path)
+
+    def failed(target, duration):
+        target.mkdir()
+        raise RuntimeError("injected recorder failure")
+
+    with pytest.raises(RuntimeError, match="injected recorder failure"):
+        run_authorized_capture(
+            plan_path, sha(plan_path), auth_path, sha(auth_path),
+            private_root=tmp_path, record_function=failed, now=NOW)
+    assert not (tmp_path / ".aa-passive-capture-v1.device.lock").exists()
+    failure = json.loads((tmp_path / plan["authorization"]["session_id"]
+                          / "capture-attempt-failure.json").read_text())
+    assert failure["status"] == "FAILED_QUARANTINED"
+    assert failure["automatic_retry"] is False
+    assert failure["files_deleted"] is False
+
+
+def test_device_lock_changed_after_creation_is_preserved(tmp_path):
+    auth_path, plan_path, _ = plan_file(tmp_path)
+    lock = tmp_path / ".aa-passive-capture-v1.device.lock"
+
+    def changed(target, duration):
+        fake_recording(target, duration)
+        with lock.open("ab") as stream:
+            stream.write(b"externally-changed")
+
+    receipt = run_authorized_capture(
+        plan_path, sha(plan_path), auth_path, sha(auth_path),
+        private_root=tmp_path, record_function=changed, now=NOW)
+    assert receipt["status"] == "CAPTURE_FINALIZED_UNREVIEWED"
+    assert lock.exists()
+    assert lock.read_bytes().endswith(b"externally-changed")
+
+
 def test_drop_or_unclean_stop_is_retained_as_failed_quarantine(tmp_path):
     auth_path, plan_path, plan = plan_file(tmp_path)
 
@@ -794,6 +831,7 @@ def test_drop_or_unclean_stop_is_retained_as_failed_quarantine(tmp_path):
     assert (target / "segment_0000.mkv").exists()
     assert (target / "capture-finalization-receipt.json").exists()
     assert receipt["ready_for_offline_review"] is False
+    assert not (tmp_path / ".aa-passive-capture-v1.device.lock").exists()
     validate_finalization_receipt(receipt)
     missing_reason = copy.deepcopy(receipt)
     missing_reason["blockers"].remove("ffmpeg_reported_dropped_frames")

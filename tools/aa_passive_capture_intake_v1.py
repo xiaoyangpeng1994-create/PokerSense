@@ -1926,6 +1926,7 @@ def run_authorized_capture(
             "plan_sha256": actual_sha,
         }) + "\n").encode("utf-8"))
         os.fsync(lock_descriptor)
+        lock_identity = _identity(os.fstat(lock_descriptor))
         _consume_authorization(
             root, plan, actual_sha, ffmpeg_identity, observed_device)
         if record_function is None:
