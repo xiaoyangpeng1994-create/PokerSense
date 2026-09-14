@@ -2,10 +2,10 @@
 
 Runs entirely on localhost — a companion process for the desktop shell, not
 a network service. ``/ws`` streams :class:`RealtimeAnalysis` produced from a
-real ADB capture of the selected LDPlayer instance (see ``live.py``).
+physical phone capture card. Emulator/ADB remains historical code only.
 
-A capture problem (ADB unavailable, emulator stopped, ambiguous devices, or
-an unsupported framebuffer aspect ratio) is a normal condition, not a
+A capture problem (capture card unavailable, stopped, or returning an
+unsupported framebuffer aspect ratio) is a normal condition, not a
 crash: it is sent to the UI as a ``{"error": ...}`` frame so the user is told
 what to fix, and the stream keeps retrying.
 """
@@ -54,9 +54,9 @@ _UI_DIR = _resolve_ui_dir()
 AnalysisFrame = RealtimeAnalysis | DesktopFrame
 AnalysisStreamFactory = Callable[[], AsyncIterator[AnalysisFrame]]
 
-# Capture sources accepted on the command line. Mirrors the backends
-# :func:`poker_engine.desktop.live.build_capture_backend` knows how to build.
-CAPTURE_SOURCES = ("adb", "capture-card")
+# Only physical capture is user-selectable. The ADB implementation is retained
+# for historical offline regression and is never exposed by the product CLI.
+CAPTURE_SOURCES = ("capture-card",)
 
 
 class _SettingsPayload(BaseModel):
@@ -82,24 +82,24 @@ _RETRY_SECONDS = 3.0
 
 
 def _default_stream() -> AsyncIterator[AnalysisFrame]:
-    return live_analysis_stream(DEFAULT_DEVICE_SERIAL)
+    return live_analysis_stream(DEFAULT_DEVICE_SERIAL, source="capture-card")
 
 
 def build_stream_factory(
     *,
     device_serial: str = DEFAULT_DEVICE_SERIAL,
-    source: str = "adb",
+    source: str = "capture-card",
     device_index: int = 0,
     api: str = "MSMF",
 ) -> AnalysisStreamFactory:
     """Bind a capture source into a stream factory for :func:`create_app`.
 
-    The ADB default keeps the released behaviour unchanged. ``source`` is
-    validated by :func:`poker_engine.desktop.live.build_capture_backend`, which
-    raises :class:`LiveCaptureError` for anything it cannot build -- so an
-    unknown source fails closed at startup rather than silently falling back
-    to a different capture path.
+    Only the physical phone capture-card source is accepted. Emulator/ADB
+    selection fails at startup rather than falling back to another path.
     """
+
+    if source not in CAPTURE_SOURCES:
+        raise ValueError("only physical capture-card input is supported")
 
     def factory() -> AsyncIterator[AnalysisFrame]:
         return live_analysis_stream(
@@ -178,7 +178,7 @@ def run(
     host: str = "127.0.0.1",
     port: int = 8765,
     device_serial: str = DEFAULT_DEVICE_SERIAL,
-    source: str = "adb",
+    source: str = "capture-card",
     device_index: int = 0,
     api: str = "MSMF",
 ) -> None:
@@ -202,16 +202,13 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--device-serial",
         default=DEFAULT_DEVICE_SERIAL,
-        help="ADB serial from `adb devices`; auto is allowed for one device",
+        help="legacy internal identifier; capture-card input does not use ADB",
     )
     parser.add_argument(
         "--source",
         choices=CAPTURE_SOURCES,
-        default="adb",
-        help=(
-            "capture source: 'adb' reads the LDPlayer framebuffer (default); "
-            "'capture-card' reads a UVC capture card"
-        ),
+        default="capture-card",
+        help="physical phone UVC capture-card input",
     )
     parser.add_argument(
         "--device-index",

@@ -27,20 +27,23 @@ equity and provides editable blinds, antes, rake/cap and straddle settings.
 Dynamic capture-card recognition and postflop strategy are not yet accepted;
 a working simulation or saved configuration is not proof of strategy coverage
 or profitability. See [local WPK progress](docs/wpk-progress-2026-09-08.md).
-The native app now defaults to capture-card; select `--source adb` for LDPlayer.
+The native app accepts only a physical phone capture card. LDPlayer/ADB is not
+a selectable product source because both AA Poker and WePoker restrict emulator
+logins. Historical ADB code and evidence remain for offline regression only.
 
 PokerSense is not an autoplay bot. It never clicks, types, places bets, or
 controls a poker client. The human remains the only executor. The intended
 environment is a private table with friends, coaching, and deliberate practice.
 
-## Retained ADB support
+## Historical ADB evidence (not selectable)
 
-The table below describes the separately calibrated **portrait LDPlayer** path.
-These measurements must not be reused as capture-card acceptance evidence.
+The table below records prior **portrait LDPlayer** calibration evidence. It is
+kept to explain historical tests and must not be used as a deployment option or
+as capture-card acceptance evidence.
 
 | Feature | Availability |
 |---|---|
-| Windows LDPlayer capture over ADB | Implemented; reads emulator pixels independently of host-window position, occlusion, and DPI |
+| Windows LDPlayer capture over ADB | Historical regression only; the product CLI rejects `--source adb` |
 | WePoker Android 1440×2560 portrait hero cards | Calibrated |
 | WePoker Android board cards and street | Calibrated; deal/flip transitions fail closed |
 | WePoker Android pot | Calibrated for the global total-pot banner; labels and overlays abstain |
@@ -69,50 +72,20 @@ outside Git and packages.
 ## Release status
 
 The published v0.1.11 installers still use the legacy H5 path and do not contain
-this Android/ADB change. The Android path is currently on `main`; a new installer
-will be published after real LDPlayer integration and Windows packaging checks.
+the current physical capture-card work. A new installer requires capture-card
+hardware acceptance and Windows packaging checks.
 
-## Run with LDPlayer (alternative)
+## Emulator source disabled
 
-PokerSense no longer needs an H5 page or a Chrome window. This alternative
-input is the Android framebuffer from LDPlayer over ADB. Before launching, you
-need a Windows LDPlayer instance, WePoker Android, and one authorized ADB
-device. The currently calibrated profile is **1440×2560 portrait**.
-
-1. Run WePoker Android in a 1440×2560 portrait LDPlayer instance and enable ADB.
-2. Run `adb devices` and note the target serial, such as `emulator-5556`.
-3. If `adb.exe` is not on PATH, point `POKERSENSE_ADB_PATH` to LDPlayer's copy.
-4. With one authorized instance, use `make run-desktop ARGS="--source adb"`.
-   With more than one instance, select it explicitly with
-   `make run-desktop ARGS="--source adb --device-serial emulator-5556"`.
-
-Cards, street, total pot, occupancy, stacks, Dealer, Hero actor, and completed
-action labels have been measured for this platform. The live pipeline maps
-them into canonical seats and positions and records only chip-consistent
-completed actions. Opponent current-turn timers, side-pot edge cases, and an
-authorized raw-frame Replay still require release evidence. Because no
-qualified multiplayer strategy Provider is bundled, live strategy actions
-remain withheld and the displayed equity is still a visible-card calculation
-against a random opponent range.
-
-With exactly one authorized ADB device, PokerSense uses `auto` and starts the
-selected ADB path. With multiple instances it fails closed and lists the
-serials instead of choosing one. `--device-serial` (or
-`POKERSENSE_ADB_SERIAL`) is then required.
-
-```bash
-adb devices
-make run-desktop ARGS="--source adb --device-serial emulator-5556"
-```
-
-ADB returns the emulator framebuffer, so moving, scaling, occluding, or
-minimizing the host window does not move the ROIs. A different resolution,
-landscape mode, or Android UI version still requires separate calibration;
-Android and H5 coordinates are not interchangeable.
+`--source adb` is rejected by both desktop entry points. The retained ADB
+backend is an internal historical regression dependency and must not be wired
+back into the user-facing source list. Current development uses existing offline
+AA capture-card recordings; later hardware checks use a physical phone and UVC
+capture card. This does not authorize live advice or client control.
 
 ## Privacy
 
-ADB frames are processed in memory and discarded after recognition.
+Capture-card frames are processed in memory and discarded after recognition.
 PokerSense does not keep screenshots, video, or a frame history on disk.
 Private calibration captures are excluded from GitHub and packages; only a
 small, redacted, labeled regression set needs long-term retention.

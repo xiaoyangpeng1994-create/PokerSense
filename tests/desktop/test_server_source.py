@@ -1,12 +1,12 @@
 """Command-line capture-source wiring for the local server.
 
-``live.py`` already knows how to build an ADB or a UVC capture-card pipeline;
-these tests pin the server layer that exposes the choice, so the capture-card
-path cannot silently regress back to ADB-only.
+``live.py`` retains historical ADB internals, but the product server exposes
+only a physical UVC capture card so emulator input cannot be selected.
 """
 
 import pytest
 
+from poker_engine.desktop.app import _create_server
 from poker_engine.desktop.server import (
     CAPTURE_SOURCES,
     build_stream_factory,
@@ -25,9 +25,9 @@ def captured_run(monkeypatch):
     return calls
 
 
-def test_adb_is_the_default_source(captured_run):
+def test_capture_card_is_the_only_default_source(captured_run):
     main([])
-    assert captured_run[0]["source"] == "adb"
+    assert captured_run[0]["source"] == "capture-card"
 
 
 def test_capture_card_source_is_selectable(captured_run):
@@ -53,8 +53,13 @@ def test_unknown_source_is_rejected():
         main(["--source", "telepathy"])
 
 
-def test_capture_card_is_an_advertised_choice():
-    assert "capture-card" in CAPTURE_SOURCES
+def test_adb_emulator_source_is_rejected():
+    with pytest.raises(SystemExit):
+        main(["--source", "adb"])
+
+
+def test_capture_card_is_the_only_advertised_choice():
+    assert CAPTURE_SOURCES == ("capture-card",)
 
 
 def test_stream_factory_forwards_source_to_live_stream(monkeypatch):
@@ -89,7 +94,7 @@ def test_stream_factory_forwards_source_to_live_stream(monkeypatch):
     assert seen["kwargs"]["api"] == "MSMF"
 
 
-def test_stream_factory_defaults_to_adb(monkeypatch):
+def test_stream_factory_defaults_to_capture_card(monkeypatch):
     seen = {}
 
     def fake_stream(device_serial, interval_seconds=1.0, source="adb", **kwargs):
@@ -107,4 +112,14 @@ def test_stream_factory_defaults_to_adb(monkeypatch):
 
     build_stream_factory()()
 
-    assert seen["source"] == "adb"
+    assert seen["source"] == "capture-card"
+
+
+def test_programmatic_stream_factory_rejects_adb():
+    with pytest.raises(ValueError, match="physical capture-card"):
+        build_stream_factory(source="adb")
+
+
+def test_native_app_server_rejects_adb_before_startup():
+    with pytest.raises(ValueError, match="physical capture-card"):
+        _create_server("emulator-5554", source="adb")
