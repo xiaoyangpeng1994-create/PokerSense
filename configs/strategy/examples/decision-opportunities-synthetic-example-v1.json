@@ -1,0 +1,1973 @@
+{
+  "schema_version": 1,
+  "dataset_id": "synthetic-contract-v1",
+  "source_kind": "synthetic",
+  "dataset_scope": {
+    "calibration_unit": "per_stable_opponent",
+    "target_player_ids": [
+      "stable-opponent"
+    ],
+    "hero_player_id": "hero-player",
+    "included_streets": [
+      "preflop"
+    ],
+    "included_active_counts": [
+      6
+    ],
+    "included_modes": [
+      "ordinary"
+    ],
+    "contiguous_session_policy": "all_complete_hands_and_explicit_censored_edges",
+    "all_table_decisions_required": true
+  },
+  "platform_binding": {
+    "platform_id": "synthetic-aa",
+    "capture_path": "synthetic",
+    "emulator_used": false
+  },
+  "rule_profiles": [
+    {
+      "rule_profile_id": "aa-reviewed-rules",
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "table_size": 6,
+      "small_blind": "1",
+      "big_blind": "2",
+      "ante": "0",
+      "ante_mode": "none",
+      "straddle_mode": "none",
+      "straddle_amount": "0",
+      "rake_percent": "0",
+      "rake_cap_bb": "0",
+      "rake_application": "all_pots",
+      "rake_rounding": "exact",
+      "rake_distribution": "proportional_all_pots",
+      "minimum_chip": "1",
+      "verification_status": "simulation",
+      "source": "synthetic-reviewed-rule",
+      "source_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "independent_review_status": "APPROVED"
+    }
+  ],
+  "split_protocol": {
+    "frozen_before_label_review": true,
+    "training_session_ids": [
+      "train-session"
+    ],
+    "validation_session_ids": [
+      "validation-session"
+    ],
+    "split_evidence_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "coverage_review": {
+    "status": "INDEPENDENT_COMPLETE",
+    "author_reviewer": "author",
+    "independent_reviewer": "reviewer",
+    "evidence_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "expected_opportunity_count": 12,
+    "listed_opportunity_count": 12
+  },
+  "sessions": [
+    {
+      "session_id": "train-session",
+      "source_recording_group_id": "train-session-recording",
+      "split": "training",
+      "platform_id": "synthetic-aa",
+      "rule_profile_id": "aa-reviewed-rules",
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "source_recording_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "source_audit_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "sample_manifest_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "first_frame": 0,
+      "last_frame": 30,
+      "start_pts": "0",
+      "end_pts_exclusive": "31",
+      "complete_hand_ids": [
+        "train-session-hand"
+      ],
+      "censored_edge_intervals": [],
+      "coverage_status": "INDEPENDENT_COMPLETE",
+      "coverage_evidence_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    {
+      "session_id": "validation-session",
+      "source_recording_group_id": "validation-session-recording",
+      "split": "validation",
+      "platform_id": "synthetic-aa",
+      "rule_profile_id": "aa-reviewed-rules",
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "source_recording_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "source_audit_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "sample_manifest_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "first_frame": 0,
+      "last_frame": 30,
+      "start_pts": "0",
+      "end_pts_exclusive": "31",
+      "complete_hand_ids": [
+        "validation-session-hand"
+      ],
+      "censored_edge_intervals": [],
+      "coverage_status": "INDEPENDENT_COMPLETE",
+      "coverage_evidence_sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+    }
+  ],
+  "participants": [
+    {
+      "player_id": "hero-player",
+      "identity_scope": "cross_session",
+      "session_ids": [
+        "train-session",
+        "validation-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "stable-opponent",
+      "identity_scope": "cross_session",
+      "session_ids": [
+        "train-session",
+        "validation-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "train-session-seat-0",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "train-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "train-session-seat-1",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "train-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "train-session-seat-2",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "train-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "train-session-seat-5",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "train-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "validation-session-seat-0",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "validation-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "validation-session-seat-1",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "validation-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "validation-session-seat-2",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "validation-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    },
+    {
+      "player_id": "validation-session-seat-5",
+      "identity_scope": "same_session",
+      "session_ids": [
+        "validation-session"
+      ],
+      "identity_status": "VERIFIED",
+      "identity_evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "independent_review_status": "APPROVED"
+    }
+  ],
+  "hands": [
+    {
+      "hand_id": "train-session-hand",
+      "session_id": "train-session",
+      "start_frame": 0,
+      "last_gameplay_frame": 30,
+      "last_gameplay_pts": "30",
+      "end_frame": 30,
+      "next_start_frame": null,
+      "temporal_complete": true,
+      "dealer_seat": 0,
+      "occupied_seats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "seat_player_map": {
+        "0": "train-session-seat-0",
+        "1": "train-session-seat-1",
+        "2": "train-session-seat-2",
+        "3": "hero-player",
+        "4": "stable-opponent",
+        "5": "train-session-seat-5",
+        "6": "EMPTY",
+        "7": "EMPTY"
+      },
+      "table_size": 6,
+      "rule_profile_id": "aa-reviewed-rules",
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "observed_optional_straddle": null,
+      "special_mode_summary": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED"
+      },
+      "public_action_timeline_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+      "expected_opportunity_count": 6,
+      "coverage_status": "INDEPENDENT_COMPLETE",
+      "timeline_binding_status": "INDEPENDENTLY_VERIFIED"
+    },
+    {
+      "hand_id": "validation-session-hand",
+      "session_id": "validation-session",
+      "start_frame": 0,
+      "last_gameplay_frame": 30,
+      "last_gameplay_pts": "30",
+      "end_frame": 30,
+      "next_start_frame": null,
+      "temporal_complete": true,
+      "dealer_seat": 0,
+      "occupied_seats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "seat_player_map": {
+        "0": "validation-session-seat-0",
+        "1": "validation-session-seat-1",
+        "2": "validation-session-seat-2",
+        "3": "hero-player",
+        "4": "stable-opponent",
+        "5": "validation-session-seat-5",
+        "6": "EMPTY",
+        "7": "EMPTY"
+      },
+      "table_size": 6,
+      "rule_profile_id": "aa-reviewed-rules",
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "observed_optional_straddle": null,
+      "special_mode_summary": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED"
+      },
+      "public_action_timeline_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "expected_opportunity_count": 6,
+      "coverage_status": "INDEPENDENT_COMPLETE",
+      "timeline_binding_status": "INDEPENDENTLY_VERIFIED"
+    }
+  ],
+  "opportunity_ledger": [
+    {
+      "opportunity_id": "train-session-hero-bet",
+      "canonical_opportunity_id": "train-session:hero:1",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 1,
+      "actor_player_id": "hero-player",
+      "actor_seat": 3,
+      "is_hero": true
+    },
+    {
+      "opportunity_id": "train-session-opportunity",
+      "canonical_opportunity_id": "train-session:1",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 2,
+      "actor_player_id": "stable-opponent",
+      "actor_seat": 4,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "train-session-tail-3",
+      "canonical_opportunity_id": "train-session:tail:3",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 3,
+      "actor_player_id": "train-session-seat-5",
+      "actor_seat": 5,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "train-session-tail-4",
+      "canonical_opportunity_id": "train-session:tail:4",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 4,
+      "actor_player_id": "train-session-seat-0",
+      "actor_seat": 0,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "train-session-tail-5",
+      "canonical_opportunity_id": "train-session:tail:5",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 5,
+      "actor_player_id": "train-session-seat-1",
+      "actor_seat": 1,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "train-session-tail-6",
+      "canonical_opportunity_id": "train-session:tail:6",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 6,
+      "actor_player_id": "train-session-seat-2",
+      "actor_seat": 2,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "validation-session-hero-bet",
+      "canonical_opportunity_id": "validation-session:hero:1",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 1,
+      "actor_player_id": "hero-player",
+      "actor_seat": 3,
+      "is_hero": true
+    },
+    {
+      "opportunity_id": "validation-session-opportunity",
+      "canonical_opportunity_id": "validation-session:1",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 2,
+      "actor_player_id": "stable-opponent",
+      "actor_seat": 4,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "validation-session-tail-3",
+      "canonical_opportunity_id": "validation-session:tail:3",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 3,
+      "actor_player_id": "validation-session-seat-5",
+      "actor_seat": 5,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "validation-session-tail-4",
+      "canonical_opportunity_id": "validation-session:tail:4",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 4,
+      "actor_player_id": "validation-session-seat-0",
+      "actor_seat": 0,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "validation-session-tail-5",
+      "canonical_opportunity_id": "validation-session:tail:5",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 5,
+      "actor_player_id": "validation-session-seat-1",
+      "actor_seat": 1,
+      "is_hero": false
+    },
+    {
+      "opportunity_id": "validation-session-tail-6",
+      "canonical_opportunity_id": "validation-session:tail:6",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 6,
+      "actor_player_id": "validation-session-seat-2",
+      "actor_seat": 2,
+      "is_hero": false
+    }
+  ],
+  "opportunities": [
+    {
+      "opportunity_id": "train-session-hero-bet",
+      "canonical_opportunity_id": "train-session:hero:1",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 1,
+      "actor_player_id": "hero-player",
+      "actor_seat": 3,
+      "is_hero": true,
+      "position": "UTG",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 6,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "pending_action_seats": [
+        3,
+        4,
+        5,
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "2",
+        "pot_before": "3",
+        "to_call": "2",
+        "minimum_raise_increment": "2",
+        "betting_reopened": true,
+        "public_history_through_sequence": [],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 1,
+        "actor_pts": "1",
+        "actor_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "menu_frame": 2,
+        "menu_pts": "2",
+        "menu_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "state_frame": 3,
+        "state_pts": "3",
+        "state_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "action_onset_frame": 4,
+        "action_onset_pts": "4",
+        "action_onset_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "action_confirmation_frame": 5,
+        "action_confirmation_pts": "5",
+        "action_confirmation_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "2",
+          "max_amount": "2",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "4",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "raise",
+        "amount": "6",
+        "amount_semantics": "total_street"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "train-session-opportunity",
+      "canonical_opportunity_id": "train-session:1",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 2,
+      "actor_player_id": "stable-opponent",
+      "actor_seat": 4,
+      "is_hero": false,
+      "position": "HJ",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 6,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "pending_action_seats": [
+        4,
+        5,
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "6",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 6,
+        "actor_pts": "6",
+        "actor_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "menu_frame": 7,
+        "menu_pts": "7",
+        "menu_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "state_frame": 8,
+        "state_pts": "8",
+        "state_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "action_onset_frame": 9,
+        "action_onset_pts": "9",
+        "action_onset_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "action_confirmation_frame": 10,
+        "action_confirmation_pts": "10",
+        "action_confirmation_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "6",
+          "max_amount": "6",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "train-session-tail-3",
+      "canonical_opportunity_id": "train-session:tail:3",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 3,
+      "actor_player_id": "train-session-seat-5",
+      "actor_seat": 5,
+      "is_hero": false,
+      "position": "CO",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 5,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "pending_action_seats": [
+        5,
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "6",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 11,
+        "actor_pts": "11",
+        "actor_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "menu_frame": 12,
+        "menu_pts": "12",
+        "menu_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "state_frame": 13,
+        "state_pts": "13",
+        "state_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "action_onset_frame": 14,
+        "action_onset_pts": "14",
+        "action_onset_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "action_confirmation_frame": 15,
+        "action_confirmation_pts": "15",
+        "action_confirmation_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "6",
+          "max_amount": "6",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "train-session-tail-4",
+      "canonical_opportunity_id": "train-session:tail:4",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 4,
+      "actor_player_id": "train-session-seat-0",
+      "actor_seat": 0,
+      "is_hero": false,
+      "position": "BTN",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 4,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "pending_action_seats": [
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "6",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "decision_sequence": 3,
+            "actor_player_id": "train-session-seat-5",
+            "actor_seat": 5,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 16,
+        "actor_pts": "16",
+        "actor_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+        "menu_frame": 17,
+        "menu_pts": "17",
+        "menu_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+        "state_frame": 18,
+        "state_pts": "18",
+        "state_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+        "action_onset_frame": 19,
+        "action_onset_pts": "19",
+        "action_onset_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+        "action_confirmation_frame": 20,
+        "action_confirmation_pts": "20",
+        "action_confirmation_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "6",
+          "max_amount": "6",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "train-session-tail-5",
+      "canonical_opportunity_id": "train-session:tail:5",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 5,
+      "actor_player_id": "train-session-seat-1",
+      "actor_seat": 1,
+      "is_hero": false,
+      "position": "SB",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 3,
+      "pot_eligible_seats": [
+        1,
+        2,
+        3
+      ],
+      "pending_action_seats": [
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "99",
+        "actor_street_committed": "1",
+        "actor_hand_committed": "1",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "5",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "decision_sequence": 3,
+            "actor_player_id": "train-session-seat-5",
+            "actor_seat": 5,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "decision_sequence": 4,
+            "actor_player_id": "train-session-seat-0",
+            "actor_seat": 0,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 5,
+          "denominator": 14
+        }
+      },
+      "evidence": {
+        "actor_frame": 21,
+        "actor_pts": "21",
+        "actor_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "menu_frame": 22,
+        "menu_pts": "22",
+        "menu_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "state_frame": 23,
+        "state_pts": "23",
+        "state_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "action_onset_frame": 24,
+        "action_onset_pts": "24",
+        "action_onset_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "action_confirmation_frame": 25,
+        "action_confirmation_pts": "25",
+        "action_confirmation_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "5",
+          "max_amount": "5",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "train-session-tail-6",
+      "canonical_opportunity_id": "train-session:tail:6",
+      "session_id": "train-session",
+      "hand_id": "train-session-hand",
+      "decision_sequence": 6,
+      "actor_player_id": "train-session-seat-2",
+      "actor_seat": 2,
+      "is_hero": false,
+      "position": "BB",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 2,
+      "pot_eligible_seats": [
+        2,
+        3
+      ],
+      "pending_action_seats": [
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "98",
+        "actor_street_committed": "2",
+        "actor_hand_committed": "2",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "4",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "decision_sequence": 3,
+            "actor_player_id": "train-session-seat-5",
+            "actor_seat": 5,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "decision_sequence": 4,
+            "actor_player_id": "train-session-seat-0",
+            "actor_seat": 0,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+          },
+          {
+            "decision_sequence": 5,
+            "actor_player_id": "train-session-seat-1",
+            "actor_seat": 1,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "7777777777777777777777777777777777777777777777777777777777777777"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 4,
+          "denominator": 13
+        }
+      },
+      "evidence": {
+        "actor_frame": 26,
+        "actor_pts": "26",
+        "actor_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+        "menu_frame": 27,
+        "menu_pts": "27",
+        "menu_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+        "state_frame": 28,
+        "state_pts": "28",
+        "state_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+        "action_onset_frame": 29,
+        "action_onset_pts": "29",
+        "action_onset_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+        "action_confirmation_frame": 30,
+        "action_confirmation_pts": "30",
+        "action_confirmation_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "4",
+          "max_amount": "4",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "validation-session-hero-bet",
+      "canonical_opportunity_id": "validation-session:hero:1",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 1,
+      "actor_player_id": "hero-player",
+      "actor_seat": 3,
+      "is_hero": true,
+      "position": "UTG",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 6,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "pending_action_seats": [
+        3,
+        4,
+        5,
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "2",
+        "pot_before": "3",
+        "to_call": "2",
+        "minimum_raise_increment": "2",
+        "betting_reopened": true,
+        "public_history_through_sequence": [],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 1,
+        "actor_pts": "1",
+        "actor_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "menu_frame": 2,
+        "menu_pts": "2",
+        "menu_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "state_frame": 3,
+        "state_pts": "3",
+        "state_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "action_onset_frame": 4,
+        "action_onset_pts": "4",
+        "action_onset_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "action_confirmation_frame": 5,
+        "action_confirmation_pts": "5",
+        "action_confirmation_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "2",
+          "max_amount": "2",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "4",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "raise",
+        "amount": "6",
+        "amount_semantics": "total_street"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "validation-session-opportunity",
+      "canonical_opportunity_id": "validation-session:1",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 2,
+      "actor_player_id": "stable-opponent",
+      "actor_seat": 4,
+      "is_hero": false,
+      "position": "HJ",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 6,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "pending_action_seats": [
+        4,
+        5,
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "6",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 6,
+        "actor_pts": "6",
+        "actor_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "menu_frame": 7,
+        "menu_pts": "7",
+        "menu_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "state_frame": 8,
+        "state_pts": "8",
+        "state_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "action_onset_frame": 9,
+        "action_onset_pts": "9",
+        "action_onset_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "action_confirmation_frame": 10,
+        "action_confirmation_pts": "10",
+        "action_confirmation_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "6",
+          "max_amount": "6",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "validation-session-tail-3",
+      "canonical_opportunity_id": "validation-session:tail:3",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 3,
+      "actor_player_id": "validation-session-seat-5",
+      "actor_seat": 5,
+      "is_hero": false,
+      "position": "CO",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 5,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "pending_action_seats": [
+        5,
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "6",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 11,
+        "actor_pts": "11",
+        "actor_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "menu_frame": 12,
+        "menu_pts": "12",
+        "menu_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state_frame": 13,
+        "state_pts": "13",
+        "state_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "action_onset_frame": 14,
+        "action_onset_pts": "14",
+        "action_onset_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "action_confirmation_frame": 15,
+        "action_confirmation_pts": "15",
+        "action_confirmation_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "6",
+          "max_amount": "6",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "validation-session-tail-4",
+      "canonical_opportunity_id": "validation-session:tail:4",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 4,
+      "actor_player_id": "validation-session-seat-0",
+      "actor_seat": 0,
+      "is_hero": false,
+      "position": "BTN",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 4,
+      "pot_eligible_seats": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "pending_action_seats": [
+        0,
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "100",
+        "actor_street_committed": "0",
+        "actor_hand_committed": "0",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "6",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "decision_sequence": 3,
+            "actor_player_id": "validation-session-seat-5",
+            "actor_seat": 5,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 2,
+          "denominator": 5
+        }
+      },
+      "evidence": {
+        "actor_frame": 16,
+        "actor_pts": "16",
+        "actor_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "menu_frame": 17,
+        "menu_pts": "17",
+        "menu_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "state_frame": 18,
+        "state_pts": "18",
+        "state_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "action_onset_frame": 19,
+        "action_onset_pts": "19",
+        "action_onset_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "action_confirmation_frame": 20,
+        "action_confirmation_pts": "20",
+        "action_confirmation_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "6",
+          "max_amount": "6",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "validation-session-tail-5",
+      "canonical_opportunity_id": "validation-session:tail:5",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 5,
+      "actor_player_id": "validation-session-seat-1",
+      "actor_seat": 1,
+      "is_hero": false,
+      "position": "SB",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 3,
+      "pot_eligible_seats": [
+        1,
+        2,
+        3
+      ],
+      "pending_action_seats": [
+        1,
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "99",
+        "actor_street_committed": "1",
+        "actor_hand_committed": "1",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "5",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "decision_sequence": 3,
+            "actor_player_id": "validation-session-seat-5",
+            "actor_seat": 5,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "decision_sequence": 4,
+            "actor_player_id": "validation-session-seat-0",
+            "actor_seat": 0,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 5,
+          "denominator": 14
+        }
+      },
+      "evidence": {
+        "actor_frame": 21,
+        "actor_pts": "21",
+        "actor_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "menu_frame": 22,
+        "menu_pts": "22",
+        "menu_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "state_frame": 23,
+        "state_pts": "23",
+        "state_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "action_onset_frame": 24,
+        "action_onset_pts": "24",
+        "action_onset_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "action_confirmation_frame": 25,
+        "action_confirmation_pts": "25",
+        "action_confirmation_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "5",
+          "max_amount": "5",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    },
+    {
+      "opportunity_id": "validation-session-tail-6",
+      "canonical_opportunity_id": "validation-session:tail:6",
+      "session_id": "validation-session",
+      "hand_id": "validation-session-hand",
+      "decision_sequence": 6,
+      "actor_player_id": "validation-session-seat-2",
+      "actor_seat": 2,
+      "is_hero": false,
+      "position": "BB",
+      "street": "preflop",
+      "table_size": 6,
+      "active_count": 2,
+      "pot_eligible_seats": [
+        2,
+        3
+      ],
+      "pending_action_seats": [
+        2
+      ],
+      "rule_fingerprint": "72b5c4ecf7a37babe36d00ed0ce220d560217fd96076afee94d5017f0e2aac46",
+      "predecision_snapshot": {
+        "dealer_seat": 0,
+        "board": [],
+        "actor_status": "ACTIVE",
+        "actor_stack": "98",
+        "actor_street_committed": "2",
+        "actor_hand_committed": "2",
+        "current_bet": "6",
+        "pot_before": "9",
+        "to_call": "4",
+        "minimum_raise_increment": "4",
+        "betting_reopened": true,
+        "public_history_through_sequence": [
+          {
+            "decision_sequence": 1,
+            "actor_player_id": "hero-player",
+            "actor_seat": 3,
+            "street": "preflop",
+            "action": "raise",
+            "amount": "6",
+            "amount_semantics": "total_street",
+            "source_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "decision_sequence": 2,
+            "actor_player_id": "stable-opponent",
+            "actor_seat": 4,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "decision_sequence": 3,
+            "actor_player_id": "validation-session-seat-5",
+            "actor_seat": 5,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "decision_sequence": 4,
+            "actor_player_id": "validation-session-seat-0",
+            "actor_seat": 0,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          {
+            "decision_sequence": 5,
+            "actor_player_id": "validation-session-seat-1",
+            "actor_seat": 1,
+            "street": "preflop",
+            "action": "fold",
+            "amount": "0",
+            "amount_semantics": "none",
+            "source_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          }
+        ],
+        "state_quality": "REVIEWED_PREDECISION",
+        "decision_price_fraction": {
+          "numerator": 4,
+          "denominator": 13
+        }
+      },
+      "evidence": {
+        "actor_frame": 26,
+        "actor_pts": "26",
+        "actor_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "menu_frame": 27,
+        "menu_pts": "27",
+        "menu_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "state_frame": 28,
+        "state_pts": "28",
+        "state_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "action_onset_frame": 29,
+        "action_onset_pts": "29",
+        "action_onset_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "action_confirmation_frame": 30,
+        "action_confirmation_pts": "30",
+        "action_confirmation_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "review_bundle_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "legal_menu": [
+        {
+          "action": "fold",
+          "min_amount": "0",
+          "max_amount": "0",
+          "amount_semantics": "none"
+        },
+        {
+          "action": "call",
+          "min_amount": "4",
+          "max_amount": "4",
+          "amount_semantics": "additional"
+        },
+        {
+          "action": "raise",
+          "min_amount": "10",
+          "max_amount": "100",
+          "amount_semantics": "total_street"
+        }
+      ],
+      "observed_action": {
+        "action": "fold",
+        "amount": "0",
+        "amount_semantics": "none"
+      },
+      "special_mode_state": {
+        "insurance": "ABSENT_REVIEWED",
+        "mushroom": "ABSENT_REVIEWED",
+        "bomb": "ABSENT_REVIEWED",
+        "buyin_overlay": "ABSENT_REVIEWED",
+        "block_state_updates": false,
+        "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      },
+      "rule_binding_status": "VERIFIED",
+      "row_status": "REVIEWED_COMPLETE",
+      "audit_status": "reviewed",
+      "unknown_reasons": [],
+      "author_review": "APPROVED",
+      "independent_review": "APPROVED"
+    }
+  ]
+}

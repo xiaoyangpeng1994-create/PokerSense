@@ -34,6 +34,32 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA8 COMPLETE DECISION OPPORTUNITY AUDIT V1: engineering PASS;
+  real dataset/calibration BLOCKED.** Added model-independent all-table decision
+  ledger/auditor+CLI,NOT-DATA template,complete synthetic contract and current
+  AA8 JSON/JSONL readiness builder. Exact schema binds platform,AARuleProfileV2
+  recomputed fingerprint,raw recording/audit/manifest hashes,whole-session split,
+  stable player vs physical seat,all hands/censored edges,ordered ledger/details,
+  predecision frame+PTS,complete legal ranges,exact Fraction,mode/review status.
+  Rebuilds forced pot,street/hand commitments,current bet,stack,actor/pending order,
+  fold eligibility,allin state and aggression reopen;hand must reach one-player/
+  allin terminal or closed river round. Ordinary JSON can only reach DECLARED_
+  COMPLETE_NEEDS_ARTIFACT_VERIFICATION,never calibration eligibility;fit/range/
+  strategy/advice/live always off. Current late-AA queue:36reviewed/30MATCH/6false,
+  25opponent/5Hero;preflop7/flop19/turn2/river2;30candidate UNKNOWN rows,legal
+  menus0,eligible0,BLOCKED with26blockers. No second confirmed same-rule session:
+  255.977s physical recording is lobby-only;old1377.97s source is unverified9seat/
+  mixed rules. Final readiness e10be9812b7beb24cd8da4792166fbc94903493831192f2ddc799a2f474cec10;
+  synthetic9391257b19e7c42e69047e5b98ee0c9c0abd17fbbd81fef983047b55aefb5a6d;
+  templatecf7a902bdf91370fb5aadbb6af097288e2034ba985747f2ae1bc4ea073fe20fd.
+  53focused;full3327passed/1skipped/2warnings,lint0,generator299,private filename
+  854/0,diff0.Independent
+  code/evidence/scope reviews PASS after five adversarial rounds. No media/protected
+  segment/device/model fit/live strategy/tag/release. See
+  docs/AA8-DECISION-OPPORTUNITIES-V1.zh-CN.md and private
+  aa8_decision_opportunities_v1_20260914_v10/. PR#2/#3/#4 merged sequentially;
+  canonical main135ba95908861e9e85847fc6c8eca5e5b24e2fcf before this branch.
+
 - **2026-09-14 AA8 GLYPH DE-DUPLICATION V2: engineering/development
   regression PASS; real calibration still BLOCKED.** Preserved V1
   action_reader/action_transfer/visual_pipeline bytes and added versioned
