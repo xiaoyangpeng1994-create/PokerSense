@@ -34,6 +34,36 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 CONNECTED UGREEN COMPOSITE-DEVICE READ-ONLY PREFLIGHT: PASS;
+  video stream/dry run still NOT AUTHORIZED.** PR#7 merged as main
+  0d24d32db6fb1887e36258b306ff1912a4339155.User connected phone/capture card;
+  metadata-only inspection found two same-name PnP interfaces:MI00 usbvideo
+  Camera and MI02 usbaudio MEDIA.Original Name-only unique check safely rejected
+  but made valid video unusable.Fix now enumerates one DirectShow(video)
+  alternative first,then selects exactly one Name=UGREEN25854+Service=usbvideo
+  CIM entity,requires MI00/Camera-or-Image/OK,one signed driver with exact
+  DeviceID,version/provider/INF/class GUID,and normalized full DShow PnP identity
+  equal to the CIM ID.Popen still uses the exact alternative and `-an`;audio
+  sibling is excluded.PnP tail is `pnp_instance_suffix`,never physical serial;
+  capture_card_serial may remain null.Hardware fingerprint includes full video
+  interface metadata plus prior phone/app/UVC/layout fields.6 adversarial
+  service/class/driver/MI/suffix/DShow mismatches reject.Real read-only probe PASS:
+  selected interface canonical SHA
+  824e5633a9578e4a93724be01ecabb63139b347f6c616637cdbf7206e280d079;
+  FFmpeg9.0.1 real target SHA
+  57c56e369d5b4873b4d93fc1a1d833cb7cd8bc9325c14b05c34ce60b22842d8a,
+  size222229504;G free~222GiB.
+  Private evidence G:/PokerSense_private/aa_capture_hardware_preflight_20260914_v1/
+  observation ffce26a2fb7a942a86e2791c8ffb1cabd21622f5cd39fded4846368117271d1a,
+  report0f376854d10a5494400ddbf4a88e1ec02a297318a9f20f52df505bde1ead0a4a,
+  manifestde8d2f29774b1e43cb71d276796ed64c03d10567bbe9c316be4c3245ee47705e;
+  independent hash/canonical recomputation0differences.62focused;full3371passed/
+  7skipped/1dependencywarning(29.46s),lint0,generator299,diff0.Independent code/
+  evidence/scope reviews P0/P1=0.No video= input,stream open,frame/media read/write,
+  capture authorization/nonce,model/strategy/advice.This proves device enumeration
+  only.Next:fill private phone/app/adapter/UVC/layout declaration and obtain exact
+  per-session phrase before one10s observer-only hardware dry run.
+
 - **2026-09-14 AA PASSIVE REAL-CAPTURE INTAKE V1: engineering PASS; real
   hardware dry run PENDING one-time user authorization.** PR#6 merged as
   main8e14f754342f9245feb6e0e1cc289075e272b420;new isolated branch adds a

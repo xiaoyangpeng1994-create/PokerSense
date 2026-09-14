@@ -78,6 +78,14 @@ def authorization(root, **updates):
             "uvc_color_space": None,
             "uvc_color_range": None,
             "dshow_input_name": None,
+            "pnp_instance_suffix": None,
+            "interface_number": None,
+            "pnp_service": None,
+            "pnp_class": None,
+            "pnp_class_guid": None,
+            "driver_device_id": None,
+            "driver_provider": None,
+            "driver_inf": None,
             "normalization_sha256": None,
             "layout_sha256": None,
             "hardware_fingerprint_sha256": None,
@@ -163,15 +171,26 @@ def bind_hardware(auth, *, driver="driver-v1"):
         "video_adapter_model": "test-adapter",
         "capture_card_model": "UGREEN 25854",
         "capture_card_firmware": "test-firmware",
-        "capture_card_serial": "test-serial",
-        "device_instance_id": "USB\\VID_1234&PID_ABCD\\TEST-SERIAL",
+        "capture_card_serial": None,
+        "device_instance_id": (
+            "USB\\VID_1234&PID_ABCD&MI_00\\TEST-SUFFIX"),
         "usb_vid_pid": "VID_1234&PID_ABCD",
+        "pnp_instance_suffix": "TEST-SUFFIX",
+        "interface_number": "00",
+        "pnp_service": "usbvideo",
+        "pnp_class": "Camera",
+        "pnp_class_guid": "TEST-CLASS-GUID",
+        "driver_device_id": (
+            "USB\\VID_1234&PID_ABCD&MI_00\\TEST-SUFFIX"),
         "host_os": "test-windows",
         "driver_version": driver,
+        "driver_provider": "Microsoft",
+        "driver_inf": "usbvideo.inf",
         "uvc_color_space": "test-color-space",
         "uvc_color_range": "test-color-range",
         "dshow_input_name": (
-            "@device_pnp_test_vid_1234_pid_abcd_test-serial"),
+            "@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_00#"
+            "test-suffix#{class}\\global"),
         "normalization_sha256": "1" * 64,
         "layout_sha256": "2" * 64,
     })
@@ -219,10 +238,12 @@ def fake_recording(target, duration, *, drop_frames=0, exit_code=0,
         "ffmpeg_sha256": hashlib.sha256(
             b"TEST_ONLY_INJECTED_RECORD_FUNCTION").hexdigest(),
         "dshow_input_name": (
-            "@device_pnp_test_vid_1234_pid_abcd_test-serial"),
+            "@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_00#"
+            "test-suffix#{class}\\global"),
         "command_sha256": intake._canonical_sha(intake._build_ffmpeg_command(
             target, duration, "TEST_ONLY_INJECTED_RECORD_FUNCTION",
-            "@device_pnp_test_vid_1234_pid_abcd_test-serial")),
+            "@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_00#"
+            "test-suffix#{class}\\global")),
         "started_utc": "2026-09-14T10:00:00+00:00",
         "ended_utc": "2026-09-14T10:00:10+00:00",
         "stop_reason": stop_reason,
@@ -523,13 +544,24 @@ def test_formal_recorder_executes_the_preflight_pinned_ffmpeg_binary(
             "mtime_ns": ffmpeg_info.st_mtime_ns})
     monkeypatch.setattr(
         intake, "_probe_windows_capture_device", lambda ffmpeg_identity: {
-            "probe_method": "windows_cim_pnp_v1",
+            "probe_method": "windows_cim_pnp_dshow_v2",
             "friendly_name": "UGREEN 25854",
-            "device_instance_id": "USB\\VID_0000&PID_0000\\TEST-SERIAL",
+            "device_instance_id": (
+                "USB\\VID_0000&PID_0000&MI_00\\TEST-SUFFIX"),
             "usb_vid_pid": "VID_0000&PID_0000",
-            "capture_card_serial": "TEST-SERIAL",
+            "pnp_instance_suffix": "TEST-SUFFIX",
+            "interface_number": "00",
+            "pnp_service": "usbvideo",
+            "pnp_class": "Camera",
+            "pnp_class_guid": "TEST-CLASS-GUID",
+            "driver_device_id": (
+                "USB\\VID_0000&PID_0000&MI_00\\TEST-SUFFIX"),
             "driver_version": "TEST-DRIVER",
-            "dshow_input_name": "@device_pnp_test_vid_0000_pid_0000_test-serial",
+            "driver_provider": "Microsoft",
+            "driver_inf": "usbvideo.inf",
+            "dshow_input_name": (
+                "@device_pnp_\\\\?\\usb#vid_0000&pid_0000&mi_00#"
+                "test-suffix#{class}\\global"),
             "status": "OK"})
     monkeypatch.setattr(
         intake.shutil, "disk_usage",
@@ -554,8 +586,7 @@ def test_formal_recorder_executes_the_preflight_pinned_ffmpeg_binary(
     assert receipt["forced_termination"] is False
     assert receipt["ffmpeg_binary_sha256"] == sha(ffmpeg)
     assert commands[0][0][0] == ffmpeg.as_posix()
-    assert "video=@device_pnp_test_vid_0000_pid_0000_test-serial" in commands[
-        0][0]
+    assert any(item.startswith("video=@device_pnp_") for item in commands[0][0])
     assert commands[0][1]["shell"] is False
     assert receipt["segments"][0]["sha256"] == hashlib.sha256(
         b"formal-recorder-segment").hexdigest()
@@ -565,11 +596,72 @@ def test_directshow_alternative_name_must_be_unique_and_device_bound():
     text = (
         '[dshow @ x] "UGREEN 25854" (video)\n'
         '[dshow @ x]   Alternative name '
-        '"@device_pnp_\\\\?\\usb#vid_1234&pid_abcd#test-serial"\n')
-    expected = "@device_pnp_\\\\?\\usb#vid_1234&pid_abcd#test-serial"
+        '"@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_00#'
+        'test-suffix#{class}\\global"\n')
+    expected = (
+        "@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_00#"
+        "test-suffix#{class}\\global")
     assert intake._parse_dshow_input_name(text, "UGREEN 25854") == expected
     with pytest.raises(ValueError, match="unique_dshow"):
         intake._parse_dshow_input_name(text + text, "UGREEN 25854")
+
+
+def test_windows_probe_selects_only_usbvideo_from_composite_device(monkeypatch):
+    calls = []
+    cim = json.dumps({
+        "friendly_name": "UGREEN 25854",
+        "device_instance_id": (
+            "USB\\VID_2B89&PID_5854&MI_00\\6&UNIT&0&0000"),
+        "status": "OK",
+        "pnp_service": "usbvideo",
+        "pnp_class": "Camera",
+        "pnp_class_guid": "{test-guid}",
+        "driver_device_id": (
+            "USB\\VID_2B89&PID_5854&MI_00\\6&UNIT&0&0000"),
+        "driver_version": "10.0.1",
+        "driver_provider": "Microsoft",
+        "driver_inf": "usbvideo.inf",
+    })
+    dshow = (
+        '[in#0 @ x] "UGREEN 25854" (video)\n'
+        '[in#0 @ x]   Alternative name '
+        '"@device_pnp_\\\\?\\usb#vid_2b89&pid_5854&mi_00#'
+        '6&unit&0&0000#{class}\\global"\n'
+        '[in#0 @ x] "数字音频接口 (UGREEN 25854)" (audio)\n')
+
+    def run(command, **kwargs):
+        calls.append(command)
+        if len(calls) == 1:
+            return SimpleNamespace(returncode=1, stdout="", stderr=dshow)
+        return SimpleNamespace(returncode=0, stdout=cim, stderr="")
+
+    monkeypatch.setattr(intake.os, "name", "nt")
+    monkeypatch.setattr(intake.shutil, "which", lambda name: "powershell.exe")
+    monkeypatch.setattr(intake.subprocess, "run", run)
+    result = intake._probe_windows_capture_device({"path": "ffmpeg.exe"})
+    assert "Service -eq 'usbvideo'" in calls[1][-1]
+    assert result["device_instance_id"].endswith("6&UNIT&0&0000")
+    assert result["usb_vid_pid"] == "VID_2B89&PID_5854"
+    assert result["interface_number"] == "00"
+    assert result["pnp_service"] == "usbvideo"
+    assert result["dshow_input_name"].startswith("@device_pnp_")
+
+
+@pytest.mark.parametrize("field,value", [
+    ("pnp_service", "usbaudio"),
+    ("pnp_class", "MEDIA"),
+    ("driver_device_id", "USB\\VID_1234&PID_ABCD&MI_02\\TEST-SUFFIX"),
+    ("interface_number", "02"),
+    ("pnp_instance_suffix", "OTHER"),
+    ("dshow_input_name", (
+        "@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_02#"
+        "test-suffix#{class}\\global")),
+])
+def test_observed_device_rejects_audio_or_mismatched_interface(field, value):
+    observed = intake._device_probe_for_test(authorization(Path.cwd()))
+    observed[field] = value
+    with pytest.raises(ValueError):
+        intake._validate_device_probe(observed)
 
 
 def test_dry_run_signoff_recomputes_receipt_from_recording(tmp_path):
