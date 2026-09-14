@@ -173,15 +173,18 @@ def test_interval_is_a_minimum_period_not_a_fixed_sleep(monkeypatch):
 
     async def run():
         return await _collect(
-            live.live_analysis_stream(interval_seconds=0.30), limit=2
+            live.live_analysis_stream(interval_seconds=2.0), limit=2
         )
 
     frames = asyncio.run(run())
     assert len(frames) == 2
     assert sleeps, "expected pacing sleeps to be recorded"
-    # A 0.20s step against a 0.30s minimum period leaves ~0.10s, not 0.30s.
+    # A step with an explicit 0.20s source delay must leave at most ~1.80s of
+    # a 2.0s minimum period.  The generous period keeps slower CI processing
+    # from legitimately consuming the entire remainder, while a fixed 2.0s
+    # sleep still fails this contract.
     for delay in sleeps:
-        assert delay < 0.25, (
+        assert 0 < delay <= 1.81, (
             f"sleep {delay:.3f}s looks like a fixed period rather than a "
             "remainder"
         )
