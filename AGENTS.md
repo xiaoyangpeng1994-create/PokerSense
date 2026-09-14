@@ -34,6 +34,18 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 OBSERVER VISUAL SPOT REVIEW: insurance true positives;
+  ordinary selection corrected.** Frames3931/17114 show purchase countdown;
+  followups3940/17130 explicitly show insurance mode. Keep fail-closed context
+  clearing.7selected bottom-stack checkpoints match manual values;frame12000
+  outside original selection is context only,not scored. Old nine-hand ordinary
+  classification was overstated:H02/H11 contain insurance. New private selection
+  v2 retains7hands/10068frames,existing targeted epoch available10068/10068 only
+  in this post-hoc subset,not session accuracy/coverage acceptance. Old evidence
+  preserved;no runtime changes. Report1d2418ea;selection61a7613b;private evidence
+  G:/PokerSense_private/aa-observer-visual-check-v1/. Next:seven-hand action/state
+  truth checks and separate insurance guard regressions;no strategy promotion.
+
 - **2026-09-15 OBSERVER REPLAY TARGETED FIXES: development PASS, no live
   promotion.** Added session-specific layout candidate: slot 4 stack y914->912,
   old frozen layout and model unchanged. All13415 old failures clipped_or_border;
