@@ -26,9 +26,30 @@ changing desktop capture, recognition, packaging, or project documentation.
    duplicated, checking references with `rg`, and moving any still-useful
    information into its replacement. An unlinked design document is not, by
    itself, evidence that it is disposable.
+6. Use `docs/PR-WORKFLOW.zh-CN.md` for authorized development. The canonical
+   remote is the public `xiaoyangpeng1994-create/PokerSense`; treat
+   `windgeek/PokerSense` and `x-poker` as read-only references. Use scoped
+   `codex/` branches, Draft PRs and independent review. Merging, tags, releases,
+   real capture and live play still require explicit user authorization.
 
 ## Current state
 
+- **2026-09-14 PUBLIC CANONICAL REPOSITORY + PROTECTED PR WORKFLOW:** Created
+  independent public `xiaoyangpeng1994-create/PokerSense` (not a fork), with local committed
+  baseline eb4011172adec280c99cd442ca49e9083ce9ec8b on main. Local `origin`
+  targets the canonical repository; `windgeek-base` retains the earliest public
+  repository as reference. `x-poker` is a substantive 532-file/54-commit private
+  historical snapshot and is retained. This PR adds the Chinese review template,
+  workflow guide and CI hygiene checks. The migration also removes two baseline
+  recorder lint violations and regenerates strategy fixtures against the
+  repository's LF asset bytes for cross-platform determinism. Uncommitted later
+  work remains preserved in the primary worktree and will migrate through
+  dependency-scoped PRs. Local3216passed/1skipped/2dependencywarnings(25.42s),
+  full lint0,generator check0,private filename guard827/0,diff-check clean.
+  Independent review PASS; Draft PR #1 CI PASS,owner merge pending. Public main
+  protection requires current PR+three checks+resolved conversations,includes
+  admins,and forbids force-push/deletion;0 approvals avoids single-owner deadlock.
+  No old repository merge,tag,release,media upload or live action.
 - **LOCAL HANDOFF CHECKPOINT 2026-09-12:** current cross-model entry is
   handoff/2026-09-12/START-HERE.zh-CN.md; old HANDOFF-CODEX-GPT6.md marked
   historical. Pre-checkpoint audit:34modified tracked,371untracked/1,690,272B,

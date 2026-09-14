@@ -71,7 +71,7 @@
   "fixture_count": 299,
   "fixture_file": "fixtures.jsonl",
   "fixture_schema_version": "1.0.0",
-  "fixture_sha256": "f9b36a24450674278f41ed4ddddbce8f88be8db66f68328e5324489eadbe364b",
+  "fixture_sha256": "49a67c93e3cdf78cc6df3c765da59885bbcfda35cd0f449b1ddeea83c8721f6b",
   "generated_at": "2026-08-22T00:00:00Z",
   "generator": "tools/generate_strategy_mock_fixtures.py",
   "not_release_acceptance_evidence": [
