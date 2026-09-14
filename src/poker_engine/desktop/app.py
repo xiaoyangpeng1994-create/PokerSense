@@ -3,8 +3,8 @@
     python -m poker_engine.desktop.app
 
 Starts the FastAPI server on a background thread and opens a companion UI.
-Table pixels default to the WPK phone capture card. ADB remains an explicit
-alternative source.
+Table pixels come from a physical phone capture card. Emulator/ADB is not a
+selectable product source.
 """
 
 from __future__ import annotations
@@ -27,6 +27,9 @@ SERVER_STARTUP_TIMEOUT_SECONDS = 10.0
 
 def _create_server(device_serial: str, *, source: str = "capture-card",
                    device_index: int = 0, api: str = "MSMF") -> uvicorn.Server:
+    if source not in CAPTURE_SOURCES:
+        raise ValueError("only physical capture-card input is supported")
+
     def stream():
         return live_analysis_stream(device_serial, source=source,
                                     device_index=device_index, api=api)
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--device-serial",
         default=DEFAULT_DEVICE_SERIAL,
-        help="ADB serial from `adb devices`; auto is allowed for one device",
+        help="legacy internal identifier; capture-card input does not use ADB",
     )
     parser.add_argument("--source", choices=CAPTURE_SOURCES, default="capture-card")
     parser.add_argument("--device-index", type=int, default=0)

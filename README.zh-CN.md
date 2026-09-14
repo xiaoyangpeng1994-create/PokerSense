@@ -15,18 +15,18 @@ PokerSense 是德州扑克实时训练伴随工具。当前本地开发主线为
 参数完整或模拟页面能显示结果，不代表已经支持相应策略，也不代表盈利已验证。
 
 启动、工具及最新证据见 [WPK 本地进展](docs/wpk-progress-2026-09-08.md)。模拟默认值和真实规则明确区分；
-盲注、前注、3% 等抽水比例、封顶和 straddle 可以在设置页修改。真实入口默认采集卡，ADB 为显式备选。
+盲注、前注、3% 等抽水比例、封顶和 straddle 可以在设置页修改。产品只允许真机采集卡入口；AA扑克和微扑克都会限制模拟器登录，因此 ADB/雷电不再是可选项。
 
 PokerSense 不是自动打牌机器人：不会点击、输入、下注或控制扑克客户端，真人始终是唯一执行者。目标
 场景是朋友自建牌局、对练、教学和刻意训练。
 
-## 保留的 ADB 支持范围
+## 历史 ADB 证据（不可选择）
 
-下表描述独立标定的 **Windows 雷电模拟器 WePoker Android 竖屏** 能力，不能将这些标定直接当作采集卡已通过。
+下表只记录以前独立标定的 **Windows 雷电模拟器 WePoker Android 竖屏** 证据，用于解释历史回归；不能作为部署路径，也不能当作采集卡已通过。
 
 | 功能 | 状态 |
 |---|---|
-| Windows 雷电模拟器 ADB 采集 | 已实现；直接读取模拟器像素，不依赖窗口位置、遮挡或 DPI |
+| Windows 雷电模拟器 ADB 采集 | 仅保留历史回归；产品 CLI 会拒绝 `--source adb` |
 | WePoker Android 1440×2560 竖屏底牌识别 | 已标定 |
 | WePoker Android 公共牌和街道 | 已标定；发牌/翻牌过渡帧会拒绝写入 |
 | WePoker Android 总底池 | 已标定；文字标签、菜单和遮罩会拒识 |
@@ -48,41 +48,15 @@ Android 标定现由原有 66 张去重 ADB 帧、234 张全分辨率牌桌帧�
 
 ## 安装状态
 
-GitHub 上的 v0.1.11 安装包仍是旧 H5 路径，不包含本页所述 Android/ADB 改造。Android 路径当前位于
-`main`，完成真实雷电联调和 Windows 打包验收后再发布新安装包，避免把开发状态误写成已发布能力。
+GitHub 上的 v0.1.11 安装包仍是旧 H5 路径，不包含当前真机采集卡改造。新安装包必须先完成采集卡硬件验收和 Windows 打包检查，避免把开发状态误写成已发布能力。
 
-## 使用雷电模拟器（备选方式）
+## 模拟器入口已关闭
 
-PokerSense 不再需要 H5 页面或 Chrome 窗口。此备选输入通过 ADB 直接读取雷电中的
-Android framebuffer。启动前需要准备 Windows 雷电实例、WePoker Android 和一个已授权的 ADB
-设备；当前已标定的配置为 **1440×2560 竖屏**。
-
-1. 在雷电中以 1440×2560 竖屏运行 WePoker Android，并开启 ADB。
-2. 运行 `adb devices`，记下目标实例序列号，例如 `emulator-5556`。
-3. 如果 `adb.exe` 不在 PATH，设置 `POKERSENSE_ADB_PATH` 为雷电目录中的 `adb.exe`。
-4. 只有一个已授权实例时，运行 `make run-desktop ARGS="--source adb"`；有多个实例时，使用
-   `make run-desktop ARGS="--source adb --device-serial emulator-5556"` 显式选择。
-
-目前底牌、公共牌、街道、总底池、座位占用、逐视觉槽位筹码、Dealer、Hero actor 和已完成动作标签已经完成
-平台标定。实时链会把它们映射为规范 seat/position，并只记录筹码差额与底池一致的动作。对手当前计时圈、
-边池边界场景和授权 raw-frame Replay 仍需发布证据；同时尚未捆绑合格的多人策略 Provider，因此界面仍只显示
-可见牌对随机范围的胜率，不会冒充完整牌局策略建议。
-
-显式选择 ADB 且只有一个已授权设备时，PokerSense 会以 `auto` 启动；存在多个雷电实例时
-会拒绝猜测并列出可选序列号，此时必须传入 `--device-serial`（或设置
-`POKERSENSE_ADB_SERIAL`）。
-
-```bash
-adb devices
-make run-desktop ARGS="--source adb --device-serial emulator-5556"
-```
-
-ADB 输出是模拟器自身像素，因此移动、缩放、遮挡或最小化雷电宿主窗口不会改变 ROI。不同分辨率、横屏或
-不同 Android UI 版本仍需独立标定，不能复用 H5 ROI。
+两个桌面入口都会拒绝 `--source adb`。ADB 后端只作为历史离线回归依赖保留，不能重新接回用户可选采集源。当前开发使用 G 盘既有 AA 真机采集卡录像，之后的硬件验收也必须使用实体手机与 UVC 采集卡。这不授权实时建议或控制客户端。
 
 ## 隐私与本地数据
 
-ADB 帧只在内存中用于识别，处理后即丢弃。PokerSense 不保存截图、视频或帧历史。真实标定原图属于私有
+采集卡帧只在内存中用于识别，处理后即丢弃。PokerSense 不保存截图、视频或帧历史。真实标定原图属于私有
 离线数据，不进入 GitHub 或安装包；只保留少量脱敏、带标签的回归样本即可。
 
 界面语言与牌桌规则分别保存。语言设置位置：

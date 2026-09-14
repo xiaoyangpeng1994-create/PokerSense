@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "status": "DEVELOPMENT_REVIEWED_BOUNDARIES_NOT_CALIBRATION",
+  "source_session_id": "aa8-phone-capture-20260909-031030",
+  "capture_path": "physical_phone_capture_card",
+  "emulator_used": false,
+  "source_audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+  "split_plan_sha256": "5e5f5475364b825db55905f4e524d5c11200f427933efe67b9603673a485f3e8",
+  "samples_sha256": "d1ecec3f4d6b68663e62a431bc46c04ec41f596829e05957a824ceb295fc7da6",
+  "pipeline_report_sha256": "3289b6fce691cb08ebd9751b82c27cadb7e613d6a224cd0c65351e8437e16423",
+  "observations_sha256": "82a09c53414c33612dad5dcdc37cf4545e6155abc25e83363ff11cc35460c17f",
+  "window": {
+    "start_pts": "840.023",
+    "end_pts_exclusive": "995.366",
+    "first_frame": 25204,
+    "last_frame": 29864,
+    "segments": [
+      {
+        "file": "segment_0014.mkv",
+        "sha256": "ee7baf41d42cbd0d9bc8264d00ff1ef31450a1957c966e28704e74bc70e637e2",
+        "decoded_frames": 1800,
+        "first_global_frame": 25204,
+        "last_global_frame": 27003
+      },
+      {
+        "file": "segment_0015.mkv",
+        "sha256": "2ea74d8da0c1675d2a116cc12709d8b4778baf8df835d89dbc83edd97400f1af",
+        "decoded_frames": 1800,
+        "first_global_frame": 27004,
+        "last_global_frame": 28803
+      },
+      {
+        "file": "segment_0016.mkv",
+        "sha256": "15ff98205503444837425a80e355bb4c16495035a0f8a0cd953adbdd201e0b15",
+        "decoded_frames": 1061,
+        "first_global_frame": 28804,
+        "last_global_frame": 29864
+      }
+    ],
+    "excluded_cross_boundary_segment": {
+      "file": "segment_0013.mkv",
+      "reason": "crosses_protected_to_development_boundary"
+    }
+  },
+  "hands": [
+    {
+      "hand_id": "aa8_late_dev_hand_005",
+      "start_frame": 25492,
+      "last_gameplay_frame": 27349,
+      "end_frame": 27473,
+      "next_start_frame": 27474,
+      "temporal_complete": true,
+      "boundary_status": "DEVELOPMENT_MANUAL_REVIEW",
+      "opening_state_status": "PARTIAL_SPECIAL_BOMB_POT",
+      "evidence": [
+        {
+          "frame": 25492,
+          "sha256": "752fd564c2f2b75195af1550e42766fdcc979eb0809773167adf944d321200f8",
+          "meaning": "first_center_deal_card_after_previous_settlement"
+        },
+        {
+          "frame": 27349,
+          "sha256": "c78b2fa2674b13d8196ef25a0af5d6d010f8ee70fc478a2d2faead03509af6a1",
+          "meaning": "last_river_gameplay_before_settlement"
+        },
+        {
+          "frame": 27474,
+          "sha256": "5bdf2f1916042f10866935e0b76ae544812c26ec5ea1550036bb06e4a6177e56",
+          "meaning": "next_hand_multi_seat_posts_and_center_deal"
+        }
+      ]
+    },
+    {
+      "hand_id": "aa8_late_dev_hand_006",
+      "start_frame": 27474,
+      "last_gameplay_frame": 28928,
+      "end_frame": 29051,
+      "next_start_frame": 29052,
+      "temporal_complete": true,
+      "boundary_status": "DEVELOPMENT_MANUAL_REVIEW",
+      "opening_state_status": "PARTIAL_ONE_EMPTY_SEAT_POST_LEDGER",
+      "evidence": [
+        {
+          "frame": 27474,
+          "sha256": "5bdf2f1916042f10866935e0b76ae544812c26ec5ea1550036bb06e4a6177e56",
+          "meaning": "multi_seat_posts_and_center_deal"
+        },
+        {
+          "frame": 28928,
+          "sha256": "7e0162bdb3fd573ecd6cb38cbb22936d2c44c8d41ec7e791ea680273e098197b",
+          "meaning": "river_end_transition_after_allin_showdown"
+        },
+        {
+          "frame": 29052,
+          "sha256": "66b10fb21c007cfc4b40588782c5bfd80332754779b6e04307772c810f98d803",
+          "meaning": "next_hand_new_posts_with_hero_waiting"
+        }
+      ]
+    },
+    {
+      "hand_id": "aa8_late_dev_tail_007",
+      "start_frame": 29052,
+      "last_gameplay_frame": 29052,
+      "end_frame": 29864,
+      "next_start_frame": null,
+      "temporal_complete": false,
+      "boundary_status": "INCOMPLETE_RECORDING_TAIL",
+      "opening_state_status": "HERO_WAITING_AND_SCENE_UNSUPPORTED_AFTER_OPENING",
+      "evidence": [
+        {
+          "frame": 29052,
+          "sha256": "66b10fb21c007cfc4b40588782c5bfd80332754779b6e04307772c810f98d803",
+          "meaning": "new_posts_visible_at_tail_start"
+        },
+        {
+          "frame": 29864,
+          "sha256": "c0b4c82ccc98bd842975d4b0672ff5327ff243254b27460d6e2c4f1fcf35848f",
+          "meaning": "recording_final_frame_without_complete_hand_end"
+        }
+      ]
+    }
+  ],
+  "review_constraints": [
+    "development_only_not_independent_acceptance",
+    "player_names_and_raw_frames_remain_private",
+    "glyph_transitions_are_candidates_not_reviewed_action_truth",
+    "complete_legal_action_menus_are_not_available",
+    "one_recording_session_cannot_be_split_into_independent_sessions",
+    "ldplayer_and_other_emulators_are_not_supported"
+  ]
+}

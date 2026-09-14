@@ -34,6 +34,30 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA8 PHYSICAL-CAPTURE OFFLINE SESSION EVIDENCE V1: development
+  engineering in review; real opponent calibration still BLOCKED.** User
+  confirmed AA/WPK emulator logins are restricted; product CLI/server now expose
+  capture-card only and reject adb, while historical backend/evidence remain for
+  offline regression. Used only new8seat physical-capture development segments
+  0014-0016,840.023-995.366s,4661frames;segment0013 excluded whole because it
+  crosses protected820s boundary. Source audit/sizes/mtimes/hashes unchanged.
+  Existing pipeline:3781supported scenes,2968known-pot frames,42glyph candidates.
+  Manual boundary review registers2temporally complete development hands
+  25492-27473(next27474) and27474-29051(next29052),plus incomplete tail29052-29864.
+  Complete hands contain36glyph candidates/30opponent;29 have same-slot actor cue
+  within prior12frames. Legal menus/reviewed decision truth0,amounts unbound;
+  first hand has unresolved special-bomb pot,one session cannot train/validate.
+  All results strategy_eligible/advice false. New fail-closed registry verifier
+  binds audit/split/segments/4661samples/pipeline/events/key frames and rejects
+  emulator,protected overlap,hash/order/drop/boundary drift. Initial review found
+  and fixed PTS/localframe,registry-next-boundary/evidence and SHA manifest path
+  traversal/read-order gaps without changing old helper.28focused tests;
+  full3237passed/1skipped/2warnings(28.08s),lint0,generator0,private filename0,
+  diff0. Final independent rereview PASS;PR#2 CI and owner signoff tracked in PR. See
+  docs/AA8-OFFLINE-SESSION-EVIDENCE-V1.zh-CN.md;private evidence under
+  G:/PokerSense_private/aa8_offline_session_evidence_20260914_v1/.
+  No LDPlayer/ADB/device/live capture/advice/tag/release/main push.
+
 - **2026-09-14 PUBLIC CANONICAL REPOSITORY + PROTECTED PR WORKFLOW:** Created
   independent public `xiaoyangpeng1994-create/PokerSense` (not a fork), with local committed
   baseline eb4011172adec280c99cd442ca49e9083ce9ec8b on main. Local `origin`
