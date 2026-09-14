@@ -34,6 +34,31 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 TC-20260915-04-R1: negative-only audit rework.** V1 positive
+  eligibility trusted declarations and is not accepted audit evidence. R1 rejects
+  any formally clean candidate with POSITIVE_ELIGIBILITY_UNSUPPORTED; never emits
+  ELIGIBLE. Enforces full media/candidate tiling,receipt SHA/frame closure,exact
+  media intersections and one whole-hand enclosure per verified V3 template.
+  Historical-v1 adapters derive YES only from bound selection/regression/review
+  hand/frame records;unsupported fields UNKNOWN,malformed/conflicting evidence
+  safely rejected. H02/H11 manual-action exposure corrected to UNKNOWN.
+  Original freeze/result untouched,new evidence under rework-1.41focused tests
+  pass;full3435passed/7skipped/1warning,lint0,diff0. No V3/media/tuning.
+
+- **2026-09-15 TC-20260915-04 holdout eligibility audit: NO_ELIGIBLE_HOLDOUT.**
+  Metadata-only inventory covers all 13 registered intervals/18003 frames of
+  session-001. Nine hands entered V3 development regression/debug; three contain
+  templates4565/11761/8680. Remaining HEAD/H01/H08/TAIL lack verifiable clean
+  provenance. Whole template-hand enclosures conservatively exclude episodes;
+  unknown episode extent fails closed. No V3 execution or new media reads.
+  New audit tool freezes provenance hashes; no-eligible labels/output artifacts
+  explicitly NOT_RUN, eight-seat/class denominators0 and confusion counts null.
+  No recognizer/template/threshold/layout changes. See
+  docs/AA-GLYPH-HOLDOUT-V1.zh-CN.md. Engineering verification tracked in task PR;
+  external independence, real recognition metrics and live eligibility untested.
+  Engineering:23focused/full3417passed/7skipped/1warning,lint0,diff0.
+  Frozen eligibility d9429ade at2026-09-15T03:12:26+08:00;result ee261f3a.
+
 - **2026-09-15 TC-20260915-03 historical baseline reconciliation.**
   The FIRST offline replay entry below is preserved verbatim as a historical
   baseline, not the current implementation status. PR #15 fixed the session-only
