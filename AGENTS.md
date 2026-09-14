@@ -34,6 +34,29 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW: platform/image PASS;
+  privacy exclusions applied,9 ordinary complete-hand candidates only.** Owner
+  authorized decode/review of session aa-live-observer-development-20260914-001
+  and PR#11 merged as main4ab1cc3.Source receipt c09dd51e;10segments/
+  3401350388bytes rehashed10/10.Full decode10/10 error0,1920x1080@30 MJPEG,
+  noaudio;initial black0.000-0.867s and no later black;600one-fps frames all
+  globally unique.Ten minute sheets show continuous AA POKER8-seat table,no
+  lobby/other app/splash;498x1080 core geometry stable.Observer-only visual
+  evidence remains consistent,not OS-input proof.Privacy P0:incoming-call overlay
+  with direct phone number0.000-75.600s;value not copied into metadata/Git,whole
+  interval excluded because it also obscures table top.Nicknames/avatars/stacks/
+  possible table IDs remain private.5FPS board-count+dealer probe(no rank/name/
+  amount/strategy recognition)plus12 dense +/-2s reviews yields1incomplete head,
+  1incomplete tail,11inter-boundary complete temporal candidates;1privacy-
+  occluded and1lucky-bomb special excluded,leaving9ordinary unoccluded candidates,
+  including2preflop-only candidates.Boundaries are reviewed0.2s windows,not exact
+  frame/canonical truth.Private report5d9a823c,boundary89daf941,privacy780e53c9,
+  70-file manifestd3b04e7e all rehashed.No other media/upload/model/strategy/
+  Advice/input/promotion.See docs/AA-LIVE-DEVELOPMENT-MEDIA-REVIEW-V1.zh-CN.md.
+  Next:exact private frame+PTS binding/frozen development split,then separately
+  authorize offline recognition;rules/identity/opportunities/legal menus/session
+  independence remain blockers.
+
 - **2026-09-14 FIRST FINGERPRINT-BOUND 10MIN AA OBSERVER DEVELOPMENT CAPTURE:
   technical PASS;media/dataset review PENDING.** Owner signed dry-run003 after
   completion(signoff334a1f47)and explicitly authorized one600s passive capture.
