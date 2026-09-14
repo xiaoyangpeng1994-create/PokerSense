@@ -34,6 +34,18 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 TC-20260915-04 holdout eligibility audit: NO_ELIGIBLE_HOLDOUT.**
+  Metadata-only inventory covers all 13 registered intervals/18003 frames of
+  session-001. Nine hands entered V3 development regression/debug; three contain
+  templates4565/11761/8680. Remaining HEAD/H01/H08/TAIL lack verifiable clean
+  provenance. Whole template-hand enclosures conservatively exclude episodes;
+  unknown episode extent fails closed. No V3 execution or new media reads.
+  New audit tool freezes provenance hashes; no-eligible labels/output artifacts
+  explicitly NOT_RUN, eight-seat/class denominators0 and confusion counts null.
+  No recognizer/template/threshold/layout changes. See
+  docs/AA-GLYPH-HOLDOUT-V1.zh-CN.md. Engineering verification tracked in task PR;
+  external independence, real recognition metrics and live eligibility untested.
+
 - **2026-09-15 TC-20260915-03 historical baseline reconciliation.**
   The FIRST offline replay entry below is preserved verbatim as a historical
   baseline, not the current implementation status. PR #15 fixed the session-only

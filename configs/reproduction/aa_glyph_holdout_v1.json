@@ -1,0 +1,610 @@
+{
+  "version": 1,
+  "scope": "template-disjoint intra-session holdout",
+  "sources": [
+    {
+      "id": "session-001",
+      "receipt_sha256": "c09dd51e737cfb57bd001f716e6d75e8c29d4fda9c840b70d04109c9bc96748d",
+      "media": [
+        {
+          "id": "segment-00",
+          "sha256": "d82898b9023f09ddf574d96701b0852346a9c06c9a4e1ffefbbadbe014d4f060",
+          "first": 0,
+          "last": 1799
+        },
+        {
+          "id": "segment-01",
+          "sha256": "7c6e5dfe1085fd91179c1c4655496b3f047d44a88148f30636be3ca8bac97533",
+          "first": 1800,
+          "last": 3600
+        },
+        {
+          "id": "segment-02",
+          "sha256": "5a48455392d63037111ab8146bea414185a51b58b48bbf7639f5be423095e051",
+          "first": 3601,
+          "last": 5400
+        },
+        {
+          "id": "segment-03",
+          "sha256": "d8610788a0372a0738332f5bcf662d7226d431d4aa2df0a274026d037b64e65c",
+          "first": 5401,
+          "last": 7200
+        },
+        {
+          "id": "segment-04",
+          "sha256": "578e5103da0bbf1d7534d21c86b75c781370a5e3a7869cb9d5d6f3f89c95f4a9",
+          "first": 7201,
+          "last": 9000
+        },
+        {
+          "id": "segment-05",
+          "sha256": "5e556954a0d8331d4838a9ed3341621cf6afb9a545eafd319382b1852418ca03",
+          "first": 9001,
+          "last": 10801
+        },
+        {
+          "id": "segment-06",
+          "sha256": "3aa5f700334b4d175c7302e232a44023c1dd82226960e6d7d7438b471256a5d5",
+          "first": 10802,
+          "last": 12601
+        },
+        {
+          "id": "segment-07",
+          "sha256": "5aad0dd922313095cd5a2c8be63b83391585f9e8ab864f501ea3ff31d14b2e30",
+          "first": 12602,
+          "last": 14401
+        },
+        {
+          "id": "segment-08",
+          "sha256": "4b661f71658e5b5644451a75d023c25a7afbe839a1028a55924f7440b72e8fb0",
+          "first": 14402,
+          "last": 16201
+        },
+        {
+          "id": "segment-09",
+          "sha256": "f2bb7d6a1d85b72756f7a33755217c090d24de0edeaed6fa24acd0a9d73dab9e",
+          "first": 16202,
+          "last": 18002
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "receipt",
+      "file": "receipt.json",
+      "sha256": "c09dd51e737cfb57bd001f716e6d75e8c29d4fda9c840b70d04109c9bc96748d"
+    },
+    {
+      "id": "boundaries",
+      "file": "boundaries.json",
+      "sha256": "63a605ccd5e750d95e02cc6c1d8ec946a654d61811edfa18fe417933c7acb0b2"
+    },
+    {
+      "id": "media-review",
+      "file": "media-review.json",
+      "sha256": "7a30153d487a2d4d28db1c284efe1cc8d0afb1015a403df762f645b086a17124"
+    },
+    {
+      "id": "action-review",
+      "file": "action-review.json",
+      "sha256": "7b28fa56eba899180dce4633596b8a857a7a7c92b545f0b80dfe453128780d18"
+    },
+    {
+      "id": "v3-first",
+      "file": "v3-first.json",
+      "sha256": "43140eee8705b59b47ddad4cd9a9d24bff00de77fe1d0d76cc3c74edf97cbdda"
+    },
+    {
+      "id": "v3-final",
+      "file": "v3-final.json",
+      "sha256": "7fd45c71357e3ed9c41c31d3740065ab342adc834eba433cf196f18eb30f72d4"
+    },
+    {
+      "id": "v3-comparison",
+      "file": "v3-comparison.json",
+      "sha256": "6d1e9a401cb2762e0741f7f442907baa876a3570231189063bff0b1bd3adc95d"
+    },
+    {
+      "id": "selection",
+      "file": "selection.json",
+      "sha256": "08a8f411d2df4c2af73402adca47a2a02efadcf8794492a98ec7566d5c62f4cc"
+    }
+  ],
+  "episodes": [
+    {
+      "source": "session-001",
+      "first": 4379,
+      "last": 5893,
+      "template_frame": 4565,
+      "extent": "CONSERVATIVE_WHOLE_HAND_EXCLUSION_NOT_EXACT_EPISODE"
+    },
+    {
+      "source": "session-001",
+      "first": 7342,
+      "last": 9269,
+      "template_frame": 8680,
+      "extent": "CONSERVATIVE_WHOLE_HAND_EXCLUSION_NOT_EXACT_EPISODE"
+    },
+    {
+      "source": "session-001",
+      "first": 10654,
+      "last": 11883,
+      "template_frame": 11761,
+      "extent": "CONSERVATIVE_WHOLE_HAND_EXCLUSION_NOT_EXACT_EPISODE"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "HEAD",
+      "source": "session-001",
+      "first": 0,
+      "last": 1321,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "privacy_or_incomplete",
+      "media_ids": [
+        "segment-00"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "UNKNOWN",
+        "manual_action_review": "UNKNOWN",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection"
+      ]
+    },
+    {
+      "id": "H01",
+      "source": "session-001",
+      "first": 1322,
+      "last": 2590,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "privacy_or_incomplete",
+      "media_ids": [
+        "segment-00",
+        "segment-01"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "UNKNOWN",
+        "manual_action_review": "UNKNOWN",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection"
+      ]
+    },
+    {
+      "id": "H02",
+      "source": "session-001",
+      "first": 2591,
+      "last": 4378,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "insurance",
+      "media_ids": [
+        "segment-01",
+        "segment-02"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison"
+      ]
+    },
+    {
+      "id": "H03",
+      "source": "session-001",
+      "first": 4379,
+      "last": 5893,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "development_table",
+      "media_ids": [
+        "segment-02",
+        "segment-03"
+      ],
+      "exposure": {
+        "template": "YES",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "YES"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H04",
+      "source": "session-001",
+      "first": 5894,
+      "last": 7341,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "development_table",
+      "media_ids": [
+        "segment-03",
+        "segment-04"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H05",
+      "source": "session-001",
+      "first": 7342,
+      "last": 9269,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "development_table",
+      "media_ids": [
+        "segment-04",
+        "segment-05"
+      ],
+      "exposure": {
+        "template": "YES",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "YES"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H06",
+      "source": "session-001",
+      "first": 9270,
+      "last": 10653,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "development_table",
+      "media_ids": [
+        "segment-05"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H07",
+      "source": "session-001",
+      "first": 10654,
+      "last": 11883,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "development_table",
+      "media_ids": [
+        "segment-05",
+        "segment-06"
+      ],
+      "exposure": {
+        "template": "YES",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "YES"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H08",
+      "source": "session-001",
+      "first": 11884,
+      "last": 13638,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "special_or_boundary_uncertain",
+      "media_ids": [
+        "segment-06",
+        "segment-07"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "UNKNOWN",
+        "manual_action_review": "UNKNOWN",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection"
+      ]
+    },
+    {
+      "id": "H09",
+      "source": "session-001",
+      "first": 13639,
+      "last": 15440,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "special_or_boundary_uncertain",
+      "media_ids": [
+        "segment-07",
+        "segment-08"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H10",
+      "source": "session-001",
+      "first": 15441,
+      "last": 16201,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "development_table",
+      "media_ids": [
+        "segment-08"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison",
+        "action-review"
+      ]
+    },
+    {
+      "id": "H11",
+      "source": "session-001",
+      "first": 16202,
+      "last": 17760,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "insurance",
+      "media_ids": [
+        "segment-09"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "YES",
+        "manual_action_review": "YES",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection",
+        "v3-first",
+        "v3-final",
+        "v3-comparison"
+      ]
+    },
+    {
+      "id": "TAIL",
+      "source": "session-001",
+      "first": 17761,
+      "last": 18002,
+      "slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "scene": "privacy_or_incomplete",
+      "media_ids": [
+        "segment-09"
+      ],
+      "exposure": {
+        "template": "NO",
+        "tuning_or_debug": "UNKNOWN",
+        "manual_action_review": "UNKNOWN",
+        "template_episode_overlap": "UNKNOWN"
+      },
+      "clean_proven": false,
+      "episode_complete": false,
+      "evidence": [
+        "boundaries",
+        "media-review",
+        "selection"
+      ]
+    }
+  ]
+}
