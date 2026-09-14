@@ -34,6 +34,30 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA OBSERVER DRY-RUN002 MEDIA REVIEW: visual/technical PASS;
+  privacy restricted,hardware signoff BLOCKED.** Explicit authorization covered
+  only session002 offline platform/image/privacy review.Source segment hash
+  371af049dacaa5daf9be249b8e782713fc11f547fa348e33276b43c6e5d25f68
+  matches immutable receipt c6d5d08b442964c10ab8001392aaf86f2d12a3789ddac3100cdd94dd12fe9cd3.
+  Full30.033s MJPEG decode exit0/error0;1920x1080@30,noaudio,blackdetect0;
+  30one-fps samples all unique.Six full-resolution samples show continuous AA
+  POKER8-seat table,no black/splash/corruption.Core crop[711,0,1209,1080]
+  exactly matches existing498x1080 normalization4634d6f2 and AA8 candidate layout
+  6e8a53ee.No Hero hole cards or operator fold/call/raise controls are visible;
+  evidence is consistent with declared observer-only but cannot prove OS input
+  absence.Window is only partial turn-to-river,not a complete hand boundary.
+  Nicknames,avatars,stacks/bets,possible room/table identifiers,status bar,network
+  latency,rules and live state are visible;private offline review only,public/Git
+  media blocked and masking+pseudonyms required.Current receipt fingerprint is
+  null and immutable,so signoff remains impossible.Private report
+  f41d7207c531dd1100d691dde8393be381e719145bf269f81ef99382bd5a2dd9,
+  hardware candidate70a9a19a6ddd61d6d187e7efc3ce5386bbabe0f9cd977aac65157687dfe63219,
+  manifestdb5b63b7ce4f0eb92e61a9903e8923a3110d1a390b76d6d01bf3394d85aaedb0;
+  15/15files rehashed.No other recording read/media uploaded/model/strategy/
+  Advice/ADB/input.No automatic promotion.See
+  docs/AA-LIVE-DRYRUN-MEDIA-REVIEW-V1.zh-CN.md.Next:get exact phone/Android/AA/
+  adapter/firmware declarations,then request a new fingerprint-bound short dry run.
+
 - **2026-09-14 AA OBSERVER DRY RUN 002 + DEVICE-LOCK FIX: engineering PASS;
   media review/calibration remain BLOCKED; owner PR review pending.** User
   explicitly authorized one new30s passive session while spectating AA;no
