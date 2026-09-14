@@ -34,6 +34,17 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 ACTION CANDIDATE REVIEW: PARTIAL, concrete defects identified.**
+  Reviewed84events from prior7-hand selection via before/event/after frames;
+  82visible glyph transitions,2false folds are showdown muck at11761/15313.
+  Confirmed missed H05slot0 all-in visible8680/8710:308->0,display308,pot259->567;
+  exact onset pending.24display-delta checks,not legal cash/conservation proof.
+  H09 is the hand after lucky-bomb animation13600,previous ordinary classification
+  wrong;conservative v3 excludes it,6hands/8266frames,old selections preserved.
+  No complete opportunity census/recall or street-accuracy claim.Private review
+  7b28fa56,manifest3e6b847a under G:/PokerSense_private/aa-action-review-001-v1/.
+  See docs/AA-ACTION-REVIEW-001.zh-CN.md.Next:fix muck-vs-fold and missed all-in.
+
 - **2026-09-15 OBSERVER VISUAL SPOT REVIEW: insurance true positives;
   ordinary selection corrected.** Frames3931/17114 show purchase countdown;
   followups3940/17130 explicitly show insurance mode. Keep fail-closed context
