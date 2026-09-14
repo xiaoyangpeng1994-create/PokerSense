@@ -34,6 +34,43 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA PASSIVE REAL-CAPTURE INTAKE V1: engineering PASS; real
+  hardware dry run PENDING one-time user authorization.** PR#6 merged as
+  main8e14f754342f9245feb6e0e1cc289075e272b420;new isolated branch adds a
+  stdlib-only formal capture CLI and NOT-DATA authorization template.No desktop/
+  recognition/state/strategy/provider/equity/advice/ADB/network/input-control
+  imports or source/replay/device/codec/extra-arg switches.One authorization
+  expires<=24h,binds one aa-live-* session,private root,5-30s hardware dry run
+  or60-1800s development capture,fixed20GiB/25GiB disk caps,privacy,field-level
+  UNKNOWN/operator-declared rules and pseudonymous identity;11forbidden
+  capabilities must befalse.Nonce is single-use;formal device lock blocks
+  concurrency;all JSON/status writes flush+fsync.New recorder uses a prehashed
+  absolute FFmpeg,shell=false,60s MKV stream-copy segments,noaudio,and rehashes
+  the binary after stop.Windows CIM requires oneOK UGREEN25854+one signed driver;
+  the same FFmpeg enumerates one DirectShow alternative containing matching
+  instance VID/PID+serial,and Popen uses that name.Manifest fingerprint also
+  covers phone/app/adapter/card/firmware/serial/instance/driver/UVC/layout/
+  normalization;development requires same hardware,observed-device and FFmpeg
+  hashes as dry run plus distinct session/group.Dry authorization,plan,
+  finalization and human signoff files+SHAs are all required and the original
+  dry session bytes are rehashed before plan and record.Capture frames must
+  match segment/out-time and30fps within max3frames/10%;duration,wall clock,
+  drop/dup/progress/stop/exit/file set/hashes are bounded.Success maxes at
+  CAPTURE_FINALIZED_UNREVIEWED;all sources stayUNASSIGNED_QUARANTINE/BLOCKED,
+  all offline/calibration/model/strategy/advice/control gates false.Failed
+  receipts retain files,require a whitelisted real failure blocker and visible
+  fact<->blocker equality;malformed progress writes attempt-failure instead.
+  Full inspect rebuilds ledger/metadata/segments/command/FFmpeg evidence.55
+  focused;full3370passed/7skipped/1dependencywarning(27.15s),lint0,generator299,
+  private filenames865/0,diff0,V1freeze280/280,old private hashes9/9.Three
+  independent adversarial reviews P0/P1/P2=0.
+  Existing frozen recorders remain byte-unchanged;operator can bypass formal
+  tooling at OS level,so project accepts only intake-closed sessions.No real
+  CIM/PnP/FFmpeg/device/media/decode/capture/model/strategy run.See
+  docs/AA-PASSIVE-CAPTURE-INTAKE-V1.zh-CN.md.Next:after explicit per-session
+  phrase,collect private hardware inventory and run one bounded dry run;then
+  human privacy/source signoff before any development session.
+
 - **2026-09-14 AA8 ARTIFACT VERIFIER + ACTOR EPISODE CENSUS V1: engineering
   PASS; real calibration/live use BLOCKED.** Added conservative actor-cue episode
   census,closed nine-role JSON/JSONL bundle builder and read-only verifier on

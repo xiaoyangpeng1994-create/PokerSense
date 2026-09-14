@@ -83,12 +83,25 @@ back into the user-facing source list. Current development uses existing offline
 AA capture-card recordings; later hardware checks use a physical phone and UVC
 capture card. This does not authorize live advice or client control.
 
+## Passive AA capture intake
+
+The AA intake tool records video only from the declared physical phone and UVC
+capture card after a one-time human authorization. Recognition, strategy,
+Advice, automated input, networking, audio, emulators, and ADB are fixed off.
+Missing or expired authorization, nonce reuse, an existing output directory, or
+any enabled forbidden capability is rejected before FFmpeg starts. Every new
+recording enters a private quarantine as 60-second segments with a hash receipt;
+a successful recording is still not calibration or strategy evidence. See the
+[passive AA capture intake V1 contract](docs/AA-PASSIVE-CAPTURE-INTAKE-V1.zh-CN.md).
+
 ## Privacy
 
-Capture-card frames are processed in memory and discarded after recognition.
-PokerSense does not keep screenshots, video, or a frame history on disk.
-Private calibration captures are excluded from GitHub and packages; only a
-small, redacted, labeled regression set needs long-term retention.
+Normal desktop recognition processes capture-card frames in memory and discards
+them without keeping screenshots, video, or frame history. Only an explicitly
+authorized passive AA intake session writes raw video-only segments under
+`G:/PokerSense_private`. Those segments, screen names, and private identity maps
+must not enter GitHub, pull requests, or packages. Private calibration captures
+remain excluded as well; only small redacted regression fixtures belong in Git.
 
 The interface language is persisted separately from editable table rules:
 
