@@ -34,8 +34,36 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW + EXACT BOUNDARIES:
+  source-specific PASS;9 ordinary development hands,not validation.** Owner
+  authorized decode/review of session aa-live-observer-development-20260914-001
+  and PR#11 merged as main4ab1cc3.Source receipt c09dd51e;10segments/
+  3401350388bytes rehashed10/10.Full decode10/10 error0,1920x1080@30 MJPEG,
+  noaudio;initial black0.000-0.867s and no later black;600one-fps frames all
+  globally unique.Ten minute sheets show continuous AA POKER8-seat table,no
+  lobby/other app/splash;498x1080 core geometry stable.Observer-only visual
+  evidence remains consistent,not OS-input proof.Privacy P0:incoming-call overlay
+  with direct phone number0.000-75.600s;value not copied into metadata/Git,whole
+  interval excluded because it also obscures table top.Nicknames/avatars/stacks/
+  possible table IDs remain private.5FPS board-count+dealer probe(no rank/name/
+  amount/strategy recognition)plus12 dense +/-2s reviews yields1incomplete head,
+  1incomplete tail,11inter-boundary complete temporal candidates;1privacy-
+  occluded and1lucky-bomb special excluded,leaving9ordinary unoccluded candidates,
+  including2preflop-only candidates.30FPS signal review plus before/current/after
+  frame sheets confirmed12first-visible multi-seat forced-posting frames;FFprobe
+  bound all18003frames to real PTS.Exact boundaries B01..B12 are frames1322/
+  2591/4379/5894/7342/9270/10654/11884/13639/15441/16202/17761 with PTS
+  44.067..591.959.Source-specific registry63a605cc,index26d3a815.9ordinary
+  hands/13415frames frozen development_only selection08a8f411;no validation,
+  holdout,calibration or cross-session canonical claim.Private report7a30153d,
+  privacy780e53c9,79-file manifest6ff0efe4 all rehashed.No other media/upload/
+  recognition model/strategy/Advice/input/promotion.See
+  docs/AA-LIVE-DEVELOPMENT-MEDIA-REVIEW-V1.zh-CN.md.Next:separately authorize
+  offline recognition on only these9 development hands;rules/identity/opportunities/
+  legal menus/second same-rule session remain blockers.
+
 - **2026-09-15 MACOS LIVE-STREAM PACING TEST FLAKE: isolated test PASS;
-  PR/CI review pending.** PR#12 doc-only head a0428e6 passed review-hygiene and
+  PR #13 merged as 07bddff; three CI checks passed.** PR#12 doc-only head a0428e6 passed review-hygiene and
   Windows but macOS failed twice at test_interval_is_a_minimum_period_not_a_fixed_sleep.
   The test used a real0.20s source delay against only0.30s minimum period;slow
   runner pipeline overhead legitimately consumed the remainder,so production
