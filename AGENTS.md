@@ -51,8 +51,9 @@ changing desktop capture, recognition, packaging, or project documentation.
   binds audit/split/segments/4661samples/pipeline/events/key frames and rejects
   emulator,protected overlap,hash/order/drop/boundary drift. Initial review found
   and fixed PTS/localframe,registry-next-boundary/evidence and SHA manifest path
-  traversal gaps without changing old helper.27focused tests;full3236passed/
-  1skipped/2warnings(28.29s),lint0,generator0,private filename0,diff0. Final
+  traversal/read-order gaps without changing old helper.28focused tests;
+  full3237passed/1skipped/2warnings(28.08s),lint0,generator0,private filename0,
+  diff0. Final
   independent rereview/PR checks pending. See
   docs/AA8-OFFLINE-SESSION-EVIDENCE-V1.zh-CN.md;private evidence under
   G:/PokerSense_private/aa8_offline_session_evidence_20260914_v1/.

@@ -315,8 +315,16 @@ def test_protected_pts_cannot_be_relabelled_development(tmp_path, monkeypatch):
     samples["samples"][0]["pts_seconds"] = "9"
     write_json(item["samples_path"], samples)
     refresh_samples(item)
+    original, reads = module.sha256, []
+
+    def guarded(path):
+        reads.append(path.resolve())
+        return original(path)
+
+    monkeypatch.setattr(module, "sha256", guarded)
     with pytest.raises(ValueError, match="sample_pts_path"):
         run(item)
+    assert not [path for path in reads if path.suffix == ".png"]
 
 
 def test_duplicate_local_frame_cannot_relabel_a_whole_segment(tmp_path, monkeypatch):
@@ -346,3 +354,20 @@ def test_manifest_traversal_rejected_before_outside_file_read(tmp_path, monkeypa
     with pytest.raises(ValueError, match="unsafe_or_malformed"):
         run(item)
     assert outside.resolve() not in reads
+
+
+def test_undeclared_frame_is_rejected_without_reading_it(tmp_path, monkeypatch):
+    item = fixture(tmp_path, monkeypatch)
+    extra = item["samples"] / "frames" / "frame_000099.png"
+    extra.write_text("not-declared", encoding="utf-8")
+    write_manifest(item["samples"])
+    original, reads = module.sha256, []
+
+    def guarded(path):
+        reads.append(path.resolve())
+        return original(path)
+
+    monkeypatch.setattr(module, "sha256", guarded)
+    with pytest.raises(ValueError, match="undeclared_sample_frames"):
+        run(item)
+    assert extra.resolve() not in reads

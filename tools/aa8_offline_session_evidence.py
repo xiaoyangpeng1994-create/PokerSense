@@ -48,8 +48,11 @@ def load_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def verify_safe_manifest(root):
-    """Validate every relative path before reading any manifested file."""
+def parse_safe_manifest(root):
+    """Validate every relative path without reading manifested file contents."""
+    root = Path(root)
+    if root.is_symlink():
+        raise ValueError("manifest_root_symlink_forbidden")
     root = root.resolve()
     manifest = root / "SHA256SUMS"
     if not manifest.is_file() or manifest.is_symlink():
@@ -64,9 +67,14 @@ def verify_safe_manifest(root):
                                              for part in path.parts)
                 or relative in entries):
             raise ValueError("unsafe_or_malformed_manifest_path")
-        candidate = (root / Path(*path.parts)).resolve()
-        if (not candidate.is_relative_to(root) or not candidate.is_file()
-                or candidate.is_symlink()):
+        unresolved = root / Path(*path.parts)
+        cursor = unresolved
+        while cursor != root:
+            if cursor.is_symlink():
+                raise ValueError("manifest_symlink_forbidden")
+            cursor = cursor.parent
+        candidate = unresolved.resolve()
+        if not candidate.is_relative_to(root) or not candidate.is_file():
             raise ValueError("manifest_file_missing_or_outside_root")
         entries[relative] = (expected, candidate)
     actual = {
@@ -76,9 +84,22 @@ def verify_safe_manifest(root):
     }
     if set(entries) != actual:
         raise ValueError("manifest_does_not_cover_exact_root_files")
-    for relative, (expected, candidate) in entries.items():
+    return entries
+
+
+def verify_manifest_hashes(entries, required=None):
+    selected = set(entries) if required is None else set(required)
+    if not selected <= set(entries):
+        raise ValueError("required_manifest_entry_missing")
+    for relative in sorted(selected):
+        expected, candidate = entries[relative]
         if sha256(candidate) != expected:
             raise ValueError("manifest_hash_mismatch:" + relative)
+
+
+def verify_safe_manifest(root):
+    entries = parse_safe_manifest(root)
+    verify_manifest_hashes(entries)
     return {relative: expected for relative, (expected, _) in entries.items()}
 
 
@@ -154,6 +175,12 @@ def _validate_window(registry, audit, plan, samples, sample_manifest):
         selected_names.append(item["file"])
     if set(selected_names) != {row["segment"] for row in rows}:
         raise ValueError("segment_inventory_does_not_cover_samples")
+    declared_frames = {row.get("file") for row in rows}
+    manifested_frames = {
+        relative for relative in sample_manifest if relative.startswith("frames/")}
+    if (declared_frames != manifested_frames
+            or sample_manifest.get("samples.json") != registry["samples_sha256"]):
+        raise ValueError("manifest_contains_missing_or_undeclared_sample_frames")
     previous_pts = None
     for row in rows:
         if (type(row.get("global_frame")) is not int
@@ -253,7 +280,9 @@ def analyze(registry_path, audit_dir, split_plan_path, samples_dir, pipeline_dir
             or sha256(observations_path) != registry["observations_sha256"]):
         raise ValueError("registry_input_hash_mismatch")
     verify_safe_manifest(audit_dir)
-    sample_manifest = verify_safe_manifest(samples_dir)
+    sample_entries = parse_safe_manifest(samples_dir)
+    sample_manifest = {
+        relative: expected for relative, (expected, _) in sample_entries.items()}
     audit, plan, samples = (load_json(path) for path in (
         audit_path, split_plan_path, samples_path))
     if (audit.get("state") != "verified"
@@ -263,6 +292,9 @@ def analyze(registry_path, audit_dir, split_plan_path, samples_dir, pipeline_dir
         raise ValueError("source_split_sample_identity_mismatch")
     sample_rows = _validate_window(
         registry, audit, plan, samples, sample_manifest)
+    verified_sample_files = {"samples.json"} | {
+        row["file"] for row in sample_rows}
+    verify_manifest_hashes(sample_entries, verified_sample_files)
     samples_by_frame = {row["global_frame"]: row for row in sample_rows}
     hands = _validate_hands(registry, samples_by_frame)
     pipeline = load_json(pipeline_report_path)
@@ -316,6 +348,8 @@ def analyze(registry_path, audit_dir, split_plan_path, samples_dir, pipeline_dir
         "capture_path": registry["capture_path"], "emulator_used": False,
         "development_window": registry["window"],
         "frame_count": len(observations), "registered_hands": hands,
+        "verified_declared_development_frame_hashes": len(sample_rows),
+        "review_sheet_images_read": False,
         "temporally_complete_hand_candidates": len(complete),
         "incomplete_tail_hands": len(hands) - len(complete),
         "all_pipeline_glyph_candidates": len(flattened),
