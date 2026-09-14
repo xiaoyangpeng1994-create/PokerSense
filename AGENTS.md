@@ -34,6 +34,17 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 GLYPH SUPPLEMENT V3: development regression PASS.** Added
+  explicit private fold/muck/light-All-in template competition;frozen reader
+  unchanged.13415frames replayed,82reviewed actions retained,2muck-as-fold
+  errors removed,H05slot0 all_in added at8676.Only new event within reviewed
+  seven hands;full nine-hand100events not all independently reviewed. Templates
+  from4565/11761/8680 overlap regression,not independent accuracy acceptance.
+  Initial15action-loss experiment retained;fixed inconclusive supplement to
+  preserve baseline.8focused/full3394passed/7skipped/1warning,lint0.No live
+  integration/capture/Advice.Private aa-glyph-v3-development;see
+  docs/AA-GLYPH-SUPPLEMENT-V3.zh-CN.md.Next:independent glyph confusion/recall audit.
+
 - **2026-09-15 ACTION CANDIDATE REVIEW: PARTIAL, concrete defects identified.**
   Reviewed84events from prior7-hand selection via before/event/after frames;
   82visible glyph transitions,2false folds are showdown muck at11761/15313.
