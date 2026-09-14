@@ -62,6 +62,17 @@ changing desktop capture, recognition, packaging, or project documentation.
   offline recognition on only these9 development hands;rules/identity/opportunities/
   legal menus/second same-rule session remain blockers.
 
+- **2026-09-15 MACOS LIVE-STREAM PACING TEST FLAKE: isolated test PASS;
+  PR #13 merged as 07bddff; three CI checks passed.** PR#12 doc-only head a0428e6 passed review-hygiene and
+  Windows but macOS failed twice at test_interval_is_a_minimum_period_not_a_fixed_sleep.
+  The test used a real0.20s source delay against only0.30s minimum period;slow
+  runner pipeline overhead legitimately consumed the remainder,so production
+  requested no sleep while the test required one.This branch changes only the
+  test period to2.0s and asserts the0.20s work is credited(sleep<=1.81s);a fixed
+  2.0s sleep still fails.No production pacing/runtime behavior changed.Target
+  test10/10 repeated pass;full3379passed/7skipped/1dependencywarning(28.70s),
+  full lint0,generator299,private filename guard867/0,diff0.
+
 - **2026-09-14 FIRST FINGERPRINT-BOUND 10MIN AA OBSERVER DEVELOPMENT CAPTURE:
   technical PASS;media/dataset review PENDING.** Owner signed dry-run003 after
   completion(signoff334a1f47)and explicitly authorized one600s passive capture.
