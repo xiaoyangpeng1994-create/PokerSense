@@ -34,6 +34,47 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 FINGERPRINT-BOUND OBSERVER DRY-RUN003: technical PASS;
+  post-capture human signoff PENDING.** Operator declared phone model,Android,
+  AA version and capture-card firmware not queryable and adapter model not
+  required;sentinel values are explicit operator unknowns,not observed facts.
+  Manifest fingerprint769a404c384d1105b2399c09750d194adf1d457824e8af606ee7d6fb993b7567.
+  New10s passive session recorded301frames,out_time10.066656s,segmentPTS10.033s,
+  drop0,dup0,exit0,forcedfalse;full receipt inspect0.Final receipt
+  1259774ebc42c77204f506bfafb8515223c9ac24e3e7da328f5bb331806efdeb.
+  Device824e5633 and FFmpeg57c56e36 match prior observations;lock-fix validated
+  on real hardware because no active lock remained.No session003 media decode/
+  view,recognition,strategy,Advice,input or automatic promotion.Signoff request
+  ba51b2e5ff7d884ba56ed4a52178bcb8194c84c1fb90d0e4092032c541ce8d1d,
+  manifestb025c59de7512ea6d3cc645e10f373efe4ea781a62b0da65464327beab8e645d.
+  Owner previously authorized progression,but protocol requires a concrete
+  post-capture human statement before HARDWARE_DRY_RUN_SIGNED_OFF and a separate
+  600s development authorization.No development capture started.
+
+- **2026-09-14 AA OBSERVER DRY-RUN002 MEDIA REVIEW: visual/technical PASS;
+  privacy restricted,hardware signoff BLOCKED.** Explicit authorization covered
+  only session002 offline platform/image/privacy review.Source segment hash
+  371af049dacaa5daf9be249b8e782713fc11f547fa348e33276b43c6e5d25f68
+  matches immutable receipt c6d5d08b442964c10ab8001392aaf86f2d12a3789ddac3100cdd94dd12fe9cd3.
+  Full30.033s MJPEG decode exit0/error0;1920x1080@30,noaudio,blackdetect0;
+  30one-fps samples all unique.Six full-resolution samples show continuous AA
+  POKER8-seat table,no black/splash/corruption.Core crop[711,0,1209,1080]
+  exactly matches existing498x1080 normalization4634d6f2 and AA8 candidate layout
+  6e8a53ee.No Hero hole cards or operator fold/call/raise controls are visible;
+  evidence is consistent with declared observer-only but cannot prove OS input
+  absence.Window is only partial turn-to-river,not a complete hand boundary.
+  Nicknames,avatars,stacks/bets,possible room/table identifiers,status bar,network
+  latency,rules and live state are visible;private offline review only,public/Git
+  media blocked and masking+pseudonyms required.Current receipt fingerprint is
+  null and immutable,so signoff remains impossible.Private report
+  f41d7207c531dd1100d691dde8393be381e719145bf269f81ef99382bd5a2dd9,
+  hardware candidate70a9a19a6ddd61d6d187e7efc3ce5386bbabe0f9cd977aac65157687dfe63219,
+  manifestdb5b63b7ce4f0eb92e61a9903e8923a3110d1a390b76d6d01bf3394d85aaedb0;
+  15/15files rehashed.No other recording read/media uploaded/model/strategy/
+  Advice/ADB/input.No automatic promotion.See
+  docs/AA-LIVE-DRYRUN-MEDIA-REVIEW-V1.zh-CN.md.Next:get exact phone/Android/AA/
+  adapter/firmware declarations,then request a new fingerprint-bound short dry run.
+
 - **2026-09-14 AA OBSERVER DRY RUN 002 + DEVICE-LOCK FIX: engineering PASS;
   media review/calibration remain BLOCKED; owner PR review pending.** User
   explicitly authorized one new30s passive session while spectating AA;no
