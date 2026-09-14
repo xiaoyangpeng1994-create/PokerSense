@@ -34,6 +34,33 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA8 ARTIFACT VERIFIER + ACTOR EPISODE CENSUS V1: engineering
+  PASS; real calibration/live use BLOCKED.** Added conservative actor-cue episode
+  census,closed nine-role JSON/JSONL bundle builder and read-only verifier on
+  main c9f32115881583b0493e57c632601a1ad76506fa. Two complete hands cover3313
+  gameplay frames:2472known actor/841UNKNOWN(813supported+28unsupported),14UNKNOWN
+  spans,32episodes.30reviewed MATCH actions bind28 one-to-one within12frames;
+  4unmatched episodes retained and A10/A33 remain unbound.26bindings have exact
+  street;2cross-street episodes are explicitly EPISODE_STREET_AMBIGUOUS;explicit
+  street conflicts remain unbound and do not consume an episode. Verifier rejects
+  path/NFC/case/symlink/reparse/hardlink/TOCTOU/non-UTF8/duplicate-key/schema and
+  bool-as-int attacks;requires external manifest SHA,9/9 role closure,and rebuilds
+  the entire readiness wrapper+audit+episode census from the same hashed snapshots
+  for exact equality.All promotion fields remain required false/null.Status only
+  VERIFIED_CURRENT_BLOCKED_METADATA_SNAPSHOTS with6blockers(raw media absent,
+  source BLOCKED,identity/rules/legal menus/independent coverage missing).Episode
+  v6 SHA1bb9cfda2a12ed49fb167ffdf8f243c7a7b6e20644fb0fce875979e1a2cfd9b8;
+  bundle v4 manifest2b5ad31b77bad1cb5bf08e175eaa7c27d9aa515307699fa566cee201bcc1df5c;
+  verification v4 76e813b7ad0c11e8547ab02f4a993f32f657e0bc1b6a88d0ac264d4b934c6e84.
+  42focused;full3320passed/7skipped/1dependencywarning(27.25s),lint0,generator299,
+  private filenames861/0,diff0,V1freeze280/280,old private hashes9/9.Three final
+  independent code/evidence/scope reviews PASS after readiness source-rebuild and
+  exact-int fixes. Earlier episode/bundle/verification versions retained. No media/
+  protected segment/device/model fit/strategy/advice/live/merge/tag/release. See
+  docs/AA8-ARTIFACT-AND-ACTOR-EPISODES-V1.zh-CN.md.Next:human-review the34 union
+  candidates plus detector misses,and add stable identity,real rules,complete legal
+  menus and a second same-rule session before any offline calibration.
+
 - **2026-09-14 AA8 COMPLETE DECISION OPPORTUNITY AUDIT V1: engineering PASS;
   real dataset/calibration BLOCKED.** Added model-independent all-table decision
   ledger/auditor+CLI,NOT-DATA template,complete synthetic contract and current

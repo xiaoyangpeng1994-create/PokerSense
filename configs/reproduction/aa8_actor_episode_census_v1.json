@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "status": "ACTOR_EPISODES_ARE_CANDIDATES_NOT_ALL_OPPORTUNITIES",
+  "registry_sha256": "dd9780e12222360726b1ba60b6e2838b3db330e129fccd92148aa7b0b5581785",
+  "review_config_sha256": "d50e5825b80f869686972371ec53103201e84a85d5624dd203edf85e073d3b93",
+  "review_result_sha256": "264be3050dc1fd7834caaff8358dd1cd1938b00073503a8a21065eed52850e73",
+  "v2_report_sha256": "0c794250f6a222bc294dab1b4418cd6f3ad783e08f0c95e6cf8b613420735f65",
+  "observations_sha256": "b3e206aadda8738454a1e620fc1c9360bbe149585ea4ff93f376d7ea763d8ff9",
+  "expected_frames": 4661,
+  "expected_complete_hands": 2,
+  "expected_reviewed_matches": 30,
+  "standard_confirmation_lag_frames": 12,
+  "maximum_candidate_confirmation_lag_frames": 12,
+  "constraints": [
+    "json_jsonl_only_no_media_read",
+    "contiguous_same_actor_frames_form_one_raw_episode",
+    "unknown_frames_split_episodes_and_are_not_silently_filled",
+    "reviewed_action_binding_is_one_to_one_same_hand_and_seat",
+    "glyph_confirmation_lag_is_not_action_onset_or_predecision_truth",
+    "unmatched_episodes_and_actions_are_retained",
+    "episode_census_does_not_prove_all_actual_opportunities",
+    "model_fit_strategy_advice_and_live_use_forbidden"
+  ]
+}
