@@ -34,6 +34,36 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA OBSERVER DRY RUN 002 + DEVICE-LOCK FIX: engineering PASS;
+  media review/calibration remain BLOCKED; owner PR review pending.** User
+  explicitly authorized one new30s passive session while spectating AA;no
+  participation or extension.Session aa-live-observer-dryrun-20260914-002
+  recorded one MJPEG-copy MKV segment:901frames,out_time30.066637s,
+  segmentPTS30.033s,172206698bytes,drop0,dup0,exit0,forcedterminationfalse.
+  Prior10s frame-density failure did not recur.Final status
+  CAPTURE_FINALIZED_UNREVIEWED;receipt
+  c6d5d08b442964c10ab8001392aaf86f2d12a3789ddac3100cdd94dd12fe9cd3,
+  plan0a6e148e36bebe1a47767841ff5433cb2b55b95b8b9803fe5e9ee5fe16765fd6,
+  authorization19fad24d7bf3bc7ae6b7e3c3722ff1681ec969a50a1bc0592b2a2434c027d6cc;
+  full receipt inspect exit0.Source remainsUNASSIGNED_QUARANTINE/BLOCKED;
+  hardware fingerprint null and all visual/privacy/rules/identity/hand-boundary/
+  opportunity/legal-menu/session-split/independent-review gates remain open.No
+  decode,screenshot,media-content read,audio,recognition,strategy,Provider,equity,
+  Advice,input control,network orADB.Both finalized sessions left device locks.
+  Stale locks were manually investigated,exact bytes preserved under
+  G:/PokerSense_private/
+  aa_capture_lock_investigation_20260914_001/ and _002/,then cleared;no session
+  evidence deleted.Root cause reproduced:the lock identity included size but was
+  captured at0bytes before PID/session content was written,so final comparison
+  always differed.Current branch from main b7b2483 moves the identity snapshot
+  after lock write+fsync;normal success and handled recorder failure remove only
+  the unchanged owned lock,while an externally changed lock remains for manual
+  investigation.59focused tests;full3379passed/7skipped/1dependencywarning
+  (26.51s),full lint0,generator299,private filename guard865/0,diff0.V1 freeze
+  manifest f3b55436 unchanged and patch paths overlap0freeze entries.No further
+  hardware/media/decode/capture/strategy action.Next:owner reviews/merges the
+  scoped PR,then separately authorizes media review before hardware signoff.
+
 - **2026-09-14 CONNECTED UGREEN COMPOSITE-DEVICE READ-ONLY PREFLIGHT: PASS;
   video stream/dry run still NOT AUTHORIZED.** PR#7 merged as main
   0d24d32db6fb1887e36258b306ff1912a4339155.User connected phone/capture card;
