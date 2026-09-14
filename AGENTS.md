@@ -34,6 +34,25 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA8 ACTION TRUTH REVIEW V1: author development review COMPLETE;
+  independent visual review pending,real calibration BLOCKED.** Reviewed all36
+  complete-hand glyph candidates from physical capture-card development frames:
+  30visible completed actions(25opponent/5Hero),6false;types check11/fold10/call6/
+  bet2/allin1. A18 is post-call showdown muck misread fold. A28-32 are prior
+  check/fold labels reappearing simultaneously after allin confirmation overlay,
+  not new actions. Manual amounts use visible stack deltas and remain candidates.
+  New strict review contract/tool retain all rows,bind source/order/hand/frame/
+  slot/glyph/evidence hashes,require matched action/amount semantics and same-slot
+  prior MATCH for stale duplicates;legal_actions must remain null.14new focused
+  tests initially passed;code review found and fixed missing candidate-frame SHA
+  binding and cross-hand stale references.16focused;full3253passed/1skipped/
+  2warnings(27.67s),lint0,generator0,private filename0,diff0.Independent code
+  review PASS.Independent blind visual review
+  agrees36/36 classifications and all9nonzero amounts;A27 clearer frame28240 added.
+  Output result-v4 sha264be3050dc1fd7834caaff8358dd1cd1938b00073503a8a21065eed52850e73.
+  See docs/AA8-ACTION-TRUTH-REVIEW-V1.zh-CN.md. Stacked on Draft PR#2;no protected
+  media/emulator/device/live advice/main merge/tag/release.
+
 - **2026-09-14 AA8 PHYSICAL-CAPTURE OFFLINE SESSION EVIDENCE V1: development
   engineering in review; real opponent calibration still BLOCKED.** User
   confirmed AA/WPK emulator logins are restricted; product CLI/server now expose
