@@ -34,6 +34,20 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AA DEVELOPMENT 001 OFFLINE REPLAY: execution PASS; state
+  closure incomplete.** User authorized PR #12 merge (main 3b2c8b9) and nine-hand
+  replay. Exactly 13,415 selected frames processed with fresh CandidateStateV2
+  per hand, existing training templates/models and overlay-aware GlyphTransitionsV2.
+  Pot candidates 13,173; actor 9,675; postflop full-board 5,126/5,305; 100 glyph
+  events, not verified actions. Slot 4 stack coverage 0; epoch and complete legal
+  state both 0. No Advice/strategy eligibility. Identity and gate audit passed;
+  model/config hashes unchanged and 200 implementation snapshots checked.
+  Private evidence G:/PokerSense_private/aa-development-001-replay-v1/;
+  observations 5ac0941bab6e9d8845a089fa0206d1df6c851af8ca75b9b7a6186159e236c167.
+  No new capture or model training; coverage is not accuracy. Next: bottom-seat
+  stack ROI/glyph review and spectator-state initialization investigation.
+  See docs/AA-DEVELOPMENT-001-REPLAY.zh-CN.md.
+
 - **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW + EXACT BOUNDARIES:
   source-specific PASS;9 ordinary development hands,not validation.** Owner
   authorized decode/review of session aa-live-observer-development-20260914-001
