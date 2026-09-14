@@ -3,7 +3,9 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import stat
 
 from poker_engine.strategy.decision_opportunities_v1 import (
     MODES, audit_decision_opportunities,
@@ -27,14 +29,71 @@ CONSTRAINTS = [
     "one_recording_session_cannot_be_train_and_validation",
     "model_fit_strategy_advice_and_live_use_forbidden",
 ]
+INPUT_HASH_KEYS = (
+    "registry_sha256", "review_config_sha256", "review_result_sha256",
+    "v2_report_sha256", "observations_sha256",
+)
+PROTOCOL_COUNT_KEYS = (
+    "expected_reviewed_candidates", "expected_matched_actions",
+    "expected_false_candidates", "expected_opponent_matches",
+    "expected_hero_matches",
+)
+MAX_INPUT_BYTES = 64 * 1024 * 1024
 
 
-def sha256(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def _is_reparse(info):
+    return bool(getattr(info, "st_file_attributes", 0)
+                & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
 
 
-def load(path):
-    return json.loads(path.read_bytes(), object_pairs_hook=unique_object)
+def _snapshot(path):
+    before = path.lstat()
+    if (path.is_symlink() or _is_reparse(before)
+            or not stat.S_ISREG(before.st_mode) or before.st_nlink != 1):
+        raise ValueError("readiness_input_must_be_plain_single_link_file")
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_BINARY", 0)
+                         | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        opened = os.fstat(descriptor)
+        chunks, size = [], 0
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            if size > MAX_INPUT_BYTES:
+                raise ValueError("readiness_input_exceeds_size_limit")
+            chunks.append(chunk)
+        after = os.fstat(descriptor)
+    finally:
+        os.close(descriptor)
+    final = path.lstat()
+
+    def identity(value):
+        return (value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns,
+                value.st_mode, value.st_nlink,
+                getattr(value, "st_file_attributes", 0))
+
+    if (identity(before) != identity(opened)
+            or identity(opened) != identity(after)
+            or identity(after) != identity(final)
+            or path.is_symlink() or _is_reparse(final)):
+        raise ValueError("readiness_input_changed_during_read")
+    raw = b"".join(chunks)
+    return raw, hashlib.sha256(raw).hexdigest()
+
+
+def _decode(raw):
+    if raw.startswith(b"\xef\xbb\xbf"):
+        raise ValueError("utf8_bom_forbidden")
+    try:
+        return raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise ValueError("utf8_readiness_input_required") from exc
+
+
+def _load(raw):
+    return json.loads(_decode(raw), object_pairs_hook=unique_object)
 
 
 def _action(label):
@@ -79,37 +138,30 @@ def _special(hand, review_hash):
             "evidence_sha256": review_hash}
 
 
-def build(protocol_path, registry_path, review_path, review_result_path,
-          report_path, observations_path):
-    protocol = load(protocol_path)
+def build_documents(protocol, registry, review, result, report, observations,
+                    bindings):
     if (not isinstance(protocol, dict) or set(protocol) != PROTOCOL_KEYS
+            or type(protocol["schema_version"]) is not int
             or protocol["schema_version"] != 1
             or protocol["status"] != (
                 "CURRENT_ACTION_CANDIDATES_NOT_ALL_OPPORTUNITIES_OR_DATA")
-            or protocol["constraints"] != CONSTRAINTS):
+            or protocol["constraints"] != CONSTRAINTS
+            or any(type(protocol[key]) is not int or protocol[key] < 0
+                   for key in PROTOCOL_COUNT_KEYS)):
         raise ValueError("exact_readiness_protocol_required")
-    paths = {
-        "registry_sha256": registry_path,
-        "review_config_sha256": review_path,
-        "review_result_sha256": review_result_path,
-        "v2_report_sha256": report_path,
-        "observations_sha256": observations_path,
-    }
-    for key, path in paths.items():
-        if sha256(path) != protocol[key]:
+    if (not isinstance(bindings, dict)
+            or set(bindings) != set(INPUT_HASH_KEYS)):
+        raise ValueError("exact_readiness_input_hash_bindings_required")
+    for key in INPUT_HASH_KEYS:
+        if protocol[key] != bindings[key]:
             raise ValueError("readiness_input_hash_mismatch:" + key)
-    registry, review, result, report = (load(path) for path in (
-        registry_path, review_path, review_result_path, report_path))
     if (result["labels"] != review["labels"]
             or result["source_samples_sha256"] != registry["samples_sha256"]
             or report["observations_sha256"] != protocol["observations_sha256"]
             or report["frames"] != registry["window"]["last_frame"]
             - registry["window"]["first_frame"] + 1):
         raise ValueError("review_registry_v2_report_identity_mismatch")
-    observations = [json.loads(line, object_pairs_hook=unique_object)
-                    for line in observations_path.read_text(
-                        encoding="utf-8").splitlines() if line]
-    if len(observations) != report["frames"]:
+    if not isinstance(observations, list) or len(observations) != report["frames"]:
         raise ValueError("observation_count_differs_from_v2_report")
     by_frame = {}
     for row in observations:
@@ -286,7 +338,7 @@ def build(protocol_path, registry_path, review_path, review_result_path,
     audit = audit_decision_opportunities(dataset)
     return {
         "scope": "AA8_CURRENT_ACTION_CANDIDATE_READINESS_NOT_DATA",
-        "input_hashes": {key: protocol[key] for key in paths},
+        "input_hashes": {key: protocol[key] for key in INPUT_HASH_KEYS},
         "candidate_inventory": {
             "reviewed": len(result["labels"]), "matched": len(matched),
             "false": len(false_rows), "opponent_matched": expected[
@@ -298,6 +350,33 @@ def build(protocol_path, registry_path, review_path, review_result_path,
         "strategy_eligible": False, "advice_emitted": False,
         "model_fit_executed": False,
     }
+
+
+def build(protocol_path, registry_path, review_path, review_result_path,
+          report_path, observations_path):
+    paths = {
+        "protocol": protocol_path,
+        "registry_sha256": registry_path,
+        "review_config_sha256": review_path,
+        "review_result_sha256": review_result_path,
+        "v2_report_sha256": report_path,
+        "observations_sha256": observations_path,
+    }
+    snapshots = {key: _snapshot(path) for key, path in paths.items()}
+    protocol = _load(snapshots["protocol"][0])
+    registry = _load(snapshots["registry_sha256"][0])
+    review = _load(snapshots["review_config_sha256"][0])
+    result = _load(snapshots["review_result_sha256"][0])
+    report = _load(snapshots["v2_report_sha256"][0])
+    lines = _decode(snapshots["observations_sha256"][0]).splitlines()
+    if not lines or len(lines) > 10000:
+        raise ValueError("bounded_nonempty_observations_required")
+    observations = [json.loads(line, object_pairs_hook=unique_object)
+                    for line in lines]
+    bindings = {key: value[1] for key, value in snapshots.items()
+                if key != "protocol"}
+    return build_documents(
+        protocol, registry, review, result, report, observations, bindings)
 
 
 def main():
