@@ -34,6 +34,25 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 FIRST FINGERPRINT-BOUND 10MIN AA OBSERVER DEVELOPMENT CAPTURE:
+  technical PASS;media/dataset review PENDING.** Owner signed dry-run003 after
+  completion(signoff334a1f47)and explicitly authorized one600s passive capture.
+  Session aa-live-observer-development-20260914-001 binds fingerprint769a404c,
+  authorizationaf4496a2,plan20e83e33 and prior dry-run sources.It finalized
+  CAPTURE_FINALIZED_UNREVIEWED:18003frames,out_time600.058264s,10segments,
+  finalPTS600.025s,maxgap0.001s,3401350388bytes,drop0,dup0,exit0,forcedfalse;
+  full inspect0.Device824e5633 and FFmpeg57c56e36 match signed dry-run;no capture
+  process or active lock remains.Private receipt
+  c09dd51e737cfb57bd001f716e6d75e8c29d4fda9c840b70d04109c9bc96748d,
+  metadata reportf8c4fa263c1c141c32d7350135b8e082b4051382544bf1de603804887fc2628b,
+  manifest46b9e42da05bb0a56131a21360e1e27b2a05e30ad439d4a037d22325a356459c.
+  No media decode/view,audio,recognition,strategy,Provider,equity,Advice,input,
+  ADB/emulator/retry/promotion.Source remainsUNASSIGNED_QUARANTINE/BLOCKED;
+  platform/privacy/rules/identity/hand-boundaries/opportunity census/legal menus/
+  split/independent review remain missing.See
+  docs/AA-LIVE-DEVELOPMENT-CAPTURE-001.zh-CN.md.Next:obtain session-specific
+  decode/review authorization before any dataset intake or offline replay.
+
 - **2026-09-14 FINGERPRINT-BOUND OBSERVER DRY-RUN003: technical PASS;
   post-capture human signoff PENDING.** Operator declared phone model,Android,
   AA version and capture-card firmware not queryable and adapter model not
