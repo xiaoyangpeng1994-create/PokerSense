@@ -15,12 +15,19 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def write_manifest(root):
+    lines = []
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and path.name != "SHA256SUMS":
+            lines.append(f"{digest(path)}  {path.relative_to(root).as_posix()}")
+    (root / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def fixture(tmp_path, monkeypatch):
     audit, samples, pipeline = (tmp_path / name for name in (
         "audit", "samples", "pipeline"))
     for path in (audit, samples, pipeline):
         path.mkdir()
-    monkeypatch.setattr(module, "verify_sha256sums", lambda path: [])
     split_path, registry_path = tmp_path / "split.json", tmp_path / "registry.json"
     audit_path, samples_path = audit / "report.json", samples / "samples.json"
     report_path, observations_path = pipeline / "report.json", pipeline / (
@@ -35,6 +42,7 @@ def fixture(tmp_path, monkeypatch):
         ],
     }
     write_json(audit_path, source)
+    write_manifest(audit)
     audit_hash = digest(audit_path)
     plan = {"source_audit_sha256": audit_hash, "ranges": [
         {"start_inclusive": "0", "end_exclusive": "10",
@@ -44,16 +52,20 @@ def fixture(tmp_path, monkeypatch):
     ]}
     write_json(split_path, plan)
     plan_hash = digest(split_path)
-    sample_rows = [
-        {"segment": "dev.mkv", "local_frame": index,
-         "global_frame": 100 + index, "pts_seconds": str(10 + index),
-         "file": f"frames/{index}.png", "sha256": f"{index + 1:064x}",
-         "role": "development"}
-        for index in range(6)
-    ]
+    (samples / "frames").mkdir()
+    sample_rows = []
+    for index in range(6):
+        path = samples / "frames" / f"frame_{100 + index:06d}.png"
+        path.write_bytes(f"frame-{index}".encode())
+        sample_rows.append({
+            "segment": "dev.mkv", "local_frame": index,
+            "global_frame": 100 + index, "pts_seconds": str(10 + index),
+            "file": path.relative_to(samples).as_posix(),
+            "sha256": digest(path), "role": "development"})
     sample_doc = {"audit_sha256": audit_hash, "plan_sha256": plan_hash,
                   "range_seconds": ["10", "20"], "samples": sample_rows}
     write_json(samples_path, sample_doc)
+    write_manifest(samples)
     observations = []
     events = []
     for index, sample in enumerate(sample_rows):
@@ -101,6 +113,8 @@ def fixture(tmp_path, monkeypatch):
              "opening_state_status": "PARTIAL",
              "evidence": [{"frame": 100, "sha256": sample_rows[0]["sha256"],
                            "meaning": "deal"},
+                          {"frame": 101, "sha256": sample_rows[1]["sha256"],
+                           "meaning": "gameplay"},
                           {"frame": 103, "sha256": sample_rows[3]["sha256"],
                            "meaning": "next"}]},
             {"hand_id": "tail", "start_frame": 103,
@@ -110,6 +124,8 @@ def fixture(tmp_path, monkeypatch):
              "opening_state_status": "PARTIAL",
              "evidence": [{"frame": 103, "sha256": sample_rows[3]["sha256"],
                            "meaning": "start"},
+                          {"frame": 104, "sha256": sample_rows[4]["sha256"],
+                           "meaning": "gameplay"},
                           {"frame": 105, "sha256": sample_rows[5]["sha256"],
                            "meaning": "end"}]},
         ],
@@ -129,6 +145,12 @@ def run(item):
 
 def save_registry(item):
     write_json(item["registry_path"], item["registry"])
+
+
+def refresh_samples(item):
+    write_manifest(item["samples"])
+    item["registry"]["samples_sha256"] = digest(item["samples_path"])
+    save_registry(item)
 
 
 def test_complete_hand_candidates_are_retained_without_false_calibration(
@@ -197,8 +219,7 @@ def test_noncontiguous_sample_inventory_is_rejected(tmp_path, monkeypatch):
     samples = json.loads(item["samples_path"].read_text())
     del samples["samples"][2]
     write_json(item["samples_path"], samples)
-    item["registry"]["samples_sha256"] = digest(item["samples_path"])
-    save_registry(item)
+    refresh_samples(item)
     with pytest.raises(ValueError, match="contiguous"):
         run(item)
 
@@ -240,6 +261,24 @@ def test_complete_hand_requires_immediate_next_boundary(tmp_path, monkeypatch):
         run(item)
 
 
+def test_next_boundary_must_be_the_next_registered_hand(tmp_path, monkeypatch):
+    item = fixture(tmp_path, monkeypatch)
+    item["registry"]["hands"][1]["start_frame"] = 104
+    save_registry(item)
+    with pytest.raises(ValueError, match="next_boundary"):
+        run(item)
+
+
+def test_complete_hand_requires_start_gameplay_and_next_evidence(
+        tmp_path, monkeypatch):
+    item = fixture(tmp_path, monkeypatch)
+    evidence = item["registry"]["hands"][0]["evidence"]
+    evidence[1] = dict(evidence[0])
+    save_registry(item)
+    with pytest.raises(ValueError, match="boundary_evidence_missing"):
+        run(item)
+
+
 def test_only_final_entry_can_be_incomplete_tail(tmp_path, monkeypatch):
     item = fixture(tmp_path, monkeypatch)
     item["registry"]["hands"] = list(reversed(item["registry"]["hands"]))
@@ -268,3 +307,42 @@ def test_shipped_registry_discloses_no_emulator_or_calibration_eligibility():
         "INCOMPLETE_RECORDING_TAIL")
     assert "complete_legal_action_menus_are_not_available" in (
         registry["review_constraints"])
+
+
+def test_protected_pts_cannot_be_relabelled_development(tmp_path, monkeypatch):
+    item = fixture(tmp_path, monkeypatch)
+    samples = json.loads(item["samples_path"].read_text())
+    samples["samples"][0]["pts_seconds"] = "9"
+    write_json(item["samples_path"], samples)
+    refresh_samples(item)
+    with pytest.raises(ValueError, match="sample_pts_path"):
+        run(item)
+
+
+def test_duplicate_local_frame_cannot_relabel_a_whole_segment(tmp_path, monkeypatch):
+    item = fixture(tmp_path, monkeypatch)
+    samples = json.loads(item["samples_path"].read_text())
+    samples["samples"][2]["local_frame"] = 1
+    write_json(item["samples_path"], samples)
+    refresh_samples(item)
+    with pytest.raises(ValueError, match="safe_development_source"):
+        run(item)
+
+
+def test_manifest_traversal_rejected_before_outside_file_read(tmp_path, monkeypatch):
+    item = fixture(tmp_path, monkeypatch)
+    outside = tmp_path / "outside.txt"
+    outside.write_text("private", encoding="utf-8")
+    manifest = item["samples"] / "SHA256SUMS"
+    with manifest.open("a", encoding="utf-8") as stream:
+        stream.write(f"{digest(outside)}  ../outside.txt\n")
+    original, reads = module.sha256, []
+
+    def guarded(path):
+        reads.append(path.resolve())
+        return original(path)
+
+    monkeypatch.setattr(module, "sha256", guarded)
+    with pytest.raises(ValueError, match="unsafe_or_malformed"):
+        run(item)
+    assert outside.resolve() not in reads

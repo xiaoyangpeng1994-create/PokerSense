@@ -49,9 +49,11 @@ changing desktop capture, recognition, packaging, or project documentation.
   first hand has unresolved special-bomb pot,one session cannot train/validate.
   All results strategy_eligible/advice false. New fail-closed registry verifier
   binds audit/split/segments/4661samples/pipeline/events/key frames and rejects
-  emulator,protected overlap,hash/order/drop/boundary drift.22focused tests;
-  full3231passed/1skipped/2warnings(29.74s),lint0,generator0,private filename0,
-  diff0. Independent review/PR checks pending. See
+  emulator,protected overlap,hash/order/drop/boundary drift. Initial review found
+  and fixed PTS/localframe,registry-next-boundary/evidence and SHA manifest path
+  traversal gaps without changing old helper.27focused tests;full3236passed/
+  1skipped/2warnings(28.29s),lint0,generator0,private filename0,diff0. Final
+  independent rereview/PR checks pending. See
   docs/AA8-OFFLINE-SESSION-EVIDENCE-V1.zh-CN.md;private evidence under
   G:/PokerSense_private/aa8_offline_session_evidence_20260914_v1/.
   No LDPlayer/ADB/device/live capture/advice/tag/release/main push.

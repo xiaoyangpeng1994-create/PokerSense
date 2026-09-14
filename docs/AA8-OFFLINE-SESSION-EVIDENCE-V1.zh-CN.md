@@ -28,7 +28,7 @@
 
 这些数字是复核队列，不是动作准确率。字形出现帧可能晚于真实点击时刻；一个候选甚至可能包含同一行动的短暂错误状态。每条动作的完整合法菜单、精确动作金额和独立动作真值仍为 0，因此 `ready_for_opponent_calibration=false`。同一次 16 分钟录制也不能拆成训练/验证后冒充跨会话验证。
 
-私有输出 `G:/PokerSense_private/aa8_offline_session_evidence_20260914_v1/report-v2.json` 完整保留 36 条候选及缺失字段。它没有生成范围模型、策略资格或 Advice。
+私有输出 `G:/PokerSense_private/aa8_offline_session_evidence_20260914_v1/report-v3.json` 完整保留 36 条候选及缺失字段。它没有生成范围模型、策略资格或 Advice。
 
 ## 模拟器入口关闭
 
@@ -42,4 +42,4 @@ README 中英文版和 AA 客户端说明同步更新。当前主线仍是录像
 
 ## 工程复验
 
-22 项聚焦测试通过；全仓 3231 passed、1 skipped、2 项依赖弃用警告（29.74s）。全仓 flake8 为 0，策略夹具生成器检查通过，公开文件名检查 0 项命中，`git diff --check` 通过。最终私有报告 SHA-256 为 `a4db1541450f127e5ba388b2a92cb31ae0a163e012b228a9f9813f6038f6d999`。独立复审与 GitHub PR 检查另行记录。
+27 项聚焦测试通过；全仓 3236 passed、1 skipped、2 项依赖弃用警告（28.29s）。全仓 flake8 为 0，策略夹具生成器检查通过，公开文件名检查 0 项命中，`git diff --check` 通过。最终私有报告 SHA-256 为 `a4db1541450f127e5ba388b2a92cb31ae0a163e012b228a9f9813f6038f6d999`。独立复审与 GitHub PR 检查另行记录。

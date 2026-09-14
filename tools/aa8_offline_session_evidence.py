@@ -5,9 +5,8 @@ from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 from pathlib import Path
+from pathlib import PurePosixPath
 import re
-
-from tools.capture_card_calibration.hashing import verify_sha256sums
 
 
 SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -49,6 +48,40 @@ def load_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def verify_safe_manifest(root):
+    """Validate every relative path before reading any manifested file."""
+    root = root.resolve()
+    manifest = root / "SHA256SUMS"
+    if not manifest.is_file() or manifest.is_symlink():
+        raise ValueError("safe_sha256_manifest_required")
+    entries = {}
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        expected, separator, relative = line.partition("  ")
+        path = PurePosixPath(relative)
+        if (not separator or not SHA256.fullmatch(expected)
+                or not relative or "\\" in relative or ":" in relative
+                or path.is_absolute() or any(part in ("", ".", "..")
+                                             for part in path.parts)
+                or relative in entries):
+            raise ValueError("unsafe_or_malformed_manifest_path")
+        candidate = (root / Path(*path.parts)).resolve()
+        if (not candidate.is_relative_to(root) or not candidate.is_file()
+                or candidate.is_symlink()):
+            raise ValueError("manifest_file_missing_or_outside_root")
+        entries[relative] = (expected, candidate)
+    actual = {
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*")
+        if path.is_file() and path.name != "SHA256SUMS"
+    }
+    if set(entries) != actual:
+        raise ValueError("manifest_does_not_cover_exact_root_files")
+    for relative, (expected, candidate) in entries.items():
+        if sha256(candidate) != expected:
+            raise ValueError("manifest_hash_mismatch:" + relative)
+    return {relative: expected for relative, (expected, _) in entries.items()}
+
+
 def development_range(start, end, plan):
     return any(
         item["role"] == "development"
@@ -79,7 +112,7 @@ def _validate_registry(registry):
         raise ValueError("explicit_review_constraints_required")
 
 
-def _validate_window(registry, audit, plan, samples):
+def _validate_window(registry, audit, plan, samples, sample_manifest):
     window = registry["window"]
     exact(window, {"start_pts", "end_pts_exclusive", "first_frame",
                    "last_frame", "segments", "excluded_cross_boundary_segment"},
@@ -107,11 +140,13 @@ def _validate_window(registry, audit, plan, samples):
                      "last_global_frame"}, "segment")
         source = by_segment.get(item["file"])
         segment_rows = [row for row in rows if row["segment"] == item["file"]]
+        local_frames = [row.get("local_frame") for row in segment_rows]
         if (source is None or source["sha256"] != item["sha256"]
                 or source["decoded_frames"] != item["decoded_frames"]
                 or not segment_rows
                 or segment_rows[0]["global_frame"] != item["first_global_frame"]
                 or segment_rows[-1]["global_frame"] != item["last_global_frame"]
+                or local_frames != list(range(item["decoded_frames"]))
                 or not development_range(decimal(source["first_pts"], "segment_start"),
                                          decimal(source["last_pts"], "segment_end"),
                                          plan)):
@@ -119,6 +154,26 @@ def _validate_window(registry, audit, plan, samples):
         selected_names.append(item["file"])
     if set(selected_names) != {row["segment"] for row in rows}:
         raise ValueError("segment_inventory_does_not_cover_samples")
+    previous_pts = None
+    for row in rows:
+        if (type(row.get("global_frame")) is not int
+                or type(row.get("local_frame")) is not int
+                or not isinstance(row.get("segment"), str)
+                or not isinstance(row.get("file"), str)
+                or not isinstance(row.get("sha256"), str)
+                or not SHA256.fullmatch(row["sha256"])):
+            raise ValueError("typed_sample_identity_required")
+        source = by_segment.get(row["segment"])
+        pts = decimal(row.get("pts_seconds"), "sample_pts")
+        expected_file = f"frames/frame_{row['global_frame']:06d}.png"
+        if (source is None or not start <= pts < end
+                or not decimal(source["first_pts"], "segment_start") <= pts
+                <= decimal(source["last_pts"], "segment_end")
+                or previous_pts is not None and pts <= previous_pts
+                or row["file"] != expected_file
+                or sample_manifest.get(row["file"]) != row["sha256"]):
+            raise ValueError("sample_pts_path_or_segment_identity_mismatch")
+        previous_pts = pts
     excluded = window["excluded_cross_boundary_segment"]
     if (not isinstance(excluded, dict)
             or set(excluded) != {"file", "reason"}
@@ -153,7 +208,10 @@ def _validate_hands(registry, samples_by_frame):
         if complete is True:
             if (hand["boundary_status"] != "DEVELOPMENT_MANUAL_REVIEW"
                     or type(hand["next_start_frame"]) is not int
-                    or hand["next_start_frame"] != hand["end_frame"] + 1):
+                    or hand["next_start_frame"] != hand["end_frame"] + 1
+                    or index + 1 >= len(hands)
+                    or hands[index + 1].get("start_frame") != (
+                        hand["next_start_frame"])):
                 raise ValueError("complete_hand_requires_next_boundary")
         elif complete is False:
             if (index != len(hands) - 1 or hand["next_start_frame"] is not None
@@ -174,6 +232,10 @@ def _validate_hands(registry, samples_by_frame):
                     or not isinstance(item["meaning"], str)
                     or not item["meaning"]):
                 raise ValueError("boundary_evidence_not_bound_to_sample")
+        required = {hand["start_frame"], hand["last_gameplay_frame"]}
+        required.add(hand["next_start_frame"] if complete else hand["end_frame"])
+        if not required <= {item["frame"] for item in evidence}:
+            raise ValueError("required_hand_boundary_evidence_missing")
     return hands
 
 
@@ -190,8 +252,8 @@ def analyze(registry_path, audit_dir, split_plan_path, samples_dir, pipeline_dir
             or sha256(pipeline_report_path) != registry["pipeline_report_sha256"]
             or sha256(observations_path) != registry["observations_sha256"]):
         raise ValueError("registry_input_hash_mismatch")
-    if verify_sha256sums(audit_dir) or verify_sha256sums(samples_dir):
-        raise ValueError("source_or_extracted_sample_integrity_failure")
+    verify_safe_manifest(audit_dir)
+    sample_manifest = verify_safe_manifest(samples_dir)
     audit, plan, samples = (load_json(path) for path in (
         audit_path, split_plan_path, samples_path))
     if (audit.get("state") != "verified"
@@ -199,7 +261,8 @@ def analyze(registry_path, audit_dir, split_plan_path, samples_dir, pipeline_dir
             or samples.get("audit_sha256") != registry["source_audit_sha256"]
             or samples.get("plan_sha256") != registry["split_plan_sha256"]):
         raise ValueError("source_split_sample_identity_mismatch")
-    sample_rows = _validate_window(registry, audit, plan, samples)
+    sample_rows = _validate_window(
+        registry, audit, plan, samples, sample_manifest)
     samples_by_frame = {row["global_frame"]: row for row in sample_rows}
     hands = _validate_hands(registry, samples_by_frame)
     pipeline = load_json(pipeline_report_path)
