@@ -34,6 +34,41 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 ACTION CANDIDATE REVIEW: PARTIAL, concrete defects identified.**
+  Reviewed84events from prior7-hand selection via before/event/after frames;
+  82visible glyph transitions,2false folds are showdown muck at11761/15313.
+  Confirmed missed H05slot0 all-in visible8680/8710:308->0,display308,pot259->567;
+  exact onset pending.24display-delta checks,not legal cash/conservation proof.
+  H09 is the hand after lucky-bomb animation13600,previous ordinary classification
+  wrong;conservative v3 excludes it,6hands/8266frames,old selections preserved.
+  No complete opportunity census/recall or street-accuracy claim.Private review
+  7b28fa56,manifest3e6b847a under G:/PokerSense_private/aa-action-review-001-v1/.
+  See docs/AA-ACTION-REVIEW-001.zh-CN.md.Next:fix muck-vs-fold and missed all-in.
+
+- **2026-09-15 OBSERVER VISUAL SPOT REVIEW: insurance true positives;
+  ordinary selection corrected.** Frames3931/17114 show purchase countdown;
+  followups3940/17130 explicitly show insurance mode. Keep fail-closed context
+  clearing.7selected bottom-stack checkpoints match manual values;frame12000
+  outside original selection is context only,not scored. Old nine-hand ordinary
+  classification was overstated:H02/H11 contain insurance. New private selection
+  v2 retains7hands/10068frames,existing targeted epoch available10068/10068 only
+  in this post-hoc subset,not session accuracy/coverage acceptance. Old evidence
+  preserved;no runtime changes. Report1d2418ea;selection61a7613b;private evidence
+  G:/PokerSense_private/aa-observer-visual-check-v1/. Next:seven-hand action/state
+  truth checks and separate insurance guard regressions;no strategy promotion.
+
+- **2026-09-15 OBSERVER REPLAY TARGETED FIXES: development PASS, no live
+  promotion.** Added session-specific layout candidate: slot 4 stack y914->912,
+  old frozen layout and model unchanged. All13415 old failures clipped_or_border;
+  current candidate coverage13415/13415,one manual frame2700 reads1107,not full
+  accuracy acceptance. Added explicit offline manual-boundary context,not an
+  automatic deal detector fix. Epoch12320/13415;1095 remain cleared after old
+  insurance VISIBLE labels at3931/17114,requiring visual verification. Wrong
+  source/interval/start rejected;overlay clears context without auto-reanchoring.
+  Legal state/strategy remain false.7focused;full3386passed/7skipped/1warning,
+  lint0,generator299. Private targeted output aa8e5ae7624d77bc006f4e45715295039315607d5ba3bde21f14f87977db614f.
+  See docs/AA-OBSERVER-REPLAY-FIXES.zh-CN.md. No new capture or training.
+
 - **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW + EXACT BOUNDARIES:
   source-specific PASS;9 ordinary development hands,not validation.** Owner
   authorized decode/review of session aa-live-observer-development-20260914-001
