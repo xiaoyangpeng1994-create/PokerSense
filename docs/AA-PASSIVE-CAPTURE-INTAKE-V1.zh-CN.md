@@ -71,14 +71,24 @@
 收集诊断，但 null 收据不能被签收，也不能解锁 development capture。
 
 正式 `record` 在消费 nonce 和启动 FFmpeg 前运行固定、只读的 Windows CIM/PnP
-查询，要求恰好一个 `UGREEN 25854`，并记录 device instance、USB VID/PID、序列
-标识、驱动版本和状态；同一个已哈希 FFmpeg 还会只读枚举 DirectShow alternative
-device name，并要求其中的 VID/PID 和序列标识与 PnP 一致。录制命令使用这个唯一
-alternative name，不按可能重名的友好名打开。非空 manifest 必须与这些观测字段
-逐项一致；development 还要求本次 PnP/DirectShow observation hash 与已签收 dry
-run 相同。手机型号、AA app 版本、
+查询，要求恰好一个 `Name=UGREEN 25854 + Service=usbvideo + MI_00` 视频接口，
+并记录完整 device instance、USB VID/PID、PnP instance suffix、驱动和状态；同一个
+已哈希 FFmpeg 还会只读枚举 DirectShow alternative device name，并要求规范化后的
+完整 PnP interface identity 与 CIM 完全相同。录制命令使用这个唯一 alternative
+name，不按可能重名的友好名打开。非空 manifest 必须与这些观测字段逐项一致；
+development 还要求本次 PnP/DirectShow observation hash 与已签收 dry run 相同。
+手机型号、AA app 版本、
 方向、视频适配器、色彩、normalization 和 layout 无法由 PnP 自动证明，继续由
 私有清单和人工签收约束。
+
+2026-09-14 首次只读实机预检确认，这块 UGREEN 是正常的复合 USB 设备：同名接口
+包含 `MI_00/usbvideo` 和 `MI_02/usbaudio`。正式探针只选择 `Service=usbvideo`、
+`interface_number=00` 的唯一视频接口，音频兄弟接口不参与 fingerprint 或 Popen；
+驱动、完整 PnP interface identity 和 DirectShow alternative 必须逐项一致。PnP ID
+尾段记录为 `pnp_instance_suffix`，不能冒充已经验证的物理 serial；未从可信 USB
+属性获得 serial 时，`capture_card_serial` 保持 null。该次预检还确认实际 FFmpeg
+binary 能绕过 WinGet symlink 正确解析和哈希，G 盘空间满足门槛；没有打开视频流或
+写入录像。
 
 只有成功 dry run 的最终收据经人工签收，后续 `development_capture` 授权才会被
 接受。签收前会从私有分段和 metadata 重新生成最终收据并要求逐字段一致；dry run

@@ -49,6 +49,8 @@ DEVICE_KEYS = {
     "capture_card_serial", "device_instance_id", "usb_vid_pid", "host_os",
     "driver_version", "uvc_color_space", "uvc_color_range",
     "dshow_input_name", "normalization_sha256", "layout_sha256",
+    "pnp_instance_suffix", "interface_number", "pnp_service", "pnp_class",
+    "pnp_class_guid", "driver_device_id", "driver_provider", "driver_inf",
     "hardware_fingerprint_sha256",
 }
 LIMIT_KEYS = {
@@ -141,7 +143,9 @@ AUTHORIZATION_USE_KEYS = {
 }
 DEVICE_PROBE_KEYS = {
     "probe_method", "friendly_name", "device_instance_id", "usb_vid_pid",
-    "capture_card_serial", "driver_version", "dshow_input_name", "status",
+    "pnp_instance_suffix", "interface_number", "pnp_service", "pnp_class",
+    "pnp_class_guid", "driver_device_id", "driver_version",
+    "driver_provider", "driver_inf", "dshow_input_name", "status",
 }
 
 STATE_MACHINE = [
@@ -391,6 +395,22 @@ def _validate_device_probe(value: Any) -> dict[str, Any]:
     if not re.fullmatch(r"VID_[0-9A-F]{4}&PID_[0-9A-F]{4}",
                         value["usb_vid_pid"].upper()):
         raise ValueError("observed_device_vid_pid_invalid")
+    instance = value["device_instance_id"]
+    vid_pid = re.search(r"VID_[0-9A-F]{4}&PID_[0-9A-F]{4}", instance.upper())
+    interface = re.search(r"&MI_([0-9A-F]{2})", instance.upper())
+    if (vid_pid is None or interface is None
+            or value["usb_vid_pid"].upper() != vid_pid.group(0)
+            or value["interface_number"].upper() != interface.group(1)
+            or _normalized_dshow_instance_id(value["dshow_input_name"])
+            != instance.casefold()
+            or value["interface_number"].upper() != "00"
+            or value["pnp_service"].casefold() != "usbvideo"
+            or value["pnp_class"].casefold() not in {"camera", "image"}
+            or value["driver_device_id"].casefold()
+            != value["device_instance_id"].casefold()
+            or value["pnp_instance_suffix"].casefold()
+            != value["device_instance_id"].rsplit("\\", 1)[-1].casefold()):
+        raise ValueError("observed_device_is_not_unique_video_interface")
     return value
 
 
@@ -410,23 +430,43 @@ def _parse_dshow_input_name(text: str, friendly_name: str) -> str:
     return matches[0]
 
 
+def _normalized_dshow_instance_id(alternative: str) -> str:
+    folded = alternative.casefold()
+    start = folded.find("usb#")
+    end = folded.find("#{", start)
+    if start < 0 or end <= start:
+        raise ValueError("dshow_alternative_name_has_no_pnp_identity")
+    return folded[start:end].replace("#", "\\")
+
+
 def _probe_windows_capture_device(ffmpeg_identity: dict[str, Any]) -> dict[str, Any]:
     if os.name != "nt":
         raise ValueError("physical_capture_requires_windows_device_probe")
+    dshow = subprocess.run([
+        ffmpeg_identity["path"], "-hide_banner", "-list_devices", "true",
+        "-f", "dshow", "-i", "dummy"], capture_output=True, text=True,
+        encoding="utf-8", timeout=20, shell=False)
+    alternative = _parse_dshow_input_name(dshow.stderr, "UGREEN 25854")
     powershell = shutil.which("powershell.exe") or shutil.which("powershell")
     if not powershell:
         raise ValueError("windows_powershell_missing_for_device_probe")
     script = (
         "$items=@(Get-CimInstance Win32_PnPEntity | "
-        "Where-Object {$_.Name -eq 'UGREEN 25854'});"
+        "Where-Object {$_.Name -eq 'UGREEN 25854' -and "
+        "$_.Service -eq 'usbvideo'});"
         "if($items.Count -ne 1){exit 41};"
         "$d=$items[0];"
         "$drivers=@(Get-CimInstance Win32_PnPSignedDriver | "
         "Where-Object {$_.DeviceID -eq $d.PNPDeviceID});"
         "if($drivers.Count -ne 1){exit 42};"
+        "$driver=$drivers[0];"
         "[pscustomobject]@{friendly_name=$d.Name;"
         "device_instance_id=$d.PNPDeviceID;status=$d.Status;"
-        "driver_version=$drivers[0].DriverVersion} | "
+        "pnp_service=$d.Service;pnp_class=$d.PNPClass;"
+        "pnp_class_guid=$d.ClassGuid;driver_device_id=$driver.DeviceID;"
+        "driver_version=$driver.DriverVersion;"
+        "driver_provider=$driver.DriverProviderName;"
+        "driver_inf=$driver.InfName} | "
         "ConvertTo-Json -Compress"
     )
     result = subprocess.run(
@@ -445,24 +485,26 @@ def _probe_windows_capture_device(ffmpeg_identity: dict[str, Any]) -> dict[str, 
     if not isinstance(instance, str):
         raise ValueError("capture_device_instance_id_missing")
     match = re.search(r"VID_[0-9A-F]{4}&PID_[0-9A-F]{4}", instance.upper())
-    serial = instance.rsplit("\\", 1)[-1].strip()
-    dshow = subprocess.run([
-        ffmpeg_identity["path"], "-hide_banner", "-list_devices", "true",
-        "-f", "dshow", "-i", "dummy"], capture_output=True, text=True,
-        encoding="utf-8", timeout=20, shell=False)
-    alternative = _parse_dshow_input_name(
-        dshow.stderr, raw.get("friendly_name"))
-    alternative_folded = alternative.casefold()
-    if (match is None or match.group(0).casefold() not in alternative_folded
-            or serial.casefold() not in alternative_folded):
+    interface = re.search(r"&MI_([0-9A-F]{2})", instance.upper())
+    suffix = instance.rsplit("\\", 1)[-1].strip()
+    normalized_dshow_id = _normalized_dshow_instance_id(alternative)
+    if (match is None or interface is None
+            or normalized_dshow_id != instance.casefold()):
         raise ValueError("dshow_alternative_name_differs_from_pnp_device")
     observed = {
-        "probe_method": "windows_cim_pnp_v1",
+        "probe_method": "windows_cim_pnp_dshow_v2",
         "friendly_name": raw.get("friendly_name"),
         "device_instance_id": instance,
         "usb_vid_pid": match.group(0) if match else None,
-        "capture_card_serial": serial,
+        "pnp_instance_suffix": suffix,
+        "interface_number": interface.group(1) if interface else None,
+        "pnp_service": raw.get("pnp_service"),
+        "pnp_class": raw.get("pnp_class"),
+        "pnp_class_guid": raw.get("pnp_class_guid"),
+        "driver_device_id": raw.get("driver_device_id"),
         "driver_version": raw.get("driver_version"),
+        "driver_provider": raw.get("driver_provider"),
+        "driver_inf": raw.get("driver_inf"),
         "dshow_input_name": alternative,
         "status": raw.get("status"),
     }
@@ -474,12 +516,22 @@ def _device_probe_for_test(authorization: dict[str, Any]) -> dict[str, Any]:
     return _validate_device_probe({
         "probe_method": "TEST_ONLY_INJECTED_RECORD_FUNCTION",
         "friendly_name": device["friendly_name"],
-        "device_instance_id": device["device_instance_id"] or "TEST\\INSTANCE",
-        "usb_vid_pid": device["usb_vid_pid"] or "VID_0000&PID_0000",
-        "capture_card_serial": device["capture_card_serial"] or "TEST-SERIAL",
+        "device_instance_id": device["device_instance_id"]
+        or "USB\\VID_1234&PID_ABCD&MI_00\\TEST-SUFFIX",
+        "usb_vid_pid": device["usb_vid_pid"] or "VID_1234&PID_ABCD",
+        "pnp_instance_suffix": device["pnp_instance_suffix"] or "TEST-SUFFIX",
+        "interface_number": device["interface_number"] or "00",
+        "pnp_service": device["pnp_service"] or "usbvideo",
+        "pnp_class": device["pnp_class"] or "Camera",
+        "pnp_class_guid": device["pnp_class_guid"] or "TEST-CLASS-GUID",
+        "driver_device_id": device["driver_device_id"]
+        or "USB\\VID_1234&PID_ABCD&MI_00\\TEST-SUFFIX",
         "driver_version": device["driver_version"] or "TEST-DRIVER",
+        "driver_provider": device["driver_provider"] or "TEST-PROVIDER",
+        "driver_inf": device["driver_inf"] or "test.inf",
         "dshow_input_name": device["dshow_input_name"]
-        or "@device_pnp_test_vid_1234_pid_abcd_test-serial",
+        or ("@device_pnp_\\\\?\\usb#vid_1234&pid_abcd&mi_00#"
+            "test-suffix#{class}\\global"),
         "status": "OK",
     })
 
@@ -682,14 +734,19 @@ def validate_authorization(
     detail_names = (
         "phone_model", "android_version", "app_version", "orientation",
         "video_adapter_model", "capture_card_model", "capture_card_firmware",
-        "capture_card_serial", "device_instance_id", "usb_vid_pid", "host_os",
-        "driver_version", "uvc_color_space", "uvc_color_range",
-        "dshow_input_name",
+        "device_instance_id", "usb_vid_pid", "pnp_instance_suffix",
+        "interface_number", "pnp_service", "pnp_class", "pnp_class_guid",
+        "driver_device_id", "driver_version", "driver_provider", "driver_inf",
+        "host_os", "uvc_color_space", "uvc_color_range", "dshow_input_name",
     )
     for key in detail_names:
         if device[key] is not None and (
                 not isinstance(device[key], str) or not device[key].strip()):
             raise ValueError("device_detail_must_be_nonempty_string_or_null:" + key)
+    if device["capture_card_serial"] is not None and (
+            not isinstance(device["capture_card_serial"], str)
+            or not device["capture_card_serial"].strip()):
+        raise ValueError("capture_card_serial_must_be_nonempty_string_or_null")
     for key in ("normalization_sha256", "layout_sha256"):
         _hex_or_none(device[key], key)
     if fingerprint is not None:
@@ -698,6 +755,22 @@ def validate_authorization(
                 or device["normalization_sha256"] is None
                 or device["layout_sha256"] is None):
             raise ValueError("hardware_fingerprint_requires_complete_device_manifest")
+        instance = device["device_instance_id"]
+        vid_pid = re.search(
+            r"VID_[0-9A-F]{4}&PID_[0-9A-F]{4}", instance.upper())
+        interface = re.search(r"&MI_([0-9A-F]{2})", instance.upper())
+        if (vid_pid is None or interface is None
+                or device["usb_vid_pid"].upper() != vid_pid.group(0)
+                or device["interface_number"].upper() != interface.group(1)
+                or device["interface_number"].upper() != "00"
+                or device["pnp_instance_suffix"].casefold()
+                != instance.rsplit("\\", 1)[-1].casefold()
+                or device["pnp_service"].casefold() != "usbvideo"
+                or device["pnp_class"].casefold() not in {"camera", "image"}
+                or device["driver_device_id"].casefold() != instance.casefold()
+                or _normalized_dshow_instance_id(device["dshow_input_name"])
+                != instance.casefold()):
+            raise ValueError("hardware_manifest_video_interface_identity_invalid")
         payload = {key: device[key] for key in sorted(DEVICE_KEYS)
                    if key != "hardware_fingerprint_sha256"}
         if fingerprint != _canonical_sha(payload):
@@ -1818,8 +1891,15 @@ def run_authorized_capture(
             "friendly_name": "friendly_name",
             "device_instance_id": "device_instance_id",
             "usb_vid_pid": "usb_vid_pid",
-            "capture_card_serial": "capture_card_serial",
+            "pnp_instance_suffix": "pnp_instance_suffix",
+            "interface_number": "interface_number",
+            "pnp_service": "pnp_service",
+            "pnp_class": "pnp_class",
+            "pnp_class_guid": "pnp_class_guid",
+            "driver_device_id": "driver_device_id",
             "driver_version": "driver_version",
+            "driver_provider": "driver_provider",
+            "driver_inf": "driver_inf",
             "dshow_input_name": "dshow_input_name",
         }
         if any(device[declared] != observed_device[observed]
