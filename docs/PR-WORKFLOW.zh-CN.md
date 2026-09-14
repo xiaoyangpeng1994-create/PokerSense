@@ -1,6 +1,6 @@
 # PokerSense 的 PR 开发与签收流程
 
-私有仓库 `xiaoyangpeng1994-create/PokerSense` 是唯一正式主仓库。`windgeek/PokerSense` 和 `xiaoyangpeng1994-create/x-poker` 仅作历史参考，不能接收新的正式开发成果。
+公开仓库 `xiaoyangpeng1994-create/PokerSense` 是唯一正式主仓库。`windgeek/PokerSense` 和 `xiaoyangpeng1994-create/x-poker` 仅作历史参考，不能接收新的正式开发成果。
 
 ## 每项任务的闭环
 
@@ -25,6 +25,8 @@ PR 事件默认测试 GitHub 生成的合并候选提交。验收记录同时保
 
 ## 仓库关系
 
-本机 `origin` 指向私有正式仓库；`windgeek-base` 指向最早的公开底座。旧仓库只用于查历史和比较，禁止把正式成果反向推送过去。`x-poker` 含 532 个文件和 54 次提交，保留为早期快照，不删除、不作为正式 PR 基线。
+本机 `origin` 指向公开正式仓库；`windgeek-base` 指向最早的公开底座。旧仓库只用于查历史和比较，禁止把正式成果反向推送过去。`x-poker` 含 532 个文件和 54 次提交，保留为早期快照，不删除、不作为正式 PR 基线。
 
-正式主仓库创建为独立私有仓库，不是 Fork。当前本地已提交基线 `eb4011172adec280c99cd442ca49e9083ce9ec8b` 作为其首个 `main`；尚未提交的后续成果继续留在原工作区，按依赖拆成后续 PR。
+正式主仓库创建为独立公开仓库，不是 Fork。当前本地已提交基线 `eb4011172adec280c99cd442ca49e9083ce9ec8b` 作为其首个 `main`；尚未提交的后续成果继续留在原工作区，按依赖拆成后续 PR。
+
+`main` 的服务器分支保护适用于管理员：必须从最新基线经过 PR，`review-hygiene`、macOS 和 Windows 三项检查必须通过，未解决对话必须清零，并禁止强推和删除。审批人数为 0，因为当前只有一个所有者账号且 GitHub 不允许作者正式批准自己的 PR；最终合并仍以用户明确指令为准。
