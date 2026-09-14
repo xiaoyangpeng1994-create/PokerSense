@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "status": "DEVELOPMENT_REGRESSION_NOT_ACCURACY_OR_ACCEPTANCE",
+  "old_report_sha256": "3289b6fce691cb08ebd9751b82c27cadb7e613d6a224cd0c65351e8437e16423",
+  "new_report_sha256": "0c794250f6a222bc294dab1b4418cd6f3ad783e08f0c95e6cf8b613420735f65",
+  "review_sha256": "d50e5825b80f869686972371ec53103201e84a85d5624dd203edf85e073d3b93",
+  "registry_sha256": "dd9780e12222360726b1ba60b6e2838b3db330e129fccd92148aa7b0b5581785",
+  "expected_old_all_events": 42,
+  "expected_new_all_events": 36,
+  "expected_complete_hand_candidates": 36,
+  "expected_retained_matches": 30,
+  "expected_removed_false_candidates": 6,
+  "expected_unchanged_outside_complete_hands": 6,
+  "expected_frames": 4661,
+  "expected_changed_input_hashes": {},
+  "expected_removed_input_hashes": {
+    "tools/aa8_visual_pipeline.py": "4f5b0cc392b4ce78f674a3703eb708ee66e9e5c13a1711c3612d5b19ed960061"
+  },
+  "expected_added_input_hashes": {
+    "tools/aa8_glyph_transitions_v2.py": "c4f76838491f566a0e03af0214ef4922fe508cc26a2fff1c31a2fa09d62e72ce",
+    "tools/aa8_visual_pipeline_v2.py": "1ba085c03208528269676f10c13e06ab73b9e6878025c92dfb87853bf205feb7"
+  },
+  "expected_unchanged_input_bindings": 18,
+  "constraints": [
+    "same_preregistered_development_frames_and_model_inputs",
+    "remove_exactly_reviewed_false_candidates",
+    "retain_every_reviewed_match",
+    "no_new_events",
+    "outside_complete_hands_unchanged",
+    "not_independent_accuracy_or_strategy_evidence"
+  ]
+}

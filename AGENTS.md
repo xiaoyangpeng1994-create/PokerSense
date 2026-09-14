@@ -34,6 +34,30 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 AA8 GLYPH DE-DUPLICATION V2: engineering/development
+  regression PASS; real calibration still BLOCKED.** Preserved V1
+  action_reader/action_transfer/visual_pipeline bytes and added versioned
+  GlyphTransitionsV2+offline visual pipeline. Unsupported/special scenes suspend
+  confirmed identity but cannot bridge unconfirmed streaks; rapid different
+  glyphs stay suppressed through short clears,5stable clear rearms,and automatic
+  non-authoritative hand candidates never reset epochs. Existing4661frame
+  development replay(840.023-995.366s) yields42->36events,retains all30reviewed
+  MATCH,removes exact6reviewed false,keeps6outside-hand events in order,and adds0.
+  Strict regression binds old/new/review/registry hashes,4661frames,18unchanged
+  inputs,explicit V1->V2 implementation replacement,policy and ordered event
+  identities. Final report0c794250f6a222bc294dab1b4418cd6f3ad783e08f0c95e6cf8b613420735f65,
+  observationsb3e206aadda8738454a1e620fc1c9360bbe149585ea4ff93f376d7ea763d8ff9,
+  regressione3e1ca46b19082307193790327243690dba49cfeea0a83cc202bd0142aa551af.
+  Independent code/evidence/scope reviews PASS after fixing two rounds of P1s.
+  Focused63passed;full3274passed/1skipped/2warnings,lint0,generator299current,
+  private filename0,diff0.Original C-root V1freeze280/280 and private hashes9/9;
+  this PR overlaps0freeze entries (prior stacked baseline differences are not
+  relabelled as freeze matches). One early reviewer accidentally SHA-read existing
+  840s+ review PNG bytes without rendering;no video or300-820s access;final reviews
+  were source/JSON only. No legal menus,independent accuracy,holdout/device/live
+  strategy/advice/main merge/tag/release. See docs/AA8-GLYPH-DEDUPE-V2.zh-CN.md
+  and G:/PokerSense_private/aa8_glyph_dedupe_regression_v2_20260914_v2/.
+
 - **2026-09-14 AA8 ACTION TRUTH REVIEW V1: author development review COMPLETE;
   independent visual review pending,real calibration BLOCKED.** Reviewed all36
   complete-hand glyph candidates from physical capture-card development frames:
