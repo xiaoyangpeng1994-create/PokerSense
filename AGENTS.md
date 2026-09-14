@@ -34,6 +34,23 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-14 FINGERPRINT-BOUND OBSERVER DRY-RUN003: technical PASS;
+  post-capture human signoff PENDING.** Operator declared phone model,Android,
+  AA version and capture-card firmware not queryable and adapter model not
+  required;sentinel values are explicit operator unknowns,not observed facts.
+  Manifest fingerprint769a404c384d1105b2399c09750d194adf1d457824e8af606ee7d6fb993b7567.
+  New10s passive session recorded301frames,out_time10.066656s,segmentPTS10.033s,
+  drop0,dup0,exit0,forcedfalse;full receipt inspect0.Final receipt
+  1259774ebc42c77204f506bfafb8515223c9ac24e3e7da328f5bb331806efdeb.
+  Device824e5633 and FFmpeg57c56e36 match prior observations;lock-fix validated
+  on real hardware because no active lock remained.No session003 media decode/
+  view,recognition,strategy,Advice,input or automatic promotion.Signoff request
+  ba51b2e5ff7d884ba56ed4a52178bcb8194c84c1fb90d0e4092032c541ce8d1d,
+  manifestb025c59de7512ea6d3cc645e10f373efe4ea781a62b0da65464327beab8e645d.
+  Owner previously authorized progression,but protocol requires a concrete
+  post-capture human statement before HARDWARE_DRY_RUN_SIGNED_OFF and a separate
+  600s development authorization.No development capture started.
+
 - **2026-09-14 AA OBSERVER DRY-RUN002 MEDIA REVIEW: visual/technical PASS;
   privacy restricted,hardware signoff BLOCKED.** Explicit authorization covered
   only session002 offline platform/image/privacy review.Source segment hash
