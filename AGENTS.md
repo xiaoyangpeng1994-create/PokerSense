@@ -34,6 +34,34 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 TC-20260915-03 historical baseline reconciliation.**
+  The FIRST offline replay entry below is preserved verbatim as a historical
+  baseline, not the current implementation status. PR #15 fixed the session-only
+  slot 4 crop candidate (13415/13415 readable candidates) and added explicit
+  manual-development context (12320/13415 epoch frames), not automatic hand
+  detection or legal-state acceptance. PR #15 confirmed insurance in H02/H11
+  and special-mode continuation in H09; conservative v3 ordinary selection is
+  6 hands/8266 frames. PR #16 retained 82 reviewed actions, removed two muck/fold
+  errors and added the missed H05 all-in candidate at8676 in development replay.
+  Historical pot/actor/board counts and log hash remain baseline evidence, not
+  rerun results. Full accuracy, recall, legal state and live eligibility remain
+  unproven. Only document conflicts resolved; main implementations unchanged.
+  See the dated correction in docs/AA-DEVELOPMENT-001-REPLAY.zh-CN.md.
+
+- **2026-09-15 AA DEVELOPMENT 001 OFFLINE REPLAY: execution PASS; state
+  closure incomplete.** User authorized PR #12 merge (main 3b2c8b9) and nine-hand
+  replay. Exactly 13,415 selected frames processed with fresh CandidateStateV2
+  per hand, existing training templates/models and overlay-aware GlyphTransitionsV2.
+  Pot candidates 13,173; actor 9,675; postflop full-board 5,126/5,305; 100 glyph
+  events, not verified actions. Slot 4 stack coverage 0; epoch and complete legal
+  state both 0. No Advice/strategy eligibility. Identity and gate audit passed;
+  model/config hashes unchanged and 200 implementation snapshots checked.
+  Private evidence G:/PokerSense_private/aa-development-001-replay-v1/;
+  observations 5ac0941bab6e9d8845a089fa0206d1df6c851af8ca75b9b7a6186159e236c167.
+  No new capture or model training; coverage is not accuracy. Next: bottom-seat
+  stack ROI/glyph review and spectator-state initialization investigation.
+  See docs/AA-DEVELOPMENT-001-REPLAY.zh-CN.md.
+
 - **2026-09-15 GLYPH SUPPLEMENT V3: development regression PASS.** Added
   explicit private fold/muck/light-All-in template competition;frozen reader
   unchanged.13415frames replayed,82reviewed actions retained,2muck-as-fold
