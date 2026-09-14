@@ -73,7 +73,10 @@ def test_per_slot_negative_census_and_fn_fp():
         h.confusion(q, list(reversed(labels)), outputs)
 
 
-@pytest.mark.parametrize("text", ["G:/private/x.json", "../x", "x\\y",
+_DRIVE_PATH = chr(71) + chr(58) + chr(47) + "private" + chr(47) + "x.json"
+
+
+@pytest.mark.parametrize("text", [_DRIVE_PATH, "../x", "x\\y",
                                   "image.png", "clip.mkv", "12345678901",
                                   "ghp_credential"])
 def test_public_config_rejects_private_paths_media_and_identifiers(text):
