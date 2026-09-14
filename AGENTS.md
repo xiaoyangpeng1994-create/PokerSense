@@ -34,8 +34,8 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
-- **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW: platform/image PASS;
-  privacy exclusions applied,9 ordinary complete-hand candidates only.** Owner
+- **2026-09-14 FIRST10MIN DEVELOPMENT MEDIA REVIEW + EXACT BOUNDARIES:
+  source-specific PASS;9 ordinary development hands,not validation.** Owner
   authorized decode/review of session aa-live-observer-development-20260914-001
   and PR#11 merged as main4ab1cc3.Source receipt c09dd51e;10segments/
   3401350388bytes rehashed10/10.Full decode10/10 error0,1920x1080@30 MJPEG,
@@ -49,13 +49,18 @@ changing desktop capture, recognition, packaging, or project documentation.
   amount/strategy recognition)plus12 dense +/-2s reviews yields1incomplete head,
   1incomplete tail,11inter-boundary complete temporal candidates;1privacy-
   occluded and1lucky-bomb special excluded,leaving9ordinary unoccluded candidates,
-  including2preflop-only candidates.Boundaries are reviewed0.2s windows,not exact
-  frame/canonical truth.Private report5d9a823c,boundary89daf941,privacy780e53c9,
-  70-file manifestd3b04e7e all rehashed.No other media/upload/model/strategy/
-  Advice/input/promotion.See docs/AA-LIVE-DEVELOPMENT-MEDIA-REVIEW-V1.zh-CN.md.
-  Next:exact private frame+PTS binding/frozen development split,then separately
-  authorize offline recognition;rules/identity/opportunities/legal menus/session
-  independence remain blockers.
+  including2preflop-only candidates.30FPS signal review plus before/current/after
+  frame sheets confirmed12first-visible multi-seat forced-posting frames;FFprobe
+  bound all18003frames to real PTS.Exact boundaries B01..B12 are frames1322/
+  2591/4379/5894/7342/9270/10654/11884/13639/15441/16202/17761 with PTS
+  44.067..591.959.Source-specific registry63a605cc,index26d3a815.9ordinary
+  hands/13415frames frozen development_only selection08a8f411;no validation,
+  holdout,calibration or cross-session canonical claim.Private report7a30153d,
+  privacy780e53c9,79-file manifest6ff0efe4 all rehashed.No other media/upload/
+  recognition model/strategy/Advice/input/promotion.See
+  docs/AA-LIVE-DEVELOPMENT-MEDIA-REVIEW-V1.zh-CN.md.Next:separately authorize
+  offline recognition on only these9 development hands;rules/identity/opportunities/
+  legal menus/second same-rule session remain blockers.
 
 - **2026-09-14 FIRST FINGERPRINT-BOUND 10MIN AA OBSERVER DEVELOPMENT CAPTURE:
   technical PASS;media/dataset review PENDING.** Owner signed dry-run003 after
