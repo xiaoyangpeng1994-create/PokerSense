@@ -34,6 +34,13 @@ JSON重复键、非有限值、bool冒充整数、未知配置字段、重复ID/
 NOT_RUN标签/输出、报告和覆盖新旧工件的SHA清单。R1仍未读取媒体或执行V3，
 不提供任何真实误报/召回率、独立数据或实时资格验收。
 
+R1实际执行commit为467ab39c809273dc6634178dbc08cf08b791ea98。
+冻结时间2026-09-15T03:52:25.582824+08:00；结束时间为03:53:17.702565+08:00。
+新manifest SHA：0c2f3e137ceb92998438f81baa30aa6145b997d5ee50d92e7405e4ece72c0c2c。
+新report SHA：c5fc25a403556252baabd46cdef89a3367086aa5e8efc6ab18c0b6ccf20c6052。
+41项聚焦测试退出0；全仓3435passed/7skipped/1warning（32.08s），完整lint、
+diff-check及敏感新增行扫描均通过。以下V1数字仅为历史，不能替代R1工程证据。
+
 任务TC-20260915-04，基线a24d10ab55f5748166de82b68cdff4c90e9e4adb。
 范围仅为 `template-disjoint intra-session holdout`。本次只读既有元数据，
 不调用V3、不解码录像、不调整任何模板、阈值、布局或旧识别器。
