@@ -20,10 +20,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from capture_card_calibration.record import (
+from capture_card_calibration.record import (  # noqa: E402
     record_session,
     write_session_log,
-    update_device_manifest,
 )
 
 
