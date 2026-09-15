@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "source_kind": "reviewed_public_decisions",
+  "context": {
+    "platform_id": "synthetic-example-platform",
+    "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "opponent_id": "example-opponent-not-real",
+  "coverage": {
+    "status": "unreviewed",
+    "reviewer": null,
+    "evidence_hash": null
+  },
+  "protocol": {
+    "training_sessions": [
+      "train-example"
+    ],
+    "validation_sessions": [
+      "validation-example"
+    ],
+    "candidates_sha256": "865b2149c433cec66d0a17cb3fc095e8a972b9c28d2dac54ec008c44cc7d2ce2"
+  },
+  "opportunities": [
+    {
+      "opportunity_id": "train-example-decision1",
+      "session_id": "train-example",
+      "hand_id": "train-example-hand1",
+      "opponent_id": "example-opponent-not-real"
+    },
+    {
+      "opportunity_id": "validation-example-decision1",
+      "session_id": "validation-example",
+      "hand_id": "validation-example-hand1",
+      "opponent_id": "example-opponent-not-real"
+    }
+  ],
+  "decisions": [
+    {
+      "opportunity_id": "train-example-decision1",
+      "session_id": "train-example",
+      "hand_id": "train-example-hand1",
+      "opponent_id": "example-opponent-not-real",
+      "source_kind": "reviewed_public_decisions",
+      "context": {
+        "platform_id": "synthetic-example-platform",
+        "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "source_hash": null,
+      "seat_id": null,
+      "table_size": null,
+      "active_count": null,
+      "position": null,
+      "street": null,
+      "pot": null,
+      "to_call": null,
+      "legal_actions": null,
+      "observed_action": null,
+      "audit_status": "unaudited",
+      "unknown_reasons": [
+        "TEMPLATE_ONLY_NO_REAL_DECISION_EVIDENCE"
+      ]
+    },
+    {
+      "opportunity_id": "validation-example-decision1",
+      "session_id": "validation-example",
+      "hand_id": "validation-example-hand1",
+      "opponent_id": "example-opponent-not-real",
+      "source_kind": "reviewed_public_decisions",
+      "context": {
+        "platform_id": "synthetic-example-platform",
+        "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "source_hash": null,
+      "seat_id": null,
+      "table_size": null,
+      "active_count": null,
+      "position": null,
+      "street": null,
+      "pot": null,
+      "to_call": null,
+      "legal_actions": null,
+      "observed_action": null,
+      "audit_status": "unaudited",
+      "unknown_reasons": [
+        "TEMPLATE_ONLY_NO_REAL_DECISION_EVIDENCE"
+      ]
+    }
+  ]
+}

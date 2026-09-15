@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source_kind": "synthetic_model_stress",
+  "candidate_ids": ["cautious_public_v1", "calling_public_v1", "aggressive_public_v1"],
+  "generating_candidate_id": "calling_public_v1",
+  "training_seed": 2026091401,
+  "validation_seed": 2026091402,
+  "training_sessions": 6,
+  "validation_sessions": 4,
+  "decisions_per_session": 100,
+  "table_sizes": [6, 7, 8],
+  "roots": ["facing_bet", "unopened"],
+  "worlds": ["reference_control", "value_heavy", "weak_callers", "rank_aware", "check_trap"],
+  "screening_rule": "report_every_case_and_reject_promotion_on_any_negative_delta_or_fallback",
+  "qualification": "Synthetic probability samples and manually specified stress worlds; not real calibration, full-hand performance, bb/100 or profitability."
+}

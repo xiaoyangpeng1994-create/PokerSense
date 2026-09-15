@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "opponent_id": "example-opponent-not-real",
+  "context": {
+    "platform_id": "synthetic-example-platform",
+    "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "candidate_scope": "public_legal_menu_and_price_only",
+  "candidates": [
+    {
+      "candidate_id": "folding",
+      "weights": {
+        "fold": "9",
+        "call": "1"
+      },
+      "price_multipliers": []
+    },
+    {
+      "candidate_id": "calling",
+      "weights": {
+        "fold": "1",
+        "call": "9"
+      },
+      "price_multipliers": []
+    }
+  ]
+}

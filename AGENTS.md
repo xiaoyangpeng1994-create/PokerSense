@@ -34,6 +34,22 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 CONDITIONAL MULTIWAY ANALYSIS INTEGRATION:** migrated 32 existing
+  research files from the preserved primary worktree onto 6d76cfc:6 modules,
+  5 CLIs,11 test files,6 manual/synthetic examples and4 historical reports.
+  All46 existing transitive dependencies match the original source hashes;
+  no task7 simulation assets or tracked identity patches imported.3 new target
+  text files normalized to repository LF;originals unchanged.224 focused tests
+  PASS after LF normalization,focused lint0;896 baseline files unchanged before
+  this note. Terminal supports6-8dealt/Hero sole ACTIVE/2-7allin opponents on
+  river;threeway supports6-8dealt but3ACTIVE at river start,finite actions and
+  no allin/sidepot crossing. Fixed-policy/calibration/uncertainty failures remain
+  regressions,not empirical approval. No live Provider/UI integration,hardware,
+  media or external solver runs. Root evidence:
+  G:/PokerSense_private/aa-conditional-strategy-integration-20260915-v1/.
+  See docs/THREEWAY-MODEL-VALIDATION-V1.zh-CN.md and
+  docs/OPPONENT-MODEL-V1.zh-CN.md;historical report counts remain historical.
+
 - **2026-09-15 AA8 OBSERVATION TOOL V1:** added dedicated AA reader/session/
   source/server/UI and standalone PyInstaller entry. ExplicitStart/Stop,single
   session,latest capture slot,stale/error clearing,raw vs processed sequences,

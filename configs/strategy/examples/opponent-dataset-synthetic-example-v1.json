@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "source_kind": "synthetic",
+  "context": {
+    "platform_id": "synthetic-example-platform",
+    "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "opponent_id": "example-opponent-not-real",
+  "coverage": {
+    "status": "synthetic_complete",
+    "reviewer": "synthetic-fixture",
+    "evidence_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "protocol": {
+    "training_sessions": [
+      "train-example"
+    ],
+    "validation_sessions": [
+      "validation-example"
+    ],
+    "candidates_sha256": "865b2149c433cec66d0a17cb3fc095e8a972b9c28d2dac54ec008c44cc7d2ce2"
+  },
+  "opportunities": [
+    {
+      "opportunity_id": "train-example-decision1",
+      "session_id": "train-example",
+      "hand_id": "train-example-hand1",
+      "opponent_id": "example-opponent-not-real"
+    },
+    {
+      "opportunity_id": "validation-example-decision1",
+      "session_id": "validation-example",
+      "hand_id": "validation-example-hand1",
+      "opponent_id": "example-opponent-not-real"
+    }
+  ],
+  "decisions": [
+    {
+      "opportunity_id": "train-example-decision1",
+      "session_id": "train-example",
+      "hand_id": "train-example-hand1",
+      "opponent_id": "example-opponent-not-real",
+      "source_kind": "synthetic",
+      "context": {
+        "platform_id": "synthetic-example-platform",
+        "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "source_hash": "c9bf0ddde88e66cb90de86d7529bf5ea221efb48f9dd16a03540e514cfee61d3",
+      "seat_id": 1,
+      "table_size": 6,
+      "active_count": 3,
+      "position": "BTN",
+      "street": "river",
+      "pot": "60",
+      "to_call": "20",
+      "legal_actions": [
+        {
+          "kind": "fold",
+          "target": "0"
+        },
+        {
+          "kind": "call",
+          "target": "0"
+        }
+      ],
+      "observed_action": {
+        "kind": "fold",
+        "target": "0"
+      },
+      "audit_status": "reviewed",
+      "unknown_reasons": []
+    },
+    {
+      "opportunity_id": "validation-example-decision1",
+      "session_id": "validation-example",
+      "hand_id": "validation-example-hand1",
+      "opponent_id": "example-opponent-not-real",
+      "source_kind": "synthetic",
+      "context": {
+        "platform_id": "synthetic-example-platform",
+        "rule_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "source_hash": "8e1da55204cccfc2ddb5ed66c5daf73d8dc2ae13b6000b4c9f442de3388f79be",
+      "seat_id": 4,
+      "table_size": 6,
+      "active_count": 3,
+      "position": "BTN",
+      "street": "river",
+      "pot": "60",
+      "to_call": "20",
+      "legal_actions": [
+        {
+          "kind": "fold",
+          "target": "0"
+        },
+        {
+          "kind": "call",
+          "target": "0"
+        }
+      ],
+      "observed_action": {
+        "kind": "call",
+        "target": "0"
+      },
+      "audit_status": "reviewed",
+      "unknown_reasons": []
+    }
+  ]
+}
