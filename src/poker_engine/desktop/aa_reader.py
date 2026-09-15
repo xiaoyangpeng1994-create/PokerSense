@@ -34,7 +34,7 @@ def _profile(path):
     path = Path(path).resolve()
     raw = json.loads(path.read_text(encoding="utf-8"))
     if (not isinstance(raw, dict) or not _REQUIRED <= set(raw)
-            or set(raw) - _REQUIRED - {"glyph_supplement"}):
+            or set(raw) - _REQUIRED - {"glyph_supplement", "bundle_manifest"}):
         raise ValueError("explicit_aa8_factory_fields_required")
     if not isinstance(raw["audit"], str) or not _HASH.fullmatch(raw["audit"]):
         raise ValueError("training_audit_sha256_required")
@@ -59,11 +59,19 @@ def _profile(path):
     return path, spec, supplements
 
 
-def preflight_profile(path):
-    """Describe readiness without loading NPZs, images, or capture devices."""
+def preflight_profile(path, *, bundle_sha256=None):
+    """Describe readiness without decoding models/images or opening devices.
+
+    Portable bundles additionally hash all model bytes against a trusted digest.
+    """
     result = {"ready": False, "errors": [], "paths": {},
               "strategy_eligible": False, "profile_path": str(path)}
     try:
+        raw = json.loads(Path(path).read_text(encoding="utf-8"))
+        if (isinstance(raw, dict) and "bundle_manifest" in raw
+                or bundle_sha256 is not None):
+            from .aa_bundle import validate_bundle
+            result["bundle"] = validate_bundle(path, bundle_sha256)
         resolved, spec, supplements = _profile(path)
         result["profile_path"] = str(resolved)
         result["paths"] = {k: spec[k] for k in _POOLS + _FILES}
@@ -89,7 +97,7 @@ def preflight_profile(path):
                 result["errors"].append("aa8_hero4_layout_required")
         result["glyph_supplement_configured"] = bool(supplements)
         result["ready"] = not result["errors"]
-    except (OSError, ValueError, TypeError) as exc:
+    except (OSError, ValueError, TypeError, KeyError) as exc:
         result["errors"].append(str(exc))
     return result
 
@@ -151,8 +159,8 @@ class AA8Reader:
     establish complete action coverage.
     """
 
-    def __init__(self, profile_path, *, factory=None):
-        self.preflight = preflight_profile(profile_path)
+    def __init__(self, profile_path, *, factory=None, bundle_sha256=None):
+        self.preflight = preflight_profile(profile_path, bundle_sha256=bundle_sha256)
         if not self.preflight["ready"]:
             raise ValueError("; ".join(self.preflight["errors"]))
         _, spec, references = _profile(profile_path)

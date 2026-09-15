@@ -50,6 +50,19 @@ changing desktop capture, recognition, packaging, or project documentation.
   See docs/THREEWAY-MODEL-VALIDATION-V1.zh-CN.md and
   docs/OPPONENT-MODEL-V1.zh-CN.md;historical report counts remain historical.
 
+- **2026-09-15 AA8 PORTABLE PRIVATE RESOURCES:** added minimal exporter and
+  externally pinned validator;31boundfiles/21developmentPNGs/19,808,686bytes.
+  Relativeprofile,source/context contiguous metadata retained;only reachable
+  witnesses copied,no video/holdout/model changes. Reader requires trusted
+  external manifestSHA for bundle profiles,checks path/role/reservation/hash
+  closure before decode. Real constructor found missing card-head JSON sidecar,
+  fixed and regression-covered;v1failed output retained,v2constructor+2template
+  observations PASS with every JSON/PNG/NPZ access confined to bundle,pot43.
+  44focused tests PASS,changed lint0,diff0. No hardware/accuracy/strategy
+  acceptance;desktop CLI pin plumbing remains integration responsibility.
+  See docs/AA-RUNTIME-BUNDLE.zh-CN.md and private
+  G:/PokerSense_private/aa-resource-bundle-20260915-v1/.
+
 - **2026-09-15 AA8 OBSERVATION TOOL V1:** added dedicated AA reader/session/
   source/server/UI and standalone PyInstaller entry. ExplicitStart/Stop,single
   session,latest capture slot,stale/error clearing,raw vs processed sequences,
