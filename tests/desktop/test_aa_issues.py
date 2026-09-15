@@ -32,3 +32,9 @@ def test_cannot_save_obsolete_image_as_current_issue(tmp_path, status):
         save_issue(tmp_path, ({"status": status, "payload": {"frame": 1}}, b"old"),
                    "", "other", {})
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("category", [[], {}, True, None])
+def test_malformed_category_is_validation_error(tmp_path, category):
+    with pytest.raises(ValueError, match="类别"):
+        save_issue(tmp_path, ({}, None), "", category, {})

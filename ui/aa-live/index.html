@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
   <script src="/controls.js" defer></script>
+  <script src="/analysis.js" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -19,7 +20,7 @@
       <div class="section-heading"><h2 id="source-title">画面来源</h2><span id="source-kind" class="muted">未启动</span></div>
       <form id="start-form">
         <label>来源<select id="mode"><option value="development-replay" disabled>已登记开发回放</option><option value="capture-card" disabled>实体采集卡</option></select></label>
-        <label>设备编号<input id="device" type="number" min="0" max="99" step="1" value="0"></label>
+        <label>设备编号<input id="device" type="number" min="0" max="20" step="1" value="0"></label>
         <label>Windows 接口<select id="api"><option value="MSMF">MSMF</option><option value="DSHOW">DirectShow</option></select></label>
         <button id="start" type="submit" disabled>开始观察</button><button id="stop" type="button" class="secondary" disabled>停止并清空</button>
       </form>
@@ -45,14 +46,16 @@
         <div class="hero-line"><div><span class="eyebrow">HERO · 座位 4</span><div id="hero" class="cards" aria-label="Hero 手牌"></div></div><dl><div><dt>当前行动者</dt><dd id="actor">未知</dd></div><div><dt>庄位</dt><dd id="dealer">未知</dd></div></dl></div>
         <div id="seats" class="seat-grid" aria-label="八个物理座位"></div>
         <p class="footnote">筹码与投入分别显示。参与状态为可见线索；座位 4 固定为 Hero。未知不会沿用上一帧。</p>
+        <p id="state-closure" class="footnote">等待完整开局上下文。</p>
       </section>
       <aside class="side-column">
         <section class="panel preview-panel"><div class="section-heading"><h2>源画面预览</h2><span class="tag">本机</span></div><div class="preview-box"><img id="preview" alt="当前 AA 来源画面" hidden><p id="preview-empty">开始后显示最新画面</p></div><p class="footnote">预览与字段独立更新，不作为精确同步证据。</p></section>
         <section class="panel strategy-panel"><div class="section-heading"><h2>策略状态</h2><span class="tag blocked">未启用</span></div><p>当前不能据此输出可靠的多人行动建议。</p><ul id="blockers"><li>等待当前牌局输入</li></ul><p class="footnote">还需要合格的 AA 多人策略及独立效果验证。识别候选数量不代表准确率或实战胜率。</p></section>
       </aside>
     </div>
-    <section class="panel"><div class="section-heading"><h2>当前帧可见动作</h2><span class="muted">候选事件，尚非完整行动历史</span></div><div id="actions" class="actions"><p class="muted">当前无动作候选</p></div></section>
+    <section class="panel"><div class="section-heading"><h2>本次观察的动作记录</h2><span class="muted">最近 48 项候选，不证明未漏动作</span></div><div id="actions" class="actions"><p class="muted">当前无动作候选</p></div></section>
     <section class="panel"><div class="section-heading"><h2>记录识别问题</h2><span class="tag">仅保存到本机</span></div><p class="footnote">点击保存时记录当前字段、匹配画面、规则和你的说明。记录尚未审阅，不自动用作训练或验收数据。</p><form id="issue-form"><label>类别<select id="issue-category"><option value="cards">牌面</option><option value="amounts">金额</option><option value="actor">行动者</option><option value="state">牌局状态</option><option value="other">其他</option></select></label><label>问题说明<input id="issue-note" maxlength="2000" placeholder="例如：这个位置应为 250，画面显示未知"></label><button id="issue-save" type="submit" disabled>保存问题（含当前画面）</button></form><p id="issue-feedback" class="muted" role="status"></p></section>
+    <section class="panel" id="analysis-panel"><div class="section-heading"><h2>多人河牌条件分析</h2><span class="tag blocked">手工假设 · 非实时建议</span></div><p>计算完整输入下各动作的净期望收益。对手范围和响应模型仍需明确提供；示例不代表当前牌桌，也不证明盈利。</p><div class="button-row"><label>分析范围<select id="analysis-kind"><option value="terminal">Hero 对多名已全下对手：河牌跟注/弃牌</option><option value="threeway">三名活跃玩家：有限河牌下注树</option></select></label><button id="analysis-example" class="secondary" type="button">载入手工示例（非本桌）</button></div><p class="footnote">终结分析支持 6–8 人桌、2–7 名已全下对手；三人分析要求河牌开始恰好 3 名活跃玩家，不支持跨越 all-in 或边池。缺项和超时会拒绝返回动作结果。</p><label for="analysis-input">完整手工场景 JSON</label><textarea id="analysis-input" rows="10" spellcheck="false" placeholder="先载入示例查看格式；填写你已确认的牌局输入和对手假设。"></textarea><label class="inline-label"><input id="analysis-use-rules" type="checkbox"> 使用上方已完整填写的本桌规则（覆盖场景中的规则）</label><div class="button-row"><button id="analysis-start" type="button">计算条件收益</button><button id="analysis-cancel" class="secondary" type="button">取消并清空分析</button><button id="analysis-export" class="secondary" type="button" disabled>导出本次分析</button></div><p id="analysis-status" role="status">尚未计算。</p><div id="analysis-results"></div><details><summary>完整结果与假设</summary><pre id="analysis-raw">无结果</pre></details></section>
     <footer>本机观察工具 · 不自动操作牌桌 · 停止、断线、异常或画面过期时清空字段与预览</footer>
   </main>
 </body>

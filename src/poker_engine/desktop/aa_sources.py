@@ -12,9 +12,12 @@ from poker_engine.perceptual.capture.base import CaptureTarget
 from poker_engine.perceptual.capture.capture_card_backend import CaptureCardBackend
 from poker_engine.perceptual.capture.normalization import NormalizationConfig
 
+from .aa_device_lock import AACaptureDeviceLock
+
 
 class AACaptureSource:
-    def __init__(self, options, *, backend_factory=CaptureCardBackend):
+    def __init__(self, options, *, backend_factory=CaptureCardBackend,
+                 device_lock_factory=None):
         index = options.get("device_index", 0)
         api = options.get("api", "MSMF")
         if type(index) is not int or not 0 <= index <= 20:
@@ -37,6 +40,7 @@ class AACaptureSource:
         self.error = None
         self.release_error = None
         self.delivered = None
+        self.device_lock = (device_lock_factory or AACaptureDeviceLock)()
 
     def _pump(self):
         try:
@@ -57,20 +61,29 @@ class AACaptureSource:
             try:
                 self.backend.release()
             except Exception as exc:
+                self.device_lock.retain_until_process_exit()
                 with self.condition:
                     self.release_error = exc
                     self.error = exc
                     self.latest = None
                     self.condition.notify_all()
+            else:
+                self.device_lock.release()
 
     def read(self):
         with self.condition:
             if self.cancel.is_set():
                 return None
             if self.thread is None:
+                self.device_lock.acquire()
                 self.thread = threading.Thread(target=self._pump, daemon=True,
                                                name="aa-latest-capture-frame")
-                self.thread.start()
+                try:
+                    self.thread.start()
+                except Exception:
+                    self.thread = None
+                    self.device_lock.release()
+                    raise
             ready = self.condition.wait_for(
                 lambda: self.error is not None or self.cancel.is_set()
                 or self.latest is not None and self.latest["source_frame"] != (
@@ -96,7 +109,10 @@ class AACaptureSource:
             if self.release_error is not None:
                 raise self.release_error
         else:
-            self.backend.release()
+            try:
+                self.backend.release()
+            finally:
+                self.device_lock.release()
 
 
 class AADevelopmentSource:

@@ -82,7 +82,9 @@ def test_browser_cannot_select_arbitrary_replay(tmp_path):
         factory({"mode": "development-replay", "path": str(tmp_path)})
 
 
-def test_capture_thread_release_failure_reaches_session_owner():
+def test_capture_thread_release_failure_reaches_session_owner(tmp_path):
+    from poker_engine.desktop.aa_device_lock import AACaptureDeviceLock
+
     class Backend:
         def __init__(self, **kwargs):
             pass
@@ -93,7 +95,9 @@ def test_capture_thread_release_failure_reaches_session_owner():
         def release(self):
             raise RuntimeError("release failed")
 
-    source = AACaptureSource({}, backend_factory=Backend)
+    source = AACaptureSource({}, backend_factory=Backend, device_lock_factory=lambda:
+                             AACaptureDeviceLock(tmp_path / "fake.lock",
+                                                 legacy_lock_path=None))
     with pytest.raises(RuntimeError):
         source.read()
     with pytest.raises(RuntimeError, match="release failed"):

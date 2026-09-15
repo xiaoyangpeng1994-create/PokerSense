@@ -4,6 +4,8 @@
 
 ## AA 八座开发工具
 
+当前增量支持[手动桌规、连续观察、问题记录与多人河牌条件分析](docs/AA-TABLE-VALIDATION-V2.zh-CN.md)，可使用[便携私有资源包](docs/AA-RUNTIME-BUNDLE.zh-CN.md)。条件分析通过独立进程运行，示例与当前观察分开；真实视觉资格和高盈利策略尚未成立。
+
 新增独立的 AA 八座观察入口：支持本机模型预检、明确开始/停止、设备编号选择、开发帧回放、八座字段与预览、异常和过期清空。运行与打包见 [AA 观察工具](docs/AA-LIVE-MONITOR-V1.zh-CN.md)。当前已验证源码开发回放与浏览器操作；采集卡实机、完整合法状态和强多人策略尚未验收。私有模型外置，不包含在公开仓库或安装包中。
 
 当前执行路线：[AA视觉优先工作计划](PLAN-AA-vision-first.zh-CN.md)；[WPK视频计划](PLAN-WPK-video-first.zh-CN.md)保留为回归；规则与案例：[德州规则底稿](docs/WPK-RULEBOOK.zh-CN.md)。先使用本地录像推进，最后做采集卡真机验收。

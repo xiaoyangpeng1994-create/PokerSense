@@ -62,6 +62,7 @@ function clearCurrent(reason) {
   el("quality").textContent = "无当前有效帧"; el("freshness").textContent = reason;
   const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "当前无动作候选"; el("actions").replaceChildren(empty);
   listBlockers(["等待当前帧与完整牌局输入"]);
+  el("state-closure").textContent = "等待完整开局上下文。";
 }
 function controls() {
   const active = ["STARTING", "RUNNING", "STALE", "STOPPING"].includes(String(statusData.status).toUpperCase());
@@ -83,6 +84,8 @@ function render(row, state) {
   el("pot").textContent = text(row.pot?.value); el("street").textContent = translated(observed.street_candidate);
   el("actor").textContent = Number.isInteger(row.current_actor) ? `座位 ${row.current_actor}` : "未知";
   el("dealer").textContent = Number.isInteger(row.dealer_seat) ? `座位 ${row.dealer_seat}` : Number.isInteger(row.dealer_observation_v2?.dealer_seat) ? `单帧候选 ${row.dealer_observation_v2.dealer_seat}（等待开局）` : "未知";
+  const ledger = row.hand_ledger_v2 || {};
+  el("state-closure").textContent = `${observed.observed_epoch ? "已观察到开局候选" : "未见完整开局，等待下一手"} · 可追溯投入 ${text(ledger.observed_total)} · 与显示底池差额 ${text(ledger.unallocated_difference)}（未解释，不能作为抽水或盈利）`;
   el("sequence").textContent = text(state.sequence); el("source-frame").textContent = text(state.source_frame ?? row.frame);
   el("latency").textContent = Number.isFinite(state.processing_ms) ? `${state.processing_ms.toFixed(0)} ms` : "未记录";
   const fields = [row.cards?.hero, row.board_count, row.pot?.value, row.current_actor, row.dealer_seat, observed.street_candidate];
@@ -97,8 +100,8 @@ function render(row, state) {
   const supplied = row.strategy_blockers || row.missing_fields || [];
   if (Array.isArray(supplied)) for (const value of supplied) if (typeof value === "string") reasons.push(value);
   listBlockers([...new Set(reasons)].slice(0, 14));
-  const actions = Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
-  if (actions.length) el("actions").replaceChildren(...actions.slice(-16).map(action => {
+  const actions = Array.isArray(row.action_history_candidate) ? row.action_history_candidate : Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
+  if (actions.length) el("actions").replaceChildren(...actions.slice(-48).map(action => {
     const node = document.createElement("span"); node.className = "action-item";
     node.textContent = `座位 ${text(action.slot)} · ${translated(action.kind)} · 金额 ${text(action.amount)} · 帧 ${text(action.frame)}`; return node;
   }));
@@ -139,6 +142,7 @@ async function poll() {
     const advanced = state.generation !== serverGeneration || incomingSequence !== sequence;
     serverGeneration = state.generation; sequence = incomingSequence; if (advanced) lastProgress = Date.now();
     statusData = state; controls(); error(state.error ? text(state.error) : "");
+    if (typeof renderAnalysis === "function") renderAnalysis(state.analysis, state);
     el("profile").textContent = typeof state.profile === "string" ? state.profile : JSON.stringify(state.profile ?? "未配置", null, 2);
     el("source-kind").textContent = state.source_kind === "capture-card" ? "实体采集卡" : state.source_kind === "development-replay" ? "开发回放 · 非现场" : text(state.source_kind);
     if (status !== "RUNNING" || !state.payload || Date.now() - lastProgress > 3000) {
@@ -152,10 +156,12 @@ async function poll() {
     if (epoch !== localEpoch || ticket !== requestId) return;
     clearCurrent("服务连接中断或读取失败，已清空当前字段与预览。"); indicator("连接异常", "bad"); error(`读取状态失败：${failure.message}`);
     statusData = {...statusData, connection_failed:true}; controls(); sequence = -1; serverGeneration = -1;
+    if (typeof clearAnalysis === "function") clearAnalysis("服务已断开，当前分析结果已隐藏。");
   } finally { clearTimeout(timeout); if (pollAbort === abort) pollAbort = null; }
 }
 async function command(action) {
   const epoch = ++localEpoch; ++requestId; if (pollAbort) pollAbort.abort();
+  if (typeof invalidateAnalysis === "function") invalidateAnalysis("来源正在启动或停止，旧分析已失效。");
   clearCurrent(action === "start" ? "正在启动，等待第一帧。" : "正在停止，当前字段已清空。"); error(); pending = true; controls();
   const abort = new AbortController(), timeout = setTimeout(() => abort.abort(), 15000);
   try {

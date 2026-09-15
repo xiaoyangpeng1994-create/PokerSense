@@ -34,6 +34,26 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AA INTEGRATED TABLE VALIDATION V2:** continued with new account;
+  packagedEXE now actually starts and runs model/development frames plus terminal
+  andthreeway spawned analysis,overcoming prior blocked smoke. Added manualAA
+  rules/nullunknowns/versioning,continuous manifest-bound multi-pool replay,
+  same-frame user-triggered local issueJPEG+JSON,OS capture lock and10s separate
+  analysis process. Manual input never becomes visual or live authority;old
+  analysis invalidates on edits/rules/source changes. Reader resourceV3 bundle
+  34files/24PNG/22,429,499bytes,baseline5frames unchanged,knownmuck suppressed
+  andlightallin detected(developmenttemplateoverlap). Full3756pass/7skip/1warning;
+  focus,packagedHTTP/browser/independentreview evidence retained privately.
+  Realhardware unavailable,completelegalstate andstrongstrategy remain incomplete;
+  source1260-1606dev autoepoch/dealer restored,unallocatedcash6 remains.
+  Final3842frame two-hand runtime regression:3context/3839scored,38actions,
+  sparse59/state45/38390historicalfieldchecks identical;107blocked retained,
+  no readergapreset. Cashpositive94/516/559/192 remainunallocated. UI14case
+  regression covers cross-tab staleEV;IPC-exit race fixed. Developmentonly.
+  Finalfull3757pass/7skip/1warning(57.19s),lint0;earlier3756retained aspriorcheck.
+  No WPK development,device/control/holdout/thirdparty solver or training.
+  See docs/AA-TABLE-VALIDATION-V2.zh-CN.md and private aa-live-integration-20260915-v2.
+
 - **2026-09-15 ISOLATED MANUAL ANALYSIS FACADE:** AAConditionalAnalysis runs
   terminal/threeway manual JSON in one disposable multiprocessing spawn worker.
   Fixed input/binding/output budgets and4096terminal/128threeway assignments,

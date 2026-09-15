@@ -202,11 +202,17 @@ class AAConditionalAnalysis:
                     if (self._report["job_id"] != job_id
                             or self._report["status"] != "RUNNING"):
                         return
-                if receiver.poll(0.025):
+                ready = receiver.poll(0.025)
+                if not ready and not process.is_alive():
+                    # The child may send and exit between poll() returning
+                    # False and the liveness check. Drain its queued final
+                    # message before treating the exit as an empty result.
+                    ready = receiver.poll(0)
+                    if not ready:
+                        break
+                if ready:
                     message = json.loads(receiver.recv_bytes(MAX_OUTPUT_BYTES))
                     self._validate_message(message)
-                    break
-                if not process.is_alive():
                     break
         except (EOFError, OSError, ValueError, TypeError, UnicodeError) as exc:
             message = None

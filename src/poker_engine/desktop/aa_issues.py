@@ -11,7 +11,8 @@ import uuid
 def save_issue(directory, evidence, note, category, table_rules):
     if not isinstance(note, str) or len(note) > 2000:
         raise ValueError("问题说明最多 2000 字")
-    if category not in {"cards", "amounts", "actor", "state", "other"}:
+    if not isinstance(category, str) or category not in {
+            "cards", "amounts", "actor", "state", "other"}:
         raise ValueError("不支持的问题类别")
     snapshot, preview = evidence
     if snapshot.get("status") != "RUNNING" or not snapshot.get("payload"):

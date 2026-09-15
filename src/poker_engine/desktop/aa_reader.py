@@ -163,6 +163,9 @@ class AA8Reader:
         self.preflight = preflight_profile(profile_path, bundle_sha256=bundle_sha256)
         if not self.preflight["ready"]:
             raise ValueError("; ".join(self.preflight["errors"]))
+        self._profile_sha256 = hashlib.sha256(
+            Path(profile_path).read_bytes()).hexdigest()
+        self._bundle_sha256 = bundle_sha256
         _, spec, references = _profile(profile_path)
         state = (factory or _create_candidate)(spec)
         supplement = None
@@ -216,6 +219,8 @@ class AA8Reader:
                 observation_sequence=frame, reader_gap_reset=reset,
                 pixel_hash_encoding="raw BGR uint8 498x1080",
                 candidate_only=True, strategy_eligible=False, advice_emitted=False,
+                runtime_profile_sha256=self._profile_sha256,
+                runtime_bundle_sha256=self._bundle_sha256,
                 complete_legal_state=False,
                 actions_complete_and_canonical_verified=False)
             row["source_frame"] = sample.get("source_frame")
@@ -226,6 +231,9 @@ class AA8Reader:
                     "source_png_sha256", "source_playlist_sha256",
                     "source_pool", "source_file")
                 if key in sample}
+            row["action_history_candidate"] = list(
+                getattr(self._state.adapter, "actions", [])[-256:]) if hasattr(
+                    self._state, "adapter") else []
             self._last = (frame, pts, source)
             self._invalidated = False
             return row

@@ -13,6 +13,7 @@ const ruleFields = {
   mushroom: ["种蘑菇", {unknown:"未知", off:"关闭", on:"开启"}]
 };
 let rulesRevision = null;
+let issueSaving = false;
 for (const [key, [title, type]] of Object.entries(ruleFields)) {
   const label = document.createElement("label"); label.textContent = title;
   const input = document.createElement(typeof type === "string" ? "input" : "select");
@@ -34,6 +35,7 @@ async function loadRules() {
 }
 async function saveRules(reset) {
   if (!rulesRevision) return;
+  if (typeof invalidateAnalysis === "function") invalidateAnalysis("正在保存本桌规则，旧分析已失效。");
   const document = {};
   for (const [key, [, type]] of Object.entries(ruleFields)) {
     const value = reset ? (key === "table_label" ? "" : typeof type === "object" && !Array.isArray(type) ? "unknown" : "") : el(`rule-${key}`).value.trim();
@@ -45,12 +47,13 @@ async function saveRules(reset) {
 el("rules-form").addEventListener("submit", event => { event.preventDefault(); saveRules(false); });
 el("rules-reset").addEventListener("click", () => saveRules(true));
 el("issue-form").addEventListener("submit", async event => {
-  event.preventDefault(); el("issue-save").disabled = true;
+  event.preventDefault(); if (issueSaving) return; issueSaving = true; el("issue-save").disabled = true;
   try {
     const response = await fetch("/api/issues", {method:"POST", headers:{...headers,"Content-Type":"application/json"}, body:JSON.stringify({note:el("issue-note").value,category:el("issue-category").value})});
     const result = await response.json(); if (!response.ok) throw Error(text(result.detail));
     el("issue-feedback").textContent = `已保存，待复核：${result.directory}`; el("issue-note").value = "";
   } catch (e) { el("issue-feedback").textContent = `未保存：${e.message}`; }
+  finally { issueSaving = false; }
 });
-setInterval(() => { el("issue-save").disabled = statusData.status !== "RUNNING" || !statusData.payload || !statusData.issue_recording_available; }, 800);
+setInterval(() => { el("issue-save").disabled = issueSaving || statusData.status !== "RUNNING" || !statusData.payload || !statusData.issue_recording_available; }, 800);
 loadRules();

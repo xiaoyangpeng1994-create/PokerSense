@@ -9,7 +9,7 @@ class Session:
         self.stops = 0
 
     def snapshot(self):
-        return {"status": "STOPPED", "payload": None}
+        return {"status": "STOPPED", "generation": self.stops, "payload": None}
 
     def preview(self):
         return None
@@ -104,3 +104,58 @@ def test_issue_recording_disabled_without_explicit_directory(tmp_path):
         assert not client.get("/api/status").json()["issue_recording_available"]
         assert client.post("/api/issues", headers=HEADERS,
                            json={"note": "", "category": "cards"}).status_code == 403
+
+
+class Analysis:
+    def __init__(self):
+        self.report = {"status": "IDLE", "binding": {}}
+        self.calls = []
+
+    def start(self, kind, document, *, binding):
+        self.calls.append((kind, document, binding))
+        self.report = {"status": "COMPLETE", "binding": binding,
+                       "result": {"strategy_eligible": False}}
+        return self.report
+
+    def cancel(self):
+        self.report = {"status": "CANCELLED", "binding": {}}
+        return self.report
+
+    def status(self):
+        return self.report
+
+
+def test_analysis_binds_rules_and_invalidates_on_generation_change(tmp_path):
+    session, analysis = Session(), Analysis()
+    app = aa_server.create_app(tmp_path / "missing", session=session,
+                               analysis_service=analysis)
+    with TestClient(app) as client:
+        rules = client.get("/api/rules").json()
+        sample = client.get("/api/analysis/example/terminal").json()["document"]
+        body = {"kind": "terminal", "document": sample,
+                "rules_source": "table", "rules_revision": rules["revision"]}
+        assert client.post("/api/analysis", headers=HEADERS,
+                           json=body).status_code == 400
+        body["rules_source"] = "document"
+        response = client.post("/api/analysis", headers=HEADERS, json=body)
+        assert response.status_code == 200
+        assert analysis.calls[0][2]["table_rules_revision"] == rules["revision"]
+        assert analysis.calls[0][2]["effective_rules"] == sample["rules"]
+        assert analysis.calls[0][2]["input_source"].startswith("MANUAL_HYPOTHESIS")
+        session.stops += 1
+        assert client.get("/api/status").json()["analysis"]["status"] == "CANCELLED"
+        body["rules_revision"] = "stale"
+        assert client.post("/api/analysis", headers=HEADERS,
+                           json=body).status_code == 400
+
+
+def test_analysis_rejects_duplicate_keys_and_large_body(tmp_path):
+    app = aa_server.create_app(tmp_path / "missing", session=Session(),
+                               analysis_service=Analysis())
+    with TestClient(app) as client:
+        headers = {**HEADERS, "Content-Type": "application/json"}
+        response = client.post("/api/analysis", headers=headers,
+                               content='{"kind":"terminal","kind":"threeway"}')
+        assert response.status_code == 400
+        assert client.post("/api/analysis", headers=headers,
+                           content=' ' * 220001).status_code == 413

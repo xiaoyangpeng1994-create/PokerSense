@@ -216,3 +216,57 @@ def test_invalid_requests_rejected_before_spawning(kind, value, binding, reason)
 def test_limits_cannot_be_disabled(options):
     with pytest.raises(ValueError):
         AAConditionalAnalysis(**options)
+
+
+@pytest.mark.parametrize("forged_authority", [False, True])
+def test_result_arriving_between_poll_and_child_exit_is_drained_and_validated(
+        forged_authority):
+    envelope = {"status": "COMPLETE", "error": None, "result": {
+        "status": "COMPLETE_CONDITIONAL", "strategy_eligible": forged_authority,
+        "advice_emitted": False}}
+
+    class Receiver:
+        queued = False
+        reads = 0
+        closed = False
+
+        def __init__(self):
+            self.poll_timeouts = []
+
+        def poll(self, timeout=0):
+            self.poll_timeouts.append(timeout)
+            return self.queued
+
+        def recv_bytes(self, maxlength):
+            assert maxlength == 2_000_000
+            self.reads += 1
+            return json.dumps(envelope).encode()
+
+        def close(self):
+            self.closed = True
+
+    receiver = Receiver()
+
+    class ExitedProcess:
+        def is_alive(self):
+            # The first timed poll has already returned false; then the child
+            # sends its result and exits before the watcher checks liveness.
+            receiver.queued = True
+            return False
+
+        def join(self, timeout):
+            pass
+
+    service = AAConditionalAnalysis()
+    service._report.update(status="RUNNING", job_id="exit-during-poll")
+    service._watch("exit-during-poll", ExitedProcess(), receiver, time.monotonic() + 3)
+    report = service.status()
+    assert receiver.poll_timeouts == [0.025, 0]
+    assert receiver.reads == 1 and receiver.closed
+    if forged_authority:
+        assert report["status"] == "ERROR" and report["result"] is None
+        assert "protocol_error" in report["error"]
+    else:
+        assert report["status"] == "COMPLETE"
+        assert report["result"] == envelope["result"]
+    assert report["strategy_eligible"] is False and report["advice_emitted"] is False

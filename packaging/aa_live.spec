@@ -5,7 +5,13 @@ root = Path(SPECPATH).resolve().parent
 a = Analysis(
     [str(root / "packaging" / "aa_live_entry.py")],
     pathex=[str(root / "src"), str(root)],
-    binaries=[], datas=[(str(root / "ui" / "aa-live"), "ui/aa-live")],
+    binaries=[], datas=[(str(root / "ui" / "aa-live"), "ui/aa-live"),
+                       (str(root / "configs" / "strategy" / "examples" /
+                            "terminal-multiway-river-manual.json"),
+                        "configs/strategy/examples"),
+                       (str(root / "configs" / "strategy" / "examples" /
+                            "threeway-river-response-manual.json"),
+                        "configs/strategy/examples")],
     hiddenimports=["uvicorn.loops.auto", "uvicorn.loops.asyncio",
                    "uvicorn.protocols.http.auto", "uvicorn.protocols.http.h11_impl",
                    "uvicorn.lifespan.on"],
