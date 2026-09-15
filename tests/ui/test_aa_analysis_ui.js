@@ -37,7 +37,7 @@ function harness() {
   });
   h.run = source => vm.runInContext(source, context);
   h.pendingCancelTimers = () => [...timers.values()].filter(fn => fn.name === "cancelAnalysis").length;
-  for (const name of ["app.js", "controls.js", "analysis.js"]) {
+  for (const name of ["app.js", "controls.js", "analysis.js", "review.js"]) {
     vm.runInContext(fs.readFileSync(path.join(root, "ui/aa-live", name), "utf8"), context, {filename: name});
   }
   h.el("mode").value = "development-replay"; h.el("device").value = "0"; h.el("api").value = "MSMF";
@@ -64,6 +64,61 @@ const response = value => Promise.resolve({ok: true, json: async () => value});
 
 async function main() {
   let cases = 0;
+  {
+    const h=harness(); h.run('showDesk("watch")');
+    assert.equal(h.el("settings-view").hidden,true);
+    assert.equal(h.el("review-view").hidden,true);
+    assert.equal(h.el("watch-view").hidden,false);
+    h.run('showDesk("settings")');
+    assert.equal(h.el("watch-view").hidden,true);
+    assert.equal(h.el("settings-view").hidden,false); cases++;
+  }
+  {
+    const h=harness();
+    h.run('statusData={status:"RUNNING",payload:{},issue_recording_available:true};reviewButtons()');
+    h.fetchImpl=()=>response({issue:{issue_id:"saved-one",observation:{source_frame:120}}});
+    await h.run("markFrame()");
+    assert.equal(h.run("lastMarked"),"saved-one");
+    assert.equal(h.run("deskView"),"watch");
+    assert.equal(h.el("open-marked").disabled,false);
+    assert.ok(h.el("mark-feedback").textContent.includes("120"));
+    assert.equal(h.calls.at(-1).url,"/api/review/mark"); cases++;
+  }
+  {
+    const h=harness();let deliver;
+    const delayed=new Promise(resolve=>{deliver=resolve;});
+    h.fetchImpl=url=>url.endsWith("old") ? delayed : response(url.includes("config") ? {key_configured:false} : {issue:{issue_id:"new",saved_at:"2026-09-15",observation:{source_frame:200,payload:{}}},human:null,ai:null});
+    const old=h.run('selectReview("old")');
+    await h.run('selectReview("new")');
+    deliver({ok:true,json:async()=>({issue:{issue_id:"old",observation:{source_frame:100}}})});await old;
+    assert.equal(h.run("selectedReview.issue.issue_id"),"new");
+    assert.ok(h.el("review-frame").textContent.includes("200"));
+    assert.equal(h.el("ai-consent").checked,false); cases++;
+  }
+  {
+    const h=harness();h.document.hidden=false;
+    h.run('deskView="review";selectedReview={issue:{issue_id:"saved"},human:{revision:"original"},ai:{status:"RUNNING"}}');
+    h.el("human-note").value="正在输入的纠正内容";
+    h.fetchImpl=url=>response(url.includes("config") ? {key_configured:true,busy:false,calls_today:1,daily_limit:20} : {ai:{status:"COMPLETE",result:{summary:"<script>text only</script>",findings:[]}},human:{note:"another tab",revision:"other"}});
+    await h.run("refreshAI()");
+    assert.equal(h.el("human-note").value,"正在输入的纠正内容");
+    assert.equal(h.run("selectedReview.human.revision"),"original");
+    assert.equal(h.el("ai-result").textContent,"<script>text only</script>"); cases++;
+  }
+  {
+    const h=harness();
+    h.run('selectedReview={issue:{issue_id:"one"}};reviewConfig={key_configured:true,busy:false,calls_today:0,daily_limit:2};reviewButtons()');
+    assert.equal(h.el("ai-run").disabled,true);
+    h.el("ai-consent").checked=true;h.run("reviewButtons()");
+    assert.equal(h.el("ai-run").disabled,false);
+    h.run('reviewConfig.calls_today=2;reviewButtons()');
+    assert.equal(h.el("ai-run").disabled,true);
+    h.el("ai-key").value="synthetic-secret";h.el("ai-model").value="deepseek-flash";h.el("ai-limit").value="20";
+    h.fetchImpl=()=>response({key_configured:true,calls_today:0,daily_limit:20});
+    const save=h.el("ai-config-form").dispatch("submit");
+    assert.equal(h.el("ai-key").value,"");await save;
+    assert.ok(!h.el("api-feedback").textContent.includes("synthetic-secret"));cases++;
+  }
   {
     const h = harness();
     assert.equal(h.el("preview-expand").disabled, true);

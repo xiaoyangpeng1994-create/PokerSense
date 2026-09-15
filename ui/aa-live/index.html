@@ -1,67 +1,58 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PokerSense · AA 实时观察</title>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PokerSense · AA 观察与复查</title>
   <link rel="stylesheet" href="/style.css">
-  <script src="/app.js" defer></script>
-  <script src="/controls.js" defer></script>
-  <script src="/analysis.js" defer></script>
+  <script src="/app.js" defer></script><script src="/controls.js" defer></script>
+  <script src="/analysis.js" defer></script><script src="/review.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <div><span class="wordmark">POKERSENSE</span><h1>AA 实时观察台</h1></div>
-    <span id="connection" class="status neutral" role="status">正在连接服务</span>
-  </header>
-  <main>
-    <section class="intro"><div><p class="eyebrow">手机 · 采集卡 · 8 座布局</p><h2>看清当前牌桌，保留每一个未知。</h2></div><p>当前展示识别候选；完整牌局和策略尚未验收。设备须在你点击开始后才会打开。</p></section>
-    <section class="panel controls" aria-labelledby="source-title">
-      <div class="section-heading"><h2 id="source-title">画面来源</h2><span id="source-kind" class="muted">未启动</span></div>
-      <form id="start-form">
-        <label>来源<select id="mode"><option value="development-replay" disabled>已登记开发回放</option><option value="capture-card" disabled>实体采集卡</option></select></label>
-        <label>设备编号<input id="device" type="number" min="0" max="20" step="1" value="0"></label>
-        <label>Windows 接口<select id="api"><option value="MSMF">MSMF</option><option value="DSHOW">DirectShow</option></select></label>
-        <button id="start" type="submit" disabled>开始观察</button><button id="stop" type="button" class="secondary" disabled>停止并清空</button>
-      </form>
-      <p id="availability" class="muted">正在检查服务配置…</p>
-      <details><summary>识别配置与来源</summary><pre id="profile">等待配置</pre></details>
-      <p id="error" class="error" role="alert" hidden></p>
-    </section>
-    <section class="panel">
-      <div class="section-heading"><h2>本桌规则</h2><span id="rules-status" class="tag">未配置</span></div>
-      <p class="footnote">换桌后请核对规则。输入值标为人工配置，不会成为视觉真值。留空表示未知；保存或清空规则会停止当前观察，避免沿用上一桌状态。</p>
-      <details id="rules-details"><summary>填写大小盲、前注、straddle 和费用</summary>
-        <form id="rules-form"><div id="rules-fields" class="rules-grid"></div><div class="button-row"><button type="submit">保存本桌规则</button><button id="rules-reset" type="button" class="secondary">换桌：清空规则</button></div></form>
-      </details><p id="rules-feedback" class="muted" role="status"></p>
-    </section>
-    <section class="metrics" aria-label="当前运行状态">
-      <div><span>已处理序号</span><strong id="sequence">—</strong></div><div><span>来源帧</span><strong id="source-frame">—</strong></div><div><span>本帧处理</span><strong id="latency">—</strong></div><div><span>字段候选 / 22</span><strong id="coverage">—</strong></div>
-    </section>
-    <div class="workspace">
-      <section class="panel table-panel" aria-labelledby="table-title">
-        <div class="section-heading"><h2 id="table-title">当前牌桌</h2><span id="quality" class="tag">等待当前帧</span></div>
-        <p id="freshness" class="muted" aria-live="polite">尚未开始观察；没有显示历史牌面。</p>
-        <div class="board-zone"><span class="eyebrow">公共牌 · 当前帧候选</span><div id="board" class="cards" aria-label="公共牌"></div><div class="pot-line"><span>底池 <strong id="pot">未知</strong></span><span>街道 <strong id="street">未知</strong></span></div></div>
-        <div class="hero-line"><div><span class="eyebrow">HERO · 座位 4</span><div id="hero" class="cards" aria-label="Hero 手牌"></div></div><dl><div><dt>当前行动者</dt><dd id="actor">未知</dd></div><div><dt>庄位</dt><dd id="dealer">未知</dd></div></dl></div>
-        <div id="seats" class="seat-grid" aria-label="八个物理座位"></div>
-        <p class="footnote">筹码与投入分别显示。参与状态为可见线索；座位 4 固定为 Hero。未知不会沿用上一帧。</p>
-        <p id="state-closure" class="footnote">等待完整开局上下文。</p>
+<header class="topbar"><div><span class="wordmark">POKERSENSE</span><h1>AA 观察台</h1></div><span id="connection" class="status neutral" role="status">正在连接</span></header>
+<nav class="view-nav" aria-label="工作区"><button id="nav-watch" type="button" aria-pressed="true">观察</button><button id="nav-review" type="button" aria-pressed="false">复查记录</button><button id="nav-settings" type="button" aria-pressed="false">设置与分析</button></nav>
+<main>
+<p id="error" class="error" role="alert" hidden></p>
+<section id="watch-view" aria-label="实时观察">
+  <div class="watch-toolbar"><span id="source-kind" class="muted">未启动</span><div class="button-row"><button id="start" type="submit" form="start-form" disabled>开始观察</button><button id="stop" type="button" class="secondary" disabled>停止并清空</button></div></div>
+  <div class="live-layout">
+    <section class="panel preview-panel"><div class="section-heading"><h2>原画面</h2><button id="preview-expand" class="secondary" type="button" aria-haspopup="dialog" disabled>大图预览</button></div><div class="preview-box"><img id="preview" alt="当前 AA 来源画面" hidden><p id="preview-empty">开始后显示最新画面</p></div><p class="footnote">实时预览。复查时请标记，保存同一时刻的画面和识别结果。</p></section>
+    <div class="watch-column">
+      <section class="panel table-panel"><div class="section-heading"><h2>当前牌桌</h2><span id="quality" class="tag">等待画面</span></div><p id="freshness" class="muted">尚未开始观察</p>
+        <div class="board-zone"><span class="eyebrow">公共牌</span><div id="board" class="cards" aria-label="公共牌"></div><div class="pot-line"><span>底池 <strong id="pot">未知</strong></span><span><strong id="street">未知</strong></span></div></div>
+        <div class="hero-line"><div><span class="eyebrow">我的手牌 · 座位 4</span><div id="hero" class="cards" aria-label="Hero 手牌"></div></div><dl><div><dt>当前行动者</dt><dd id="actor">未知</dd></div><div><dt>庄位</dt><dd id="dealer">未知</dd></div></dl></div>
+        <div class="mark-row"><button id="mark-frame" type="button" disabled>标记此刻 · 稍后复查</button><button id="open-marked" type="button" class="secondary" disabled>查看刚才标记</button></div><p id="mark-feedback" class="muted" role="status">发现问题时先标记，后台观察会继续。</p>
       </section>
-      <aside class="side-column">
-        <section class="panel preview-panel"><div class="section-heading"><h2>源画面预览</h2><button id="preview-expand" class="secondary" type="button" aria-haspopup="dialog" disabled>大图预览</button></div><div class="preview-box"><img id="preview" alt="当前 AA 来源画面" hidden><p id="preview-empty">开始后显示最新画面</p></div><p class="footnote">预览实时更新。点击“大图预览”可放大查看；预览与字段独立更新，不作为精确同步证据。</p></section>
-        <section class="panel strategy-panel"><div class="section-heading"><h2>策略状态</h2><span class="tag blocked">未启用</span></div><p>当前不能据此输出可靠的多人行动建议。</p><ul id="blockers"><li>等待当前牌局输入</li></ul><p class="footnote">还需要合格的 AA 多人策略及独立效果验证。识别候选数量不代表准确率或实战胜率。</p></section>
-      </aside>
+      <section class="panel recent-actions"><div class="section-heading"><h2>动作记录</h2><span class="muted">识别候选</span></div><div id="actions" class="actions"><p class="muted">等待动作</p></div></section>
+      <p class="watch-scope">当前用于识别观察与复查。策略建议尚未启用。</p>
+      <details class="panel seat-details"><summary>查看八座筹码与牌局详情</summary><div id="seats" class="seat-grid" aria-label="八个座位"></div><p id="state-closure" class="footnote">等待完整开局</p></details>
     </div>
-    <section class="panel"><div class="section-heading"><h2>本次观察的动作记录</h2><span class="muted">最近 48 项候选，不证明未漏动作</span></div><div id="actions" class="actions"><p class="muted">当前无动作候选</p></div></section>
-    <section class="panel"><div class="section-heading"><h2>记录识别问题</h2><span class="tag">仅保存到本机</span></div><p class="footnote">点击保存时记录当前字段、匹配画面、规则和你的说明。记录尚未审阅，不自动用作训练或验收数据。</p><form id="issue-form"><label>类别<select id="issue-category"><option value="cards">牌面</option><option value="amounts">金额</option><option value="actor">行动者</option><option value="state">牌局状态</option><option value="other">其他</option></select></label><label>问题说明<input id="issue-note" maxlength="2000" placeholder="例如：这个位置应为 250，画面显示未知"></label><button id="issue-save" type="submit" disabled>保存问题（含当前画面）</button></form><p id="issue-feedback" class="muted" role="status"></p></section>
-    <section class="panel" id="analysis-panel"><div class="section-heading"><h2>多人河牌条件分析</h2><span class="tag blocked">手工假设 · 非实时建议</span></div><p>计算完整输入下各动作的净期望收益。对手范围和响应模型仍需明确提供；示例不代表当前牌桌，也不证明盈利。</p><div class="button-row"><label>分析范围<select id="analysis-kind"><option value="terminal">Hero 对多名已全下对手：河牌跟注/弃牌</option><option value="threeway">三名活跃玩家：有限河牌下注树</option></select></label><button id="analysis-example" class="secondary" type="button">载入手工示例（非本桌）</button></div><p class="footnote">终结分析支持 6–8 人桌、2–7 名已全下对手；三人分析要求河牌开始恰好 3 名活跃玩家，不支持跨越 all-in 或边池。缺项和超时会拒绝返回动作结果。</p><label for="analysis-input">完整手工场景 JSON</label><textarea id="analysis-input" rows="10" spellcheck="false" placeholder="先载入示例查看格式；填写你已确认的牌局输入和对手假设。"></textarea><label class="inline-label"><input id="analysis-use-rules" type="checkbox"> 使用上方已完整填写的本桌规则（覆盖场景中的规则）</label><div class="button-row"><button id="analysis-start" type="button">计算条件收益</button><button id="analysis-cancel" class="secondary" type="button">取消并清空分析</button><button id="analysis-export" class="secondary" type="button" disabled>导出本次分析</button></div><p id="analysis-status" role="status">尚未计算。</p><div id="analysis-results"></div><details><summary>完整结果与假设</summary><pre id="analysis-raw">无结果</pre></details></section>
-    <footer>本机观察工具 · 不自动操作牌桌 · 停止、断线、异常或画面过期时清空字段与预览</footer>
-  </main>
-  <dialog id="preview-dialog" aria-labelledby="preview-title" aria-describedby="preview-help">
+  </div>
+</section>
+<section id="review-view" aria-label="冻结画面复查" hidden>
+  <div class="watch-toolbar"><div><h2>复查记录</h2><p class="muted">这里显示已保存的固定画面，后台观察继续。人工记录和 AI 复核分别保留。</p></div><button id="review-refresh" class="secondary" type="button">刷新列表</button></div>
+  <div class="review-picker"><label for="review-select">最近 30 条记录</label><select id="review-select"><option value="">请先标记一帧</option></select><span id="review-count" class="muted"></span></div>
+  <p id="review-feedback" role="status" class="muted"></p>
+  <div id="review-content" class="review-layout" hidden>
+    <section class="panel"><div class="section-heading"><h2>冻结画面</h2><span id="review-frame" class="tag"></span></div><img id="review-image" alt="已保存的固定复查画面"><p id="review-source" class="footnote"></p></section>
+    <div class="watch-column">
+      <section class="panel"><h2>这一刻的识别结果</h2><div id="review-fields" class="review-fields"></div></section>
+      <section class="panel"><h2>我的复查</h2><form id="human-review-form"><label>核对结果<select id="human-verdict"><option value="unreadable">看不清 / 尚不能确认</option><option value="incorrect">有错误</option><option value="correct">已核对，所查字段正确</option></select></label><label>核对了哪些字段？正确内容是什么？<textarea id="human-note" rows="3" maxlength="2000" placeholder="例如：座位 4 本次跟注是 120，程序显示 720。仅核对这一项。"></textarea></label><button id="human-save" type="submit">保存人工复查</button></form><p id="human-feedback" class="muted" role="status"></p></section>
+      <section class="panel"><div class="section-heading"><h2>DeepSeek 视觉复查</h2><span id="ai-state" class="tag">尚未提交</span></div><p class="footnote">将此冻结截图及对应牌面、金额、座位候选发送给 DeepSeek，可能包含昵称等画面信息。AI 结果待你确认，不会自动改写识别或策略。</p><label class="consent-row"><input id="ai-consent" type="checkbox">允许发送这条记录的截图和字段</label><button id="ai-run" type="button" disabled>发送此帧给 AI 复核</button><p id="ai-feedback" role="status" class="muted"></p><div id="ai-result"></div></section>
+    </div>
+  </div>
+</section>
+<section id="settings-view" aria-label="设置与条件分析" hidden>
+  <section class="panel controls"><div class="section-heading"><h2 id="source-title">画面来源</h2></div><form id="start-form"><label>来源<select id="mode"><option value="development-replay" disabled>已登记开发回放</option><option value="capture-card" disabled>实体采集卡</option></select></label><label>设备编号<input id="device" type="number" min="0" max="20" step="1" value="0"></label><label>Windows 接口<select id="api"><option value="MSMF">MSMF</option><option value="DSHOW">DirectShow</option></select></label></form><p id="availability" class="muted">检查服务配置…</p><p class="footnote">回到“观察”点击开始。采集卡只在你选择设备并开始时打开。</p></section>
+  <section class="panel"><div class="section-heading"><h2>DeepSeek API</h2><span id="api-state" class="tag">未配置</span></div><p class="footnote">密钥仅保存在本机服务内存，重启程序后需重新填写。配置不会发送图片或产生 API 请求。</p><form id="ai-config-form" class="api-config-form"><label>API Key<input id="ai-key" type="password" autocomplete="off" spellcheck="false" maxlength="512" placeholder="仅在这里填写密钥"></label><label>视觉模型<select id="ai-model"><option value="deepseek-flash">deepseek-flash</option><option value="deepseek-v4-flash-vision-exp">deepseek-v4-flash-vision-exp（兼容名称）</option></select></label><label>每天最多调用次数<input id="ai-limit" type="number" min="1" max="100" value="20"></label><div class="button-row"><button id="ai-config-save" type="submit">保存 API 配置</button><button id="ai-clear-key" class="secondary" type="button">清除密钥</button></div></form><p id="api-feedback" role="status" class="muted"></p><p class="footnote">调用 DeepSeek 官方 HTTPS 接口。每次最多一张图，30 秒停止等待，无自动重试；每日次数按 UTC 日期统计，失败请求也计数。次数上限不是金额上限。</p></section>
+  <section class="panel"><div class="section-heading"><h2>本桌规则</h2><span id="rules-status" class="tag">未配置</span></div><p class="footnote">换桌后核对；未知留空。保存或清空规则会停止观察。</p><details id="rules-details"><summary>填写大小盲、前注、straddle 和费用</summary><form id="rules-form"><div id="rules-fields" class="rules-grid"></div><div class="button-row"><button type="submit">保存本桌规则</button><button id="rules-reset" type="button" class="secondary">换桌：清空规则</button></div></form></details><p id="rules-feedback" class="muted" role="status"></p></section>
+  <details class="panel"><summary>高级：手工多人河牌条件分析</summary><section class="panel" id="analysis-panel"><div class="section-heading"><h2>多人河牌条件分析</h2><span class="tag blocked">手工假设 · 非实时建议</span></div><p>计算完整输入下各动作的净期望收益。对手范围和响应模型仍需明确提供；示例不代表当前牌桌，也不证明盈利。</p><div class="button-row"><label>分析范围<select id="analysis-kind"><option value="terminal">Hero 对多名已全下对手：河牌跟注/弃牌</option><option value="threeway">三名活跃玩家：有限河牌下注树</option></select></label><button id="analysis-example" class="secondary" type="button">载入手工示例（非本桌）</button></div><p class="footnote">终结分析支持 6–8 人桌、2–7 名已全下对手；三人分析要求河牌开始恰好 3 名活跃玩家，不支持跨越 all-in 或边池。缺项和超时会拒绝返回动作结果。</p><label for="analysis-input">完整手工场景 JSON</label><textarea id="analysis-input" rows="10" spellcheck="false" placeholder="先载入示例查看格式；填写你已确认的牌局输入和对手假设。"></textarea><label class="inline-label"><input id="analysis-use-rules" type="checkbox"> 使用上方已完整填写的本桌规则（覆盖场景中的规则）</label><div class="button-row"><button id="analysis-start" type="button">计算条件收益</button><button id="analysis-cancel" class="secondary" type="button">取消并清空分析</button><button id="analysis-export" class="secondary" type="button" disabled>导出本次分析</button></div><p id="analysis-status" role="status">尚未计算。</p><div id="analysis-results"></div><details><summary>完整结果与假设</summary><pre id="analysis-raw">无结果</pre></details></section><ul id="blockers"></ul></details>
+  <details class="panel"><summary>诊断信息与传统问题记录</summary><section class="metrics"><div><span>已处理序号</span><strong id="sequence">—</strong></div><div><span>来源帧</span><strong id="source-frame">—</strong></div><div><span>处理耗时</span><strong id="latency">—</strong></div><div><span>字段候选 / 22（非准确率）</span><strong id="coverage">—</strong></div></section><pre id="profile">等待配置</pre><form id="issue-form"><label>类别<select id="issue-category"><option value="cards">牌面</option><option value="amounts">金额</option><option value="actor">行动者</option><option value="state">状态</option><option value="other">其他</option></select></label><label>说明<input id="issue-note" maxlength="2000"></label><button id="issue-save" type="submit" disabled>保存当前问题</button></form><p id="issue-feedback" class="muted" role="status"></p></details>
+</section>
+<footer>AA 开发观察工具 · 复查结果不自动成为训练真值或实战策略</footer>
+</main>
+<dialog id="preview-dialog"aria-labelledby="preview-title" aria-describedby="preview-help">
     <div class="preview-dialog-heading"><h2 id="preview-title">源画面大图 · 实时更新</h2><button id="preview-close" type="button" class="secondary" autofocus>关闭大图</button></div>
     <p id="preview-help" class="footnote">画面继续播放，可上下滚动查看细节。按 Esc 或“关闭大图”返回；此处不会暂停或保存画面。</p>
     <div class="preview-large-box"><img id="preview-large" alt="当前 AA 来源画面放大预览" hidden><p id="preview-large-empty">当前无可用预览</p></div>
   </dialog>
-</body>
-</html>
+</body></html>

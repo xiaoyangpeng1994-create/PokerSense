@@ -19,6 +19,7 @@ from .aa_sources import source_factory
 from .aa_table_config import AATableConfigStore
 from .aa_issues import save_issue
 from .aa_analysis import AAConditionalAnalysis
+from .aa_review import AAReviewDesk, ReviewError
 
 
 def ui_root():
@@ -30,7 +31,7 @@ def ui_root():
 def create_app(profile_path, *, replay_pool=None, replay_first=None,
                replay_last=None, replay_playlist=None, allow_capture=False,
                session=None, rules_path=None, records_dir=None, bundle_sha256=None,
-               analysis_service=None):
+               analysis_service=None, review_service=None):
     profile_path = Path(profile_path)
     service = session or AARecognitionSession(
         source_factory(profile_path, replay_pool=replay_pool,
@@ -42,6 +43,7 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     )
     rules = AATableConfigStore(rules_path)
     analysis = analysis_service or AAConditionalAnalysis()
+    review = review_service or AAReviewDesk(records_dir)
     controls_lock = threading.RLock()
     profile_status = (preflight_profile(profile_path, bundle_sha256=bundle_sha256)
                       if bundle_sha256 else preflight_profile(profile_path))
@@ -51,6 +53,7 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
         yield
         service.stop()
         analysis.cancel()
+        review.close()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None,
                   lifespan=lifespan)
@@ -96,6 +99,75 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     @app.get("/analysis.js")
     def analysis_script():
         return FileResponse(ui_root() / "analysis.js", media_type="text/javascript")
+
+    @app.get("/review.js")
+    def review_script():
+        return FileResponse(ui_root() / "review.js", media_type="text/javascript")
+
+    async def review_body(request, keys):
+        raw = await request.body()
+        if len(raw) > 16000:
+            raise HTTPException(413, "复查请求过大")
+        try:
+            body = json.loads(raw)
+        except ValueError:
+            raise HTTPException(400, "复查请求需要 JSON") from None
+        if not isinstance(body, dict) or set(body) != set(keys):
+            raise HTTPException(400, "复查请求字段不完整")
+        return body
+
+    def review_call(function, *args):
+        try:
+            return function(*args)
+        except ReviewError as exc:
+            raise HTTPException(400, str(exc)) from None
+        except (ValueError, TypeError, OSError, KeyError):
+            raise HTTPException(400, "操作未完成，请检查输入、记录和 API 状态") from None
+
+    @app.get("/api/review/config")
+    def review_config():
+        return review_call(review.config)
+
+    @app.post("/api/review/config")
+    async def set_review_config(request: Request):
+        body = await review_body(request, ("api_key", "model", "daily_limit"))
+        return review_call(review.configure, body["api_key"], body["model"],
+                           body["daily_limit"])
+
+    @app.post("/api/review/clear-key")
+    async def clear_review_key(request: Request):
+        await review_body(request, ())
+        return review_call(review.clear_key)
+
+    @app.get("/api/review/issues")
+    def review_issues():
+        return {"items": review_call(review.recent)}
+
+    @app.post("/api/review/mark")
+    async def review_mark(request: Request):
+        await review_body(request, ())
+        with controls_lock:
+            evidence, current_rules = service.evidence(), rules.get()
+        return review_call(review.mark, evidence, current_rules)
+
+    @app.get("/api/review/issues/{issue_id}")
+    def review_issue(issue_id: str):
+        return review_call(review.get, issue_id)
+
+    @app.get("/api/review/issues/{issue_id}/image")
+    def review_image(issue_id: str):
+        return Response(review_call(review.image, issue_id), media_type="image/jpeg")
+
+    @app.post("/api/review/issues/{issue_id}/human")
+    async def review_human(issue_id: str, request: Request):
+        body = await review_body(request, ("verdict", "note", "revision"))
+        return review_call(review.review, issue_id, body["verdict"],
+                           body["note"], body["revision"])
+
+    @app.post("/api/review/issues/{issue_id}/ai")
+    async def review_ai(issue_id: str, request: Request):
+        body = await review_body(request, ("consent",))
+        return review_call(review.start, issue_id, body["consent"])
 
     @app.get("/api/status")
     def status():

@@ -2,6 +2,8 @@
 
 ## AA eight-seat development monitor
 
+The [focused observation and vision review desk](docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md) separates observation, saved reviews and settings. Mark a frame without stopping observation, retain human correction history, and explicitly submit that saved image and its fields to DeepSeek for candidate review. The API key stays in server memory and must be re-entered after restart. Daily request caps apply; AI output never automatically trains models or enables live strategy.
+
 The portrait source preview is larger and includes a scrollable live image dialog. Closing it keeps playback running. See the [manual first-hand review steps](docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md#人工复查操作); the dialog does not pause or save frames.
 
 The [action/settlement interpretation layer](docs/AA8-ACTION-SEMANTICS-AND-SETTLEMENT.zh-CN.md) now separates bet/raise/call from all-in using pre-debit observations and keeps historical commitments out of the current cleared-pot difference. Original observations and unknown monetary attribution remain intact; this does not authorize live strategy.

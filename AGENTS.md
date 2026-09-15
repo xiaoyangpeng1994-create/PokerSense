@@ -34,6 +34,21 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 FOCUSED AA DESK / DEEPSEEK VISION REVIEW:** three views keep
+  setup/diagnostics/manual strategy off observation screen. One-click mark keeps
+  matched frozen image/fields while observation continues; human revisions and
+  AI candidates remain separate,original observations unchanged. Fixed HTTPS
+  DeepSeek endpoint,process-memory key,explicit per-image upload,UTC daily cap,
+  one worker,no retry,30s publication timeout/late-result rejection;busy retained
+  until underlying worker exits.16backend tests and26JS cases PASS,fullsuite PASS,
+  focused lint/syntax PASS. PackagedEXE replay mark at1261/hash/stop/reopen PASS.
+  Real API tested only on synthetic image:720candidate vs120visible detected,
+  803tokens,COMPLETE;real table frames not uploaded. Browser visual QA blocked
+  by bridge;independent code review andhardware/fullstate/strongstrategy pending.
+  V4 private app atlocalhost8777;old8775 remains because process stop was denied
+  by tool policy. No model training,automatic source edits or strategy promotion.
+  See docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md;private aa-review-desk-20260915-v1.
+
 - **2026-09-15 AA PREVIEW READABILITY:** portrait preview now uses a wider
   responsive column and native aspect ratio; accessible scrollable live dialog
   opens without changing playback. Both views clear on invalidation/decode error;

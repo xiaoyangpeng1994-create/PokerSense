@@ -114,7 +114,7 @@ function render(row, state) {
   if (Array.isArray(supplied)) for (const value of supplied) if (typeof value === "string") reasons.push(value);
   listBlockers([...new Set(reasons)].slice(0, 14));
   const actions = Array.isArray(row.interpreted_action_history) ? row.interpreted_action_history : Array.isArray(row.action_history_candidate) ? row.action_history_candidate : Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
-  if (actions.length) el("actions").replaceChildren(...actions.slice(-48).map(action => {
+  if (actions.length) el("actions").replaceChildren(...actions.slice(-48).reverse().map(action => {
     const node = document.createElement("span"); node.className = "action-item";
     const kind = action.semantic_kind;
     const actionLabel = kind ? `${translated(kind)}${action.all_in ? "（全下）" : ""}${["bet","raise"].includes(kind) && action.target_total != null ? ` 至 ${action.target_total}` : ""}` : `${translated(action.kind)}字样（上下文待核）`;
