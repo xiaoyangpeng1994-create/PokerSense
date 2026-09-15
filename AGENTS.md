@@ -34,6 +34,18 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 ISOLATED MANUAL ANALYSIS FACADE:** AAConditionalAnalysis runs
+  terminal/threeway manual JSON in one disposable multiprocessing spawn worker.
+  Fixed input/binding/output budgets and4096terminal/128threeway assignments,
+  20000threeway nodes;independent Timer terminates at deadline without polling.
+  Cancel invalidates before termination;generation-bound result publication,
+  copied input/binding/reports and no partial/error-result publication.23focused
+  tests PASS including real examples,oversize/invalid/crashed child,forged live
+  flags,compute caps,unpolled timeout and cancellation/restart. No capture,
+  Provider,UI coupling or empirical promotion. Caller must cancel when saved
+  rules/manual input/source generation changes;frozen entry must freeze_support.
+  Evidence:aa-conditional-strategy-integration-20260915-v1/worker-pytest-final.log.
+
 - **2026-09-15 CONDITIONAL MULTIWAY ANALYSIS INTEGRATION:** migrated 32 existing
   research files from the preserved primary worktree onto 6d76cfc:6 modules,
   5 CLIs,11 test files,6 manual/synthetic examples and4 historical reports.
