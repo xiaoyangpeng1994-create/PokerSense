@@ -16,6 +16,8 @@ import uuid
 
 import numpy as np
 
+from .aa_semantics import AAObservationSemantics
+
 
 _POOLS = ("source", "context_source", "late_source", "bomb_pool")
 _FILES = ("bank_path", "profile_path", "heads_path", "reservations")
@@ -186,6 +188,7 @@ class AA8Reader:
         self._source = "aa8-session-" + uuid.uuid4().hex
         self._last = None
         self._invalidated = False
+        self._semantics = AAObservationSemantics()
 
     def read(self, image, frame, sample):
         try:
@@ -210,6 +213,7 @@ class AA8Reader:
                 or pts - previous[1] > 1.0))
             if reset:
                 self._state = _copy_candidate(self._initial)
+                self._semantics.reset()
             self._state.audit = source
             current_hash = hashlib.sha256(image.tobytes()).hexdigest()
             row = self._state.read(image, frame, {
@@ -234,6 +238,7 @@ class AA8Reader:
             row["action_history_candidate"] = list(
                 getattr(self._state.adapter, "actions", [])[-256:]) if hasattr(
                     self._state, "adapter") else []
+            row.update(self._semantics.observe(row))
             self._last = (frame, pts, source)
             self._invalidated = False
             return row

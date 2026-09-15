@@ -34,6 +34,28 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AA ACTION SEMANTICS / SETTLEMENT CANDIDATES:** additive desktop
+  interpreter uses bounded pre-debit same-source/epoch/street price+cash evidence;
+  raw actions/ledger untouched,allin separated frombet/raise/call. First-hand
+  2060frame rerun preservesalloldfields,21semantictypes matchreference;
+  3023check retainsUNKNOWN confirmationstreet. Terminalriver/allin+latercredits
+  +two clearedframes => waitingnextcandidate,currentledgerNone,historical629/6
+  retained. No inference ofrake/mushroom13/6,no canonical/strategy promotion.
+  28newfocused/full3786pass/7skip/1warning(52.58s),18JS checks. No model/template/
+  threshold/hardware/holdout edits orruns. Evidence private aa-semantic-stage-
+  20260915-v1/runtime-v1;see docs/AA8-ACTION-SEMANTICS-AND-SETTLEMENT.zh-CN.md.
+
+- **2026-09-15 FIRST AA HAND REVIEW:** current3c50eb0/V3 rerun2060frames
+  (3context+2057hand),21registered visible actions match seat/order/glyph/amount;
+  83sourceframes visually reviewed(6full),prior references reused,not blindgold.
+  4labels needbet/raise/call semantics;openingcash29-pot23=6 andsettlement
+  529-paid516=13 remainunallocated. Settledpot0 vs historicalledger629 needs
+  phase distinction;readable3195board rejected;UI raw/processed frame ambiguity.
+  Dense onset/confirmation1740/1741,3168/3169,3171/3174 preserve1/1/3frame delays.
+  About20min AI-assisted review,141.266s model;human labelingcostUNKNOWN.
+  No runtime/model/threshold/media-source edits,device/holdout/strategy execution.
+  See docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md;private aa-first-hand-review-20260915-v1.
+
 - **2026-09-15 AA INTEGRATED TABLE VALIDATION V2:** continued with new account;
   packagedEXE now actually starts and runs model/development frames plus terminal
   andthreeway spawned analysis,overcoming prior blocked smoke. Added manualAA

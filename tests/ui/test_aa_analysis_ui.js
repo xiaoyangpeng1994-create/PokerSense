@@ -64,6 +64,21 @@ async function main() {
   let cases = 0;
   {
     const h = harness();
+    const message = h.run('phaseDescription({hand_ledger_v2:{observed_total:"629",unallocated_difference:"629"},hand_phase:{phase:"WAITING_NEXT_HAND_CANDIDATE",current_ledger:null,historical_ledger:{observed_total:"629",unallocated_difference:"6"}}})');
+    assert.ok(message.includes("历史累计投入 629"));
+    assert.ok(message.includes("历史待解释差额 6"));
+    assert.ok(message.includes("当前差额不计算")); cases++;
+  }
+  {
+    const h = harness();
+    h.run('render({scene_supported:true,interpreted_action_history:[{slot:4,kind:"all_in",semantic_kind:"call",all_in:true,semantic_street:"river",amount:"120",frame:1909,confirmed_at:1909,source_confirmation_frame:3169}]},{sequence:1909,source_frame:3169})');
+    const message=h.el("actions").textContent;
+    assert.ok(message.includes("跟注（全下）"));
+    assert.ok(message.includes("本次支出 120"));
+    assert.ok(message.includes("来源确认帧 3169 / 处理序号 1909")); cases++;
+  }
+  {
+    const h = harness();
     assert.equal(h.run('actionName({kind:"fold",target:"0"})'), "弃牌");
     assert.equal(h.run('actionName({kind:"call",target:"0"})'), "跟注");
     assert.equal(h.run('actionName({kind:"raise",target:"40"})'), "加注 至 40");

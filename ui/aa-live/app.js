@@ -56,6 +56,16 @@ function seatCards(row = {}) {
 function listBlockers(values) {
   el("blockers").replaceChildren(...values.map(value => { const li = document.createElement("li"); li.textContent = value; return li; }));
 }
+function phaseDescription(row) {
+  const phase = row.hand_phase || {}, ledger = phase.current_ledger ?? row.hand_ledger_v2 ?? {};
+  const previous = phase.historical_ledger || {};
+  if (["WAITING_NEXT_HAND_CANDIDATE", "POT_CLEAR_PENDING"].includes(phase.phase)) {
+    return `结算／清台候选 · ${phase.phase === "POT_CLEAR_PENDING" ? "正在确认" : "等待下一手"}。历史累计投入 ${text(previous.observed_total)}；历史待解释差额 ${text(previous.unallocated_difference)}。当前差额不计算，资金归属尚未核实。`;
+  }
+  if (["SUSPENDED", "WAITING_OPENING"].includes(phase.phase)) return "当前牌局上下文不足，等待新的完整开局；历史证据保留。";
+  const prefix = phase.phase === "SETTLEMENT_CANDIDATE" ? "已观察到现金回流（结算候选）" : row.observed_state_v2?.observed_epoch ? "已观察到开局候选" : "未见完整开局，等待下一手";
+  return `${prefix} · 可追溯投入 ${text(ledger.observed_total)} · 与显示底池差额 ${text(ledger.unallocated_difference)}（未解释，不能作为抽水或盈利）`;
+}
 function clearCurrent(reason) {
   cards("hero", null, 2); cards("board", null, 5); seatCards(); clearPreview();
   for (const id of ["pot", "street", "actor", "dealer"]) el(id).textContent = "未知";
@@ -85,8 +95,7 @@ function render(row, state) {
   el("pot").textContent = text(row.pot?.value); el("street").textContent = translated(observed.street_candidate);
   el("actor").textContent = Number.isInteger(row.current_actor) ? `座位 ${row.current_actor}` : "未知";
   el("dealer").textContent = Number.isInteger(row.dealer_seat) ? `座位 ${row.dealer_seat}` : Number.isInteger(row.dealer_observation_v2?.dealer_seat) ? `单帧候选 ${row.dealer_observation_v2.dealer_seat}（等待开局）` : "未知";
-  const ledger = row.hand_ledger_v2 || {};
-  el("state-closure").textContent = `${observed.observed_epoch ? "已观察到开局候选" : "未见完整开局，等待下一手"} · 可追溯投入 ${text(ledger.observed_total)} · 与显示底池差额 ${text(ledger.unallocated_difference)}（未解释，不能作为抽水或盈利）`;
+  el("state-closure").textContent = phaseDescription(row);
   el("sequence").textContent = text(state.sequence); el("source-frame").textContent = text(state.source_frame ?? row.frame);
   el("latency").textContent = Number.isFinite(state.processing_ms) ? `${state.processing_ms.toFixed(0)} ms` : "未记录";
   const fields = [row.cards?.hero, row.board_count, row.pot?.value, row.current_actor, row.dealer_seat, observed.street_candidate];
@@ -101,10 +110,13 @@ function render(row, state) {
   const supplied = row.strategy_blockers || row.missing_fields || [];
   if (Array.isArray(supplied)) for (const value of supplied) if (typeof value === "string") reasons.push(value);
   listBlockers([...new Set(reasons)].slice(0, 14));
-  const actions = Array.isArray(row.action_history_candidate) ? row.action_history_candidate : Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
+  const actions = Array.isArray(row.interpreted_action_history) ? row.interpreted_action_history : Array.isArray(row.action_history_candidate) ? row.action_history_candidate : Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
   if (actions.length) el("actions").replaceChildren(...actions.slice(-48).map(action => {
     const node = document.createElement("span"); node.className = "action-item";
-    node.textContent = `座位 ${text(action.slot)} · ${translated(action.kind)} · 金额 ${text(action.amount)} · 帧 ${text(action.frame)}`; return node;
+    const kind = action.semantic_kind;
+    const actionLabel = kind ? `${translated(kind)}${action.all_in ? "（全下）" : ""}${["bet","raise"].includes(kind) && action.target_total != null ? ` 至 ${action.target_total}` : ""}` : `${translated(action.kind)}字样（上下文待核）`;
+    const sourceFrame = Number.isInteger(action.source_confirmation_frame) ? action.source_confirmation_frame : "未绑定";
+    node.textContent = `座位 ${text(action.slot)} · ${actionLabel} · 本次支出 ${text(action.amount)} · 来源确认帧 ${sourceFrame} / 处理序号 ${text(action.confirmed_at ?? action.frame)}${kind && !action.semantic_street ? " · 街道待定" : ""}`; return node;
   }));
   else if (row.glyphs) {
     const nodes = Object.entries(row.glyphs).filter(([, value]) => known(value)).map(([seat, value]) => {

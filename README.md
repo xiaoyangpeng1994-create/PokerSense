@@ -2,6 +2,8 @@
 
 ## AA eight-seat development monitor
 
+The [action/settlement interpretation layer](docs/AA8-ACTION-SEMANTICS-AND-SETTLEMENT.zh-CN.md) now separates bet/raise/call from all-in using pre-debit observations and keeps historical commitments out of the current cleared-pot difference. Original observations and unknown monetary attribution remain intact; this does not authorize live strategy.
+
 The [current AA workflow](docs/AA-TABLE-VALIDATION-V2.zh-CN.md) adds manual per-table rules, continuous development replay, explicit local issue snapshots and isolated manual river analysis. [Portable private resource bundles](docs/AA-RUNTIME-BUNDLE.zh-CN.md) remove old checkout path dependencies. Conditional examples remain separate from live observations and are not evidence of strategy profitability.
 
 A dedicated AA entry now provides explicit start/stop, device selection, registered development-frame replay, eight-seat candidate fields, preview and stale/error clearing. See [AA monitor setup and limitations](docs/AA-LIVE-MONITOR-V1.zh-CN.md). Source-based replay and browser controls were exercised; physical capture, complete legal state and reliable multiway strategy remain unverified. Private model references stay external to the public repository and executable.
