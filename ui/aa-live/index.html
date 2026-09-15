@@ -6,6 +6,7 @@
   <title>PokerSense · AA 实时观察</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
+  <script src="/controls.js" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -26,6 +27,13 @@
       <details><summary>识别配置与来源</summary><pre id="profile">等待配置</pre></details>
       <p id="error" class="error" role="alert" hidden></p>
     </section>
+    <section class="panel">
+      <div class="section-heading"><h2>本桌规则</h2><span id="rules-status" class="tag">未配置</span></div>
+      <p class="footnote">换桌后请核对规则。输入值标为人工配置，不会成为视觉真值。留空表示未知；保存或清空规则会停止当前观察，避免沿用上一桌状态。</p>
+      <details id="rules-details"><summary>填写大小盲、前注、straddle 和费用</summary>
+        <form id="rules-form"><div id="rules-fields" class="rules-grid"></div><div class="button-row"><button type="submit">保存本桌规则</button><button id="rules-reset" type="button" class="secondary">换桌：清空规则</button></div></form>
+      </details><p id="rules-feedback" class="muted" role="status"></p>
+    </section>
     <section class="metrics" aria-label="当前运行状态">
       <div><span>已处理序号</span><strong id="sequence">—</strong></div><div><span>来源帧</span><strong id="source-frame">—</strong></div><div><span>本帧处理</span><strong id="latency">—</strong></div><div><span>字段候选 / 22</span><strong id="coverage">—</strong></div>
     </section>
@@ -44,6 +52,7 @@
       </aside>
     </div>
     <section class="panel"><div class="section-heading"><h2>当前帧可见动作</h2><span class="muted">候选事件，尚非完整行动历史</span></div><div id="actions" class="actions"><p class="muted">当前无动作候选</p></div></section>
+    <section class="panel"><div class="section-heading"><h2>记录识别问题</h2><span class="tag">仅保存到本机</span></div><p class="footnote">点击保存时记录当前字段、匹配画面、规则和你的说明。记录尚未审阅，不自动用作训练或验收数据。</p><form id="issue-form"><label>类别<select id="issue-category"><option value="cards">牌面</option><option value="amounts">金额</option><option value="actor">行动者</option><option value="state">牌局状态</option><option value="other">其他</option></select></label><label>问题说明<input id="issue-note" maxlength="2000" placeholder="例如：这个位置应为 250，画面显示未知"></label><button id="issue-save" type="submit" disabled>保存问题（含当前画面）</button></form><p id="issue-feedback" class="muted" role="status"></p></section>
     <footer>本机观察工具 · 不自动操作牌桌 · 停止、断线、异常或画面过期时清空字段与预览</footer>
   </main>
 </body>

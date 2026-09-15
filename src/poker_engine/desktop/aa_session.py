@@ -79,6 +79,12 @@ class AARecognitionSession:
             self._expire()
             return self._preview
 
+    def evidence(self):
+        """Return current fields and their matching preview under one lock."""
+        with self._lock:
+            self._expire()
+            return self._snapshot(), self._preview
+
     def start(self, source_options: dict):
         if not isinstance(source_options, dict):
             raise TypeError("source_options must be a dict")

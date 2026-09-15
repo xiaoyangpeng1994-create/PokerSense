@@ -1,6 +1,9 @@
 """Explicit AA image sources; constructing the application never opens hardware."""
 
+from decimal import Decimal, InvalidOperation
+import hashlib
 import json
+import math
 from pathlib import Path
 import threading
 import time
@@ -133,17 +136,137 @@ class AADevelopmentSource:
         self.closed = True
 
 
+def _sha256_text(value):
+    return (isinstance(value, str) and len(value) == 64
+            and all(char in "0123456789abcdef" for char in value))
+
+
+class AADevelopmentSequenceSource:
+    """Hash-bound development segments with one uninterrupted source identity.
+
+    Construction checks metadata for every selected segment before loading any
+    pixels. Context-only frames are still real observations; the marker never
+    initializes poker state or changes the source's original frame numbers.
+    """
+
+    def __init__(self, playlist_path, audit):
+        playlist = Path(playlist_path).resolve(strict=True)
+        raw = playlist.read_bytes()
+        spec = json.loads(raw.decode("utf-8"))
+        if (not isinstance(spec, dict)
+                or set(spec) != {"schema_version", "audit_sha256", "segments"}
+                or type(spec["schema_version"]) is not int
+                or spec["schema_version"] != 1):
+            raise ValueError("invalid development playlist schema")
+        if not _sha256_text(audit) or spec["audit_sha256"] != audit:
+            raise ValueError("playlist audit mismatch")
+        segments = spec["segments"]
+        if not isinstance(segments, list) or not segments:
+            raise ValueError("playlist requires ordered segments")
+        self.playlist_sha256 = hashlib.sha256(raw).hexdigest()
+        self.source_id = f"aa8-development:{audit}:{self.playlist_sha256}"
+        selected = []
+        previous_frame = previous_pts = previous_float = None
+        for segment in segments:
+            if (not isinstance(segment, dict) or set(segment) != {
+                    "pool", "first", "last", "manifest_sha256", "context_only"}
+                    or not isinstance(segment["pool"], str)
+                    or not segment["pool"].strip()
+                    or type(segment["context_only"]) is not bool
+                    or type(segment["first"]) is not int
+                    or type(segment["last"]) is not int
+                    or not 0 <= segment["first"] <= segment["last"]
+                    or not _sha256_text(segment["manifest_sha256"])):
+                raise ValueError("invalid development playlist segment")
+            pool = (playlist.parent / segment["pool"]).resolve(strict=True)
+            manifest_raw = (pool / "samples.json").read_bytes()
+            if hashlib.sha256(manifest_raw).hexdigest() != segment["manifest_sha256"]:
+                raise ValueError("development manifest hash mismatch")
+            manifest = json.loads(manifest_raw.decode("utf-8"))
+            if not isinstance(manifest, dict) or manifest.get("audit_sha256") != audit:
+                raise ValueError("development manifest audit mismatch")
+            rows = manifest.get("samples")
+            if (not isinstance(rows, list) or not rows
+                    or any(not isinstance(row, dict) for row in rows)):
+                raise ValueError("development manifest samples required")
+            ids = [row.get("global_frame") for row in rows]
+            if (any(type(frame) is not int or frame < 0 for frame in ids)
+                    or ids != list(range(ids[0], ids[-1] + 1))):
+                raise ValueError("contiguous unique ordered frames required")
+            if any(row.get("role") != "development" for row in rows):
+                raise ValueError("development frames only")
+            by_frame = dict(zip(ids, rows))
+            if segment["first"] not in by_frame or segment["last"] not in by_frame:
+                raise ValueError("playlist range outside registered development frames")
+            for frame in range(segment["first"], segment["last"] + 1):
+                row = by_frame[frame]
+                if previous_frame is not None and frame != previous_frame + 1:
+                    raise ValueError("playlist source frame gap or overlap")
+                filename = row.get("file")
+                if (not isinstance(filename, str) or not filename
+                        or not (pool / filename).resolve().is_relative_to(pool)
+                        or not _sha256_text(row.get("sha256"))):
+                    raise ValueError("invalid development frame path or hash")
+                try:
+                    value = row["pts_seconds"]
+                    if isinstance(value, bool):
+                        raise ValueError("boolean PTS")
+                    pts = Decimal(str(value))
+                    source_float = float(pts)
+                    if (not pts.is_finite() or pts < 0
+                            or not math.isfinite(source_float)
+                            or previous_pts is not None and (
+                                pts <= previous_pts or source_float <= previous_float)):
+                        raise ValueError("unordered PTS")
+                except (KeyError, InvalidOperation, TypeError, ValueError,
+                        OverflowError):
+                    raise ValueError(
+                        "finite increasing development PTS required") from None
+                selected.append((pool, row, segment["manifest_sha256"],
+                                 segment["context_only"], source_float))
+                previous_frame, previous_pts, previous_float = frame, pts, source_float
+        self.frames = iter(selected)
+        self.closed = False
+
+    def read(self):
+        from tools.aa8_action_transfer import load
+
+        if self.closed:
+            return None
+        selected = next(self.frames, None)
+        if selected is None:
+            return None
+        pool, row, manifest_sha, context_only, pts = selected
+        return {"image": load(pool, row), "source_frame": row["global_frame"],
+                "pts_seconds": pts, "source_pts_exact": str(row["pts_seconds"]),
+                "source_kind": "development-replay", "source_id": self.source_id,
+                "context_only": context_only, "source_pool": str(pool),
+                "source_file": row["file"], "source_png_sha256": row["sha256"],
+                "source_manifest_sha256": manifest_sha,
+                "source_playlist_sha256": self.playlist_sha256}
+
+    def close(self):
+        self.closed = True
+
+
 def source_factory(profile_path, *, replay_pool=None, replay_first=None,
-                   replay_last=None, allow_capture=False):
+                   replay_last=None, replay_playlist=None, allow_capture=False):
     """Browser cannot supply a filesystem path, normalization or audit identity."""
+    if replay_playlist is not None and any(value is not None for value in (
+            replay_pool, replay_first, replay_last)):
+        raise ValueError("playlist cannot be combined with pool/range overrides")
+
     def create(options):
         mode = options.get("mode")
         if mode == "capture-card":
             if not allow_capture:
                 raise ValueError("本次启动未启用采集卡；当前仅允许离线验证")
             return AACaptureSource(options)
-        if mode == "development-replay" and replay_pool is not None:
+        if mode == "development-replay" and (replay_pool is not None
+                                             or replay_playlist is not None):
             spec = json.loads(Path(profile_path).read_text(encoding="utf-8"))
+            if replay_playlist is not None:
+                return AADevelopmentSequenceSource(replay_playlist, spec["audit"])
             return AADevelopmentSource(replay_pool, spec["audit"],
                                        first=replay_first, last=replay_last)
         raise ValueError("请选择本次启动已配置的来源")

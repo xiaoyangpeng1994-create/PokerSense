@@ -210,6 +210,14 @@ class AA8Reader:
                 candidate_only=True, strategy_eligible=False, advice_emitted=False,
                 complete_legal_state=False,
                 actions_complete_and_canonical_verified=False)
+            row["source_frame"] = sample.get("source_frame")
+            row["context_only"] = sample.get("context_only", False)
+            row["source_provenance"] = {
+                key: sample[key] for key in (
+                    "source_kind", "source_pts_exact", "source_manifest_sha256",
+                    "source_png_sha256", "source_playlist_sha256",
+                    "source_pool", "source_file")
+                if key in sample}
             self._last = (frame, pts, source)
             self._invalidated = False
             return row

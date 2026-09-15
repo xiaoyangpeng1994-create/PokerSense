@@ -73,3 +73,34 @@ def test_missing_models_prevents_any_start(tmp_path):
 def test_frozen_ui_path(monkeypatch, tmp_path):
     monkeypatch.setattr(aa_server.sys, "_MEIPASS", str(tmp_path), raising=False)
     assert aa_server.ui_root() == tmp_path / "ui" / "aa-live"
+
+
+def test_rules_save_stops_old_session_and_cannot_claim_verified(tmp_path):
+    from poker_engine.desktop.aa_table_config import empty_config
+
+    session = Session()
+    rules_path = tmp_path / "rules.json"
+    app = aa_server.create_app(tmp_path / "missing", session=session,
+                               rules_path=rules_path)
+    with TestClient(app) as client:
+        prior = client.get("/api/rules").json()
+        document = {**empty_config(), "small_blind": "2", "big_blind": "4"}
+        result = client.post("/api/rules", headers=HEADERS,
+                             json={"document": document,
+                                   "revision": prior["revision"]})
+        assert result.status_code == 200
+        assert session.stops == 1 and rules_path.exists()
+        assert not result.json()["visual_verified"]
+        assert not result.json()["conditional_analysis_ready"]
+        again = client.post("/api/rules", headers=HEADERS,
+                            json={"document": empty_config(),
+                                  "revision": prior["revision"]})
+        assert again.status_code == 400
+
+
+def test_issue_recording_disabled_without_explicit_directory(tmp_path):
+    app = aa_server.create_app(tmp_path / "missing", session=Session())
+    with TestClient(app) as client:
+        assert not client.get("/api/status").json()["issue_recording_available"]
+        assert client.post("/api/issues", headers=HEADERS,
+                           json={"note": "", "category": "cards"}).status_code == 403

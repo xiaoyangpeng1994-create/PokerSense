@@ -4,6 +4,7 @@ import argparse
 from contextlib import asynccontextmanager
 from pathlib import Path
 import sys
+import threading
 from urllib.parse import urlsplit
 import webbrowser
 
@@ -14,6 +15,8 @@ from fastapi.responses import FileResponse, Response
 from .aa_reader import AA8Reader, preflight_profile
 from .aa_session import AARecognitionSession
 from .aa_sources import source_factory
+from .aa_table_config import AATableConfigStore
+from .aa_issues import save_issue
 
 
 def ui_root():
@@ -23,14 +26,18 @@ def ui_root():
 
 
 def create_app(profile_path, *, replay_pool=None, replay_first=None,
-               replay_last=None, allow_capture=False, session=None):
+               replay_last=None, replay_playlist=None, allow_capture=False,
+               session=None, rules_path=None, records_dir=None):
     profile_path = Path(profile_path)
     service = session or AARecognitionSession(
         source_factory(profile_path, replay_pool=replay_pool,
                        replay_first=replay_first, replay_last=replay_last,
+                       replay_playlist=replay_playlist,
                        allow_capture=allow_capture),
         lambda: AA8Reader(profile_path), interval_seconds=0.15,
     )
+    rules = AATableConfigStore(rules_path)
+    controls_lock = threading.RLock()
 
     @asynccontextmanager
     async def lifespan(app):
@@ -74,12 +81,21 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     def style():
         return FileResponse(ui_root() / "style.css", media_type="text/css")
 
+    @app.get("/controls.js")
+    def controls_script():
+        return FileResponse(ui_root() / "controls.js", media_type="text/javascript")
+
     @app.get("/api/status")
     def status():
-        result = service.snapshot()
+        with controls_lock:
+            result = service.snapshot()
+            table_rules = rules.get()
         result.update(profile=preflight_profile(profile_path),
-                      replay_available=replay_pool is not None,
+                      replay_available=replay_pool is not None or (
+                          replay_playlist is not None),
                       capture_available=allow_capture,
+                      issue_recording_available=records_dir is not None,
+                      table_rules=table_rules,
                       strategy_scope="AA8_OBSERVATION_ONLY_NO_ADVICE")
         return result
 
@@ -106,19 +122,55 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
             raise HTTPException(400, "当前 AA 来源仅请求 30 FPS 采集")
         if options["mode"] == "capture-card" and not allow_capture:
             raise HTTPException(403, "本次启动未启用采集卡")
-        if options["mode"] == "development-replay" and replay_pool is None:
+        if (options["mode"] == "development-replay" and replay_pool is None
+                and replay_playlist is None):
             raise HTTPException(400, "未配置开发回放")
         profile = preflight_profile(profile_path)
         if not profile["ready"]:
             raise HTTPException(409, {"message": "AA 识别资源未准备好",
                                       "errors": profile["errors"]})
-        service.start(options)
-        return service.snapshot()
+        with controls_lock:
+            service.start(options)
+            return service.snapshot()
 
     @app.post("/api/stop")
     def stop():
-        service.stop()
-        return service.snapshot()
+        with controls_lock:
+            service.stop()
+            return service.snapshot()
+
+    @app.get("/api/rules")
+    def get_rules():
+        return rules.get()
+
+    @app.post("/api/rules")
+    async def update_rules(request: Request):
+        try:
+            body = await request.json()
+            if not isinstance(body, dict) or set(body) != {"document", "revision"}:
+                raise ValueError("规则请求需要 document 和 revision")
+            with controls_lock:
+                result = rules.save(body["document"], body["revision"])
+                # Rule changes invalidate the old observation/analysis context.
+                service.stop()
+                return result
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(400, str(exc)) from None
+
+    @app.post("/api/issues")
+    async def record_issue(request: Request):
+        if records_dir is None:
+            raise HTTPException(403, "本次启动没有配置问题记录目录")
+        try:
+            body = await request.json()
+            if not isinstance(body, dict) or set(body) != {"note", "category"}:
+                raise ValueError("问题记录需要 note 和 category")
+            with controls_lock:
+                evidence, current_rules = service.evidence(), rules.get()
+            return save_issue(records_dir, evidence, body["note"],
+                              body["category"], current_rules)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from None
 
     return app
 
@@ -129,15 +181,19 @@ def main(argv=None):
     parser.add_argument("--replay-pool", type=Path)
     parser.add_argument("--replay-first", type=int)
     parser.add_argument("--replay-last", type=int)
+    parser.add_argument("--replay-playlist", type=Path)
+    parser.add_argument("--rules-path", type=Path)
+    parser.add_argument("--records-dir", type=Path)
     parser.add_argument("--allow-capture", action="store_true")
     parser.add_argument("--port", type=int, default=8771)
     parser.add_argument("--open-browser", action="store_true")
     args = parser.parse_args(argv)
     app = create_app(args.profile, replay_pool=args.replay_pool,
                      replay_first=args.replay_first, replay_last=args.replay_last,
+                     replay_playlist=args.replay_playlist,
+                     rules_path=args.rules_path, records_dir=args.records_dir,
                      allow_capture=args.allow_capture)
     if args.open_browser:
-        import threading
         threading.Timer(1.0, lambda: webbrowser.open(
             f"http://127.0.0.1:{args.port}")).start()
     import uvicorn

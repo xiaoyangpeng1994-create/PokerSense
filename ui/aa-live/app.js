@@ -82,13 +82,13 @@ function render(row, state) {
   cards("hero", row.cards?.hero, 2); cards("board", row.cards?.board_slots, 5); seatCards(row);
   el("pot").textContent = text(row.pot?.value); el("street").textContent = translated(observed.street_candidate);
   el("actor").textContent = Number.isInteger(row.current_actor) ? `座位 ${row.current_actor}` : "未知";
-  el("dealer").textContent = Number.isInteger(row.dealer_seat) ? `座位 ${row.dealer_seat}` : "未知";
+  el("dealer").textContent = Number.isInteger(row.dealer_seat) ? `座位 ${row.dealer_seat}` : Number.isInteger(row.dealer_observation_v2?.dealer_seat) ? `单帧候选 ${row.dealer_observation_v2.dealer_seat}（等待开局）` : "未知";
   el("sequence").textContent = text(state.sequence); el("source-frame").textContent = text(state.source_frame ?? row.frame);
   el("latency").textContent = Number.isFinite(state.processing_ms) ? `${state.processing_ms.toFixed(0)} ms` : "未记录";
   const fields = [row.cards?.hero, row.board_count, row.pot?.value, row.current_actor, row.dealer_seat, observed.street_candidate];
   for (let seat = 0; seat < 8; seat++) fields.push(row.stacks?.[seat]?.value, row.street_wagers?.[seat]);
   el("coverage").textContent = `${fields.filter(known).length} / 22`;
-  el("quality").textContent = "识别候选 · 未完成验收";
+  el("quality").textContent = row.context_only ? "开局前滚 · 不计入验收" : "识别候选 · 未完成验收";
   el("freshness").textContent = `当前帧 · ${known(row.pts_seconds) ? `来源时间 ${text(row.pts_seconds)} 秒 · ` : ""}牌局 ${text(observed.observed_epoch)}`;
   const reasons = [], authority = row.strategy_input_authority?.fields || {};
   const names = {hand_boundary:"牌局边界",cards:"牌面",pot:"底池",stacks:"筹码",street_wagers:"本轮投入",hand_commitments:"整手投入",actions:"完整行动",participation:"参与状态",dealer:"庄位",action_line:"行动线"};
