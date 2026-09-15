@@ -34,6 +34,28 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AA8 OBSERVATION TOOL V1:** added dedicated AA reader/session/
+  source/server/UI and standalone PyInstaller entry. ExplicitStart/Stop,single
+  session,latest capture slot,stale/error clearing,raw vs processed sequences,
+  development role/path/hash validation. Real model deepcopy and PTS-string
+  integration bugs fixed;STOP null-sequence UI and close-failure fixed.
+  Full3440pass/7skip/1warning;post-PTS20focusedpass;41newfocused total,lint0.
+  Browser showed real development Hero5d6d/pot81/actor7 at1606 and stop-cleared.
+  LocalAA EXEbuildPASS;packaged launch smoke BLOCKED by automatic approval,
+  reason only blocked by policy. No device/video/holdout/control or strategy
+  promotion. OptionalV3supplement not configured in current localprofile.
+  See docs/AA-LIVE-MONITOR-V1.zh-CN.md and private aa-live-runtime-20260915-v1.
+
+- **2026-09-15 AA-ONLY REPOSITORY MAP:** owner asks for full remote/local
+  understanding before implementation;AA8/Hero4/6-8dealt is the sole current
+  target and hardware is unavailable for testing. Verified main fb703e2,
+  882remote/970primary-visible files and22worktrees;no product edits. AA readers
+  remain tools/private compositions,not installed desktop runtime;canonical
+  state and empirically strong multiway strategy are incomplete. Three read-only
+  domain audits retained at G:/PokerSense_private/project-map-20260915-v1/.
+  Optional GTOpen registration missing source_revision reproduced without
+  network/device use;not fixed. No media/training/capture/commit/push/merge.
+
 - **2026-09-15 AA FROZEN OBSERVATION VIEWER:** isolated localhost-only viewer
   for SHA7f86f4cd,1801frames(0–1800),nine visual slots. Shows source/time,values,
   unknowns,participation and resets;pot/presence/actor/full-actions/special modes

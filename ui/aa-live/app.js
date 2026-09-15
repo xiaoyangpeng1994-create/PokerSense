@@ -1,0 +1,179 @@
+"use strict";
+const el = id => document.getElementById(id);
+const headers = {"X-AA-Live": "1"};
+const states = {STOPPED:"已停止", STARTING:"正在启动", RUNNING:"正在观察", STOPPING:"正在停止", ENDED:"回放结束", ERROR:"发生错误", STALE:"画面已过期"};
+const labels = {preflop:"翻前", flop:"翻牌", turn:"转牌", river:"河牌", UNKNOWN:"未知", ACTIVE:"参与候选", FOLDED:"弃牌候选", ALL_IN:"全下候选", DEALT_IN_CANDIDATE:"已发牌候选", FOLDED_CANDIDATE:"弃牌候选", WAITING_NEXT_HAND:"等待下一手", WAITING_POST_OR_PASS:"等待入局", WAITING_CANDIDATE:"等待候选", EMPTY_CANDIDATE:"空座候选", EMPTY:"空座候选", fold:"弃牌", check:"过牌", call:"跟注", bet:"下注", raise:"加注", all_in:"全下"};
+let localEpoch = 0, requestId = 0, serverGeneration = -1, sequence = -1;
+let lastProgress = 0, statusData = {}, pending = false, pollAbort = null;
+let previewAbort = null, previewUrl = null, previewId = 0, modeTouched = false;
+const known = value => value !== null && value !== undefined && value !== "UNKNOWN";
+const text = value => !known(value) ? "未知" : typeof value === "object" ? JSON.stringify(value) : String(value);
+const translated = value => labels[value] || text(value);
+function error(message = "") { el("error").textContent = message; el("error").hidden = !message; }
+function indicator(label, type = "neutral") { el("connection").textContent = label; el("connection").className = `status ${type}`; }
+function clearPreview(message = "当前无可用预览") {
+  ++previewId; if (previewAbort) previewAbort.abort(); previewAbort = null;
+  el("preview").hidden = true; el("preview").removeAttribute("src");
+  if (previewUrl) URL.revokeObjectURL(previewUrl); previewUrl = null;
+  el("preview-empty").textContent = message; el("preview-empty").hidden = false;
+}
+function cards(id, values, count) {
+  const nodes = [];
+  for (let i = 0; i < count; i++) {
+    const value = Array.isArray(values) ? values[i] : null;
+    const card = document.createElement("span"); card.className = "playing-card unknown";
+    const match = typeof value === "string" && /^([2-9TJQKA])([cdhs])$/i.exec(value);
+    if (match) {
+      const suit = match[2].toLowerCase(); card.className = `playing-card ${"dh".includes(suit) ? "red" : ""}`;
+      const rank = document.createElement("span"), symbol = document.createElement("small");
+      rank.textContent = match[1].toUpperCase() === "T" ? "10" : match[1].toUpperCase();
+      symbol.textContent = {c:"♣", d:"♦", h:"♥", s:"♠"}[suit]; card.append(rank, symbol);
+      card.setAttribute("aria-label", value);
+    } else { card.textContent = "?"; card.setAttribute("aria-label", "未知牌"); }
+    nodes.push(card);
+  }
+  el(id).replaceChildren(...nodes);
+}
+function seatCards(row = {}) {
+  const nodes = [], wagers = row.street_wagers || {}, causal = row.causal_street_wagers_v2?.wagers || {};
+  for (let seat = 0; seat < 8; seat++) {
+    const box = document.createElement("article"); box.className = `seat${seat === 4 ? " hero-seat" : ""}${row.current_actor === seat ? " acting" : ""}`;
+    const heading = document.createElement("h3"); heading.textContent = `座位 ${seat}`;
+    const badge = document.createElement("span"); badge.textContent = [seat === 4 ? "HERO" : "", row.dealer_seat === seat ? "庄" : ""].filter(Boolean).join(" · "); heading.append(badge);
+    const list = document.createElement("dl");
+    for (const [name, value] of [["筹码", row.stacks?.[seat]?.value], ["可见投入", wagers[seat]], ["时序投入", causal[seat]]]) {
+      const pair = document.createElement("div"), dt = document.createElement("dt"), dd = document.createElement("dd");
+      dt.textContent = name; dd.textContent = text(value); pair.append(dt, dd); list.append(pair);
+    }
+    const participation = document.createElement("p"); participation.className = "participation";
+    const state = row.participation?.slots?.[seat];
+    participation.textContent = state?.conflict ? "参与线索冲突" : translated(state?.current);
+    box.append(heading, list, participation); nodes.push(box);
+  }
+  el("seats").replaceChildren(...nodes);
+}
+function listBlockers(values) {
+  el("blockers").replaceChildren(...values.map(value => { const li = document.createElement("li"); li.textContent = value; return li; }));
+}
+function clearCurrent(reason) {
+  cards("hero", null, 2); cards("board", null, 5); seatCards(); clearPreview();
+  for (const id of ["pot", "street", "actor", "dealer"]) el(id).textContent = "未知";
+  for (const id of ["sequence", "source-frame", "latency", "coverage"]) el(id).textContent = "—";
+  el("quality").textContent = "无当前有效帧"; el("freshness").textContent = reason;
+  const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "当前无动作候选"; el("actions").replaceChildren(empty);
+  listBlockers(["等待当前帧与完整牌局输入"]);
+}
+function controls() {
+  const active = ["STARTING", "RUNNING", "STALE", "STOPPING"].includes(String(statusData.status).toUpperCase());
+  const replay = statusData.replay_available === true, capture = statusData.capture_available === true;
+  el("mode").options[0].disabled = !replay; el("mode").options[1].disabled = !capture;
+  if (!modeTouched && !active && !pending) el("mode").value = replay ? "development-replay" : capture ? "capture-card" : "development-replay";
+  const useCapture = el("mode").value === "capture-card";
+  el("mode").disabled = active || pending;
+  el("device").disabled = el("api").disabled = !useCapture || active || pending;
+  el("start").disabled = active || pending || statusData.connection_failed === true || !(useCapture ? capture : replay) || statusData.profile?.ready === false;
+  el("stop").disabled = !active && !pending;
+  el("availability").textContent = [replay ? "已登记开发回放可用" : "未配置开发回放", capture ? "采集入口已配置，点击开始才打开设备" : "采集入口未开放（启动服务时需明确启用）"].join(" · ");
+}
+function render(row, state) {
+  clearCurrent("正在更新当前帧…");
+  if (row.scene_supported !== true) { el("freshness").textContent = "当前画面不受支持或有遮挡，字段已清空。"; return; }
+  const observed = row.observed_state_v2 || {};
+  cards("hero", row.cards?.hero, 2); cards("board", row.cards?.board_slots, 5); seatCards(row);
+  el("pot").textContent = text(row.pot?.value); el("street").textContent = translated(observed.street_candidate);
+  el("actor").textContent = Number.isInteger(row.current_actor) ? `座位 ${row.current_actor}` : "未知";
+  el("dealer").textContent = Number.isInteger(row.dealer_seat) ? `座位 ${row.dealer_seat}` : "未知";
+  el("sequence").textContent = text(state.sequence); el("source-frame").textContent = text(state.source_frame ?? row.frame);
+  el("latency").textContent = Number.isFinite(state.processing_ms) ? `${state.processing_ms.toFixed(0)} ms` : "未记录";
+  const fields = [row.cards?.hero, row.board_count, row.pot?.value, row.current_actor, row.dealer_seat, observed.street_candidate];
+  for (let seat = 0; seat < 8; seat++) fields.push(row.stacks?.[seat]?.value, row.street_wagers?.[seat]);
+  el("coverage").textContent = `${fields.filter(known).length} / 22`;
+  el("quality").textContent = "识别候选 · 未完成验收";
+  el("freshness").textContent = `当前帧 · ${known(row.pts_seconds) ? `来源时间 ${text(row.pts_seconds)} 秒 · ` : ""}牌局 ${text(observed.observed_epoch)}`;
+  const reasons = [], authority = row.strategy_input_authority?.fields || {};
+  const names = {hand_boundary:"牌局边界",cards:"牌面",pot:"底池",stacks:"筹码",street_wagers:"本轮投入",hand_commitments:"整手投入",actions:"完整行动",participation:"参与状态",dealer:"庄位",action_line:"行动线"};
+  for (const [key, name] of Object.entries(names)) if (authority[key] !== true) reasons.push(`${name}尚未核验`);
+  if (observed.complete_legal_state !== true) reasons.push("完整合法状态尚未闭合");
+  const supplied = row.strategy_blockers || row.missing_fields || [];
+  if (Array.isArray(supplied)) for (const value of supplied) if (typeof value === "string") reasons.push(value);
+  listBlockers([...new Set(reasons)].slice(0, 14));
+  const actions = Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
+  if (actions.length) el("actions").replaceChildren(...actions.slice(-16).map(action => {
+    const node = document.createElement("span"); node.className = "action-item";
+    node.textContent = `座位 ${text(action.slot)} · ${translated(action.kind)} · 金额 ${text(action.amount)} · 帧 ${text(action.frame)}`; return node;
+  }));
+  else if (row.glyphs) {
+    const nodes = Object.entries(row.glyphs).filter(([, value]) => known(value)).map(([seat, value]) => {
+      const node = document.createElement("span"); node.className = "action-item"; node.textContent = `座位 ${seat} · 字样 ${text(value)}`; return node;
+    });
+    if (nodes.length) el("actions").replaceChildren(...nodes);
+  }
+}
+async function preview(epoch, gen, seq) {
+  const ticket = ++previewId, abort = new AbortController(); previewAbort = abort;
+  const timeout = setTimeout(() => abort.abort(), 1800);
+  try {
+    const response = await fetch("/api/preview.jpg", {headers, cache:"no-store", signal:abort.signal});
+    if (!response.ok) return;
+    const blob = await response.blob();
+    if (epoch !== localEpoch || gen !== serverGeneration || seq !== sequence || ticket !== previewId) return;
+    previewUrl = URL.createObjectURL(blob); el("preview").src = previewUrl; el("preview").hidden = false; el("preview-empty").hidden = true;
+  } catch (_) { /* A missing preview never preserves a previous frame. */ }
+  finally { clearTimeout(timeout); }
+}
+async function poll() {
+  if (pending || document.hidden) return;
+  const epoch = localEpoch, ticket = ++requestId, abort = new AbortController(); pollAbort = abort;
+  const timeout = setTimeout(() => abort.abort(), 2500);
+  try {
+    const response = await fetch("/api/status", {headers, cache:"no-store", signal:abort.signal});
+    if (!response.ok) throw Error(`HTTP ${response.status}`);
+    const state = await response.json();
+    if (epoch !== localEpoch || ticket !== requestId) return;
+    const status = String(state.status).toUpperCase();
+    const hasCurrentPayload = status === "RUNNING" && state.payload;
+    if (!Number.isInteger(state.generation) || hasCurrentPayload && !Number.isInteger(state.sequence)) throw Error("服务状态缺少有效版本标识");
+    const incomingSequence = Number.isInteger(state.sequence) ? state.sequence : -1;
+    if (state.generation < serverGeneration || hasCurrentPayload && state.generation === serverGeneration && incomingSequence < sequence) return;
+    if (state.generation !== serverGeneration) { clearCurrent("来源已切换，等待当前画面。"); sequence = -1; }
+    const advanced = state.generation !== serverGeneration || incomingSequence !== sequence;
+    serverGeneration = state.generation; sequence = incomingSequence; if (advanced) lastProgress = Date.now();
+    statusData = state; controls(); error(state.error ? text(state.error) : "");
+    el("profile").textContent = typeof state.profile === "string" ? state.profile : JSON.stringify(state.profile ?? "未配置", null, 2);
+    el("source-kind").textContent = state.source_kind === "capture-card" ? "实体采集卡" : state.source_kind === "development-replay" ? "开发回放 · 非现场" : text(state.source_kind);
+    if (status !== "RUNNING" || !state.payload || Date.now() - lastProgress > 3000) {
+      const stale = status === "RUNNING" && state.payload;
+      indicator(stale ? "画面已过期" : states[status] || status, ["ERROR", "STALE"].includes(status) || stale ? "bad" : "neutral");
+      clearCurrent(stale ? "超过 3 秒没有新识别结果，已清空当前字段。" : `${states[status] || status}；等待新的有效帧。`); return;
+    }
+    indicator("正在观察 · 候选", "good");
+    if (advanced) { render(state.payload, state); preview(epoch, serverGeneration, sequence); }
+  } catch (failure) {
+    if (epoch !== localEpoch || ticket !== requestId) return;
+    clearCurrent("服务连接中断或读取失败，已清空当前字段与预览。"); indicator("连接异常", "bad"); error(`读取状态失败：${failure.message}`);
+    statusData = {...statusData, connection_failed:true}; controls(); sequence = -1; serverGeneration = -1;
+  } finally { clearTimeout(timeout); if (pollAbort === abort) pollAbort = null; }
+}
+async function command(action) {
+  const epoch = ++localEpoch; ++requestId; if (pollAbort) pollAbort.abort();
+  clearCurrent(action === "start" ? "正在启动，等待第一帧。" : "正在停止，当前字段已清空。"); error(); pending = true; controls();
+  const abort = new AbortController(), timeout = setTimeout(() => abort.abort(), 15000);
+  try {
+    const body = action === "start" ? {mode:el("mode").value, device_index:Number(el("device").value), api:el("api").value, fps:30} : {};
+    const response = await fetch(`/api/${action}`, {method:"POST", headers:{...headers,"Content-Type":"application/json"}, body:JSON.stringify(body), signal:abort.signal});
+    const result = await response.json(); if (epoch !== localEpoch) return;
+    if (!response.ok) throw Error(text(result.error ?? result.detail ?? `HTTP ${response.status}`));
+    sequence = -1; indicator(action === "start" ? "正在启动" : "已请求停止");
+  } catch (failure) { if (epoch === localEpoch) { error(`操作未确认：${failure.message}。正在重新查询服务状态。`); indicator("正在核对运行状态", "warning"); } }
+  finally { clearTimeout(timeout); if (epoch === localEpoch) { pending = false; controls(); await poll(); } }
+}
+el("start-form").addEventListener("submit", event => { event.preventDefault(); if (!el("start").disabled) command("start"); });
+el("stop").addEventListener("click", () => command("stop"));
+el("mode").addEventListener("change", () => { modeTouched = true; controls(); });
+el("preview").addEventListener("error", () => clearPreview("当前预览解码失败"));
+document.addEventListener("visibilitychange", () => {
+  ++requestId; if (pollAbort) pollAbort.abort(); clearCurrent("页面重新获得焦点后获取新画面。"); sequence = -1;
+  if (!document.hidden) poll();
+});
+async function tick() { await poll(); setTimeout(tick, 800); }
+clearCurrent("尚未开始观察；没有显示历史牌面。"); tick();

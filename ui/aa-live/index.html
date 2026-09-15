@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PokerSense · AA 实时观察</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div><span class="wordmark">POKERSENSE</span><h1>AA 实时观察台</h1></div>
+    <span id="connection" class="status neutral" role="status">正在连接服务</span>
+  </header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">手机 · 采集卡 · 8 座布局</p><h2>看清当前牌桌，保留每一个未知。</h2></div><p>当前展示识别候选；完整牌局和策略尚未验收。设备须在你点击开始后才会打开。</p></section>
+    <section class="panel controls" aria-labelledby="source-title">
+      <div class="section-heading"><h2 id="source-title">画面来源</h2><span id="source-kind" class="muted">未启动</span></div>
+      <form id="start-form">
+        <label>来源<select id="mode"><option value="development-replay" disabled>已登记开发回放</option><option value="capture-card" disabled>实体采集卡</option></select></label>
+        <label>设备编号<input id="device" type="number" min="0" max="99" step="1" value="0"></label>
+        <label>Windows 接口<select id="api"><option value="MSMF">MSMF</option><option value="DSHOW">DirectShow</option></select></label>
+        <button id="start" type="submit" disabled>开始观察</button><button id="stop" type="button" class="secondary" disabled>停止并清空</button>
+      </form>
+      <p id="availability" class="muted">正在检查服务配置…</p>
+      <details><summary>识别配置与来源</summary><pre id="profile">等待配置</pre></details>
+      <p id="error" class="error" role="alert" hidden></p>
+    </section>
+    <section class="metrics" aria-label="当前运行状态">
+      <div><span>已处理序号</span><strong id="sequence">—</strong></div><div><span>来源帧</span><strong id="source-frame">—</strong></div><div><span>本帧处理</span><strong id="latency">—</strong></div><div><span>字段候选 / 22</span><strong id="coverage">—</strong></div>
+    </section>
+    <div class="workspace">
+      <section class="panel table-panel" aria-labelledby="table-title">
+        <div class="section-heading"><h2 id="table-title">当前牌桌</h2><span id="quality" class="tag">等待当前帧</span></div>
+        <p id="freshness" class="muted" aria-live="polite">尚未开始观察；没有显示历史牌面。</p>
+        <div class="board-zone"><span class="eyebrow">公共牌 · 当前帧候选</span><div id="board" class="cards" aria-label="公共牌"></div><div class="pot-line"><span>底池 <strong id="pot">未知</strong></span><span>街道 <strong id="street">未知</strong></span></div></div>
+        <div class="hero-line"><div><span class="eyebrow">HERO · 座位 4</span><div id="hero" class="cards" aria-label="Hero 手牌"></div></div><dl><div><dt>当前行动者</dt><dd id="actor">未知</dd></div><div><dt>庄位</dt><dd id="dealer">未知</dd></div></dl></div>
+        <div id="seats" class="seat-grid" aria-label="八个物理座位"></div>
+        <p class="footnote">筹码与投入分别显示。参与状态为可见线索；座位 4 固定为 Hero。未知不会沿用上一帧。</p>
+      </section>
+      <aside class="side-column">
+        <section class="panel preview-panel"><div class="section-heading"><h2>源画面预览</h2><span class="tag">本机</span></div><div class="preview-box"><img id="preview" alt="当前 AA 来源画面" hidden><p id="preview-empty">开始后显示最新画面</p></div><p class="footnote">预览与字段独立更新，不作为精确同步证据。</p></section>
+        <section class="panel strategy-panel"><div class="section-heading"><h2>策略状态</h2><span class="tag blocked">未启用</span></div><p>当前不能据此输出可靠的多人行动建议。</p><ul id="blockers"><li>等待当前牌局输入</li></ul><p class="footnote">还需要合格的 AA 多人策略及独立效果验证。识别候选数量不代表准确率或实战胜率。</p></section>
+      </aside>
+    </div>
+    <section class="panel"><div class="section-heading"><h2>当前帧可见动作</h2><span class="muted">候选事件，尚非完整行动历史</span></div><div id="actions" class="actions"><p class="muted">当前无动作候选</p></div></section>
+    <footer>本机观察工具 · 不自动操作牌桌 · 停止、断线、异常或画面过期时清空字段与预览</footer>
+  </main>
+</body>
+</html>
