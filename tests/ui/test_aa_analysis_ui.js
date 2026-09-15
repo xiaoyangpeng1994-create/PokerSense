@@ -62,6 +62,13 @@ const response = value => Promise.resolve({ok: true, json: async () => value});
 
 async function main() {
   let cases = 0;
+  {
+    const h = harness();
+    assert.equal(h.run('actionName({kind:"fold",target:"0"})'), "弃牌");
+    assert.equal(h.run('actionName({kind:"call",target:"0"})'), "跟注");
+    assert.equal(h.run('actionName({kind:"raise",target:"40"})'), "加注 至 40");
+    cases++;
+  }
   // Another observer may change rules/source and replace the job between polls.
   for (const [packet, current] of [
     [report("new", 2, "r2"), {generation: 2, table_rules: {revision: "r2"}}],

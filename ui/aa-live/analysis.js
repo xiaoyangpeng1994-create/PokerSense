@@ -23,7 +23,7 @@ function analysisEdited() {
 function exactAmount(value) { return value?.decimal ?? value?.exact ?? text(value); }
 function actionName(action) {
   if (typeof action === "string") return translated(action.toLowerCase());
-  return `${translated(action?.kind)}${action?.target != null ? ` 至 ${action.target}` : ""}`;
+  return `${translated(action?.kind)}${["bet", "raise"].includes(action?.kind) && action?.target != null ? ` 至 ${action.target}` : ""}`;
 }
 function renderAnalysis(report, state) {
   if (acceptedAnalysisId === null) return;

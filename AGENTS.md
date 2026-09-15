@@ -51,6 +51,8 @@ changing desktop capture, recognition, packaging, or project documentation.
   no readergapreset. Cashpositive94/516/559/192 remainunallocated. UI14case
   regression covers cross-tab staleEV;IPC-exit race fixed. Developmentonly.
   Finalfull3757pass/7skip/1warning(57.19s),lint0;earlier3756retained aspriorcheck.
+  Final packaged browser identified neutral action target0 label ambiguity;
+  call/fold no longer show raise-to0,15JS regressions pass.
   No WPK development,device/control/holdout/thirdparty solver or training.
   See docs/AA-TABLE-VALIDATION-V2.zh-CN.md and private aa-live-integration-20260915-v2.
 
