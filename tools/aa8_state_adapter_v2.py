@@ -71,6 +71,10 @@ def posting_comparison(before, after):
 
 
 class AA8StateAdapterV2:
+    @staticmethod
+    def _stacks_equal(left, right):
+        return left == right
+
     def __init__(self, pair_window=12):
         self.window = pair_window
         self.last = None
@@ -178,14 +182,14 @@ class AA8StateAdapterV2:
         if self.pending_hand:
             pending = self.pending_hand
             if (deal and row.get("board_count") == 0 and amount(row.get("pot")) == 0
-                    and row.get("stacks") == pending["stacks"]):
+                    and self._stacks_equal(row.get("stacks"), pending["stacks"])):
                 self._new_epoch(frame, pending["first"], "MULTI_POST_DEAL_CANDIDATE",
                                 pending["comparison"])
             self.pending_hand = None
         if (len(self.history) >= 2 and deal and row.get("board_count") == 0
                 and amount(row.get("pot")) == 0):
             a, b = list(self.history)[-2:]
-            if (a.get("stacks") == b.get("stacks")
+            if (self._stacks_equal(a.get("stacks"), b.get("stacks"))
                     and a.get("board_count") == b.get("board_count") == 0):
                 comparison = posting_comparison(b, row)
                 if comparison:

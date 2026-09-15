@@ -57,7 +57,7 @@ def load_bomb(pool, reservations_path):
 
 class CandidateStateV2(FrozenPredictionState):
     def __init__(self, source, context_source, late_source, bank_path, profile_path,
-                 heads_path, audit, bomb_reference):
+                 heads_path, audit, bomb_reference, frame_enricher=None):
         super().__init__(source, context_source, late_source, bank_path,
                          profile_path, heads_path, audit)
         source_rows = inventory(source, audit)
@@ -78,13 +78,26 @@ class CandidateStateV2(FrozenPredictionState):
         self.dealer_reader = AA8DealerReader()
         self.dealer_evidence = StableDealerEvidence()
         self.hand_ledger = AA8HandLedgerCandidate()
+        self.frame_enricher = frame_enricher
 
     def read(self, image, frame, sample):
         row = super().read(image, frame, sample)
+        if getattr(self, "frame_enricher", None) is not None:
+            row = self.frame_enricher(image, row)
         row["wager_visibility_v2"] = self.context_reader.last_visibility if (
             row["scene_supported"]) else {}
         previous = len(self.adapter.actions)
         row["observed_state_v2"] = self.adapter.observe(row)
+        if row["observed_state_v2"].get("live_boundary_reset"):
+            self.roster.begin_hand(row["observed_state_v2"]["observed_epoch"])
+        if row["observed_state_v2"].get("live_boundary_invalidated"):
+            self.roster = type(self.roster)(stable_frames=self.roster.required)
+        if (row["observed_state_v2"].get("live_boundary_reset")
+                or row["observed_state_v2"].get("live_boundary_invalidated")):
+            row["participation"] = {"slots": {str(s): {
+                "current": "UNKNOWN", "history": "UNKNOWN", "conflict": False,
+                "in_this_hand": None} for s in range(8)},
+                "reason": "waiting_fresh_roster_after_boundary"}
         row["observed_actions_v2"] = self.adapter.actions[previous:]
         partition = {"title": row.get("pot", {}).get("value"),
                      "center": self.center.recognize(image),

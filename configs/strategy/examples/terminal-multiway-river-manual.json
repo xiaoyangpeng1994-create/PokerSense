@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "mode": "manual_hypothesis",
+  "range_assumptions": "Arithmetic example only: each opponent has one hypothetical holding. These are not observed AA opponent ranges or a GTO policy.",
+  "hero_seat": 0,
+  "actor_seat": 0,
+  "hero_cards": ["As", "Ad"],
+  "board_cards": ["2c", "4d", "7h", "9s", "Jc"],
+  "current_bet": "100",
+  "pot_before": "260",
+  "other_fees": "0",
+  "split_policy": "fractional_equal_split",
+  "rules": {
+    "schema_version": 2,
+    "table_size": 6,
+    "small_blind": "1",
+    "big_blind": "2",
+    "ante": "0",
+    "ante_mode": "none",
+    "straddle_mode": "none",
+    "straddle_amount": "0",
+    "rake_percent": "0.03",
+    "rake_cap_bb": "2",
+    "rake_application": "all_pots",
+    "rake_rounding": "exact",
+    "rake_distribution": "proportional_all_pots",
+    "minimum_chip": "1",
+    "verification_status": "simulation",
+    "source": "Manually configured arithmetic assumptions, not verified platform rules"
+  },
+  "seats": [
+    {"seat_id": 0, "stack": "60", "street_committed": "40", "hand_committed": "40", "status": "ACTIVE"},
+    {"seat_id": 1, "stack": "0", "street_committed": "100", "hand_committed": "100", "status": "ALL_IN"},
+    {"seat_id": 2, "stack": "0", "street_committed": "60", "hand_committed": "60", "status": "ALL_IN"},
+    {"seat_id": 3, "stack": "0", "street_committed": "20", "hand_committed": "20", "status": "ALL_IN"},
+    {"seat_id": 4, "stack": "100", "street_committed": "30", "hand_committed": "30", "status": "FOLDED"},
+    {"seat_id": 5, "stack": "100", "street_committed": "10", "hand_committed": "10", "status": "FOLDED"}
+  ],
+  "ranges": [
+    {"seat_id": 1, "combos": {"KhKd": "1"}},
+    {"seat_id": 2, "combos": {"QhQd": "1"}},
+    {"seat_id": 3, "combos": {"ThTd": "1"}}
+  ]
+}

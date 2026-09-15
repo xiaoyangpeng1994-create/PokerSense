@@ -34,6 +34,186 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-16 V5 OFFLINE STRATEGY ENTRY:** userendedplay;capturestopped,no
+  subsequent device start. Reboot didnotlose saved20AI/600slog/90developmentsamples.
+  Added unchanged-threshold Hero callprice,min-channel extraction,stable positive
+  empty-plus withconflict guards;stable dealer/newhand andnumeric-stack comparison;
+  independent late-opening receipts reachhandledger+causalwagers without deleting
+  originalcash/events orclearing existingtaint/actions. Firstafter-singleframe P1
+  fixed and independently reviewed. Saved6062actoris4;earlier actor7claimwas a
+  timestamp alignment error and is withdrawn. River bound checkslegalholdings and
+  card-disjoint tie upperbounds;manual saved-frame form/API persists assumptions,
+  imagehash/result;no range guesses,feesunknown=>netNone,no livepolicy approval.
+  Core3859pass/7skip/1warning,34JS;finalconflictguard45focusedpass.2060PNG replay
+  baselinefieldsunchanged,21actions both;lastconflictguardlaterfocusedtested.
+  Independentmath1024graphsPASS;EXE savedframe448/260=>grosslower94 PASS.
+  V5 localhost8777 offlineonly,keyrestoredtomemory,calls_today20preserved. Browser
+  visualQA unavailable. Actualrake/fulllegalstate/fullstreetstrongstrategy remain
+  unaccepted. See docs/AA-STRATEGY-ENTRY-V5.zh-CN.md andprivate aa-strategy-entry-
+  20260916-v1;no WorkBuddy dispatch,newpaidAIcall,merge/tag/release.
+
+- **2026-09-16 LIVE FOLLOW-UP / STRATEGY DRAFT BRIDGE:** capture remainson8777
+  UGREEN0/DSHOW. AuthorizedAIroundfinished20:17COMPLETE/3ERROR,no retry;43211
+  reportedtokens,AI241match/71uncertain/10mismatch areNOTaccuracy. Poll800->250ms,
+  remove duplicate validframe DOMreset;unknown/stale clearing retained. Saved
+  snapshot->manualterminaldraft usesoriginal rules andseparateprovenance;
+  unknown wagers/fees/ranges remainnull/empty,oldledger excluded,sameepoch/taint
+  checked.32JS+26analysis/UI focused PASS. Userconfirmed2/4/8 ante4 storedprivate;
+  fees/straddle subtype unknown,rules-save notused toavoid interruptingcapture.
+  CORRECTION: saved6062 actoris4;earlier actor7 reportmixeddifferentframes.
+  Added bounded600s/.5s readonlyGET settlementlogger,31tests/lintPASS;actualrun
+  private settlement-followup-20260916. No video/newAIuploads,fee inference,
+  gamecontrols,livepolicy approval orclaimstrongstrategycomplete. See reviewdeskdoc.
+
+- **2026-09-15 AUTHORIZED LIVE AA CONNECTION / FINITE AI ROUND:** user explicitly
+  requested capture during own live session,then approved real screenshots to
+  DeepSeek atmost1/30s and20total. UGREEN25854/index0/DSHOW nowstreams;MSMF had
+  2s noframe error. Firstsavedcapture141 Ks/3c visuallymatches;not accuracygate.
+  Finite localAPI sampler pinsinstance/generation,stops onsource/stop/key/quota,
+  rechecks markedframe provenance,no retry afteruncertainPOST. Separate round
+  receipts identify timedautomation,never humangold. FirstrealAI COMPLETE2599
+  tokens,match/uncertain are modelcandidates.4scheduler tests+27JS PASS;source
+  selector now mirrors running options across tabs andremembers capture.
+  CurrentV4 localhost8777,APIkeyonlyinmemory;primarycapturekept running.
+  No client/game actions,automatic training,strategyadvice orprofit acceptance.
+  See docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md andprivate live-round-1 receipts.
+
+- **2026-09-15 FOCUSED AA DESK / DEEPSEEK VISION REVIEW:** three views keep
+  setup/diagnostics/manual strategy off observation screen. One-click mark keeps
+  matched frozen image/fields while observation continues; human revisions and
+  AI candidates remain separate,original observations unchanged. Fixed HTTPS
+  DeepSeek endpoint,process-memory key,explicit per-image upload,UTC daily cap,
+  one worker,no retry,30s publication timeout/late-result rejection;busy retained
+  until underlying worker exits.16backend tests and26JS cases PASS,fullsuite PASS,
+  focused lint/syntax PASS. PackagedEXE replay mark at1261/hash/stop/reopen PASS.
+  Real API tested only on synthetic image:720candidate vs120visible detected,
+  803tokens,COMPLETE;real table frames not uploaded. Browser visual QA blocked
+  by bridge;independent code review andhardware/fullstate/strongstrategy pending.
+  V4 private app atlocalhost8777;old8775 remains because process stop was denied
+  by tool policy. No model training,automatic source edits or strategy promotion.
+  See docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md;private aa-review-desk-20260915-v1.
+
+- **2026-09-15 AA PREVIEW READABILITY:** portrait preview now uses a wider
+  responsive column and native aspect ratio; accessible scrollable live dialog
+  opens without changing playback. Both views clear on invalidation/decode error;
+  late preview replies remain rejected. 21 deterministic JS UI cases and 9
+  focused desktop tests PASS (one dependency warning), JS syntax/diff checks PASS.
+  Portable V3 static assets updated in place with source/bundle/HTTP byte checks;
+  same server instance/generation continued replay. Browser visual QA unavailable
+  because CUA bridge failed; no hardware or recognition/strategy changes.
+  Private evidence: aa-preview-enlargement-20260915-v1. Manual review instructions
+  in docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md; development status unchanged.
+
+- **2026-09-15 AA ACTION SEMANTICS / SETTLEMENT CANDIDATES:** additive desktop
+  interpreter uses bounded pre-debit same-source/epoch/street price+cash evidence;
+  raw actions/ledger untouched,allin separated frombet/raise/call. First-hand
+  2060frame rerun preservesalloldfields,21semantictypes matchreference;
+  3023check retainsUNKNOWN confirmationstreet. Terminalriver/allin+latercredits
+  +two clearedframes => waitingnextcandidate,currentledgerNone,historical629/6
+  retained. No inference ofrake/mushroom13/6,no canonical/strategy promotion.
+  28newfocused/full3786pass/7skip/1warning(52.58s),18JS checks. No model/template/
+  threshold/hardware/holdout edits orruns. Evidence private aa-semantic-stage-
+  20260915-v1/runtime-v1;see docs/AA8-ACTION-SEMANTICS-AND-SETTLEMENT.zh-CN.md.
+
+- **2026-09-15 FIRST AA HAND REVIEW:** current3c50eb0/V3 rerun2060frames
+  (3context+2057hand),21registered visible actions match seat/order/glyph/amount;
+  83sourceframes visually reviewed(6full),prior references reused,not blindgold.
+  4labels needbet/raise/call semantics;openingcash29-pot23=6 andsettlement
+  529-paid516=13 remainunallocated. Settledpot0 vs historicalledger629 needs
+  phase distinction;readable3195board rejected;UI raw/processed frame ambiguity.
+  Dense onset/confirmation1740/1741,3168/3169,3171/3174 preserve1/1/3frame delays.
+  About20min AI-assisted review,141.266s model;human labelingcostUNKNOWN.
+  No runtime/model/threshold/media-source edits,device/holdout/strategy execution.
+  See docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md;private aa-first-hand-review-20260915-v1.
+
+- **2026-09-15 AA INTEGRATED TABLE VALIDATION V2:** continued with new account;
+  packagedEXE now actually starts and runs model/development frames plus terminal
+  andthreeway spawned analysis,overcoming prior blocked smoke. Added manualAA
+  rules/nullunknowns/versioning,continuous manifest-bound multi-pool replay,
+  same-frame user-triggered local issueJPEG+JSON,OS capture lock and10s separate
+  analysis process. Manual input never becomes visual or live authority;old
+  analysis invalidates on edits/rules/source changes. Reader resourceV3 bundle
+  34files/24PNG/22,429,499bytes,baseline5frames unchanged,knownmuck suppressed
+  andlightallin detected(developmenttemplateoverlap). Full3756pass/7skip/1warning;
+  focus,packagedHTTP/browser/independentreview evidence retained privately.
+  Realhardware unavailable,completelegalstate andstrongstrategy remain incomplete;
+  source1260-1606dev autoepoch/dealer restored,unallocatedcash6 remains.
+  Final3842frame two-hand runtime regression:3context/3839scored,38actions,
+  sparse59/state45/38390historicalfieldchecks identical;107blocked retained,
+  no readergapreset. Cashpositive94/516/559/192 remainunallocated. UI14case
+  regression covers cross-tab staleEV;IPC-exit race fixed. Developmentonly.
+  Finalfull3757pass/7skip/1warning(57.19s),lint0;earlier3756retained aspriorcheck.
+  Final packaged browser identified neutral action target0 label ambiguity;
+  call/fold no longer show raise-to0,15JS regressions pass.
+  Server instance IDs prevent generation rollback after fast server restart
+  from leaving UI stuck;focused session/JS regression added(16JS cases).
+  No WPK development,device/control/holdout/thirdparty solver or training.
+  See docs/AA-TABLE-VALIDATION-V2.zh-CN.md and private aa-live-integration-20260915-v2.
+
+- **2026-09-15 ISOLATED MANUAL ANALYSIS FACADE:** AAConditionalAnalysis runs
+  terminal/threeway manual JSON in one disposable multiprocessing spawn worker.
+  Fixed input/binding/output budgets and4096terminal/128threeway assignments,
+  20000threeway nodes;independent Timer terminates at deadline without polling.
+  Cancel invalidates before termination;generation-bound result publication,
+  copied input/binding/reports and no partial/error-result publication.23focused
+  tests PASS including real examples,oversize/invalid/crashed child,forged live
+  flags,compute caps,unpolled timeout and cancellation/restart. No capture,
+  Provider,UI coupling or empirical promotion. Caller must cancel when saved
+  rules/manual input/source generation changes;frozen entry must freeze_support.
+  Evidence:aa-conditional-strategy-integration-20260915-v1/worker-pytest-final.log.
+
+- **2026-09-15 CONDITIONAL MULTIWAY ANALYSIS INTEGRATION:** migrated 32 existing
+  research files from the preserved primary worktree onto 6d76cfc:6 modules,
+  5 CLIs,11 test files,6 manual/synthetic examples and4 historical reports.
+  All46 existing transitive dependencies match the original source hashes;
+  no task7 simulation assets or tracked identity patches imported.3 new target
+  text files normalized to repository LF;originals unchanged.224 focused tests
+  PASS after LF normalization,focused lint0;896 baseline files unchanged before
+  this note. Terminal supports6-8dealt/Hero sole ACTIVE/2-7allin opponents on
+  river;threeway supports6-8dealt but3ACTIVE at river start,finite actions and
+  no allin/sidepot crossing. Fixed-policy/calibration/uncertainty failures remain
+  regressions,not empirical approval. No live Provider/UI integration,hardware,
+  media or external solver runs. Root evidence:
+  G:/PokerSense_private/aa-conditional-strategy-integration-20260915-v1/.
+  See docs/THREEWAY-MODEL-VALIDATION-V1.zh-CN.md and
+  docs/OPPONENT-MODEL-V1.zh-CN.md;historical report counts remain historical.
+
+- **2026-09-15 AA8 PORTABLE PRIVATE RESOURCES:** added minimal exporter and
+  externally pinned validator;31boundfiles/21developmentPNGs/19,808,686bytes.
+  Relativeprofile,source/context contiguous metadata retained;only reachable
+  witnesses copied,no video/holdout/model changes. Reader requires trusted
+  external manifestSHA for bundle profiles,checks path/role/reservation/hash
+  closure before decode. Real constructor found missing card-head JSON sidecar,
+  fixed and regression-covered;v1failed output retained,v2constructor+2template
+  observations PASS with every JSON/PNG/NPZ access confined to bundle,pot43.
+  44focused tests PASS,changed lint0,diff0. No hardware/accuracy/strategy
+  acceptance;desktop CLI pin plumbing remains integration responsibility.
+  See docs/AA-RUNTIME-BUNDLE.zh-CN.md and private
+  G:/PokerSense_private/aa-resource-bundle-20260915-v1/.
+
+- **2026-09-15 AA8 OBSERVATION TOOL V1:** added dedicated AA reader/session/
+  source/server/UI and standalone PyInstaller entry. ExplicitStart/Stop,single
+  session,latest capture slot,stale/error clearing,raw vs processed sequences,
+  development role/path/hash validation. Real model deepcopy and PTS-string
+  integration bugs fixed;STOP null-sequence UI and close-failure fixed.
+  Full3440pass/7skip/1warning;post-PTS20focusedpass;release-propagation adds
+  one focused regression(42newfocused total),lint0.
+  Browser showed real development Hero5d6d/pot81/actor7 at1606 and stop-cleared.
+  LocalAA EXEbuildPASS;packaged launch smoke BLOCKED by automatic approval,
+  reason only blocked by policy. No device/video/holdout/control or strategy
+  promotion. OptionalV3supplement not configured in current localprofile.
+  See docs/AA-LIVE-MONITOR-V1.zh-CN.md and private aa-live-runtime-20260915-v1.
+
+- **2026-09-15 AA-ONLY REPOSITORY MAP:** owner asks for full remote/local
+  understanding before implementation;AA8/Hero4/6-8dealt is the sole current
+  target and hardware is unavailable for testing. Verified main fb703e2,
+  882remote/970primary-visible files and22worktrees;no product edits. AA readers
+  remain tools/private compositions,not installed desktop runtime;canonical
+  state and empirically strong multiway strategy are incomplete. Three read-only
+  domain audits retained at G:/PokerSense_private/project-map-20260915-v1/.
+  Optional GTOpen registration missing source_revision reproduced without
+  network/device use;not fixed. No media/training/capture/commit/push/merge.
+
 - **2026-09-15 AA FROZEN OBSERVATION VIEWER:** isolated localhost-only viewer
   for SHA7f86f4cd,1801frames(0–1800),nine visual slots. Shows source/time,values,
   unknowns,participation and resets;pot/presence/actor/full-actions/special modes
