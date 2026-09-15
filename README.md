@@ -205,7 +205,10 @@ Detailed deliverables and exit criteria are in
 # Offline AA observation viewer
 
 Run `python -m tools.aa_replay_viewer --observations <pinned-log-path>` from the repository,
-then open `http://127.0.0.1:8766`. This separate read-only viewer accepts only the pinned
-0–1800 observation replay. It starts no capture or strategy. Missing features and
-unrecorded confidence/rejection details remain explicit. See the
+then open `http://127.0.0.1:8766`. The viewer accepts only the pinned 0–1800 replay.
+Add `--ledger <private-jsonl-path>` to persist human confirmations separately from
+automatic values. Missing declarations come from `incomplete_fields`; numeric confidence
+is unrecorded. Review reports include denominators; exports include only development
+entries from a source-bound zone policy (default: unknown, ineligible).
+No capture, training, or strategy is run. See the
 [viewer guide](docs/AA-REPLAY-VIEWER-V1.zh-CN.md).

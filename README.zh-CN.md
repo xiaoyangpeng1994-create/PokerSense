@@ -159,6 +159,9 @@ PokerSense 使用 OpenCV 角标模板匹配和按平台配置的布局映射。A
 详细交付物与退出标准见 [`architecture.md` 第 9 节](architecture.md#9-最优实施路线)。
 # AA 冻结结果离线查看
 
-新增独立的只读回放界面：在仓库根目录运行 `python -m tools.aa_replay_viewer --observations <冻结日志路径>`，
+独立回放界面：在仓库根目录运行 `python -m tools.aa_replay_viewer --observations <冻结日志路径>`，
 然后打开 `http://127.0.0.1:8766`。仅接受已固定SHA的0–1800回放，不启动采集或策略。
-未实现字段、未知值和日志未记录的置信度均明确显示；[打开方法与边界](docs/AA-REPLAY-VIEWER-V1.zh-CN.md)。
+加 `--ledger <私有JSONL路径>` 可逐字段人工确认并持久落盘，人工值与自动值明确分开。
+未实现集合来自 `incomplete_fields`；无逐字段数值置信度。提供含分母的只读复盘及
+开发标签导出；分区默认 unknown、不允许训练，保留帧始终不可训练。导出不执行训练。
+[打开方法、分区配置与边界](docs/AA-REPLAY-VIEWER-V1.zh-CN.md)。
