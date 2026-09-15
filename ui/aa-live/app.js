@@ -15,6 +15,9 @@ function indicator(label, type = "neutral") { el("connection").textContent = lab
 function clearPreview(message = "当前无可用预览") {
   ++previewId; if (previewAbort) previewAbort.abort(); previewAbort = null;
   el("preview").hidden = true; el("preview").removeAttribute("src");
+  el("preview-large").hidden = true; el("preview-large").removeAttribute("src");
+  el("preview-expand").disabled = true;
+  el("preview-large-empty").textContent = message; el("preview-large-empty").hidden = false;
   if (previewUrl) URL.revokeObjectURL(previewUrl); previewUrl = null;
   el("preview-empty").textContent = message; el("preview-empty").hidden = false;
 }
@@ -133,7 +136,10 @@ async function preview(epoch, gen, seq) {
     if (!response.ok) return;
     const blob = await response.blob();
     if (epoch !== localEpoch || gen !== serverGeneration || seq !== sequence || ticket !== previewId) return;
-    previewUrl = URL.createObjectURL(blob); el("preview").src = previewUrl; el("preview").hidden = false; el("preview-empty").hidden = true;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(blob);
+    for (const id of ["preview", "preview-large"]) { el(id).src = previewUrl; el(id).hidden = false; }
+    el("preview-empty").hidden = true; el("preview-large-empty").hidden = true; el("preview-expand").disabled = false;
   } catch (_) { /* A missing preview never preserves a previous frame. */ }
   finally { clearTimeout(timeout); }
 }
@@ -195,6 +201,11 @@ el("start-form").addEventListener("submit", event => { event.preventDefault(); i
 el("stop").addEventListener("click", () => command("stop"));
 el("mode").addEventListener("change", () => { modeTouched = true; controls(); });
 el("preview").addEventListener("error", () => clearPreview("当前预览解码失败"));
+el("preview-large").addEventListener("error", () => clearPreview("当前预览解码失败"));
+el("preview-expand").addEventListener("click", () => {
+  if (previewUrl && !el("preview-expand").disabled && !el("preview-dialog").open) el("preview-dialog").showModal();
+});
+el("preview-close").addEventListener("click", () => el("preview-dialog").close());
 document.addEventListener("visibilitychange", () => {
   ++requestId; if (pollAbort) pollAbort.abort(); clearCurrent("页面重新获得焦点后获取新画面。"); sequence = -1;
   if (!document.hidden) poll();

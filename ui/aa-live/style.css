@@ -3,3 +3,22 @@
 .rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;padding:18px 0}.rules-grid label,#issue-form label{display:flex;flex-direction:column;gap:7px;font-size:13px;color:#526b62}.rules-grid input,.rules-grid select,#issue-form input,#issue-form select{padding:10px;border:1px solid #dce6e0;border-radius:8px;min-width:0;background:white}.button-row,#issue-form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}#issue-form label:nth-child(2){flex:1;min-width:240px}.panel+ .panel{margin-top:20px}
 
 #analysis-input{width:100%;padding:12px;margin:8px 0;border:1px solid #dce6e0;border-radius:8px;resize:vertical;font:12px/1.5 Consolas,monospace}#analysis-kind{max-width:100%;padding:9px;border:1px solid #dce6e0;border-radius:8px}.inline-label{display:flex;gap:8px;align-items:center;margin:12px 0}.analysis-table{border-collapse:collapse;width:100%;margin-top:12px}.analysis-table td,.analysis-table th{text-align:left;padding:10px;border-bottom:1px solid #dce6e0}
+
+/* Preserve the portrait source's readable width instead of fitting it to 260px height. */
+main{max-width:1540px}
+.workspace{grid-template-columns:minmax(0,1fr) clamp(360px,34vw,498px)}
+.preview-box{position:relative;width:100%;max-width:498px;height:auto;aspect-ratio:498/1080;margin:auto}
+.preview-box img{position:absolute;inset:0}
+.preview-panel .section-heading{align-items:center;flex-wrap:wrap}
+#preview-expand{padding:8px 12px}
+#preview-dialog{width:min(96vw,760px);max-width:96vw;max-height:94vh;padding:0 20px 20px;border:1px solid var(--line);border-radius:14px;color:var(--ink);background:white;overflow:auto}
+#preview-dialog::backdrop{background:rgba(10,25,21,.75)}
+.preview-dialog-heading{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;background:white}
+.preview-dialog-heading h2{font-size:17px;margin:0}
+.preview-dialog-heading button{flex-shrink:0}
+#preview-help{margin:0 0 14px}
+.preview-large-box{position:relative;width:100%;max-width:650px;aspect-ratio:498/1080;margin:auto;background:#edf1ef;text-align:center;border-radius:9px}
+#preview-large{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain}
+#preview-large[hidden]{display:none}
+@media(max-width:1000px){.workspace{grid-template-columns:1fr}.side-column{display:flex}.preview-panel{order:-1}}
+@media(max-width:490px){#preview-dialog{padding:0 10px 10px}.preview-dialog-heading h2{font-size:14px}.preview-dialog-heading button{padding:8px 12px}}

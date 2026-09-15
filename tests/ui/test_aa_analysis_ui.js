@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, "../..");
 function harness() {
   const nodes = new Map(), timers = new Map();
   let timerId = 0;
-  const h = {calls: [], blobs: [], fetchImpl: () => new Promise(() => {})};
+  const h = {calls: [], blobs: [], revoked: [], fetchImpl: () => new Promise(() => {})};
   class Element {
     constructor() { this.children = []; this._text = ""; this.value = ""; this.options = [{}, {}]; this.listeners = new Map(); this.attrs = {}; this.disabled = false; }
     set id(value) { nodes.set(value, this); }
@@ -23,12 +23,14 @@ function harness() {
     addEventListener(name, listener) { this.listeners.set(name, listener); }
     dispatch(name) { return this.listeners.get(name)?.({preventDefault() {}, target: this}); }
     click() { return this.dispatch("click"); }
+    showModal() { this.open = true; }
+    close() { this.open = false; }
   }
   h.el = id => { if (!nodes.has(id)) nodes.set(id, new Element()); return nodes.get(id); };
   h.document = {hidden: true, getElementById: h.el, createElement: () => new Element(), addEventListener() {}};
   const context = vm.createContext({
     document: h.document, console, AbortController, Blob,
-    URL: {createObjectURL(blob) { h.blobs.push(blob); return "blob:test"; }, revokeObjectURL() {}},
+    URL: {createObjectURL(blob) { h.blobs.push(blob); return "blob:test"; }, revokeObjectURL(url) { h.revoked.push(url); }},
     fetch(url, options) { h.calls.push({url, options}); return h.fetchImpl(url, options); },
     setTimeout(callback) { const id = ++timerId; timers.set(id, callback); return id; },
     clearTimeout(id) { timers.delete(id); }, setInterval() { return ++timerId; },
@@ -62,6 +64,56 @@ const response = value => Promise.resolve({ok: true, json: async () => value});
 
 async function main() {
   let cases = 0;
+  {
+    const h = harness();
+    assert.equal(h.el("preview-expand").disabled, true);
+    h.el("preview-expand").click();
+    assert.notEqual(h.el("preview-dialog").open, true);
+    h.fetchImpl = async () => ({ok:true, blob:async () => new Blob(["frame"])});
+    await h.run("preview(localEpoch,serverGeneration,sequence)");
+    assert.equal(h.el("preview-expand").disabled, false);
+    assert.equal(h.el("preview").src, h.el("preview-large").src);
+    assert.equal(h.el("preview-large").hidden, false);
+    const callsBeforeDialog = h.calls.length;
+    h.el("preview-expand").click();
+    assert.equal(h.el("preview-dialog").open, true);
+    h.el("preview-close").click();
+    assert.equal(h.el("preview-dialog").open, false);
+    assert.equal(h.calls.length, callsBeforeDialog); // Dialog never controls playback.
+    assert.equal(h.calls.at(-1).url, "/api/preview.jpg"); cases++;
+  }
+  {
+    const h = harness();
+    h.fetchImpl = async () => ({ok:true, blob:async () => new Blob(["frame"])});
+    await h.run("preview(localEpoch,serverGeneration,sequence)");
+    h.el("preview-expand").click();
+    h.run('clearCurrent("画面已过期")');
+    assert.equal(h.el("preview-large").hidden, true);
+    assert.equal(h.el("preview-large-empty").hidden, false);
+    assert.equal(h.el("preview-expand").disabled, true);
+    assert.equal(h.run("previewUrl"), null);
+    assert.deepEqual(h.revoked, ["blob:test"]);
+    assert.equal(h.el("preview-dialog").open, true);
+    await h.run("preview(localEpoch,serverGeneration,sequence)");
+    assert.equal(h.el("preview-large").hidden, false);
+    assert.equal(h.el("preview-large-empty").hidden, true);
+    h.el("preview-large").dispatch("error");
+    assert.equal(h.el("preview").hidden, true);
+    assert.equal(h.el("preview-large").hidden, true);
+    assert.equal(h.el("preview-expand").disabled, true); cases++;
+  }
+  {
+    const h = harness(); let resolveBlob;
+    const blobReady = new Promise(resolve => { resolveBlob = resolve; });
+    h.fetchImpl = async () => ({ok:true, blob:() => blobReady});
+    const pendingPreview = h.run("preview(localEpoch,serverGeneration,sequence)");
+    await Promise.resolve();
+    h.run('clearCurrent("来源已切换")');
+    resolveBlob(new Blob(["stale frame"])); await pendingPreview;
+    assert.equal(h.blobs.length, 0);
+    assert.equal(h.el("preview-large").hidden, true);
+    assert.equal(h.el("preview-expand").disabled, true); cases++;
+  }
   {
     const h = harness();
     const message = h.run('phaseDescription({hand_ledger_v2:{observed_total:"629",unallocated_difference:"629"},hand_phase:{phase:"WAITING_NEXT_HAND_CANDIDATE",current_ledger:null,historical_ledger:{observed_total:"629",unallocated_difference:"6"}}})');

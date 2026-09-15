@@ -2,6 +2,8 @@
 
 ## AA eight-seat development monitor
 
+The portrait source preview is larger and includes a scrollable live image dialog. Closing it keeps playback running. See the [manual first-hand review steps](docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md#人工复查操作); the dialog does not pause or save frames.
+
 The [action/settlement interpretation layer](docs/AA8-ACTION-SEMANTICS-AND-SETTLEMENT.zh-CN.md) now separates bet/raise/call from all-in using pre-debit observations and keeps historical commitments out of the current cleared-pot difference. Original observations and unknown monetary attribution remain intact; this does not authorize live strategy.
 
 The [current AA workflow](docs/AA-TABLE-VALIDATION-V2.zh-CN.md) adds manual per-table rules, continuous development replay, explicit local issue snapshots and isolated manual river analysis. [Portable private resource bundles](docs/AA-RUNTIME-BUNDLE.zh-CN.md) remove old checkout path dependencies. Conditional examples remain separate from live observations and are not evidence of strategy profitability.

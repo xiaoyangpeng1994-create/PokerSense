@@ -34,6 +34,17 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AA PREVIEW READABILITY:** portrait preview now uses a wider
+  responsive column and native aspect ratio; accessible scrollable live dialog
+  opens without changing playback. Both views clear on invalidation/decode error;
+  late preview replies remain rejected. 21 deterministic JS UI cases and 9
+  focused desktop tests PASS (one dependency warning), JS syntax/diff checks PASS.
+  Portable V3 static assets updated in place with source/bundle/HTTP byte checks;
+  same server instance/generation continued replay. Browser visual QA unavailable
+  because CUA bridge failed; no hardware or recognition/strategy changes.
+  Private evidence: aa-preview-enlargement-20260915-v1. Manual review instructions
+  in docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md; development status unchanged.
+
 - **2026-09-15 AA ACTION SEMANTICS / SETTLEMENT CANDIDATES:** additive desktop
   interpreter uses bounded pre-debit same-source/epoch/street price+cash evidence;
   raw actions/ledger untouched,allin separated frombet/raise/call. First-hand
