@@ -32,6 +32,7 @@ class AACaptureSource:
         self.thread = None
         self.latest = None
         self.error = None
+        self.release_error = None
         self.delivered = None
 
     def _pump(self):
@@ -50,7 +51,14 @@ class AACaptureSource:
                 self.latest = None
                 self.condition.notify_all()
         finally:
-            self.backend.release()
+            try:
+                self.backend.release()
+            except Exception as exc:
+                with self.condition:
+                    self.release_error = exc
+                    self.error = exc
+                    self.latest = None
+                    self.condition.notify_all()
 
     def read(self):
         with self.condition:
@@ -82,6 +90,8 @@ class AACaptureSource:
             # Runs in session worker, never the API thread. A blocked driver
             # leaves STOPPING visible and prevents a second device owner.
             self.thread.join()
+            if self.release_error is not None:
+                raise self.release_error
         else:
             self.backend.release()
 

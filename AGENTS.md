@@ -39,7 +39,8 @@ changing desktop capture, recognition, packaging, or project documentation.
   session,latest capture slot,stale/error clearing,raw vs processed sequences,
   development role/path/hash validation. Real model deepcopy and PTS-string
   integration bugs fixed;STOP null-sequence UI and close-failure fixed.
-  Full3440pass/7skip/1warning;post-PTS20focusedpass;41newfocused total,lint0.
+  Full3440pass/7skip/1warning;post-PTS20focusedpass;release-propagation adds
+  one focused regression(42newfocused total),lint0.
   Browser showed real development Hero5d6d/pot81/actor7 at1606 and stop-cleared.
   LocalAA EXEbuildPASS;packaged launch smoke BLOCKED by automatic approval,
   reason only blocked by policy. No device/video/holdout/control or strategy

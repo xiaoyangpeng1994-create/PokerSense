@@ -39,7 +39,7 @@ python -m PyInstaller packaging/aa_live.spec --distpath '<输出目录>' --workp
 ## 本轮验证
 
 - 全仓3440 passed / 7 skipped / 1依赖警告，35.10秒。
-- 后续PTS字符串转换修复重跑源／会话／服务器20项通过；当前新增聚焦共41项。
+- 后续PTS字符串转换修复重跑源／会话／服务器20项通过；捕获线程释放异常传播另补1项回归，当前新增聚焦共42项。
 - 实际已有开发帧1470–1474读取通过：底池43、actor4，时序确认后Hero5d6d；这是开发推断核对，不是独立准确率。
 - 浏览器实测发现并修复STOPPED sequence=null误报；随后显示source frame1606、Hero5d6d、底池81、actor7及八座数据与预览。点击停止后字段／预览清空。
 - 修复真实读取器含module对象导致deepcopy失败、真实开发PTS以字符串存储导致服务拒绝、停止时close异常被隐藏；保留相应回归。

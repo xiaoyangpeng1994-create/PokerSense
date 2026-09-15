@@ -80,3 +80,21 @@ def test_browser_cannot_select_arbitrary_replay(tmp_path):
     factory = source_factory(tmp_path / "missing.json")
     with pytest.raises(ValueError, match="已配置"):
         factory({"mode": "development-replay", "path": str(tmp_path)})
+
+
+def test_capture_thread_release_failure_reaches_session_owner():
+    class Backend:
+        def __init__(self, **kwargs):
+            pass
+
+        def capture(self, target):
+            raise RuntimeError("capture failed")
+
+        def release(self):
+            raise RuntimeError("release failed")
+
+    source = AACaptureSource({}, backend_factory=Backend)
+    with pytest.raises(RuntimeError):
+        source.read()
+    with pytest.raises(RuntimeError, match="release failed"):
+        source.close()
