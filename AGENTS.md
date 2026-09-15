@@ -34,6 +34,16 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AA FROZEN OBSERVATION VIEWER:** isolated localhost-only viewer
+  for SHA7f86f4cd,1801frames(0–1800),nine visual slots. Shows source/time,values,
+  unknowns,participation and resets;pot/presence/actor/full-actions/special modes
+  explicitly unimplemented. Confidence and detailed rejection reasons absent
+  from source are shown unrecorded,never fabricated. Browser verified hero
+  Jc9h at152 and cleared at1261;no capture/recognizer/threshold/template/strategy
+  changes. Five focused tests pass;full3399passed/7skipped/1warning,lint0,diff0.
+  All1801frames verified29rows each and five explicit unimplemented fields;
+  see docs/AA-REPLAY-VIEWER-V1.zh-CN.md.
+
 - **2026-09-15 TC-20260915-03 historical baseline reconciliation.**
   The FIRST offline replay entry below is preserved verbatim as a historical
   baseline, not the current implementation status. PR #15 fixed the session-only

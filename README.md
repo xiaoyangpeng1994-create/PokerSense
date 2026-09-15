@@ -202,3 +202,10 @@ For detailed subsystem notes, see [`docs/`](docs/).
 
 Detailed deliverables and exit criteria are in
 [`architecture.md` §9](architecture.md#9-最优实施路线).
+# Offline AA observation viewer
+
+Run `python -m tools.aa_replay_viewer --observations <pinned-log-path>` from the repository,
+then open `http://127.0.0.1:8766`. This separate read-only viewer accepts only the pinned
+0–1800 observation replay. It starts no capture or strategy. Missing features and
+unrecorded confidence/rejection details remain explicit. See the
+[viewer guide](docs/AA-REPLAY-VIEWER-V1.zh-CN.md).
