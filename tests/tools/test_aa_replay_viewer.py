@@ -3,7 +3,7 @@ import copy
 import pytest
 from fastapi.testclient import TestClient
 
-from tools.aa_replay_viewer import UNIMPLEMENTED, create_app, load_replay, present
+from tools.aa_replay_viewer import create_app, load_replay, present
 
 
 def row():
@@ -11,20 +11,30 @@ def row():
                 gap_reset=True, scene="AA_TABLE_CANDIDATE", hero=None,
                 board_slots=[None] * 5, stacks={str(i): None for i in range(9)},
                 actions={str(i): None for i in range(9)}, hero_participation="UNKNOWN",
-                strategy_eligible=False)
+                strategy_eligible=False, incomplete_fields=[
+                    "pot", "seat_presence", "full_actions", "special_modes",
+                    "participation", "acceptance"])
 
 
-def test_missing_fields_are_unimplemented_even_if_input_has_placeholder_values():
+def test_declarations_derive_missing_fields_and_never_hide_new_values():
     value = row()
-    value.update(pot=100, current_actor=2, full_actions=["bet"])
+    value.update(pot=100, current_actor=2)
+    value["incomplete_fields"].remove("pot")
     result = present(value)
     fields = {f["name"]: f for f in result["fields"]}
-    for key in UNIMPLEMENTED:
+    assert fields["pot"]["value"] == 100
+    assert fields["pot"]["status"] == "候选值（未验收）"
+    assert fields["current_actor"]["value"] == 2
+    for key in ("full_actions", "special_modes", "acceptance"):
         assert fields[key]["status"] == "未实现"
         assert fields[key]["value"] is None
     assert "未实现" in result["participation"]
     assert result["strategy_eligible"] is False
     assert "重置" in result["invalidity"][0]
+    value["incomplete_fields"].append("pot")
+    conflict = present(value)
+    assert conflict["contract_errors"] == ["INCOMPLETE_FIELDS_VALUE_CONFLICT:pot"]
+    assert next(f for f in conflict["fields"] if f["name"] == "pot")["value"] == 100
 
 
 def test_frame_change_clears_unknown_not_last_value():
@@ -50,7 +60,7 @@ def test_only_local_viewer_routes_no_capture_or_arbitrary_files():
     assert client.get("/app.js").status_code == 200
     assert client.get("/capture").status_code == 404
     assert client.get("/api/frame/not-a-number").status_code == 422
-    assert client.post("/api/frame/0").status_code == 405
+    assert client.post("/api/frame/0").status_code == 403
 
 
 def test_hash_mismatch_rejected_before_parsing(tmp_path):

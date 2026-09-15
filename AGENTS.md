@@ -34,6 +34,27 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 HUMAN CONFIRMATION LEDGER V1:** owner-authorized PR #18 merged
+  as fb703e2; this branch starts there. Local replay adds persistent source-bound
+  manual values, JSONL hash chain, server-only zone policy (unknown default),
+  reserved/unknown/exploration training exclusion and irreversible frame exposure.
+  Latest confirmation drives UI; exposure never reverts corrections or rewrites
+  historical hashes. Read-only field comparison reports carry denominators and
+  hashes; development exports supply money/glyph consumer labels, not images or
+  trained banks. Missing fields derive from incomplete_fields, including
+  participation/acceptance; actor null is UNKNOWN, and visible glyphs do not
+  imply full history. Offline strategy completeness validates required structures
+  and still needs source acceptance/full history; no Advice/live promotion.
+  Focused27passed; full3421passed/7skipped/1dependencywarning; lint/diff0.
+  Real1801frames/57rows each/0contract conflicts/0strategy true. Synthetic HTTP
+  ledger3confirmations includes1reserved entry excluded from training/export.
+  Ledger433064d0, report5e76af82, manifest1b9c2c67 retained privately under
+  aa-human-confirmation-ledger-v1-20260915; no real human labels invented.
+  Independent review fixes verified; visual browser QA BLOCKED by
+  `nodeRepl.fetch request failed`, not claimed passed. No PR #17 merge,
+  recognition/layout/template/threshold/media/capture/training changes.
+  See docs/AA-REPLAY-VIEWER-V1.zh-CN.md for launch and consumer limitations.
+
 - **2026-09-15 AA FROZEN OBSERVATION VIEWER:** isolated localhost-only viewer
   for SHA7f86f4cd,1801frames(0–1800),nine visual slots. Shows source/time,values,
   unknowns,participation and resets;pot/presence/actor/full-actions/special modes
