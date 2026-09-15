@@ -136,7 +136,16 @@ class _Tracker:
 def _create_candidate(spec):
     # Explicit module, imported only after user starts a configured session.
     from tools.aa8_candidate_v2 import create_candidate
-    return create_candidate(spec)
+    from .aa_live_context import (
+        LiveFrameEvidence, LiveStateAdapter, LiveHandLedger, LiveCausalWagers,
+    )
+    state = create_candidate(spec)
+    state.frame_enricher = LiveFrameEvidence(
+        state.cache.bank, state.profile, state.seats.empty)
+    state.adapter = LiveStateAdapter()
+    state.hand_ledger = LiveHandLedger()
+    state.causal_wagers = LiveCausalWagers()
+    return state
 
 
 def _copy_candidate(state):
@@ -239,6 +248,8 @@ class AA8Reader:
                 getattr(self._state.adapter, "actions", [])[-256:]) if hasattr(
                     self._state, "adapter") else []
             row.update(self._semantics.observe(row))
+            from .aa_river_strategy import current_river_study
+            row["river_strategy_v1"] = current_river_study(row)
             self._last = (frame, pts, source)
             self._invalidated = False
             return row

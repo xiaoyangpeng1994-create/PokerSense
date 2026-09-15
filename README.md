@@ -2,6 +2,8 @@
 
 ## AA eight-seat development monitor
 
+[V5 offline review and conditional river bounds](docs/AA-STRATEGY-ENTRY-V5.zh-CN.md) adds saved-frame candidate inputs and a plain form that calculates and preserves conservative payoff bounds without an API key. Unknown fees do not produce a net-payoff guarantee. Opening/commitment continuity and call-price observations improve; a strong full-street policy and profitability remain unvalidated.
+
 Saved frames can seed a source-labelled manual river-analysis draft; missing ranges, fees and commitments remain unfilled. This does not emit live advice. The observation page polls every 250ms; end-to-end capture/display latency remains to be measured.
 
 The [focused observation and vision review desk](docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md) separates observation, saved reviews and settings. Mark a frame without stopping observation, retain human correction history, and explicitly submit that saved image and its fields to DeepSeek for candidate review. The API key stays in server memory and must be re-entered after restart. Daily request caps apply; AI output never automatically trains models or enables live strategy.

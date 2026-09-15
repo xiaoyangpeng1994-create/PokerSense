@@ -254,3 +254,31 @@ def test_routes_mark_review_and_explicit_cloud_consent(tmp_path):
         assert finished(desk, identifier)["status"] == "COMPLETE"
         assert KEY not in client.get("/api/review/config").text
         assert len(client.get("/api/review/issues").json()["items"]) == 1
+
+
+def test_local_river_study_saves_hypothesis_and_leaves_source_unchanged(tmp_path):
+    desk = aa_review.AAReviewDesk(tmp_path)
+    identifier = marked(desk)
+    original = (tmp_path / identifier / "issue.json").read_bytes()
+    app = aa_server.create_app(tmp_path / "missing", session=Session(),
+                               records_dir=tmp_path, review_service=desk)
+    body = {"mode": "manual_hypothesis", "hero_cards": ["6d", "9c"],
+            "board_cards": ["7h", "Ad", "5s", "2h", "8s"],
+            "pot_before": "448", "call_cost": "260", "opponents": 1,
+            "max_hero_deduction": None}
+    route = f"/api/review/issues/{identifier}/river-study"
+    with TestClient(app) as client:
+        assert client.post(route, json=body).status_code == 403
+        wrong = client.post(route, json={**body, "mode": "live"},
+                            headers={"X-AA-Live": "1"})
+        assert wrong.status_code == 400
+        response = client.post(route, json=body, headers={"X-AA-Live": "1"})
+        assert response.status_code == 200
+        saved = response.json()
+        assert saved["result"]["call_gross_lower"]["exact"] == "94"
+        assert saved["result"]["call_net_lower"] is None
+        assert saved["source"]["issue_id"] == identifier
+        assert saved["strategy_eligible"] is False
+        assert desk.get(identifier)["river"]["study_id"] == saved["study_id"]
+        assert desk.config()["calls_today"] == 0
+    assert (tmp_path / identifier / "issue.json").read_bytes() == original

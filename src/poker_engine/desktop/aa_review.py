@@ -177,9 +177,9 @@ class AAReviewDesk:
             document = self._read(folder / "issue.json")
             if document.get("issue_id") != issue_id:
                 raise ReviewError("复查记录编号不一致")
-            result = {"issue": document, "human": None, "ai": None}
+            result = {"issue": document, "human": None, "ai": None, "river": None}
             for key, name in (("human", "human-review.json"),
-                              ("ai", "ai-review.json")):
+                              ("ai", "ai-review.json"), ("river", "river-study.json")):
                 if (folder / name).exists():
                     result[key] = self._read(folder / name)
             # Pending requests cannot survive a process restart.
@@ -189,6 +189,23 @@ class AAReviewDesk:
                     result["ai"] = {**result["ai"], "status": "INTERRUPTED",
                                     "error": "上次请求已中断，可重新提交"}
             return deepcopy(result)
+
+    def save_river_study(self, issue_id, inputs, result):
+        with self._lock:
+            record = self.get(issue_id)
+            self.image(issue_id)
+            document = {"study_id": uuid.uuid4().hex, "saved_at": now(),
+                        "input": deepcopy(inputs), "result": deepcopy(result),
+                        "source": {"issue_id": issue_id,
+                                   "source_frame": record["issue"]["observation"].get(
+                                       "source_frame"),
+                                   "preview_sha256": record["issue"]["preview_sha256"]},
+                        "scope": "MANUAL_HYPOTHESIS_NOT_VERIFIED_LIVE_STATE",
+                        "training_eligible": False, "strategy_eligible": False}
+            folder = self._folder(issue_id)
+            atomic_json(folder / ("river-" + document["study_id"] + ".json"), document)
+            atomic_json(folder / "river-study.json", document)
+            return document
 
     def recent(self):
         root = self._root()

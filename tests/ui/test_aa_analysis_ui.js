@@ -66,6 +66,28 @@ async function main() {
   let cases = 0;
   {
     const h=harness();
+    h.run('renderRiverStudy({status:"CONDITIONAL_STUDY",source_frame:10,opponent_seats:[7],result:{call_gross_lower:{decimal:"94"},share_floor:{exact:"1/2"},strength_evidence:{unbeaten:true},max_hero_deduction_for_nonnegative_bound:{decimal:"94"}}})');
+    assert.ok(h.el("river-live-results").textContent.includes("94"));
+    h.run('clearCurrent("已停止")');
+    assert.equal(h.el("river-live-results").textContent,"");
+    assert.equal(h.el("call-price").textContent,"未知");cases++;
+  }
+  {
+    const h=harness();let resolve;
+    const waiting=new Promise(done=>{resolve=done;});
+    h.run('selectedReview={issue:{issue_id:"one"}}');
+    h.el("river-hero-input").value="6d 9c";h.el("river-board-input").value="7h Ad 5s 2h 8s";
+    h.el("river-pot-input").value="448";h.el("river-call-input").value="260";h.el("river-opponents-input").value="1";
+    h.fetchImpl=()=>waiting;
+    const request=h.el("river-study-form").dispatch("submit");
+    h.el("river-call-input").value="280";h.el("river-call-input").dispatch("input");
+    resolve({ok:true,json:async()=>({source:{source_frame:10},result:{call_gross_lower:{decimal:"94"},call_net_lower:null}})});
+    await request;
+    assert.equal(h.el("river-review-result").textContent,"");
+    assert.equal(h.el("river-calculate").disabled,false);cases++;
+  }
+  {
+    const h=harness();
     const scenario=JSON.parse(fs.readFileSync(path.join(root,"configs/strategy/examples/terminal-multiway-river-manual.json"),"utf8"));
     const swap=seat=>seat===0 ? 4 : seat===4 ? 0 : seat;
     scenario.hero_seat=4;scenario.actor_seat=4;

@@ -77,6 +77,9 @@ function clearCurrent(reason) {
   const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "当前无动作候选"; el("actions").replaceChildren(empty);
   listBlockers(["等待当前帧与完整牌局输入"]);
   el("state-closure").textContent = "等待完整开局上下文。";
+  el("call-price").textContent = "未知";
+  el("river-live-results").replaceChildren();
+  el("river-live-status").textContent = "等待完整河牌和跟注价格";
 }
 function controls() {
   const active = ["STARTING", "RUNNING", "STALE", "STOPPING"].includes(String(statusData.status).toUpperCase());
@@ -105,6 +108,8 @@ function render(row, state) {
   el("actor").textContent = Number.isInteger(row.current_actor) ? `座位 ${row.current_actor}` : "未知";
   el("dealer").textContent = Number.isInteger(row.dealer_seat) ? `座位 ${row.dealer_seat}` : Number.isInteger(row.dealer_observation_v2?.dealer_seat) ? `单帧候选 ${row.dealer_observation_v2.dealer_seat}（等待开局）` : "未知";
   el("state-closure").textContent = phaseDescription(row);
+  el("call-price").textContent = text(row.hero_controls_v1?.call_amount);
+  renderRiverStudy(row.river_strategy_v1);
   el("sequence").textContent = text(state.sequence); el("source-frame").textContent = text(state.source_frame ?? row.frame);
   el("latency").textContent = Number.isFinite(state.processing_ms) ? `${state.processing_ms.toFixed(0)} ms` : "未记录";
   const fields = [row.cards?.hero, row.board_count, row.pot?.value, row.current_actor, row.dealer_seat, observed.street_candidate];
@@ -135,6 +140,22 @@ function render(row, state) {
     });
     if (nodes.length) el("actions").replaceChildren(...nodes);
   }
+}
+function renderRiverStudy(study) {
+  el("river-live-results").replaceChildren();
+  if (study?.status !== "CONDITIONAL_STUDY" || !study.result) {
+    el("river-live-status").textContent = study?.reasons?.slice(0,2).join("；") || "等待完整河牌和跟注价格";
+    return;
+  }
+  const result=study.result;
+  el("river-live-status").textContent=`来源帧 ${text(study.source_frame)} · ${study.opponent_seats.length}名全下对手候选 · 条件计算`;
+  const amount=document.createElement("p");amount.className="river-bound-number";
+  amount.textContent=`跟注毛收益下界：${text(result.call_gross_lower?.decimal)}`;
+  const detail=document.createElement("p");detail.className="footnote";
+  detail.textContent=result.strength_evidence.unbeaten ? `已检查全部合法单手组合；在全额争池、跟注结束行动的前提下，最差分得比例至少 ${text(result.share_floor?.exact)}。` : "存在能击败这副牌的合法组合。该下界不是平均收益，也不构成弃牌建议；仍需对手范围。";
+  const fees=document.createElement("p");fees.className="footnote";
+  fees.textContent=result.max_hero_deduction_for_nonnegative_bound ? `上述前提成立时，个人额外扣款不超过 ${text(result.max_hero_deduction_for_nonnegative_bound.decimal)}，该下界仍非负。实际费用、底池资格尚未核实，不代表胜率或盈利保证。` : "费用未知，未计算净收益保证；不支持当前输入外的后续下注。";
+  el("river-live-results").append(amount,detail,fees);
 }
 async function preview(epoch, gen, seq) {
   const ticket = ++previewId, abort = new AbortController(); previewAbort = abort;

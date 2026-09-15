@@ -1,6 +1,8 @@
 "use strict";
 let deskView = "watch", reviewTicket = 0, selectedReview = null, lastMarked = null;
 let reviewConfig = null, markBusy = false, humanBusy = false, aiBusy = false;
+let riverReviewEpoch = 0, riverReviewBusy = false;
+const riverInputIds = ["river-hero-input", "river-board-input", "river-pot-input", "river-call-input", "river-opponents-input", "river-fee-input"];
 const reviewStates = {RUNNING:"正在复核", COMPLETE:"AI 候选 · 待确认", ERROR:"复核失败", TIMED_OUT:"复核超时", INTERRUPTED:"请求已中断"};
 function showDesk(view) {
   if (!["watch", "review", "settings"].includes(view)) return;
@@ -59,7 +61,14 @@ async function loadReviewList() {
     });
     if (!nodes.length) { const option = document.createElement("option"); option.value=""; option.textContent="暂无记录，请先在观察页标记"; nodes.push(option); }
     el("review-select").replaceChildren(...nodes);
-    if (selectedReview && result.items.some(row => row.issue_id === selectedReview.issue.issue_id)) el("review-select").value = selectedReview.issue.issue_id;
+    if (selectedReview) {
+      if(!result.items.some(row=>row.issue_id===selectedReview.issue.issue_id)) {
+        const current=document.createElement("option");current.value=selectedReview.issue.issue_id;
+        current.textContent=`当前打开的较早记录 · 来源帧 ${text(selectedReview.issue.observation.source_frame)}`;
+        el("review-select").append(current);
+      }
+      el("review-select").value=selectedReview.issue.issue_id;
+    }
     else el("review-select").value = "";
     el("review-count").textContent = `显示 ${result.items.length} 条；属于开发复查记录`;
   } catch (_) { el("review-feedback").textContent = "复查列表读取失败，请检查本机服务。"; }
@@ -91,6 +100,9 @@ function renderAI(report) {
 }
 async function selectReview(issueId) {
   const ticket=++reviewTicket; selectedReview=null;
+  ++riverReviewEpoch;
+  for(const id of riverInputIds) el(id).value="";
+  el("river-review-result").replaceChildren();el("river-review-status").textContent="";
   el("review-content").hidden=true; el("review-image").removeAttribute("src");
   el("human-note").value=""; el("ai-consent").checked=false;
   el("human-feedback").textContent=""; el("ai-result").replaceChildren(); reviewButtons();
@@ -99,14 +111,67 @@ async function selectReview(issueId) {
   try {
     const result=await deskRequest(`/api/review/issues/${issueId}`);
     if(ticket!==reviewTicket) return;
-    selectedReview=result; el("review-content").hidden=false; el("review-select").value=issueId;
+    selectedReview=result; el("review-content").hidden=false;
+    if(!Array.from(el("review-select").options).some(option=>option.value===issueId)) {
+      const option=document.createElement("option");option.value=issueId;
+      option.textContent=`来源帧 ${text(result.issue.observation.source_frame)}`;el("review-select").append(option);
+    }
+    el("review-select").value=issueId;
     renderFrozenFields(result);
     el("human-verdict").value=result.human?.verdict || "unreadable"; el("human-note").value=result.human?.note || "";
     el("review-feedback").textContent=""; renderAI(result.ai);
+    if(result.river) {fillRiverInputs(result.river.input);renderSavedRiver(result.river);}
     await loadReviewConfig();
   } catch (_) { if(ticket===reviewTicket) el("review-feedback").textContent="该记录未能打开，请重新选择。"; }
   reviewButtons();
 }
+function fillRiverInputs(input) {
+  el("river-hero-input").value=(input.hero_cards || []).filter(Boolean).join(" ");
+  el("river-board-input").value=(input.board_cards || []).filter(Boolean).join(" ");
+  el("river-pot-input").value=input.pot_before ?? "";el("river-call-input").value=input.call_cost ?? "";
+  el("river-opponents-input").value=input.opponents ?? "";
+  el("river-fee-input").value=input.max_hero_deduction ?? "";
+}
+function renderSavedRiver(report) {
+  const result=report.result;
+  el("river-review-result").replaceChildren();
+  const gross=document.createElement("p");gross.className="river-bound-number";
+  gross.textContent=`跟注毛收益下界 ${text(result.call_gross_lower?.decimal)} · 弃牌参考 0`;
+  const net=document.createElement("p");net.textContent=result.call_net_lower ? `按所填个人扣款上限计算，净收益下界 ${text(result.call_net_lower.decimal)}` : "费用上限未知，未给出净收益保证。";
+  const note=document.createElement("p");note.className="footnote";
+  note.textContent="前提：Hero具备全额争池资格、跟注后无后续行动、牌面与价格正确，且按分数平分。下界不是平均收益或胜率；负下界也不等于应弃牌。";
+  el("river-review-result").append(gross,net,note);
+  el("river-review-status").textContent=`已保存核算 · 来源帧 ${text(report.source.source_frame)} · 人工假设，非实时建议`;
+}
+el("river-seed").addEventListener("click",async()=>{
+  if(!selectedReview)return;
+  const id=selectedReview.issue.issue_id,ticket=reviewTicket,epoch=++riverReviewEpoch;
+  el("river-review-result").replaceChildren();el("river-review-status").textContent="正在读取这张固定画面的候选值…";
+  try {
+    const inputs=await deskRequest(`/api/review/issues/${id}/river-input`,{});
+    if(ticket!==reviewTicket || epoch!==riverReviewEpoch)return;
+    fillRiverInputs(inputs);
+    el("river-review-status").textContent="候选值已带入。请核对并填写争池对手数；跟注额是单帧候选，费用未知可留空。";
+  } catch(e){if(ticket===reviewTicket && epoch===riverReviewEpoch)el("river-review-status").textContent=`未带入：${e.message}`;}
+});
+for(const id of riverInputIds)el(id).addEventListener("input",()=>{
+  ++riverReviewEpoch;el("river-review-result").replaceChildren();
+  el("river-review-status").textContent="输入已修改，请重新计算。";
+});
+el("river-study-form").addEventListener("submit",async event=>{
+  event.preventDefault();if(!selectedReview || riverReviewBusy)return;
+  const id=selectedReview.issue.issue_id,ticket=reviewTicket,epoch=++riverReviewEpoch;
+  riverReviewBusy=true;el("river-calculate").disabled=true;el("river-review-result").replaceChildren();
+  const codes=id=>el(id).value.trim().split(/[\s,，]+/).filter(Boolean);
+  const input={mode:"manual_hypothesis",hero_cards:codes("river-hero-input"),board_cards:codes("river-board-input"),pot_before:el("river-pot-input").value.trim(),call_cost:el("river-call-input").value.trim(),opponents:Number(el("river-opponents-input").value),max_hero_deduction:el("river-fee-input").value.trim() || null};
+  el("river-review-status").textContent="正在进行本地条件计算…";
+  try {
+    const report=await deskRequest(`/api/review/issues/${id}/river-study`,input);
+    if(ticket!==reviewTicket || epoch!==riverReviewEpoch)return;
+    selectedReview.river=report;renderSavedRiver(report);
+  } catch(e){if(ticket===reviewTicket && epoch===riverReviewEpoch)el("river-review-status").textContent=`未完成：${e.message}`;}
+  finally{riverReviewBusy=false;el("river-calculate").disabled=false;}
+});
 async function saveHumanReview() {
   if (!selectedReview || humanBusy) return;
   const id=selectedReview.issue.issue_id, ticket=reviewTicket;
@@ -162,3 +227,8 @@ el("ai-clear-key").addEventListener("click",async()=>{
 });
 el("review-image").addEventListener("error",()=>{el("review-feedback").textContent="冻结图片读取或校验失败，请勿据此确认。";selectedReview=null;reviewButtons();});
 setInterval(reviewButtons,500);setInterval(refreshAI,1800);loadReviewConfig();
+if(typeof location!=="undefined" && location.hash.startsWith("#review")) {
+  showDesk("review");
+  const id=location.hash.split("/")[1];
+  if(id && /^\d{8}T\d{6}-[a-f0-9]{12}$/.test(id))selectReview(id);
+}

@@ -20,6 +20,8 @@ from .aa_table_config import AATableConfigStore
 from .aa_issues import save_issue
 from .aa_analysis import AAConditionalAnalysis
 from .aa_review import AAReviewDesk, ReviewError
+from .aa_saved_strategy import SavedStrategyInputs
+from poker_engine.strategy.river_bounds_v1 import river_payoff_bounds
 
 
 def ui_root():
@@ -39,11 +41,12 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
                        replay_playlist=replay_playlist,
                        allow_capture=allow_capture),
         lambda: AA8Reader(profile_path, bundle_sha256=bundle_sha256),
-        interval_seconds=0.15,
+        interval_seconds=0.03,
     )
     rules = AATableConfigStore(rules_path)
     analysis = analysis_service or AAConditionalAnalysis()
     review = review_service or AAReviewDesk(records_dir)
+    saved_strategy = SavedStrategyInputs(profile_path, bundle_sha256)
     controls_lock = threading.RLock()
     profile_status = (preflight_profile(profile_path, bundle_sha256=bundle_sha256)
                       if bundle_sha256 else preflight_profile(profile_path))
@@ -190,6 +193,27 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
                       analysis=analysis_status,
                       strategy_scope="AA8_OBSERVATION_ONLY_NO_ADVICE")
         return result
+
+    @app.post("/api/review/issues/{issue_id}/river-input")
+    async def saved_river_input(issue_id: str, request: Request):
+        await review_body(request, ())
+        return review_call(saved_strategy.from_record, review, issue_id)
+
+    @app.post("/api/review/issues/{issue_id}/river-study")
+    async def manual_river_bounds(issue_id: str, request: Request):
+        body = await review_body(request, (
+            "hero_cards", "board_cards", "pot_before", "call_cost", "opponents",
+            "max_hero_deduction", "mode"))
+        if body["mode"] != "manual_hypothesis":
+            raise HTTPException(400, "当前只接受明确的人工假设")
+        try:
+            result = river_payoff_bounds(
+                body["hero_cards"], body["board_cards"], body["pot_before"],
+                body["call_cost"], body["opponents"],
+                max_hero_deduction=body["max_hero_deduction"])
+        except (ValueError, TypeError, ArithmeticError):
+            raise HTTPException(400, "请核对两张手牌、五张公共牌、金额与对手数") from None
+        return review_call(review.save_river_study, issue_id, body, result)
 
     @app.get("/api/preview.jpg")
     def preview():

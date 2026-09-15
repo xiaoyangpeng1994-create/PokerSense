@@ -34,6 +34,24 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-16 V5 OFFLINE STRATEGY ENTRY:** userendedplay;capturestopped,no
+  subsequent device start. Reboot didnotlose saved20AI/600slog/90developmentsamples.
+  Added unchanged-threshold Hero callprice,min-channel extraction,stable positive
+  empty-plus withconflict guards;stable dealer/newhand andnumeric-stack comparison;
+  independent late-opening receipts reachhandledger+causalwagers without deleting
+  originalcash/events orclearing existingtaint/actions. Firstafter-singleframe P1
+  fixed and independently reviewed. Saved6062actoris4;earlier actor7claimwas a
+  timestamp alignment error and is withdrawn. River bound checkslegalholdings and
+  card-disjoint tie upperbounds;manual saved-frame form/API persists assumptions,
+  imagehash/result;no range guesses,feesunknown=>netNone,no livepolicy approval.
+  Core3859pass/7skip/1warning,34JS;finalconflictguard45focusedpass.2060PNG replay
+  baselinefieldsunchanged,21actions both;lastconflictguardlaterfocusedtested.
+  Independentmath1024graphsPASS;EXE savedframe448/260=>grosslower94 PASS.
+  V5 localhost8777 offlineonly,keyrestoredtomemory,calls_today20preserved. Browser
+  visualQA unavailable. Actualrake/fulllegalstate/fullstreetstrongstrategy remain
+  unaccepted. See docs/AA-STRATEGY-ENTRY-V5.zh-CN.md andprivate aa-strategy-entry-
+  20260916-v1;no WorkBuddy dispatch,newpaidAIcall,merge/tag/release.
+
 - **2026-09-16 LIVE FOLLOW-UP / STRATEGY DRAFT BRIDGE:** capture remainson8777
   UGREEN0/DSHOW. AuthorizedAIroundfinished20:17COMPLETE/3ERROR,no retry;43211
   reportedtokens,AI241match/71uncertain/10mismatch areNOTaccuracy. Poll800->250ms,
@@ -42,7 +60,7 @@ changing desktop capture, recognition, packaging, or project documentation.
   unknown wagers/fees/ranges remainnull/empty,oldledger excluded,sameepoch/taint
   checked.32JS+26analysis/UI focused PASS. Userconfirmed2/4/8 ante4 storedprivate;
   fees/straddle subtype unknown,rules-save notused toavoid interruptingcapture.
-  Source6062 hasHero260callbuttons butactor7candidate:actionownershipstillneedsfix.
+  CORRECTION: saved6062 actoris4;earlier actor7 reportmixeddifferentframes.
   Added bounded600s/.5s readonlyGET settlementlogger,31tests/lintPASS;actualrun
   private settlement-followup-20260916. No video/newAIuploads,fee inference,
   gamecontrols,livepolicy approval orclaimstrongstrategycomplete. See reviewdeskdoc.
