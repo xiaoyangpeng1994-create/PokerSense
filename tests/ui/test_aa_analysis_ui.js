@@ -66,6 +66,61 @@ async function main() {
   let cases = 0;
   {
     const h=harness();
+    const scenario=JSON.parse(fs.readFileSync(path.join(root,"configs/strategy/examples/terminal-multiway-river-manual.json"),"utf8"));
+    const swap=seat=>seat===0 ? 4 : seat===4 ? 0 : seat;
+    scenario.hero_seat=4;scenario.actor_seat=4;
+    scenario.seats=scenario.seats.map(seat=>({...seat,seat_id:swap(seat.seat_id)})).sort((a,b)=>a.seat_id-b.seat_id);
+    const commitments=Object.fromEntries(scenario.seats.map(seat=>[seat.seat_id,seat.hand_committed]));
+    const record={issue:{issue_id:"reference",table_rules:{conditional_analysis_ready:true,simulation_rules:scenario.rules},observation:{payload:{current_actor:4,cards:{hero:scenario.hero_cards,board_slots:scenario.board_cards},pot:{value:scenario.pot_before},stacks:Object.fromEntries(scenario.seats.map(seat=>[seat.seat_id,{value:seat.stack}])),observed_state_v2:{street_candidate:"river",observed_epoch:"a",participants:Object.fromEntries(scenario.seats.map(seat=>[seat.seat_id,{state:seat.status.toLowerCase()}]))},causal_street_wagers_v2:{status:"OBSERVED_STREET_WAGERS_CANDIDATE",title_center_ledger_reconciled:true,street_price:scenario.current_bet,wagers:Object.fromEntries(scenario.seats.map(seat=>[seat.seat_id,seat.street_committed]))},hand_phase:{current_ledger:{status:"OBSERVED_HAND_COMMITMENTS_CANDIDATE",epoch:"a",taint_reasons:[],hand_commitments:commitments,unallocated_difference:"0"}}}}}};
+    const draft=JSON.parse(h.run(`JSON.stringify(terminalDraftFromReview(${JSON.stringify(record)}).document)`));
+    draft.seats=draft.seats.filter(seat=>seat.seat_id<6);
+    draft.ranges=scenario.ranges;draft.other_fees=scenario.other_fees;draft.range_assumptions=scenario.range_assumptions;
+    assert.deepEqual(draft,scenario);cases++;
+  }
+  {
+    const h=harness();
+    const draft=h.run('terminalDraftFromReview({issue:{issue_id:"saved",observation:{source_frame:321,payload:{cards:{hero:["As","Ad"]},pot:{value:"120"},current_actor:4,observed_state_v2:{street_candidate:"flop",participants:{0:{state:"empty"}}},hand_phase:{current_ledger:null},hand_ledger_v2:{hand_commitments:{4:"50"}},causal_street_wagers_v2:{status:"BASELINE_UNKNOWN",street_price:"80",wagers:{4:"20"}}}},table_rules:{revision:"saved-rules",conditional_analysis_ready:false}}})');
+    assert.equal(draft.document.current_bet,null);
+    assert.equal(draft.document.seats[4].hand_committed,null);
+    assert.equal(draft.document.seats[0].status,null);
+    assert.equal(draft.document.ranges.length,0);
+    assert.equal(draft.document.other_fees,null);
+    assert.equal(draft.document.rules.table_size,null);
+    assert.equal(draft.document.board_cards.length,0);
+    assert.equal(draft.source.table_rules_revision,"saved-rules");cases++;
+  }
+  {
+    const h=harness();
+    h.run('var frozenSeed={issue:{issue_id:"seed",observation:{payload:{cards:{hero:["As","Ad"],board_slots:["2c","4d","7h","9s","Jc"]},current_actor:4,observed_state_v2:{street_candidate:"river",observed_epoch:"hand-a",participants:{4:{state:"active"}}},hand_phase:{current_ledger:{status:"OBSERVED_HAND_COMMITMENTS_CANDIDATE",epoch:"hand-a",taint_reasons:[],hand_commitments:{4:"40"},unallocated_difference:"6"}},causal_street_wagers_v2:{status:"OBSERVED_STREET_WAGERS_CANDIDATE",title_center_ledger_reconciled:true,street_price:"100",wagers:{4:"40"}}}},table_rules:{}}};var seedDraft=terminalDraftFromReview(frozenSeed)');
+    assert.equal(h.run('seedDraft.document.seats[4].hand_committed'),"40");
+    assert.equal(h.run('seedDraft.document.current_bet'),"100");
+    assert.ok(h.run('seedDraft.missing.join(" ")').includes("未解释差额"));
+    h.run('seedDraft.document.hero_cards[0]="Ks"');
+    assert.equal(h.run('frozenSeed.issue.observation.payload.cards.hero[0]'),"As");
+    h.run('frozenSeed.issue.observation.payload.hand_phase.current_ledger.epoch="old-hand"');
+    assert.equal(h.run('terminalDraftFromReview(frozenSeed).document.seats[4].hand_committed'),null);cases++;
+  }
+  {
+    const h=harness();h.fetchImpl=()=>response({});
+    await h.run('openStrategyDraft({issue:{issue_id:"one",observation:{source_frame:15,payload:{}},table_rules:{}}})');
+    assert.equal(h.el("analysis-kind").value,"terminal");
+    assert.equal(h.el("strategy-tools").open,true);
+    assert.equal(h.run("deskView"),"settings");
+    assert.equal(h.el("analysis-use-rules").checked,false);
+    assert.ok(h.el("strategy-draft-origin").textContent.includes("15"));
+    assert.equal(h.calls.filter(call=>["/api/start","/api/stop","/api/analysis"].includes(call.url)).length,0);cases++;
+  }
+  {
+    const h=harness();
+    h.run('render({scene_supported:true,cards:{hero:["As","Ad"]},pot:{value:"720"},glyphs:{4:"raise"}},{sequence:1})');
+    h.run('render({scene_supported:true,cards:{hero:[null,null]}},{sequence:2})');
+    assert.equal(h.el("pot").textContent,"未知");
+    assert.ok(!h.el("actions").textContent.includes("raise"));
+    h.run('render({scene_supported:false},{sequence:3})');
+    assert.equal(h.el("quality").textContent,"无当前有效帧");cases++;
+  }
+  {
+    const h=harness();
     h.run('statusData={status:"RUNNING",source_options:{mode:"capture-card",device_index:0,api:"DSHOW"},capture_available:true,replay_available:true};controls()');
     assert.equal(h.el("mode").value,"capture-card");
     assert.equal(h.el("api").value,"DSHOW");

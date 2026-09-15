@@ -97,8 +97,8 @@ function controls() {
   el("availability").textContent = [replay ? "已登记开发回放可用" : "未配置开发回放", capture ? "采集入口已配置，点击开始才打开设备" : "采集入口未开放（启动服务时需明确启用）"].join(" · ");
 }
 function render(row, state) {
-  clearCurrent("正在更新当前帧…");
-  if (row.scene_supported !== true) { el("freshness").textContent = "当前画面不受支持或有遮挡，字段已清空。"; return; }
+  if (row.scene_supported !== true) { clearCurrent("当前画面不受支持或有遮挡，字段已清空。"); return; }
+  clearPreview();
   const observed = row.observed_state_v2 || {};
   cards("hero", row.cards?.hero, 2); cards("board", row.cards?.board_slots, 5); seatCards(row);
   el("pot").textContent = text(row.pot?.value); el("street").textContent = translated(observed.street_candidate);
@@ -119,6 +119,8 @@ function render(row, state) {
   const supplied = row.strategy_blockers || row.missing_fields || [];
   if (Array.isArray(supplied)) for (const value of supplied) if (typeof value === "string") reasons.push(value);
   listBlockers([...new Set(reasons)].slice(0, 14));
+  const emptyAction = document.createElement("p"); emptyAction.className = "muted"; emptyAction.textContent = "当前无动作候选";
+  el("actions").replaceChildren(emptyAction);
   const actions = Array.isArray(row.interpreted_action_history) ? row.interpreted_action_history : Array.isArray(row.action_history_candidate) ? row.action_history_candidate : Array.isArray(row.observed_actions_v2) ? row.observed_actions_v2 : [];
   if (actions.length) el("actions").replaceChildren(...actions.slice(-48).reverse().map(action => {
     const node = document.createElement("span"); node.className = "action-item";
@@ -216,5 +218,5 @@ document.addEventListener("visibilitychange", () => {
   ++requestId; if (pollAbort) pollAbort.abort(); clearCurrent("页面重新获得焦点后获取新画面。"); sequence = -1;
   if (!document.hidden) poll();
 });
-async function tick() { await poll(); setTimeout(tick, 800); }
+async function tick() { await poll(); setTimeout(tick, 250); }
 clearCurrent("尚未开始观察；没有显示历史牌面。"); tick();

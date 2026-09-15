@@ -34,6 +34,19 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-16 LIVE FOLLOW-UP / STRATEGY DRAFT BRIDGE:** capture remainson8777
+  UGREEN0/DSHOW. AuthorizedAIroundfinished20:17COMPLETE/3ERROR,no retry;43211
+  reportedtokens,AI241match/71uncertain/10mismatch areNOTaccuracy. Poll800->250ms,
+  remove duplicate validframe DOMreset;unknown/stale clearing retained. Saved
+  snapshot->manualterminaldraft usesoriginal rules andseparateprovenance;
+  unknown wagers/fees/ranges remainnull/empty,oldledger excluded,sameepoch/taint
+  checked.32JS+26analysis/UI focused PASS. Userconfirmed2/4/8 ante4 storedprivate;
+  fees/straddle subtype unknown,rules-save notused toavoid interruptingcapture.
+  Source6062 hasHero260callbuttons butactor7candidate:actionownershipstillneedsfix.
+  Added bounded600s/.5s readonlyGET settlementlogger,31tests/lintPASS;actualrun
+  private settlement-followup-20260916. No video/newAIuploads,fee inference,
+  gamecontrols,livepolicy approval orclaimstrongstrategycomplete. See reviewdeskdoc.
+
 - **2026-09-15 AUTHORIZED LIVE AA CONNECTION / FINITE AI ROUND:** user explicitly
   requested capture during own live session,then approved real screenshots to
   DeepSeek atmost1/30s and20total. UGREEN25854/index0/DSHOW nowstreams;MSMF had
