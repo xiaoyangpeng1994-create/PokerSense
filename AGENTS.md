@@ -34,6 +34,19 @@ changing desktop capture, recognition, packaging, or project documentation.
 
 ## Current state
 
+- **2026-09-15 AUTHORIZED LIVE AA CONNECTION / FINITE AI ROUND:** user explicitly
+  requested capture during own live session,then approved real screenshots to
+  DeepSeek atmost1/30s and20total. UGREEN25854/index0/DSHOW nowstreams;MSMF had
+  2s noframe error. Firstsavedcapture141 Ks/3c visuallymatches;not accuracygate.
+  Finite localAPI sampler pinsinstance/generation,stops onsource/stop/key/quota,
+  rechecks markedframe provenance,no retry afteruncertainPOST. Separate round
+  receipts identify timedautomation,never humangold. FirstrealAI COMPLETE2599
+  tokens,match/uncertain are modelcandidates.4scheduler tests+27JS PASS;source
+  selector now mirrors running options across tabs andremembers capture.
+  CurrentV4 localhost8777,APIkeyonlyinmemory;primarycapturekept running.
+  No client/game actions,automatic training,strategyadvice orprofit acceptance.
+  See docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md andprivate live-round-1 receipts.
+
 - **2026-09-15 FOCUSED AA DESK / DEEPSEEK VISION REVIEW:** three views keep
   setup/diagnostics/manual strategy off observation screen. One-click mark keeps
   matched frozen image/fields while observation continues; human revisions and

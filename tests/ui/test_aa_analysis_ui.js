@@ -65,6 +65,14 @@ const response = value => Promise.resolve({ok: true, json: async () => value});
 async function main() {
   let cases = 0;
   {
+    const h=harness();
+    h.run('statusData={status:"RUNNING",source_options:{mode:"capture-card",device_index:0,api:"DSHOW"},capture_available:true,replay_available:true};controls()');
+    assert.equal(h.el("mode").value,"capture-card");
+    assert.equal(h.el("api").value,"DSHOW");
+    h.run('statusData.status="STOPPED";controls()');
+    assert.equal(h.el("mode").value,"capture-card");cases++;
+  }
+  {
     const h=harness(); h.run('showDesk("watch")');
     assert.equal(h.el("settings-view").hidden,true);
     assert.equal(h.el("review-view").hidden,true);

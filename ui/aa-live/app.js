@@ -81,6 +81,12 @@ function clearCurrent(reason) {
 function controls() {
   const active = ["STARTING", "RUNNING", "STALE", "STOPPING"].includes(String(statusData.status).toUpperCase());
   const replay = statusData.replay_available === true, capture = statusData.capture_available === true;
+  const runningOptions = statusData.source_options || {};
+  if (active && ["capture-card", "development-replay"].includes(runningOptions.mode)) {
+    el("mode").value = runningOptions.mode; modeTouched = true;
+    if (Number.isInteger(runningOptions.device_index)) el("device").value = runningOptions.device_index;
+    if (["MSMF", "DSHOW"].includes(runningOptions.api)) el("api").value = runningOptions.api;
+  }
   el("mode").options[0].disabled = !replay; el("mode").options[1].disabled = !capture;
   if (!modeTouched && !active && !pending) el("mode").value = replay ? "development-replay" : capture ? "capture-card" : "development-replay";
   const useCapture = el("mode").value === "capture-card";

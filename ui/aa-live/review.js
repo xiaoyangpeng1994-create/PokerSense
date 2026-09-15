@@ -54,7 +54,7 @@ async function loadReviewList() {
     const result = await deskRequest("/api/review/issues");
     const nodes = result.items.map(row => {
       const option = document.createElement("option"); option.value = row.issue_id;
-      option.textContent = `来源帧 ${text(row.source_frame)} · ${row.saved_at.slice(11,19)} UTC · ${row.human_status ? "已有人工记录" : "待复查"}`;
+      option.textContent = `来源帧 ${text(row.source_frame)} · ${new Date(row.saved_at).toLocaleTimeString("zh-CN",{hour12:false})} · ${row.human_status ? "已有人工记录" : "待复查"}`;
       return option;
     });
     if (!nodes.length) { const option = document.createElement("option"); option.value=""; option.textContent="暂无记录，请先在观察页标记"; nodes.push(option); }
