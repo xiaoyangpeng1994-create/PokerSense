@@ -43,6 +43,15 @@ class Reader:
         return {"hero": None, "strategy_eligible": False}
 
 
+def test_session_instances_do_not_reuse_generation_namespace():
+    one = AARecognitionSession(lambda _: Source(), Reader)
+    two = AARecognitionSession(lambda _: Source(), Reader)
+    assert one.snapshot()["instance_id"] != two.snapshot()["instance_id"]
+    first = one.snapshot()["instance_id"]
+    one.stop()
+    assert one.snapshot()["instance_id"] == first
+
+
 def test_explicit_start_shared_worker_and_restart():
     sources = []
     reader = Reader()

@@ -70,6 +70,14 @@ async function main() {
     cases++;
   }
   // Another observer may change rules/source and replace the job between polls.
+  {
+    const h = harness(); seed(h); h.document.hidden = false;
+    h.run('serverInstance="old-server";serverGeneration=10;sequence=99');
+    h.fetchImpl = () => response({status:"STOPPED",instance_id:"new-server",generation:0,sequence:null,
+      replay_available:true,capture_available:false,table_rules:{revision:"r1"},analysis:{status:"IDLE",job_id:null}});
+    await h.run("poll()"); cleared(h);
+    assert.equal(h.run("serverGeneration"),0); assert.equal(h.run("serverInstance"),"new-server"); cases++;
+  }
   for (const [packet, current] of [
     [report("new", 2, "r2"), {generation: 2, table_rules: {revision: "r2"}}],
     [report(), {generation: 2, table_rules: {revision: "r1"}}],

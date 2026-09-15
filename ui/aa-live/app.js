@@ -4,6 +4,7 @@ const headers = {"X-AA-Live": "1"};
 const states = {STOPPED:"已停止", STARTING:"正在启动", RUNNING:"正在观察", STOPPING:"正在停止", ENDED:"回放结束", ERROR:"发生错误", STALE:"画面已过期"};
 const labels = {preflop:"翻前", flop:"翻牌", turn:"转牌", river:"河牌", UNKNOWN:"未知", ACTIVE:"参与候选", FOLDED:"弃牌候选", ALL_IN:"全下候选", DEALT_IN_CANDIDATE:"已发牌候选", FOLDED_CANDIDATE:"弃牌候选", WAITING_NEXT_HAND:"等待下一手", WAITING_POST_OR_PASS:"等待入局", WAITING_CANDIDATE:"等待候选", EMPTY_CANDIDATE:"空座候选", EMPTY:"空座候选", fold:"弃牌", check:"过牌", call:"跟注", bet:"下注", raise:"加注", all_in:"全下"};
 let localEpoch = 0, requestId = 0, serverGeneration = -1, sequence = -1;
+let serverInstance = null;
 let lastProgress = 0, statusData = {}, pending = false, pollAbort = null;
 let previewAbort = null, previewUrl = null, previewId = 0, modeTouched = false;
 const known = value => value !== null && value !== undefined && value !== "UNKNOWN";
@@ -133,6 +134,11 @@ async function poll() {
     if (!response.ok) throw Error(`HTTP ${response.status}`);
     const state = await response.json();
     if (epoch !== localEpoch || ticket !== requestId) return;
+    if (typeof state.instance_id === "string" && state.instance_id !== serverInstance) {
+      serverInstance = state.instance_id; serverGeneration = -1; sequence = -1;
+      clearCurrent("服务已重启，等待当前实例的画面。");
+      if (typeof invalidateAnalysis === "function") invalidateAnalysis("服务已重启，旧分析已失效。");
+    }
     const status = String(state.status).toUpperCase();
     const hasCurrentPayload = status === "RUNNING" && state.payload;
     if (!Number.isInteger(state.generation) || hasCurrentPayload && !Number.isInteger(state.sequence)) throw Error("服务状态缺少有效版本标识");

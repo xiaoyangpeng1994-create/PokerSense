@@ -8,6 +8,7 @@ import json
 import math
 import threading
 import time
+import uuid
 
 import cv2
 import numpy as np
@@ -40,6 +41,7 @@ class AARecognitionSession:
         self._worker = None
         self._cancel = threading.Event()
         self._generation = 0
+        self._instance_id = uuid.uuid4().hex
         self._status = "STOPPED"
         self._payload = self._preview = self._sequence = None
         self._source_frame = self._processing_ms = self._last_result = None
@@ -62,7 +64,8 @@ class AARecognitionSession:
             self._clear()
 
     def _snapshot(self):
-        return {"status": self._status, "generation": self._generation,
+        return {"status": self._status, "instance_id": self._instance_id,
+                "generation": self._generation,
                 "sequence": self._sequence, "source_frame": self._source_frame,
                 "payload": copy.deepcopy(self._payload), "error": self._error,
                 "processing_ms": self._processing_ms,

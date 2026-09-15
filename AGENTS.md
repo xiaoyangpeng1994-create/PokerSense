@@ -53,6 +53,8 @@ changing desktop capture, recognition, packaging, or project documentation.
   Finalfull3757pass/7skip/1warning(57.19s),lint0;earlier3756retained aspriorcheck.
   Final packaged browser identified neutral action target0 label ambiguity;
   call/fold no longer show raise-to0,15JS regressions pass.
+  Server instance IDs prevent generation rollback after fast server restart
+  from leaving UI stuck;focused session/JS regression added(16JS cases).
   No WPK development,device/control/holdout/thirdparty solver or training.
   See docs/AA-TABLE-VALIDATION-V2.zh-CN.md and private aa-live-integration-20260915-v2.
 
