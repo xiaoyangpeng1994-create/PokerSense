@@ -12,14 +12,14 @@
 ```powershell
 $env:PYTHONPATH='src;.'
 $env:PYTHONUTF8='1'
-& 'C:/Users/Administrator/.codex/runtimes/pokersense-v6-clean-20260908/Scripts/python.exe' tools/validate_threeway_models.py `
+& $PYTHON tools/validate_threeway_models.py `
   --input   configs/strategy/examples/threeway-river-response-manual.json `
   --protocol configs/strategy/examples/threeway-validation-protocol-v1.json `
-  --output  G:/PokerSense_private/strategy001_repro_20260916_v1/validate-v1
+  --output  $PRIVATE_OUTPUT/validate-v1
 
 & '...python.exe' tools/study_opponent_uncertainty.py `
   --input  configs/strategy/examples/threeway-river-response-manual.json `
-  --output G:/PokerSense_private/strategy001_repro_20260916_v1/uncertainty-v1
+  --output $PRIVATE_OUTPUT/uncertainty-v1
 ```
 
 | 项 | 值 |
@@ -27,7 +27,7 @@ $env:PYTHONUTF8='1'
 | repo HEAD | `dc72a4176f81689e95a9238a49fb2d268dcd4a56` |
 | `tools/validate_threeway_models.py` sha256 前 16 | `9230cddb262ea7bb` |
 | `src/.../threeway_policy_evaluation_v1.py` sha256 前 16 | `75b9af69582f4d29` |
-| Python | 3.13.14（`pokersense-v6-clean-20260908`） |
+| Python | 3.13.14（本机项目运行时，路径以占位符表示） |
 | 依赖实况 | numpy **2.3.5** / opencv **4.10.0**（`pyproject.toml` pin：2.4.6 / 4.14.0.94 ⇒ **不一致**） |
 | A 退出码 / 耗时 | **0** / **2 s** |
 | B 退出码 / 耗时 | **2** / **5 s**（**设计内**：`tools/study_opponent_uncertainty.py:95` → `return 2 if any(... INSUFFICIENT_EVIDENCE)`，非崩溃） |
@@ -100,7 +100,16 @@ calibration_status=NOT_REAL_CALIBRATION
 
 ⇒ 未下注根上，log loss 选出的策略本与原手工策略本在本次评价中**没有产生差异**；该根的「新增挑战」并未真正区分两个候选。
 
-**这两条事实的后果**：headline `18/30` 中有 9 行（9 个 facing_bet 负比较）是**同一比较的重复计数**。
+**这两条事实的后果（已按 review 5217785775 更正，2026-09-16）**
+
+> 原文此处曾推断「`18/30` 中有 9 行是同一比较的重复计数」。**该推断错误，现予撤回**，旧表述保留在此以备追溯。
+> 实际统计路径是 `tools/validate_threeway_models.py` 的 `(group, world)` 双层循环：每个场景**至多追加一条**记录，
+> 判定为 `delta < 0 or delta_vs_check_fold < 0 or delta_vs_check_call < 0`（三个比较列的 **or**）。
+> 因此 `ref` 与 `check/call` 的 EV 相同**不能**推出重复计数，也就**不存在**「先修口径才能比较」这一步。
+
+正确表述：上述两条事实只说明**比较对象在某些世界上退化** —— `ref` 列与 `check/call` 列给出同一个数、
+未下注根上 `ref` 与选中策略无差异。这是**诊断/可读性**问题，**不改变**失败场景数 18，
+也**不证明**两套策略等价。计数语义回归见 `tests/tools/test_validate_threeway_models_counting.py`。
 即：当前筛选计数把「selected 劣于 check/call」同时记了一次「劣于 ref」。
 这不改变「存在失败」这一结论，但**改变失败规模的可解释性**，必须在下一轮修正口径后再报数。
 
@@ -111,11 +120,13 @@ calibration_status=NOT_REAL_CALIBRATION
 | 类别 | 本轮判定 | 依据 |
 | --- | --- | --- |
 | **A 实现 / 结算 / 信息集错误** | **未发现** | 30 世界全部 `complete`，`planning_errors` 为空，`fallback_cases = 0`，精确分数自洽（同一比较两列逐位相等）；无异常退出（A exit 0）。既有反例（QQ/TT/JJ）已在历史轮次修复并保留为回归。 |
-| **B 对手范围 / 响应模型错设** | ✅ **主因** | ① `value_heavy` 世界 Δvs_check/fold = **−80**（两种根都是）：面对强价值范围时，不是最激进基线更好，而是**直接弃牌更优**，而所选策略没有充分弃牌。② `rank_aware` / `check_trap` 世界 Δvs_check/call 为 **−1.7 ~ −4.9**（check/fold 差值为大正数）：**过度跟注**。③ 选中候选由**合成 calling 生成器**产生 ⇒ 系统性偏好跟注。 |
+| **B 对手范围 / 响应模型错设** | **待检验假设**（原写作「主因」，按审查降级；当前**无分支级证据**） | ① `value_heavy` 世界 Δvs_check/fold = **−80**（两种根都是）：面对强价值范围时，不是最激进基线更好，而是**直接弃牌更优**，而所选策略没有充分弃牌。② `rank_aware` / `check_trap` 世界 Δvs_check/call 为 **−1.7 ~ −4.9**（check/fold 差值为大正数）：**假设「过度跟注」**（尚未用冻结 policy book 的可达公开历史给出分支级证据）。③ 选中候选由**合成 calling 生成器**产生 ⇒ 仅说明该候选家族的来源，**不等同于** Hero 的跟注频率。 |
 | **C 动作网格 / 公开历史覆盖不足** | **本轮未触发** | `fallback_cases = 0`：没有任何世界因未覆盖历史而退化。零 fallback **不等于**能应对网格外动作（网格外下注仍不支持），但**不是本次 18 条的原因**。 |
-| **D 桌规 / 字段 / 真实数据不足** | **长期缺口，非本次主因** | `opponent_dataset_v1` 的严格准入下，真实可准入记录 = **0**；straddle 子类型、抽水、封顶保持 **UNKNOWN**（未确认为零）；`calibration_status=NOT_REAL_CALIBRATION`。这些限制本轮**未**直接造成 18 条负比较，但决定了本轮结论无法升级为真实对手证据。 |
+| **D 桌规 / 字段 / 真实数据不足** | **长期缺口**（未作为本次归因假设） | `opponent_dataset_v1` 的严格准入下，真实可准入记录 = **0**；straddle 子类型、抽水、封顶保持 **UNKNOWN**（未确认为零）；`calibration_status=NOT_REAL_CALIBRATION`。这些限制本轮**未**直接造成 18 条负比较，但决定了本轮结论无法升级为真实对手证据。 |
 
-**总判定**：本轮失败 = **B 为主 + 比较口径缺陷（事实 1/2）干扰读数**；无 A；C 未触发；D 为长期约束。
+**总判定（更正后）**：本轮**没有**实现/结算/信息集错误的证据，也**不能**宣布已排除全部实现问题；
+C（动作网格/历史覆盖）在本轮未触发（fallback=0）；B 是**最值得检验的假设**，但尚无分支级证据；
+D 为长期约束。事实 1/2 只影响**读数可读性**，不影响 18 这个场景级计数。
 
 ---
 
