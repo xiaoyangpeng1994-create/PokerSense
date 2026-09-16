@@ -30,7 +30,7 @@ run_id `USABLE-001-U2-20260916T2225Z` · 基线 `44cb006597264107421698135a816e0
 | `tests/desktop/test_aa_analysis_records_ui.py`（2 例，含**真实重启**） | 未运行（前置收集失败） | **2 passed** |
 | `tests/js/hand_records_flow_test.mjs`（26 项检查，两阶段） | 链路不存在 | **phase1 26/26 + phase2 5/5** |
 | 全量 `pytest` | 4048 passed / 1 skipped（U1-R3） | **4076 passed / 1 skipped / 2 warnings，226.35s** |
-| `flake8 src tests tools launch` | — | **0 项**（并把 `launch` 加入 CI 的 lint 目标） |
+| `flake8 src tests tools launch` | — | **0 项**（本机对 `launch` 也跑；CI 的 lint 目标**未改动**，原因见 §7） |
 
 ### 2.1 真实重启证据（两阶段 harness + 两个真实服务进程）
 
@@ -90,3 +90,11 @@ python launch\u2-trial\trial_launcher.py --self-check   # 只报告版本/资源
 
 不启动下一检查点；不重做 A/B/C/D 与冻结的 C 协议数据；不换模型；不扩 solver/容量/上限；不改 #24/#20；
 不新增 Git/MCP/Agent/自动循环；不读新私有媒体、不开采集或视觉 API；不合并、不发布、不覆盖用户旧程序。
+## 7. 一处未做（如实列出）
+
+CI 的 flake8 目标仍是 `src tests tools`，**没有**把新目录 `launch/` 加进去。
+原因：本机推送用的是 `gh` 的 OAuth 令牌，**缺少 `workflow` 权限**，修改 `.github/workflows/*` 会被远端直接拒绝
+（`refusing to allow an OAuth App to create or update workflow ... without workflow scope`）。
+没有为此改写推送方式或新增 Git 工具（本轮明确不开发 Git/自动化）；`launch/u2-trial/trial_launcher.py` 已在**本机**
+通过同一套 flake8 配置（`max-line-length=88`、`extend-ignore=E203,W503`）检查，0 项。
+如需让 CI 覆盖它，请由所有者在 `gh auth refresh -s workflow` 之后再加一行 lint 目标；本轮未擅自改动 CI 配置。
