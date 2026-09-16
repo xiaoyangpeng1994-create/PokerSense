@@ -21,7 +21,7 @@ from .aa_issues import save_issue
 from .aa_analysis import AAConditionalAnalysis
 from .aa_review import AAReviewDesk, ReviewError
 from .aa_saved_strategy import SavedStrategyInputs
-from .aa_hand_input import AAHandInput, HandInputError
+from .aa_hand_input import AAHandInput, HandInputError, digest
 from .aa_study_records import AAStudyRecordStore, StudyRecordError
 from poker_engine.strategy.river_bounds_v1 import river_payoff_bounds
 
@@ -170,6 +170,15 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
                     "candidate": {"revision": current["revision"]}}}
         result = hand_call(hand_input.build, facts, body["assumptions"])
         result["rules_source"] = body["rules_source"]
+        if result.get("document") is not None:
+            # The exact table-rules version this receipt was verified against, so
+            # the form can send the verified revision instead of whatever the page
+            # happens to see when the human later presses compute.
+            result["verified_rules"] = {
+                "rules_source": body["rules_source"],
+                "rules_revision": current["revision"],
+                "effective_rules_sha256": digest(result["document"].get("rules")),
+            }
         return result
 
     @app.get("/api/study/examples")

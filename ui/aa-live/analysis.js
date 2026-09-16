@@ -2,6 +2,11 @@
 let analysisEpoch = 0, acceptedAnalysisId = null, analysisReport = null, analysisInput = null;
 let analysisBusy = false, cancelTimer = null, analysisBinding = null;
 let analysisDraftSource = null, analysisExpectedInput = null;
+// The table-rules revision the input was verified against. A form-initiated
+// computation must send THIS revision, not whatever the page currently sees, so a
+// rule change made by another page is refused by the server instead of being
+// silently accepted against a stale document.
+let analysisExpectedRulesRevision = null;
 const analysisLabels = {RUNNING:"正在计算（最多 10 秒）", COMPLETE:"条件计算完成", BLOCKED:"输入或场景不受支持", ERROR:"计算失败", CANCELLED:"分析已取消", TIMED_OUT:"计算超时，未返回局部结果", IDLE:"尚未计算"};
 function clearAnalysis(message) {
   acceptedAnalysisId = null; analysisReport = null; analysisBinding = null;
@@ -23,6 +28,7 @@ async function cancelAnalysis() {
 // the panel's own start handler clears it.
 function analysisInputChanged(reason) {
   analysisExpectedInput = null; analysisDraftSource = null;
+  analysisExpectedRulesRevision = null;
   invalidateAnalysis(reason);
   cancelTimer = setTimeout(cancelAnalysis, 350);
 }
@@ -35,6 +41,9 @@ function actionName(action) {
   return `${translated(action?.kind)}${["bet", "raise"].includes(action?.kind) && action?.target != null ? ` 至 ${action.target}` : ""}`;
 }
 const analysisHex = value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+// The table rules revision is whatever the server named it; the panel only needs
+// it to be stated, so a receipt can never be paired with a newer revision.
+const analysisRevision = value => typeof value === "string" && value.trim() !== "";
 function renderAnalysis(report, state) {
   if (acceptedAnalysisId === null) return;
   if (!analysisBinding || state && (analysisBinding.generation !== state.generation || analysisBinding.table_rules_revision !== state.table_rules?.revision)) {
@@ -43,6 +52,13 @@ function renderAnalysis(report, state) {
   const expected = analysisBinding.expected_input_sha256;
   if (expected !== null && expected !== undefined && expected !== analysisExpectedInput) {
     invalidateAnalysis("录入表单的输入身份已变更，旧分析已失效，请重新核对后计算。"); return;
+  }
+  const expectedRules = analysisBinding.expected_rules_revision;
+  if (expectedRules !== null && expectedRules !== undefined
+      && (expectedRules !== analysisExpectedRulesRevision
+          || analysisBinding.table_rules_revision !== expectedRules)) {
+    invalidateAnalysis("本桌规则版本已变更（这条结果不是按核对时的规则算出的），已失效，请重新核对后计算。");
+    return;
   }
   if (!report || report.job_id !== acceptedAnalysisId
       || report.kind !== analysisBinding.kind
@@ -81,6 +97,7 @@ function renderAnalysis(report, state) {
 el("analysis-example").addEventListener("click", async () => {
   analysisDraftSource = null;
   analysisExpectedInput = null;
+  analysisExpectedRulesRevision = null;
   el("strategy-draft-details").hidden = true;
   el("strategy-draft-origin").textContent = "";
   const cancelling = cancelAnalysis();
@@ -94,10 +111,12 @@ el("analysis-start").addEventListener("click", async () => {
   clearTimeout(cancelTimer); const cancelling = cancelAnalysis();
   const epoch = analysisEpoch;
   const expectedInput = analysisExpectedInput;
+  const expectedRulesRevision = analysisExpectedRulesRevision;
   const expectedPayload = el("analysis-input").value;
   try {
     await cancelling; if (epoch !== analysisEpoch) return;
     if (expectedInput !== analysisExpectedInput
+        || expectedRulesRevision !== analysisExpectedRulesRevision
         || el("analysis-input").value !== expectedPayload) {
       el("analysis-status").textContent = "输入在开始计算前被改动，请重新核对后再计算。"; return;
     }
@@ -105,11 +124,21 @@ el("analysis-start").addEventListener("click", async () => {
         && (!analysisDraftSource || analysisDraftSource.input_sha256 !== expectedInput)) {
       el("analysis-status").textContent = "录入表单的身份与本场景不匹配：请回到录入区重新核对后计算。"; return;
     }
+    if (expectedInput !== null
+        && (!analysisRevision(expectedRulesRevision)
+            || expectedRulesRevision !== statusData.table_rules?.revision)) {
+      // The receipt names the revision it was verified against; if the page can
+      // already see a different one, the input must be re-verified. The request
+      // still carries the verified revision, so a change this page has not polled
+      // yet is refused by the server rather than accepted against a stale document.
+      el("analysis-status").textContent = "核对时使用的本桌规则版本已变更：请重新核对后再计算（不会用新规则套旧输入）。";
+      return;
+    }
     if (expectedInput !== null && el("analysis-use-rules").checked) {
       el("analysis-status").textContent = "本桌规则会覆盖这个场景的规则，无法与录入表单核对同一份输入：请取消勾选「使用本桌规则」后重新核对。"; return;
     }
     const document = JSON.parse(el("analysis-input").value);
-    const r = await fetch("/api/analysis", {method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({kind:el("analysis-kind").value,document,rules_source:el("analysis-use-rules").checked ? "table" : "document",rules_revision:statusData.table_rules?.revision})});
+    const r = await fetch("/api/analysis", {method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({kind:el("analysis-kind").value,document,rules_source:el("analysis-use-rules").checked ? "table" : "document",rules_revision: expectedRulesRevision ?? statusData.table_rules?.revision})});
     const result = await r.json(); if (epoch !== analysisEpoch) return; if (!r.ok) throw Error(text(result.detail));
     const reported = analysisHex(result.input_sha256) ? result.input_sha256 : null;
     if (expectedInput !== null && reported !== expectedInput) {
@@ -122,6 +151,7 @@ el("analysis-start").addEventListener("click", async () => {
     analysisBinding = JSON.parse(JSON.stringify(result.binding));
     analysisBinding.kind = result.kind ?? el("analysis-kind").value;
     analysisBinding.expected_input_sha256 = expectedInput;
+    analysisBinding.expected_rules_revision = expectedRulesRevision;
     analysisBinding.input_sha256 = reported;
     renderAnalysis(result);
   } catch (e) { if (epoch === analysisEpoch) el("analysis-status").textContent = `未开始计算：${e.message}`; }
@@ -170,6 +200,7 @@ function terminalDraftFromReview(record) {
 async function openStrategyDraft(record) {
   await cancelAnalysis();
   analysisExpectedInput = null;
+  analysisExpectedRulesRevision = null;
   const draft=terminalDraftFromReview(record); analysisDraftSource=draft.source;
   el("analysis-kind").value="terminal";el("analysis-use-rules").checked=false;
   el("analysis-input").value=JSON.stringify(draft.document,null,2);

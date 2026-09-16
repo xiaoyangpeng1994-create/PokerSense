@@ -20,7 +20,9 @@ import { createDom, click, fire } from "./dom_stub.mjs";
 const base = (process.argv[2] || "").replace(/\/$/, "");
 const RECORD_A = process.argv[3] || "";
 const RECORD_B = process.argv[4] || "";
-if (!base.startsWith("http://127.0.0.1:") || !RECORD_A || !RECORD_B) {
+const RECORD_C = process.argv[5] || "";
+if (!base.startsWith("http://127.0.0.1:") || !RECORD_A || !RECORD_B
+    || !RECORD_C) {
   console.log(JSON.stringify({name: "arguments", ok: false, detail: base}));
   process.exit(2);
 }
@@ -454,6 +456,83 @@ check("a_start_response_for_a_different_input_is_rejected",
       && analysisStatus().includes("不是同一份"),
       analysisStatus().slice(0, 70));
 delete hooks.rewrite["/api/analysis"];
+
+// --- 16. UNKNOWN blocks keep their candidate without becoming facts -----
+select(recordRef(RECORD_C));
+const importedC = await run("handImportRecord()");
+check("the_mid_street_record_imports_only_what_it_has",
+      importedC !== null && fieldValue("hand-hero") !== ""
+      && rowCount("seats") === 0 && rowCount("history") === 0,
+      `hero=${fieldValue("hand-hero")} seats=${rowCount("seats")} `
+      + `history=${rowCount("history")}`);
+const retained = exposed("handOrigin") ? run("handOrigin") : {};
+const IMPORTED_SEATS_CANDIDATE = retained.seats?.candidate ?? null;
+check("unknown_blocks_keep_their_candidate_without_becoming_facts",
+      retained.seats?.provenance === "unknown"
+      && retained.seats?.candidate != null
+      && JSON.stringify(retained.seats.candidate).includes("wagers")
+      && retained.history?.provenance === "unknown"
+      && Array.isArray(retained.history?.candidate)
+      && retained.history.candidate.length === 1
+      && run('(() => { try { handFacts(); return "built"; } '
+             + 'catch (e) { return "refused"; } })()') === "refused",
+      `seats=${retained.seats?.provenance}/cand=${
+        retained.seats?.candidate != null} `
+      + `history=${retained.history?.provenance}/cand=${
+        JSON.stringify(retained.history?.candidate)} `
+      + "-> the hand is still not buildable");
+check("the_unknown_blocks_did_not_fill_the_controls",
+      rowCount("seats") === 0 && rowCount("history") === 0
+      && fieldValue("hand-order") === "" && fieldValue("hand-hero-seat") === "",
+      "a candidate is not a confirmed value");
+// The human now fills those two fields by hand, as the gaps instruct.
+run(`handFillRows("seats", ${JSON.stringify(SEATS)})`);
+run('handAddRow("history", {actor: "1", kind: "bet", target: "20"}, true)');
+run('handAddRow("history", {actor: "2", kind: "call", target: "0"}, true)');
+touch(run('el("hand-rows-history")').children[0]
+  .querySelectorAll("input,select")[0]);
+const filled = run("handFacts()");
+check("a_human_fill_keeps_the_imported_candidate",
+      filled.history.provenance === "human_confirmed"
+      && Array.isArray(filled.history.value) && filled.history.value.length === 2
+      && Array.isArray(filled.history.candidate)
+      && filled.history.candidate.length === 1
+      && filled.seats.provenance === "human_confirmed"
+      && filled.seats.candidate !== null,
+      `history=${filled.history.provenance}/value=${
+        (filled.history.value || []).length}/cand=${
+        Array.isArray(filled.history.candidate)} `
+      + `seats=${filled.seats.provenance}/cand=${filled.seats.candidate !== null}`);
+// Finish the hand with hand-typed values and really compute it.
+el("hand-hero-seat").value = "0";
+el("hand-order").value = "1,2,0";
+el("hand-pot").value = "130";
+el("hand-targets").value = "20,40,80";
+el("hand-max-agg").value = "2";
+el("hand-ended").checked = true;
+el("hand-fees").value = "confirmed_zero";
+run(`handFillRows("ranges", [
+  {seat_id: 1, combo: "JhJd", weight: "1"}, {seat_id: 1, combo: "AsAc", weight: "3"},
+  {seat_id: 2, combo: "KhKd", weight: "1"}, {seat_id: 2, combo: "QhQd", weight: "3"}])`);
+run(`handFillRows("weights", [
+  {seat_id: 1, key: "check", weight: "1"}, {seat_id: 1, key: "bet", weight: "2"},
+  {seat_id: 1, key: "call", weight: "9"}, {seat_id: 1, key: "fold", weight: "1"},
+  {seat_id: 2, key: "check", weight: "1"}, {seat_id: 2, key: "call", weight: "9"},
+  {seat_id: 2, key: "fold", weight: "1"}])`);
+await click(el("hand-build"));
+check("the_mid_street_hand_completes_after_the_human_fills_it",
+      run("handBuilt") !== null,
+      (feedback() + ' | ' + gaps()).replace(/\s+/g, ' ').slice(0, 160));
+await click(el("hand-compute"));
+const candidateReport = await pollRender();
+check("the_export_carries_the_unknown_blocks_candidate",
+      candidateReport?.status === "COMPLETE"
+      && run("analysisDraftSource")?.provenance?.history?.candidate != null
+      && run("analysisDraftSource")?.provenance?.seats?.candidate != null
+      && run("analysisDraftSource")?.provenance?.history?.provenance
+         === "human_confirmed",
+      `status=${candidateReport?.status} prov=${
+        run("analysisDraftSource")?.provenance?.history?.provenance}`);
 
 check("no_innerhtml_used", dom.state.innerHTMLWrites === 0,
       `writes=${dom.state.innerHTMLWrites}`);

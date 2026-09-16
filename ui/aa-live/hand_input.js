@@ -15,6 +15,9 @@
 // point it becomes `human_confirmed` and the candidate is kept for comparison.
 let handToken = 0, handBuilt = null, handWired = false, handExpectedInput = null;
 let handSource = handBlankSource(), handOrigin = {};
+// The receipt records WHICH table-rules version the verified document was built
+// against, so a compute can never pair an old document with a newer revision.
+let handReceipt = null;
 const handStatus = message => { el("hand-input-tag").textContent = message; };
 const handFeedback = (message, isError) => {
   el("hand-status").textContent = message;
@@ -48,7 +51,11 @@ function handFact(key, value) {
   if (value === null || value === undefined || value === "") {
     return handUnknown(origin.candidate);
   }
-  return {value, provenance: origin.provenance, candidate: origin.candidate};
+  // An imported block stated as unknown never fills a control, so a value that is
+  // present here can only have come from the human.
+  const provenance = origin.provenance === "unknown" ? "human_confirmed"
+    : origin.provenance;
+  return {value, provenance, candidate: origin.candidate};
 }
 const HAND_BLOCKS = {
   seats: ["座位", [
@@ -164,9 +171,15 @@ function handClearRows(block) {
   delete handOrigin[block];
 }
 function handFillRows(block, rows, provenance, candidate) {
+  // Replacing a block must not throw away the evidence the snapshot already gave
+  // for it: unless the caller supplies a candidate, the retained one survives.
+  const retained = handOriginOf(block).candidate;
   handClearRows(block);
   for (const values of rows) handAddRow(block, values, true);
-  if (rows.length) handSetOrigin(block, provenance || "human_confirmed", candidate);
+  if (rows.length) {
+    handSetOrigin(block, provenance || "human_confirmed",
+                  candidate === undefined ? retained : candidate);
+  }
 }
 function handConfirm(value) { return {value, provenance: "human_confirmed", candidate: null}; }
 function handUnknown(candidate = null) { return {value: null, provenance: "unknown", candidate}; }
@@ -220,10 +233,11 @@ function handFacts() {
                         String(el("hand-hero-seat").value).trim() === "" ? ""
                           : Number(String(el("hand-hero-seat").value).trim())),
     hero_cards: handFact("hand-hero", hero), board_cards: handFact("hand-board", board),
-    action_order: order.length ? handFact("hand-order", order) : handUnknown(),
+    action_order: order.length ? handFact("hand-order", order)
+      : handUnknown(handOriginOf("hand-order").candidate),
     seats: handFact("seats", seats),
     history: historyRows.length ? handFact("history", history)
-      : (noHistory ? handConfirm([]) : handUnknown()),
+      : (noHistory ? handConfirm([]) : handUnknown(handOriginOf("history").candidate)),
     pot_display: handFact("hand-pot", String(el("hand-pot").value).trim()),
     table_rules: handUnknown(), observed_at: handSource.saved_at ?? null,
   };
@@ -258,7 +272,8 @@ function handBindAnalysisInput(value) {
   try { analysisExpectedInput = value; return true; } catch (_) { return false; }
 }
 function handDropReceipt() {
-  handBuilt = null; handExpectedInput = null;
+  handBuilt = null; handExpectedInput = null; handReceipt = null;
+  handRulesInFlight = null;
   el("hand-compute").disabled = true;
 }
 function handFailAnalysis(reason) {
@@ -355,6 +370,11 @@ function handRender(result, facts) {
     input_sha256: result.hashes.input_sha256,
     implementation_version: result.hashes.implementation_version,
     kernel: result.hashes.kernel, scope: result.hashes.scope,
+    verified_rules: handReceipt ? {
+      rules_source: handReceipt.rules_source,
+      rules_revision: handReceipt.rules_revision,
+      effective_rules_sha256: handReceipt.effective_rules_sha256,
+    } : result.verified_rules ?? null,
     source: handSource, provenance,
     note: "任一行被人工修改后，该块整体记为人工确认；原候选保留在 candidate 里",
   }, null, 2);
@@ -362,15 +382,18 @@ function handRender(result, facts) {
 async function handVerify() {
   handFailAnalysis("开始核对：下方旧结果已失效。");
   const token = ++handToken;
+  handRulesInFlight = statusData.table_rules?.revision ?? null;
   let facts, assumptions;
   try {
     facts = handFacts(); assumptions = handAssumptions();
   } catch (error) {
+    handRulesInFlight = null;
     handFeedback(error.message, true);
     return null;
   }
   el("hand-gaps").replaceChildren();
   if (!el("hand-use-rules").checked) {
+    handRulesInFlight = null;
     handFeedback("本轮只支持使用「本桌规则」里已保存的完整规则；"
                  + "请先勾选该选项并在设置页补齐桌规（未知项不能自动补零）。", true);
     return null;
@@ -379,9 +402,10 @@ async function handVerify() {
     const response = await fetch("/api/hand-input/build", {
       method: "POST", headers: {...headers, "Content-Type": "application/json"},
       body: JSON.stringify({facts, assumptions, rules_source: "table",
-        rules_revision: statusData.table_rules?.revision})});
+        rules_revision: handRulesInFlight})});
     const result = await response.json();
     if (token !== handToken) return null;
+    handRulesInFlight = null;
     if (!response.ok) {
       handFeedback(`未通过核对：${text(result.detail)}`, true);
       return null;
@@ -394,6 +418,19 @@ async function handVerify() {
     }
     handBuilt = result.document;
     handExpectedInput = result.hashes.input_sha256;
+    handReceipt = {
+      input_sha256: result.hashes.input_sha256,
+      rules_source: result.verified_rules?.rules_source ?? result.rules_source ?? null,
+      rules_revision: result.verified_rules?.rules_revision ?? null,
+      effective_rules_sha256: result.verified_rules?.effective_rules_sha256 ?? null,
+    };
+    if (!handReceipt.rules_revision) {
+      // Without the revision the receipt was built against, no compute can prove
+      // which rules it used; refuse instead of pretending.
+      handDropReceipt();
+      handFeedback("核对回执缺少本次使用的桌规版本，无法安全计算：请重新核对。", true);
+      return null;
+    }
     handRender(result, facts);
     el("hand-compute").disabled = false;
     handStatus("已核对");
@@ -401,24 +438,37 @@ async function handVerify() {
                  false);
     return result;
   } catch (error) {
+    handRulesInFlight = null;
     if (token === handToken) handFeedback(`核对失败：${error.message}`, true);
     return null;
   }
 }
 function handCompute() {
-  if (!handBuilt || !handExpectedInput) { handFeedback("请先核对输入。", true); return; }
+  if (!handBuilt || !handExpectedInput || !handReceipt) {
+    handFeedback("请先核对输入。", true); return;
+  }
+  // Re-check the receipt's rules version at compute time: the page may have seen a
+  // newer one since the verify, and an unverified pairing must never be sent.
+  if (handReceipt.rules_revision !== (statusData.table_rules?.revision ?? null)) {
+    handInvalidate("本桌规则版本与核对时不一致：请重新核对后再计算（不会用新规则套旧输入）。");
+    return;
+  }
   // The manual form owns the panel now: the previous draft provenance is dropped
   // and this input's identity travels with the exported report instead.
   if (!handBindAnalysisInput(handExpectedInput)) {
     handFeedback("当前页面没有加载条件分析面板，无法把输入交给内核。", true);
     return;
   }
+  try { analysisExpectedRulesRevision = handReceipt.rules_revision; }
+  catch (_) { /* analysis.js not loaded */ }
   const provenance = {...handOrigin};
   analysisDraftSource = {
     kind: "hand_input_form",
     input_sha256: handExpectedInput,
     scope: "MANUAL_HYPOTHESIS_OFFLINE_NOT_LIVE_ADVICE",
-    rules_revision: statusData.table_rules?.revision ?? null,
+    rules_revision: handReceipt.rules_revision,
+    rules_source: handReceipt.rules_source,
+    effective_rules_sha256: handReceipt.effective_rules_sha256,
     form_source: {...handSource},
     provenance,
     note: "手工录入/带入的已结束牌局 + 人工假设；不是观测验证样本，也不代表实战建议",
@@ -449,6 +499,26 @@ function handResetForSource(source, message) {
 function handClear() {
   el("hand-csv").value = "";
   handResetForSource(handBlankSource(), "已清空录入与假设：来源恢复为手工输入。");
+}
+// The revision an in-flight build request used, so a rules change is noticed even
+// before the receipt for it exists.
+let handRulesInFlight = null;
+function handRulesChanged(reason) {
+  // The table rules are being changed or were changed somewhere else. A verified
+  // receipt names the revision it was built against, so it cannot survive that:
+  // void it and the result, but KEEP the typed hand so the human only has to
+  // re-verify. This always goes through handInvalidate so the token advances and
+  // a build request that is still in flight can never restore "verified".
+  handInvalidate(reason);
+}
+function handRulesRevisionSeen() {
+  // Called from the page's status poll: notice a rules revision this page has not
+  // reacted to yet and void the receipt (or the in-flight build) before it can be
+  // computed.
+  const current = statusData.table_rules?.revision ?? null;
+  const known = handReceipt ? handReceipt.rules_revision : handRulesInFlight;
+  if (known === null || known === undefined || known === current) return;
+  handInvalidate("本桌规则已在本机之外变更为新版本：上方输入的旧核对已失效，请重新核对后再计算。");
 }
 function handSourceChanged(issueId) {
   // The review desk selected another record (or cleared the selection). A receipt
@@ -496,6 +566,10 @@ function handApplyImportedFacts(issueId, body) {
     ["hand-hero-seat", "hero_seat", value => String(value)],
     ["hand-order", "action_order", value => value.join(",")],
   ];
+  // Retain EVERY returned block's provenance and candidate first, then decide
+  // whether a control can be filled. A block the record states as unknown still
+  // hands its original evidence to the human; keeping the candidate is not the
+  // same as treating it as a confirmed fact.
   for (const [id, key, render] of scalars) {
     const block = facts[key];
     const usable = block && block.value !== null && block.value !== undefined
@@ -505,6 +579,7 @@ function handApplyImportedFacts(issueId, body) {
       handSetOrigin(id, block.provenance || "observed", block.candidate);
       applied.push(HAND_FACT_LABELS[key]);
     } else {
+      if (block) handSetOrigin(id, "unknown", block.candidate);
       missing.push(HAND_FACT_LABELS[key]);
     }
   }
@@ -513,7 +588,22 @@ function handApplyImportedFacts(issueId, body) {
                  facts.seats.candidate);
     applied.push(HAND_FACT_LABELS.seats);
   } else {
+    if (facts.seats) handSetOrigin("seats", "unknown", facts.seats.candidate);
     missing.push(HAND_FACT_LABELS.seats);
+  }
+  // The snapshot never supplies a confirmed public history, so it is always a gap
+  // for the human - but its candidate must survive into the next build.
+  if (facts.history) {
+    handSetOrigin("history", "unknown", facts.history.candidate);
+    if (facts.history.value) {
+      handFillRows("history", facts.history.value, facts.history.provenance
+                   || "observed", facts.history.candidate);
+      applied.push(HAND_FACT_LABELS.history);
+    } else {
+      missing.push(HAND_FACT_LABELS.history);
+    }
+  } else {
+    missing.push(HAND_FACT_LABELS.history);
   }
   handSource = {...handSource, kind: "saved_observed_snapshot", issue_id: issueId,
                 saved_at: (body.source && body.source.saved_at) || handSource.saved_at,
@@ -522,11 +612,12 @@ function handApplyImportedFacts(issueId, body) {
                 scope: (body.source && body.source.scope) || null};
   const gaps = [...(body.gaps || [])];
   for (const name of missing) {
-    gaps.push(`${name}：该记录没有可用候选，需要人工录入`);
+    gaps.push(`${name}：该记录没有可用候选或仍是未知，需要人工录入/确认`);
   }
   el("hand-gaps").replaceChildren(...handList(
     `已带入记录 ${issueId}；只有下面这些有证据，其余仍是未知，`
-    + "必须人工补齐并确认后才能计算：", gaps, "blockers"));
+    + "必须人工补齐并确认后才能计算（未知项的原候选已保留，供你核对时对照）：",
+    gaps, "blockers"));
   handStatus("已带入候选");
   handFeedback(`已带入 ${applied.length} 项有证据的字段（来源标记为候选）；`
                + "带入不等于已核对：请补齐未知项、勾选「本手已结束」并选择费用状态，"

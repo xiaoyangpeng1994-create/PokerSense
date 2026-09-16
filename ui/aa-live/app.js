@@ -195,6 +195,7 @@ async function poll() {
     const advanced = state.generation !== serverGeneration || incomingSequence !== sequence;
     serverGeneration = state.generation; sequence = incomingSequence; if (advanced) lastProgress = Date.now();
     statusData = state; controls(); error(state.error ? text(state.error) : "");
+    if (typeof handRulesRevisionSeen === "function") handRulesRevisionSeen();
     if (typeof renderAnalysis === "function") renderAnalysis(state.analysis, state);
     el("profile").textContent = typeof state.profile === "string" ? state.profile : JSON.stringify(state.profile ?? "未配置", null, 2);
     el("source-kind").textContent = state.source_kind === "capture-card" ? "实体采集卡" : state.source_kind === "development-replay" ? "开发回放 · 非现场" : text(state.source_kind);

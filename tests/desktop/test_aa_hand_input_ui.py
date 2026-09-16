@@ -34,6 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS = REPO_ROOT / "tests" / "js" / "hand_input_dom_stub_test.mjs"
 FLOW_HARNESS = REPO_ROOT / "tests" / "js" / "analysis_flow_test.mjs"
 IMPORT_HARNESS = REPO_ROOT / "tests" / "js" / "hand_import_flow_test.mjs"
+RULES_HARNESS = REPO_ROOT / "tests" / "js" / "hand_rules_flow_test.mjs"
 FLOW_SERVER = REPO_ROOT / "tests" / "js" / "analysis_flow_server.py"
 NODE = shutil.which("node")
 TABLE_RULES = {
@@ -128,6 +129,7 @@ class _FlowServer:
 
 RECORD_A = "20260916T101530-aaaaaaaaaaaa"
 RECORD_B = "20260916T101600-bbbbbbbbbbbb"
+RECORD_C = "20260916T101700-cccccccccccc"
 
 
 def write_review_record(server, issue_id, payload):
@@ -142,6 +144,24 @@ def write_review_record(server, issue_id, payload):
     (folder / "issue.json").write_text(
         json.dumps(document, ensure_ascii=False), encoding="utf-8")
     return folder
+
+
+def mid_street_payload():
+    """A river frame WITH a wager, plus an unconfirmed action-history candidate.
+
+    The time basis fails (river money already exists), so `seats` cannot become a
+    river-start fact - but the payload's own evidence must survive as a candidate,
+    exactly like the history candidate.
+    """
+    payload = river_start_payload(
+        ("5d", "6d"), ("5h", "6c", "6s", "Tc", "3d"), "110",
+        {0: "20", 1: "20", 2: "20", 3: "10", 4: "10", 5: "10"})
+    wagers = payload["causal_street_wagers_v2"]
+    payload["causal_street_wagers_v2"] = {
+        **wagers, "wagers": {**wagers["wagers"], "1": "20"}, "street_price": "20"}
+    payload["action_history_candidate"] = [
+        {"actor": 1, "kind": "bet", "target": "20", "reading": "未确认候选"}]
+    return payload
 
 
 def river_start_payload(cards, board, pot, commitments, stacks="200"):
@@ -280,10 +300,11 @@ def test_import_replacement_and_identity_are_enforced(flow_server):
         {0: "20", 1: "20", 2: "20", 3: "10", 4: "10", 5: "10"}))
     write_review_record(flow_server, RECORD_B,
                         {"frame": 1500, "cards": {"hero": ["2h", "3d"]}})
+    write_review_record(flow_server, RECORD_C, mid_street_payload())
     saved = post_rules(flow_server.base)
     assert saved["conditional_analysis_ready"] is True, saved
     checks, verdict = run_harness(IMPORT_HARNESS, flow_server.base, timeout=420,
-                                  extra=(RECORD_A, RECORD_B))
+                                  extra=(RECORD_A, RECORD_B, RECORD_C))
     assert verdict["failed"] == 0 and verdict["passed"] >= 20, verdict
     names = {item["name"] for item in checks}
     for required in (
@@ -298,6 +319,10 @@ def test_import_replacement_and_identity_are_enforced(flow_server):
             "hand_b_is_a_different_input_from_hand_a",
             "hand_b_identity_matches_the_backend",
             "the_export_reports_the_form_source_and_provenance",
+            "unknown_blocks_keep_their_candidate_without_becoming_facts",
+            "the_unknown_blocks_did_not_fill_the_controls",
+            "a_human_fill_keeps_the_imported_candidate",
+            "the_export_carries_the_unknown_blocks_candidate",
             "imported_values_keep_their_observed_provenance",
             "an_untouched_unknown_stays_unknown",
             "editing_an_imported_value_confirms_it_and_keeps_the_candidate",
@@ -317,6 +342,55 @@ def test_import_replacement_and_identity_are_enforced(flow_server):
             "the_identity_check_does_not_break_a_legitimate_run",
             "a_report_without_an_identity_is_refused_not_skipped",
             "a_start_response_for_a_different_input_is_rejected"):
+        assert required in names, f"missing check: {required}"
+
+
+@pytest.mark.skipif(
+    NODE is None,
+    reason="node is unavailable, so the shipped JS cannot be exercised here")
+def test_the_rules_lifecycle_voids_a_stale_receipt(flow_server):
+    """U1-R3: a hand verified against R1 is never computed against R2.
+
+    This one loads app.js + controls.js + analysis.js + hand_input.js, so the
+    "this page saved the rules" cases really run controls.js's submit handler and
+    the real POST /api/rules, and the external change really arrives through the
+    page's own poll().
+    """
+    checks, verdict = run_harness(RULES_HARNESS, flow_server.base, timeout=420)
+    assert verdict["failed"] == 0 and verdict["passed"] >= 18, verdict
+    names = {item["name"] for item in checks}
+    for required in (
+            "the_page_scripts_are_loaded",
+            "the_page_reloads_the_rules_after_the_external_change",
+            "controls_loadRules_ran",
+            "r1_is_saved_through_the_real_controls_handler",
+            "r1_hand_verifies",
+            "the_receipt_carries_the_verified_rules_revision",
+            "case1_r1_compute_is_accepted_and_aligned",
+            "the_hand_verifies_before_the_same_page_rule_save",
+            "the_same_page_rule_save_really_changed_the_server",
+            "case2_the_same_page_save_voids_the_hand_receipt",
+            "case2_the_typed_hand_survives_for_re_verification",
+            "case2_the_shown_result_is_cleared",
+            "case2_the_old_receipt_cannot_be_computed",
+            "the_hand_verifies_at_r2",
+            "the_receipt_names_r2",
+            "the_other_page_changed_the_rules",
+            "this_page_has_not_polled_yet",
+            "case3_the_request_carried_the_verified_revision",
+            "case3_the_server_refused_the_stale_rules_version",
+            "case3b_the_poll_voids_the_receipt_for_the_external_change",
+            "the_rules_changed_while_the_build_was_in_flight",
+            "case4_the_late_build_does_not_restore_verified",
+            "the_hand_re_verifies_at_r4",
+            "case5_the_re_verified_input_computes_with_aligned_versions",
+            "the_export_names_the_verified_rules",
+            "the_hand_verifies_before_the_reset",
+            "the_reset_really_changed_the_server",
+            "case6_the_reset_voids_the_receipt",
+            "case6_the_reset_keeps_the_typed_hand",
+            "case6b_the_failed_save_reports_and_keeps_the_receipt_dead",
+            "the_positive_path_is_not_all_disabled"):
         assert required in names, f"missing check: {required}"
 
 

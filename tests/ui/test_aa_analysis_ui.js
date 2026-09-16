@@ -320,13 +320,44 @@ async function main() {
   // whose identity is missing must not slip through the gap either.
   {
     const h = harness();
-    h.run(`analysisExpectedInput=${JSON.stringify(DIGEST_A)};analysisDraftSource={kind:"hand_input_form",input_sha256:${JSON.stringify(DIGEST_A)}};`);
+    h.run('statusData={generation:1,table_rules:{revision:"r1"}}');
+    h.run(`analysisExpectedInput=${JSON.stringify(DIGEST_A)};analysisExpectedRulesRevision="r1";analysisDraftSource={kind:"hand_input_form",input_sha256:${JSON.stringify(DIGEST_A)}};`);
     h.el("analysis-input").value = '{"mode":"manual_hypothesis","rules":{}}';
     h.fetchImpl = url => response(url === "/api/analysis"
       ? report("foreign", 1, "r1", "RUNNING", DIGEST_B) : {});
     await h.el("analysis-start").dispatch("click");
     assert.equal(h.run("acceptedAnalysisId"), null);
-    assert.ok(h.el("analysis-status").textContent.includes("不是同一份")); cases++;
+    assert.ok(h.el("analysis-status").textContent.includes("不是同一份"), h.el("analysis-status").textContent); cases++;
+  }
+  // A receipt verified against another rules revision is refused before the
+  // request is even sent, and a matching one really sends the VERIFIED revision.
+  {
+    const h = harness();
+    h.run('statusData={generation:1,table_rules:{revision:"r2"}}');
+    h.run(`analysisExpectedInput=${JSON.stringify(DIGEST_A)};analysisExpectedRulesRevision="r1";analysisDraftSource={kind:"hand_input_form",input_sha256:${JSON.stringify(DIGEST_A)}};`);
+    h.el("analysis-input").value = '{"mode":"manual_hypothesis","rules":{}}';
+    let posted = false;
+    h.fetchImpl = url => { if (url === "/api/analysis") posted = true; return response({}); };
+    await h.el("analysis-start").dispatch("click");
+    assert.equal(posted, false);
+    assert.ok(h.el("analysis-status").textContent.includes("版本"), h.el("analysis-status").textContent); cases++;
+  }
+  {
+    const h = harness();
+    h.run('statusData={generation:1,table_rules:{revision:"r1"}}');
+    h.run(`analysisExpectedInput=${JSON.stringify(DIGEST_A)};analysisExpectedRulesRevision="r1";analysisDraftSource={kind:"hand_input_form",input_sha256:${JSON.stringify(DIGEST_A)}};`);
+    h.el("analysis-input").value = '{"mode":"manual_hypothesis","rules":{}}';
+    let sent = null;
+    h.fetchImpl = (url, options) => {
+      if (url === "/api/analysis") {
+        sent = JSON.parse(options.body).rules_revision;
+        return response(report("same", 1, "r1", "RUNNING", DIGEST_A));
+      }
+      return response({});
+    };
+    await h.el("analysis-start").dispatch("click");
+    assert.equal(sent, "r1");
+    assert.equal(h.run("acceptedAnalysisId") !== null, true); cases++;
   }
   {
     const h = harness(); seed(h, report("same", 1, "r1", "COMPLETE", DIGEST_A));
