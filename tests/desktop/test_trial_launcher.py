@@ -6,6 +6,7 @@ browser after the service really answers.
 """
 
 import json
+import os
 from pathlib import Path
 import socket
 import subprocess
@@ -126,13 +127,17 @@ def test_the_launcher_serves_and_reads_the_same_records_after_a_restart(tmp_path
         "schema_version": 1, "record_id": record_id,
         "record_kind": "manual_hypothesis_analysis"}), encoding="utf-8")
     bases = []
+    # CI has no PYTHONPATH and a working directory outside the checkout, which is
+    # exactly when a launcher that relies on the caller's environment breaks.
+    hostile = {key: value for key, value in os.environ.items()
+               if key not in ("PYTHONPATH", "PYTHONHOME")}
     for attempt in (1, 2):
         ready = tmp_path / f"ready{attempt}.json"
         process = subprocess.Popen(
             [sys.executable, str(LAUNCHER), "--no-browser", "--state", str(state),
              "--port", "8791", "--ready-file", str(ready)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-            encoding="utf-8")
+            encoding="utf-8", env=hostile, cwd=str(tmp_path))
         try:
             info = _wait_ready(ready, process)
             bases.append(info["base"])

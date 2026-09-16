@@ -114,7 +114,13 @@ def serve(args):
     if missing:
         print("缺少必要资源，未启动：" + "、".join(missing), file=sys.stderr)
         return 2
-    sys.path.insert(0, str(root / "src"))
+    # The project's documented environment is PYTHONPATH="src;." and the app
+    # imports both `poker_engine` (from src) and the `tools` package (from the
+    # repository root). The trial must set that up itself so it does not depend on
+    # the caller's PYTHONPATH, the current directory or an installed copy.
+    for entry in (root, root / "src"):
+        if str(entry) not in sys.path:
+            sys.path.insert(0, str(entry))
     import uvicorn
 
     from poker_engine.desktop import aa_server
