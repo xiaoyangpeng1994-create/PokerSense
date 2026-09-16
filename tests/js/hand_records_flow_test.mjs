@@ -20,7 +20,7 @@
 //
 // Usage: node hand_records_flow_test.mjs <base-url> <run1|run2|run3> <handoff>
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import vm from "node:vm";
@@ -57,6 +57,7 @@ function hold(match) {
   held.push(entry);
   return entry;
 }
+const REQUEST_TIMEOUT_MS = 15000;
 async function fetchStub(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   calls.push({path, method, body: options.body ?? null});
@@ -66,10 +67,19 @@ async function fetchStub(path, options = {}) {
     await entry.gate;
     if (entry.forge) return entry.forge(path);
   }
-  const response = await fetch(base + path, options);
-  const body = await response.text();
-  return {ok: response.ok, status: response.status, text: async () => body,
-          json: async () => JSON.parse(body)};
+  // A page request against an endpoint that never finishes must reject (the
+  // page's own try/catch then reports it) instead of hanging the whole run.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(base + path,
+                                 {...options, signal: controller.signal});
+    const body = await response.text();
+    return {ok: response.ok, status: response.status, text: async () => body,
+            json: async () => JSON.parse(body)};
+  } finally {
+    clearTimeout(timer);
+  }
 }
 const timers = new Map();
 let timerId = 0;
@@ -111,11 +121,26 @@ async function waitUntil(predicate, timeout = 20000) {
   }
   return false;
 }
-const api = async (path, options) => {
-  const response = await fetch(base + path, options);
-  const text = await response.text();
-  return {ok: response.ok, status: response.status,
-          body: text ? JSON.parse(text) : null};
+const api = async (path, options = {}) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(base + path,
+                                 {...options, signal: controller.signal});
+    const text = await response.text();
+    // A refusal is not always JSON (an unhandled error can answer with plain
+    // text and an unterminated body), so a broken answer must produce a failed
+    // CHECK, not a parse crash that swallows every later check.
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch (_) { body = null; }
+    return {ok: response.ok, status: response.status, body, raw: text};
+  } catch (error) {
+    const kind = (error && error.constructor && error.constructor.name) || "Error";
+    return {ok: false, status: 0, body: null,
+            raw: `${kind}: ${error && error.message}`};
+  } finally {
+    clearTimeout(timer);
+  }
 };
 const serverRules = async () => (await api("/api/rules")).body;
 const serverRevision = async () => (await serverRules()).revision;
@@ -239,11 +264,11 @@ async function openRecord(recordId) {
   await waitUntil(() => !/正在打开/.test(feedback()) && viewText().length > 0);
   return viewText();
 }
-const recordIds = async () => (await api("/api/analysis/records")).body.items
-  .map(row => row.record_id);
+const recordIds = async () => (((await api("/api/analysis/records")).body || {})
+  .items || []).map(row => row.record_id);
 async function storedView(recordId) {
   const opened = await api(`/api/analysis/records/${recordId}`);
-  const view = opened.body.view;
+  const view = (opened.body || {}).view;
   if (!view) return null;
   return {hero: view.situation.hero_cards.join(" "),
           seat1: JSON.stringify(view.assumptions.ranges.find(r => r.seat_id === 1)
@@ -255,7 +280,11 @@ async function storedView(recordId) {
           call_ev: (view.actions.find(row => row.kind === "call") || {}).ev,
           raise_ev: (view.actions.find(row => row.kind === "raise") || {}).ev,
           raise_exact: (view.actions.find(row => row.kind === "raise") || {}).ev_exact,
+          evs: view.actions.map(row => row.ev),
           rake: view.rules.effective_rules.rake_percent,
+          cap: view.rules.effective_rules.rake_cap_bb,
+          rules_source: view.rules.rules_source,
+          effective_rules: view.rules.effective_rules,
           rules_revision: view.rules.rules_revision,
           parent: (view.source || {}).parent_analysis_record_id || null,
           issue_id: (view.source || {}).issue_id || null,
@@ -263,9 +292,41 @@ async function storedView(recordId) {
           job_id: opened.body.identity.job_id,
           status: opened.body.status};
 }
+// A DIRECT kernel call for one document: the stored record's numbers must equal
+// what the untouched entry point produces for that same input. POSTs need the
+// page's own header pair (aa_server refuses a bare POST).
+async function directAnalysis(document, rulesSource) {
+  const rules = await serverRules();
+  const started = await api("/api/analysis", {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "X-AA-Live": "1"},
+    body: JSON.stringify({kind: "threeway", document, rules_source: rulesSource,
+                          rules_revision: rules.revision})});
+  if (!started.ok) {
+    return {status: `HTTP_${started.status}`,
+            error: started.body && started.body.detail};
+  }
+  const job = started.body.job_id;
+  for (let index = 0; index < 200; index += 1) {
+    const analysis = (await api("/api/status")).body.analysis;
+    if (analysis && analysis.job_id === job && analysis.status !== "RUNNING"
+        && analysis.status !== "IDLE") {
+      return analysis;
+    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  return {status: "TIMEOUT"};
+}
 function sameView(left, right) {
   return !!left && !!right && JSON.stringify(left) === JSON.stringify(right);
 }
+// Key-order-insensitive comparison, so a rule object that differs only in the
+// order its keys were serialised is still recognised as the same rules.
+const canonical = value => JSON.stringify(value, (key, item) =>
+  (item && typeof item === "object" && !Array.isArray(item))
+    ? Object.fromEntries(Object.entries(item).sort(
+      ([left], [right]) => (left < right ? -1 : 1)))
+    : item);
 
 // --- phases 2 and 3: the record only ever survives a real restart -----------
 if (phase === "run2" || phase === "run3") {
@@ -295,11 +356,13 @@ if (phase === "run2" || phase === "run3") {
     }
     check("run3_each_record_keeps_its_identity_and_numbers", identical,
         JSON.stringify(now.map(entry => entry && `${entry.status}/${entry.job_id}`)));
-    check("run3_both_recomputed_records_are_readable_as_themselves",
+    check("run3_every_recomputed_record_is_readable_as_itself",
         now.length === saved.ids.length
-        && now.filter(entry => entry && entry.parent === saved.a).length === 2
-        && now.some(entry => entry && entry.parent === saved.a && entry.rake === "0.05")
-        && now.some(entry => entry && entry.parent === saved.a && entry.rake === "0"),
+        && now.filter(entry => entry && entry.parent === saved.a).length === 3
+        && now.filter(entry => entry && entry.parent === saved.a
+                    && entry.rake === "0.05").length === 2
+        && now.filter(entry => entry && entry.parent === saved.a
+                    && entry.rake === "0").length === 1,
         JSON.stringify(now.map(entry => entry && `${entry.parent}/${entry.rake}`)));
     check("run3_nothing_was_recomputed_on_any_reopen",
         calls.filter(call => call.path === "/api/analysis"
@@ -355,11 +418,15 @@ if (phase === "run2" || phase === "run3") {
       && child.source_kind === "recomputed_from_analysis_record"
       && child.job_id !== parentBefore.job_id,
       `parent=${child && child.parent} kind=${child && child.source_kind}`);
+  const currentRulesSibling = saved.views_by_id[saved.e];
   check("run2_the_child_used_the_PARENT_rules_not_the_current_ones",
       child && child.rake === "0" && child.hero === parentBefore.hero
       && child.bet_weight === parentBefore.bet_weight
-      && child.seat1 === parentBefore.seat1 && child.seat2 === parentBefore.seat2,
-      `child rake=${child && child.rake} current rake=5`);
+      && child.seat1 === parentBefore.seat1 && child.seat2 === parentBefore.seat2
+      && currentRulesSibling && child.call_ev !== currentRulesSibling.call_ev
+      && child.raise_ev !== currentRulesSibling.raise_ev,
+      `child call=${child && child.call_ev} (parent rules) vs `
+      + `current-rules call=${currentRulesSibling && currentRulesSibling.call_ev}`);
   check("run2_the_parent_record_is_untouched_by_the_recompute",
       sameView(parentAfter, parentBefore),
       `parent status=${parentAfter && parentAfter.status}`);
@@ -481,7 +548,12 @@ typeHand({hero: "Qs Qd", pot: "130"});
 const fourth = await verifyAndCompute();
 check("the_fourth_analysis_computes_before_the_rules_change",
       fourth?.status === "COMPLETE", `status=${fourth?.status}`);
-const R2 = await saveRulesForm({rake_percent: "5"});
+// R2 must carry a NON-ZERO rake cap: with `rake_cap_bb = 0` the cap is 0 chips,
+// the rake is capped away entirely, and a "current rules" recompute becomes
+// numerically identical to the saved-conditions one - which would make the whole
+// difference untestable. Measured: cap 0 reproduces the no-rake EVs exactly,
+// cap 2 differs (call 60.15625 vs 64.375).
+const R2 = await saveRulesForm({rake_percent: "5", rake_cap_bb: "2"});
 check("the_rules_really_changed", R2 !== R1, `${R1.slice(0, 8)} -> ${R2.slice(0, 8)}`);
 const afterRules = await recordIds();
 check("changing_the_rules_does_not_touch_the_existing_records",
@@ -495,6 +567,101 @@ check("an_older_rules_record_is_still_viewable_as_history",
       firstAfterRules.replace(/\s+/g, " ").slice(0, 80));
 check("the_historical_record_says_it_is_not_a_current_recomputation",
       firstAfterRules.includes("不是用当前桌规重算"), "labelled history");
+
+// ---- A / P1: the rule-source control must really switch the mode ---------
+// Loading the saved conditions puts the form into the RECORD's own rules
+// scenario with the control OFF. Ticking that control through its real change
+// handler must LEAVE the scenario: otherwise the form would keep sending the old
+// document rules while the control says "use this table's rules".
+await openRecord(aId);
+await fire(node("records-recompute-saved"), "click", {});
+const savedLoaded = await waitUntil(loaded);
+check("the_saved_conditions_load_selects_the_records_own_rules",
+    savedLoaded && safeRun("handScenario") !== null
+    && safeRun("handScenario").rules.rake_percent === "0"
+    && node("hand-use-rules").checked === false
+    && node("hand-hero").value === "Qs Qd",
+    `rake=${safeRun("handScenario") && safeRun("handScenario").rules.rake_percent} `
+    + `checked=${node("hand-use-rules").checked}`);
+await click(node("hand-build"));
+check("the_saved_scenario_verifies_as_a_document_rule_input",
+    run("handReceipt") !== null && run("handReceipt").rules_source === "document"
+    && run("handBuilt").rules.rake_percent === "0",
+    `source=${run("handReceipt") && run("handReceipt").rules_source} `
+    + `doc_rake=${run("handBuilt") && run("handBuilt").rules.rake_percent}`);
+node("hand-use-rules").checked = true;
+await fire(node("hand-use-rules"), "change", {});
+check("ticking_the_real_rule_source_control_leaves_the_saved_scenario",
+    safeRun("handScenario") === null && run("handReceipt") === null
+    && run("handBuilt") === null && run("acceptedAnalysisId") === null
+    && node("hand-use-rules").checked === true
+    && /保存条件模式已退出/.test(node("hand-status").textContent),
+    `scenario=${safeRun("handScenario")} `
+    + `status=${node("hand-status").textContent.slice(0, 44)}`);
+check("the_switch_keeps_the_hand_the_assumptions_and_the_parent_link",
+    node("hand-hero").value === "Qs Qd"
+    && node("hand-board").value === "2c 4d 7h 9s Jc"
+    && run('handRows("ranges")').length === RANGES_A.length
+    && run('handRows("ranges")')[0].combo === "JhJd"
+    && run('handRows("weights")')[1].weight === "2"
+    && node("hand-targets").value === "20,40,80"
+    && run("handSource").parent_analysis_record_id === aId
+    && run("handSource").issue_id === null,
+    JSON.stringify(run("handSource")));
+const beforeSwitchBuild = calls.length;
+const switched = await verifyAndCompute();
+const switchedBuild = calls.slice(beforeSwitchBuild).find(
+  call => call.path === "/api/hand-input/build" && call.method === "POST");
+const switchedBody = switchedBuild ? JSON.parse(switchedBuild.body) : null;
+check("the_switched_verify_asks_the_server_for_the_TABLE_rules",
+    switchedBody && switchedBody.rules_source === "table"
+    && run("handReceipt") && run("handReceipt").rules_source === "table"
+    && run("handBuilt").rules.rake_percent === "0.05",
+    `sent=${switchedBody && switchedBody.rules_source} `
+    + `doc_rake=${run("handBuilt") && run("handBuilt").rules.rake_percent}`);
+check("the_switched_recompute_completes_on_the_real_kernel",
+    switched?.status === "COMPLETE", `status=${switched?.status} error=${switched?.error}`);
+const switchMessage = await saveCurrent("切本桌规则重算 A");
+const afterSwitch = await recordIds();
+check("the_switched_recompute_saves_as_a_NEW_record",
+    /已保存本次分析/.test(switchMessage) && afterSwitch.length === 3
+    && afterSwitch.includes(aId) && afterSwitch[0] !== aId,
+    `${switchMessage.slice(0, 40)} ids=${afterSwitch.length}`);
+const eId = afterSwitch[0];
+const eView = await storedView(eId);
+const tableRules = (await serverRules()).simulation_rules;
+check("the_switched_record_uses_THIS_table_rules_and_keeps_its_parent",
+    eView && eView.parent === aId
+    && eView.source_kind === "recomputed_from_analysis_record"
+    && canonical(eView.effective_rules) === canonical(tableRules)
+    && eView.hero === aView.hero && eView.seat1 === aView.seat1
+    && eView.job_id !== aView.job_id,
+    `parent=${eView && eView.parent} job=${eView && eView.job_id} `
+    + `record_rules=${canonical(eView && eView.effective_rules).slice(0, 150)} `
+    + `table_rules=${canonical(tableRules).slice(0, 150)}`);
+check("the_switched_rules_actually_changed_the_numbers",
+    eView && eView.call_ev !== aView.call_ev && eView.raise_ev !== aView.raise_ev
+    && eView.raise_exact !== aView.raise_exact,
+    `A call=${aView.call_ev}/raise=${aView.raise_ev} -> `
+    + `switched call=${eView && eView.call_ev}/raise=${eView && eView.raise_ev}`);
+
+// Switching DURING an in-flight verify must not let the old answer restore the
+// saved-rules mode or hand back a receipt for it.
+await openRecord(aId);
+await fire(node("records-recompute-saved"), "click", {});
+await waitUntil(loaded);
+const buildGate = hold((path, method) =>
+  path === "/api/hand-input/build" && method === "POST");
+fire(node("hand-build"), "click", {});
+node("hand-use-rules").checked = true;
+await fire(node("hand-use-rules"), "change", {});
+buildGate.release();
+await new Promise(resolve => setTimeout(resolve, 400));
+check("switching_the_rule_source_during_an_in_flight_verify_discards_the_answer",
+    safeRun("handScenario") === null && run("handReceipt") === null
+    && run("handBuilt") === null && handTag() !== "已核对"
+    && node("hand-compute").disabled === true,
+    `tag=${handTag()} receipt=${run("handReceipt")}`);
 
 // ---- A / P1: recompute with the CURRENT rules -> new record C ----------
 // A live receipt that belongs to ANOTHER hand (a fresh 2h3d analysis under the
@@ -543,18 +710,24 @@ check("the_current_rules_recompute_completes_on_the_real_kernel",
 const currentMessage = await saveCurrent("按当前规则重算 A");
 const afterCurrent = await recordIds();
 check("the_current_rules_recompute_saves_as_a_NEW_record",
-      /已保存本次分析/.test(currentMessage) && afterCurrent.length === 3
-      && afterCurrent.includes(aId) && afterCurrent.includes(bId)
-      && afterCurrent[0] !== aId && afterCurrent[0] !== bId,
-      `${currentMessage.slice(0, 40)} ids=${afterCurrent.length}`);
+    /已保存本次分析/.test(currentMessage) && afterCurrent.length === 4
+    && afterCurrent.includes(aId) && afterCurrent.includes(bId)
+    && afterCurrent[0] !== aId && afterCurrent[0] !== bId
+    && afterCurrent[0] !== eId,
+    `${currentMessage.slice(0, 40)} ids=${afterCurrent.length}`);
 const cId = afterCurrent[0];
 const cView = await storedView(cId);
 check("the_new_current_rules_record_names_its_parent_and_its_own_rules",
-      cView && cView.parent === aId && cView.rake === "0.05"
-      && cView.source_kind === "recomputed_from_analysis_record"
-      && cView.job_id !== aView.job_id && cView.hero === aView.hero
-      && cView.seat1 === aView.seat1 && cView.bet_weight === aView.bet_weight,
-      `rake=${cView && cView.rake} parent=${cView && cView.parent}`);
+    cView && cView.parent === aId && cView.rake === "0.05"
+    && cView.source_kind === "recomputed_from_analysis_record"
+    && cView.job_id !== aView.job_id && cView.hero === aView.hero
+    && cView.seat1 === aView.seat1 && cView.bet_weight === aView.bet_weight,
+    `rake=${cView && cView.rake} parent=${cView && cView.parent}`);
+check("the_two_current_rules_entries_reach_the_same_rules_by_different_controls",
+    cView && eView
+    && canonical(cView.effective_rules) === canonical(eView.effective_rules)
+    && cView.job_id !== eView.job_id,
+    `C job=${cView && cView.job_id} E job=${eView && eView.job_id}`);
 check("the_original_A_record_is_unchanged_by_the_recompute",
       sameView(await storedView(aId), aBefore), "A untouched");
 
@@ -715,17 +888,75 @@ if (process.env.RECORDS_DIR) {
       && !brokenText.includes("本街追加"),
       brokenText.replace(/\s+/g, " ").slice(0, 70));
   writeFileSync(recordPath, pristine);
+
+  // ---- B / P2: a valid-JSON but wrong-SHAPED file, through the real routes ---
+  const initialList = await api("/api/analysis/records");
+  const healthyBefore = (((initialList.body || {}).items) || [])
+    .filter(item => item.display_permitted === true).map(item => item.record_id);
+  const SHAPE_ID = "20260101T000000-5a5a5a5a5a5a";
+  const shapeFolder = join(process.env.RECORDS_DIR, "analysis-records", SHAPE_ID);
+  const shapePath = join(shapeFolder, "record.json");
+  mkdirSync(shapeFolder, {recursive: true});
+  const shapeCases = [["an_array", "[]"], ["null", "null"],
+                      ["a_string", '"not-an-object"']];
+  let shapeServed = 0, shapeRefused = 0, shapeKept = 0, shapeMissing = [];
+  for (const [label, payload] of shapeCases) {
+    writeFileSync(shapePath, payload);
+    const listed = await api("/api/analysis/records");
+    const items = ((listed.body || {}).items) || [];
+    const row = items.find(item => item.record_id === SHAPE_ID);
+    shapeMissing = healthyBefore.filter(id => !items.some(
+      item => item.record_id === id && item.display_permitted === true));
+    const healthyIntact = healthyBefore.length >= 2 && shapeMissing.length === 0;
+    const opened = await api(`/api/analysis/records/${SHAPE_ID}`);
+    const scenario = await api(`/api/analysis/records/${SHAPE_ID}/scenario`);
+    if (listed.ok && row && row.display_permitted === false
+        && row.status === "INVALID" && healthyIntact) shapeServed += 1;
+    if (opened.status === 400 && scenario.status === 400) shapeRefused += 1;
+    if (readFileSync(shapePath, "utf8") === payload) shapeKept += 1;
+    console.log(`# shape ${label}: list=${listed.status} `
+                + `row=${row ? row.status : "missing"} get=${opened.status} `
+                + `scenario=${scenario.status} healthy=${healthyIntact} `
+                + `missing=${JSON.stringify(shapeMissing)}`);
+  }
+  check("a_wrong_shaped_file_is_listed_as_invalid_and_does_not_hide_the_others",
+      shapeServed === shapeCases.length,
+      `${shapeServed}/${shapeCases.length} served; healthy=${healthyBefore.length} `
+      + `missing=${JSON.stringify(shapeMissing)}`);
+  check("get_and_scenario_answer_a_wrong_shaped_file_with_a_refusal_not_a_crash",
+      shapeRefused === shapeCases.length,
+      `${shapeRefused}/${shapeCases.length} answered 400 (no 5xx)`);
+  check("a_wrong_shaped_file_is_never_deleted_or_rewritten",
+      shapeKept === shapeCases.length, `${shapeKept}/${shapeCases.length} kept`);
+  const afterShape = await openRecord(aId);
+  check("the_records_panel_still_reads_the_healthy_records_after_a_bad_shape",
+      afterShape.includes("Qs Qd") && afterShape.includes("本街追加"),
+      afterShape.replace(/\s+/g, " ").slice(0, 70));
+  rmSync(shapeFolder, {recursive: true, force: true});
 } else {
   check("every_rewritten_content_field_is_refused_on_every_read_path", false,
         "RECORDS_DIR not provided");
 }
 
+// ---- the stored result equals a DIRECT kernel call on its own input ------
+// Last, because this posts a fresh analysis and so replaces the live job.
+{
+  const openedE = await api(`/api/analysis/records/${eId}`);
+  const direct = await directAnalysis(openedE.body.document.input, "table");  const directEvs = ((direct.result || {}).root_actions || [])
+    .map(row => row.ev.decimal);
+  check("the_switched_record_equals_a_direct_kernel_call_on_its_own_input",
+      direct.status === "COMPLETE"
+      && JSON.stringify(directEvs) === JSON.stringify(eView.evs)
+      && direct.input_sha256 === openedE.body.identity.input_sha256,
+      `direct=${JSON.stringify(directEvs)} stored=${JSON.stringify(eView.evs)}`);
+}
+
 const finalViews = {[aId]: await storedView(aId), [bId]: await storedView(bId),
-                    [cId]: await storedView(cId)};
+                    [eId]: await storedView(eId), [cId]: await storedView(cId)};
 writeFileSync(handoff, JSON.stringify({
-  ids: [aId, bId, cId],
-  views: [finalViews[aId], finalViews[bId], finalViews[cId]],
-  rules: R1, rules_after: R2, a: aId, b: bId, c: cId,
+  ids: [aId, bId, eId, cId],
+  views: [finalViews[aId], finalViews[bId], finalViews[eId], finalViews[cId]],
+  rules: R1, rules_after: R2, a: aId, b: bId, e: eId, c: cId,
   views_by_id: finalViews}), "utf8");
 
 check("no_innerhtml_used", dom.state.innerHTMLWrites === 0,

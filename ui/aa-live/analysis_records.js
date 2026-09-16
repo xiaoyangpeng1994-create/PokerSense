@@ -382,7 +382,10 @@ async function recordsRecompute(mode) {
     handLoadRecordScenario(targetId, body, mode, reviewIssueId);
     recordFeedback(`已按${RECOMPUTE_LABELS[mode]}载入记录 ${targetId}；`
                    + `请点「核对输入」用${mode === "saved" ? "记录里的规则情景" : "本桌当前规则"}`
-                   + "重新核对，再计算并保存为新记录。", false);
+                   + "重新核对，再计算并保存为新记录。"
+                   + (mode === "saved"
+                      ? "若要改用本桌规则，请在录入区勾选「使用本桌已保存规则」。"
+                      : ""), false);
   } catch (error) {
     if (epoch === recordsEpoch) {
       recordFeedback(`重算材料载入失败：${error.message}`, true);

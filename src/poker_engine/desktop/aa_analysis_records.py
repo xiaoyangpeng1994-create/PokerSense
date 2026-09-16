@@ -442,18 +442,26 @@ class AAAnalysisRecordStore:
         return facts, document, checked
 
     # -- read -------------------------------------------------------------
+    @staticmethod
+    def _invalid_row(record_id, note):
+        return {"record_id": record_id, "status": INVALID,
+                "display_permitted": False, "label": None, "saved_at": None,
+                "notes": [note]}
+
     def recent(self):
         rows = []
         for path in self._paths():
             try:
                 document = json.loads(read_text(path / "record.json", "分析记录"))
-            except (AnalysisRecordError, json.JSONDecodeError):
-                rows.append({"record_id": path.name, "status": INVALID,
-                             "display_permitted": False,
-                             "label": None, "saved_at": None,
-                             "notes": ["分析记录无法读取，已拒绝展示数值"]})
+                envelope = self._present(document, path.name)
+            except (AnalysisRecordError, json.JSONDecodeError, ValueError,
+                    TypeError, KeyError, AttributeError, OSError):
+                # ONE broken entry is reported as its own INVALID row and the
+                # list carries on: a file with a wrong shape must never hide its
+                # neighbours, and it is never rewritten or deleted.
+                rows.append(self._invalid_row(
+                    path.name, "分析记录无法读取或结构不受支持，已按未通过自检处理"))
                 continue
-            envelope = self._present(document, path.name)
             rows.append({key: envelope.get(key) for key in (
                 "record_id", "label", "saved_at", "status", "display_permitted",
                 "identity", "record_kind", "implementation_version", "notes")})
@@ -610,6 +618,12 @@ class AAAnalysisRecordStore:
         check passed; the file is never repaired and never deleted.
         """
         notes = []
+        # The shape check comes FIRST, before any field is read: a file that is
+        # valid JSON but not an object (`[]`, `null`, a bare string) is this
+        # record's own refusal and must not raise through the whole list.
+        if not isinstance(document, dict):
+            return (["分析记录不是一个 JSON 对象（形状不受支持）：这一条按未通过自检处理，"
+                     "其它记录不受影响"], None, INVALID)
         if document.get("schema_version") != SCHEMA_VERSION:
             return (["记录 schema 版本不受支持"], None, INVALID)
         if document.get("record_kind") != RECORD_KIND:
@@ -700,6 +714,12 @@ class AAAnalysisRecordStore:
                         INVALID)
         except AnalysisRecordError as exc:
             return ([str(exc)], None, INVALID)
+        except (AttributeError, TypeError, KeyError, IndexError, ValueError) as exc:
+            # A nested block with the wrong shape can raise one of these while a
+            # field is being read. It stays THIS record's own refusal - named
+            # with the failure - and never becomes a success.
+            return ([f"记录结构不受支持，读取字段时失败：{type(exc).__name__}: {exc}"],
+                    None, INVALID)
 
         revision = identity.get("rules_revision")
         if revision != self.rules_revision():
@@ -849,15 +869,18 @@ class AAAnalysisRecordStore:
     def _present(self, document, expected_record_id=None):
         notes, view, status = self._verify(document, expected_record_id)
         permitted = view is not None
+        # A file that is not even an object has no readable fields of its own, so
+        # it is still reported under the directory it was found in.
+        fields = document if isinstance(document, dict) else {}
         return {
             # The record is named by the directory it was found in: a file whose
             # own id disagrees is reported under the id that was asked for.
-            "record_id": expected_record_id or document.get("record_id"),
-            "label": document.get("label"),
-            "saved_at": document.get("saved_at"),
-            "record_kind": document.get("record_kind"),
-            "implementation_version": document.get("implementation_version"),
-            "identity": deepcopy(document.get("identity")),
+            "record_id": expected_record_id or fields.get("record_id"),
+            "label": fields.get("label"),
+            "saved_at": fields.get("saved_at"),
+            "record_kind": fields.get("record_kind"),
+            "implementation_version": fields.get("implementation_version"),
+            "identity": deepcopy(fields.get("identity")),
             "status": status,
             "display_permitted": permitted,
             "notes": notes,

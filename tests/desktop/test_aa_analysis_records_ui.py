@@ -44,6 +44,17 @@ PHASE_ONE = (
     "changing_the_rules_does_not_touch_the_existing_records",
     "an_older_rules_record_is_still_viewable_as_history",
     "the_historical_record_says_it_is_not_a_current_recomputation",
+    # A / P1 (U2-R2): the rule-source control must really switch the mode.
+    "the_saved_conditions_load_selects_the_records_own_rules",
+    "the_saved_scenario_verifies_as_a_document_rule_input",
+    "ticking_the_real_rule_source_control_leaves_the_saved_scenario",
+    "the_switch_keeps_the_hand_the_assumptions_and_the_parent_link",
+    "the_switched_verify_asks_the_server_for_the_TABLE_rules",
+    "the_switched_recompute_completes_on_the_real_kernel",
+    "the_switched_recompute_saves_as_a_NEW_record",
+    "the_switched_record_uses_THIS_table_rules_and_keeps_its_parent",
+    "the_switched_rules_actually_changed_the_numbers",
+    "switching_the_rule_source_during_an_in_flight_verify_discards_the_answer",
     # A / P1: the recompute must go back through the verified, invalidating flow.
     "the_recompute_starts_from_an_existing_receipt",
     "recompute_with_current_rules_voids_the_old_receipt_and_result",
@@ -54,6 +65,7 @@ PHASE_ONE = (
     "the_current_rules_recompute_completes_on_the_real_kernel",
     "the_current_rules_recompute_saves_as_a_NEW_record",
     "the_new_current_rules_record_names_its_parent_and_its_own_rules",
+    "the_two_current_rules_entries_reach_the_same_rules_by_different_controls",
     "the_original_A_record_is_unchanged_by_the_recompute",
     # B / P1: request identity, out-of-order, forged and failed responses.
     "an_out_of_order_open_paints_only_the_current_selection",
@@ -69,12 +81,19 @@ PHASE_ONE = (
     "restoring_the_original_file_makes_it_readable_again",
     "an_edited_display_value_is_reported_as_invalid",
     "the_ui_refuses_to_show_numbers_for_a_broken_record",
+    # B / P2 (U2-R2): a wrong-shaped file, through the real routes.
+    "a_wrong_shaped_file_is_listed_as_invalid_and_does_not_hide_the_others",
+    "get_and_scenario_answer_a_wrong_shaped_file_with_a_refusal_not_a_crash",
+    "a_wrong_shaped_file_is_never_deleted_or_rewritten",
+    "the_records_panel_still_reads_the_healthy_records_after_a_bad_shape",
+    "the_switched_record_equals_a_direct_kernel_call_on_its_own_input",
     "no_innerhtml_used",
 )
 PHASE_TWO = (
     "run2_record_1_reopens_with_the_same_numbers",
     "run2_record_2_reopens_with_the_same_numbers",
     "run2_record_3_reopens_with_the_same_numbers",
+    "run2_record_4_reopens_with_the_same_numbers",
     "run2_the_parent_record_is_readable_before_the_saved_conditions_run",
     "run2_a_fresh_page_starts_without_a_receipt",
     "run2_saved_conditions_recompute_loads_the_frozen_facts_and_assumptions",
@@ -92,10 +111,11 @@ PHASE_THREE = (
     "run3_record_2_reopens_with_the_same_numbers",
     "run3_record_3_reopens_with_the_same_numbers",
     "run3_record_4_reopens_with_the_same_numbers",
+    "run3_record_5_reopens_with_the_same_numbers",
     "run3_every_record_survived_the_second_restart",
     "run3_every_record_still_passes_its_self_check",
     "run3_each_record_keeps_its_identity_and_numbers",
-    "run3_both_recomputed_records_are_readable_as_themselves",
+    "run3_every_recomputed_record_is_readable_as_itself",
     "run3_nothing_was_recomputed_on_any_reopen",
 )
 
@@ -181,8 +201,8 @@ def test_both_recomputes_save_new_records_and_survive_two_real_restarts(tmp_path
     with pytest.raises(OSError):
         urllib.request.urlopen(first.base + "/api/rules", timeout=3).read()
     handoff_data = json.loads(handoff.read_text(encoding="utf-8"))
-    assert len(handoff_data["ids"]) == 3, handoff_data["ids"]
-    assert len(handoff_data["views"]) == 3
+    assert len(handoff_data["ids"]) == 4, handoff_data["ids"]
+    assert len(handoff_data["views"]) == 4
 
     second = RunningServer(work)
     try:
@@ -193,7 +213,7 @@ def test_both_recomputes_save_new_records_and_survive_two_real_restarts(tmp_path
     with pytest.raises(OSError):
         urllib.request.urlopen(second.base + "/api/rules", timeout=3).read()
     handoff_data = json.loads(handoff.read_text(encoding="utf-8"))
-    assert len(handoff_data["ids"]) == 4, handoff_data["ids"]
+    assert len(handoff_data["ids"]) == 5, handoff_data["ids"]
 
     third = RunningServer(work)
     try:

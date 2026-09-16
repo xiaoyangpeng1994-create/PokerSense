@@ -398,6 +398,7 @@ async function handVerify() {
   }
   el("hand-gaps").replaceChildren();
   const scenario = handScenario;
+  if (scenario && el("hand-use-rules").checked) return handRulesSourceMismatch();
   if (scenario) {
     // Recomputed from a saved record: the rules come from THAT record and are
     // carried as this scenario's own rules. The table settings are untouched and
@@ -536,6 +537,30 @@ function handRulesChanged(reason) {
   // re-verify. This always goes through handInvalidate so the token advances and
   // a build request that is still in flight can never restore "verified".
   handInvalidate(reason);
+}
+function handUseTableRulesFromControl() {
+  // The rule-source control has exactly ONE effective state. Ticking "use this
+  // table's rules" must really LEAVE a saved-rules scenario - not merely drop the
+  // receipt while the old document rules keep being sent. The hand, the opponent
+  // assumptions and the recompute-parent link all survive the switch.
+  if (handScenario === null) {
+    handCareful();
+    return;
+  }
+  const left = handScenario.record_id;
+  handScenario = null;
+  el("hand-use-rules").checked = true;
+  handInvalidate(`已改用「本桌规则」的当前版本核对：记录 ${left} 的保存条件模式已退出`
+                 + "（牌局、对手假设与重算来源保留）。请重新核对后再计算。");
+}
+function handRulesSourceMismatch() {
+  // Fail closed on the one state that must never be sent: a saved-rules scenario
+  // paired with a control that says "use this table's rules".
+  handDropReceipt();
+  handFeedback("规则来源与录入状态不一致：当前选中「本桌规则」，但场景仍指向保存条件。"
+               + "请再切换一次「使用本桌已保存规则」后重新核对（不会替你猜用哪一套规则）。",
+               true);
+  return null;
 }
 function handRulesRevisionSeen() {
   // Called from the page's status poll: notice a rules revision this page has not
@@ -729,6 +754,10 @@ function handLoadRecordScenario(recordId, body, mode, reviewIssueId) {
                   `${name}：这条记录里没有可用假设，需要人工补齐`),
                 "记录里的原候选只作为对照；未知项不会因为重算变成确认值",
                 "重算不会改动原记录，也不会把桌规改回保存时的版本"];
+  if (saved) {
+    gaps.push("若要改用本桌规则：勾选「使用本桌已保存规则」，保存条件模式会立刻退出"
+              + "（牌局、对手假设与重算来源保留），然后重新核对");
+  }
   el("hand-gaps").replaceChildren(...handList(
     saved
       ? `已载入记录 ${recordId} 保存时的事实、假设与规则情景（保存时修订 `
@@ -837,9 +866,12 @@ if (typeof document !== "undefined" && typeof el === "function"
       handCareful();
     });
   }
-  for (const id of ["hand-ended", "hand-use-rules", "hand-no-history"]) {
+  for (const id of ["hand-ended", "hand-no-history"]) {
     el(id).addEventListener("change", handCareful);
   }
+  // The rule-source control gets its own handler: it must switch the actual mode,
+  // not just void the receipt.
+  el("hand-use-rules").addEventListener("change", handUseTableRulesFromControl);
   el("hand-fees").addEventListener("change", handCareful);
   handWired = true;
   handFeedback("尚未核对输入。未知项留空即可；核对后会给出还缺什么。", false);

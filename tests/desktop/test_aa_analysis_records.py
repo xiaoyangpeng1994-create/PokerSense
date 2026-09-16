@@ -580,3 +580,108 @@ def test_the_view_makes_the_assumptions_and_rule_values_readable(store):
     assert view["rules"]["effective_rules"]["rake_percent"] == "0"
     assert view["rules"]["rules_source"] in ("document", "table")
     assert view["facts"]["hero_cards"]["value"] == ["Qs", "Qd"]
+
+
+# ---------------------------------------------------------------------------
+# U2-R2 / review B: a record whose file is VALID JSON but the wrong SHAPE must
+# be refused on its own - the list must never answer with an unhandled
+# exception, and the healthy neighbours must stay readable.
+# ---------------------------------------------------------------------------
+
+
+def _write_bad(store, record_id, payload):
+    folder = store.store.directory / record_id
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "record.json").write_text(payload, encoding="utf-8")
+    return folder / "record.json"
+
+
+BAD_SHAPE_ID = "20260101T000000-abcdefabcdef"
+
+
+@pytest.mark.parametrize("payload", ["[]", "null", '"not-an-object"', "123",
+                                     "true", "[]\n"])
+def test_a_non_object_record_is_named_and_does_not_break_the_list(store, payload):
+    """The pre-fix behaviour was AttributeError straight through `recent`."""
+    document = document_for()
+    store.analysis.complete(document, job_id="job-good-1")
+    healthy = store.save(job_id="job-good-1", source={"issue_id": None})
+    store.analysis.complete(document, job_id="job-good-2")
+    neighbour = store.save(job_id="job-good-2", source={"issue_id": None})
+    path = _write_bad(store, BAD_SHAPE_ID, payload)
+
+    rows = store.store.recent()
+    by_id = {row["record_id"]: row for row in rows}
+    assert len(rows) == 3, [row["record_id"] for row in rows]
+    bad = by_id[BAD_SHAPE_ID]
+    assert bad["display_permitted"] is False
+    assert bad["status"] == module.INVALID
+    assert bad["notes"] and any("对象" in note for note in bad["notes"]), bad["notes"]
+    # The healthy records are untouched by the broken neighbour.
+    assert by_id[healthy["record_id"]]["display_permitted"] is True
+    assert by_id[healthy["record_id"]]["status"] == module.OK
+    assert by_id[neighbour["record_id"]]["display_permitted"] is True
+    # A single get / scenario is refused as a record error, not an AttributeError.
+    for call in (lambda: store.store.get(BAD_SHAPE_ID),
+                 lambda: store.store.scenario(BAD_SHAPE_ID)):
+        with pytest.raises(module.AnalysisRecordError):
+            call()
+    assert path.read_text(encoding="utf-8") == payload
+
+
+@pytest.mark.parametrize("mutate,keyword", [
+    (lambda doc: doc.__setitem__("identity", "not-an-object"), "身份"),
+    (lambda doc: doc.__setitem__("job", []), "任务"),
+    (lambda doc: doc.__setitem__("source", []), "来源"),
+    (lambda doc: doc.__setitem__("input", "not-an-object"), "规范输入"),
+    (lambda doc: doc.__setitem__("facts", []), "事实"),
+    (lambda doc: doc.__setitem__("assumptions", "not-an-object"), "假设"),
+    (lambda doc: doc.__setitem__("report", []), "报告"),
+    (lambda doc: doc.__setitem__("support", "not-an-object"), "支持"),
+    (lambda doc: doc.__setitem__("amounts", []), "金额"),
+    (lambda doc: doc.__setitem__("capacity", "not-an-object"), "容量"),
+])
+def test_a_nested_shape_error_yields_invalid_without_raising(store, mutate, keyword):
+    """A wrong nested block must be a named refusal, never a traceback."""
+    document = document_for()
+    store.analysis.complete(document, job_id="job-nested-1")
+    victim = store.save(job_id="job-nested-1", source={"issue_id": None})
+    store.analysis.complete(document, job_id="job-nested-2")
+    neighbour = store.save(job_id="job-nested-2", source={"issue_id": None})
+    _tamper(store, victim["record_id"], mutate)
+
+    rows = {row["record_id"]: row for row in store.store.recent()}
+    victim_row = rows[victim["record_id"]]
+    assert victim_row["display_permitted"] is False
+    assert victim_row["status"] == module.INVALID
+    assert any(keyword in note for note in victim_row["notes"]), victim_row["notes"]
+    reopened = store.store.get(victim["record_id"])
+    assert reopened["view"] is None and reopened["display_permitted"] is False
+    assert rows[neighbour["record_id"]]["display_permitted"] is True
+    with pytest.raises(module.AnalysisRecordError):
+        store.store.scenario(victim["record_id"])
+
+
+def test_the_list_keeps_every_healthy_record_while_a_bad_file_sits_between(store):
+    """A junk file must not be able to hide the records around it."""
+    document = document_for()
+    ids = []
+    for index in range(2):
+        store.analysis.complete(document, job_id=f"job-keep-{index}")
+        ids.append(store.save(job_id=f"job-keep-{index}",
+                              source={"issue_id": None})["record_id"])
+    _write_bad(store, "20250101T000000-000000000001", "[]")
+    _write_bad(store, "20250101T000000-000000000002", "null")
+    (store.store.directory / "20250101T000000-000000000003").mkdir()
+    (store.store.directory / "20250101T000000-000000000003" / "record.json").write_text(
+        "{not json", encoding="utf-8")
+
+    rows = store.store.recent()
+    assert len(rows) == 5, [row["record_id"] for row in rows]
+    healthy = [row for row in rows if row["display_permitted"]]
+    assert sorted(row["record_id"] for row in healthy) == sorted(ids)
+    assert all(row["status"] == module.OK for row in healthy)
+    assert all(row["status"] == module.INVALID
+               for row in rows if not row["display_permitted"])
+    for record_id in ids:
+        assert store.store.get(record_id)["display_permitted"] is True
