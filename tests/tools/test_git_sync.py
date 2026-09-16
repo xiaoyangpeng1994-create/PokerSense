@@ -141,5 +141,36 @@ def test_module_code_never_requests_force_flags():
             assert "--force" not in node.value
 
 
+def test_timeout_records_phase_and_nonzero_exit():
+    """Regression: a timed-out command must be distinguishable from a clean run."""
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "p.jsonl")
+        res = git_sync.run([sys.executable, "-c", "import time; time.sleep(30)"],
+                           timeout_s=2, label="selftest-timeout-regression",
+                           progress_path=path)
+        assert res["timed_out"] is True
+        assert res["exit_code"] != 0
+        phases = [json.loads(x)["phase"] for x in open(path, encoding="utf-8")
+                  if x.strip()]
+        assert "timed_out" in phases
+        assert phases[-1] == "timed_out"
+
+
+def test_dry_run_push_is_non_destructive_and_offline():
+    """`--dry-run` must be the default way to inspect a push without writing."""
+    out = git_sync.do_push(".", "some-branch", dry_run=True)
+    cmd = out["command"]
+    assert "--dry-run" in cmd
+    assert "push" in cmd
+    assert "--force" not in cmd
+
+
+def test_wrapper_never_uses_a_shell():
+    """No shell=True anywhere: argv is passed directly so quoting cannot drift."""
+    import inspect
+    src = inspect.getsource(git_sync)
+    assert "shell=True" not in src
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
