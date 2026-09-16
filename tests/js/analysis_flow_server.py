@@ -6,7 +6,11 @@ method, which re-imports ``__main__`` — a real module-level ``__main__`` guard
 never shares a process with the test.
 
 Usage: python analysis_flow_server.py --work <dir> --port <port>
-Prints one JSON line {"base": "http://127.0.0.1:<port>"} once it is listening.
+
+Prints one JSON line {"base": "http://127.0.0.1:<port>"} to announce the port.
+This is an ANNOUNCEMENT, not a readiness signal: uvicorn binds the socket after
+it. A caller must poll the base URL until it answers (the test fixture does);
+trusting this line alone races on a slow or loaded machine.
 """
 
 import argparse

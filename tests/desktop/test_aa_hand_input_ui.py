@@ -75,6 +75,9 @@ def hand_server(tmp_path_factory):
 @pytest.fixture(scope="module")
 def flow_server(tmp_path_factory):
     """A dedicated process, because the analysis worker uses spawn."""
+    import urllib.error
+    import urllib.request
+
     directory = tmp_path_factory.mktemp("analysis-flow")
     port = free_port()
     process = subprocess.Popen(
@@ -87,6 +90,21 @@ def flow_server(tmp_path_factory):
         assert line, (f"the flow server printed nothing; stderr: "
                       f"{process.stderr.read()[-1500:]}")
         base = json.loads(line)["base"]
+        # The launcher announces its port before uvicorn binds it, so poll for
+        # an actual answer rather than trusting the line (this raced on macOS).
+        deadline = time.time() + 60
+        while True:
+            try:
+                urllib.request.urlopen(base + "/api/rules", timeout=5).read()
+                break
+            except urllib.error.HTTPError:
+                break
+            except OSError:
+                if time.time() >= deadline:
+                    raise AssertionError(
+                        f"the flow server never answered on {base}; stderr: "
+                        f"{process.stderr.read()[-1500:]}") from None
+                time.sleep(0.2)
         yield base
     finally:
         process.terminate()
