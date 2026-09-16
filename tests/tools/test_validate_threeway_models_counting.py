@@ -41,8 +41,6 @@ TOOL = os.path.join(REPO_ROOT, "tools", "validate_threeway_models.py")
 
 
 @pytest.fixture(scope="module")
-
-
 def report(tmp_path_factory):
     """Run the real tool once and return its report."""
     # the tool refuses to write into an existing directory
