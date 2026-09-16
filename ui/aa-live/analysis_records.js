@@ -1,20 +1,33 @@
 "use strict";
 // Saved analysis records: freeze the CURRENT completed analysis, list what is
-// saved, and reopen it. Reopening reads history only - it never calls the kernel
-// and never rewrites a record with the current table rules.
+// saved, reopen it, and recompute it either under the record's OWN saved rules
+// or under the current table rules. Reopening reads history only - it never
+// calls the kernel and never rewrites a record with the current table rules.
 //
-// The numbers shown here are the ones the server re-derived from the frozen
-// exact values; the panel never reads a saved display string as truth.
-let recordsToken = 0, recordsList = [], openedRecord = null;
+// Every request this panel makes is bound to the target it was issued for: a
+// monotonic epoch plus the record id it asked for. A late, out-of-order or
+// failed response therefore cannot paint another record's numbers, cannot
+// restore the previous record's recompute buttons, and cannot revive a stale
+// input. The panel voids its rendered context BEFORE each new request.
+let recordsToken = 0, recordsList = [], openedRecord = null, recordsEpoch = 0;
 const recordFeedback = (message, isError) => {
   el("records-status").textContent = message;
   el("records-status").className = isError ? "error" : "muted";
 };
 const STATUS_LABELS = {CURRENT: "当前版本", HISTORICAL_RULES: "历史规则版本",
                        HISTORICAL_IMPLEMENTATION: "历史实现版本",
-                       INVALID: "未通过自洽校验"};
+                       INVALID: "未通过自洽校验",
+                       UNVERIFIED_FORMAT: "旧格式未校验"};
 const STATUS_CLASSES = {CURRENT: "tag", HISTORICAL_RULES: "tag",
-                        HISTORICAL_IMPLEMENTATION: "tag", INVALID: "tag blocked"};
+                        HISTORICAL_IMPLEMENTATION: "tag", INVALID: "tag blocked",
+                        UNVERIFIED_FORMAT: "tag blocked"};
+// The sample type is validated by the server and shown verbatim, so a manual,
+// unverified input is never displayed as if it were a real observed hand.
+const SOURCE_KIND_LABELS = {
+  manual_hypothesis_unverified: "手工录入/带入的假设输入（未经观测验证）",
+  linked_review_record: "关联到一条已保存的复查记录",
+  recomputed_from_analysis_record: "由另一条分析记录重算而来"};
+const RECOMPUTE_LABELS = {saved: "保存时的规则情景", current: "本桌当前规则"};
 function recordEl(tag, className, value) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -39,6 +52,22 @@ function recordTable(headers, rows) {
   }
   return table;
 }
+function recordDetails(summary, nodes) {
+  const details = document.createElement("details");
+  details.append(recordEl("summary", null, summary));
+  for (const node of nodes) details.append(node);
+  return details;
+}
+function recordVoid(message) {
+  // Invalidate every in-flight record request and drop the rendered context
+  // BEFORE a new one starts: a superseded response must find nothing to restore.
+  ++recordsEpoch;
+  openedRecord = null;
+  el("records-view").replaceChildren();
+  el("records-recompute-saved").disabled = true;
+  el("records-recompute-current").disabled = true;
+  if (message) recordFeedback(message, false);
+}
 const PROVENANCE_LABELS = {observed: "结构化快照候选（未人工修改）",
                            human_confirmed: "人工填写/确认", assumed: "假设",
                            unknown: "未知"};
@@ -57,6 +86,25 @@ function recordProvenanceRows(facts) {
   }
   return rows;
 }
+function recordRangeRows(assumptions) {
+  const rows = [];
+  for (const item of (assumptions && assumptions.ranges) || []) {
+    for (const combo of item.combos || []) {
+      rows.push([`座位 ${item.seat_id}`, combo.combo, combo.weight]);
+    }
+  }
+  return rows;
+}
+function recordWeightRows(assumptions) {
+  return ((assumptions && assumptions.models) || []).map(row =>
+    [`座位 ${row.seat_id}`, translated(row.key), row.weight]);
+}
+function recordRuleRows(rules) {
+  if (!rules || typeof rules !== "object") return [];
+  return Object.entries(rules).map(([key, value]) => [
+    key, value === null || value === undefined ? "（未设置）"
+      : typeof value === "object" ? JSON.stringify(value) : String(value)]);
+}
 function renderRecord(view, envelope) {
   if (!view) {
     el("records-view").replaceChildren(
@@ -74,6 +122,18 @@ function renderRecord(view, envelope) {
   for (const note of envelope.notes || []) {
     nodes.push(recordEl("p", "footnote", note));
   }
+  // What kind of sample this is, in words rather than as a digest.
+  nodes.push(recordEl("p", "footnote",
+    `来源类型：${view.source_kind_label || SOURCE_KIND_LABELS[view.source_kind]
+      || view.source_kind}（${view.source_kind}）`));
+  const source = view.source || {};
+  if (source.issue_id) {
+    nodes.push(recordEl("p", "footnote", `关联的复查记录：${source.issue_id}`));
+  }
+  if (source.parent_analysis_record_id) {
+    nodes.push(recordEl("p", "footnote",
+      `重算来源的分析记录：${source.parent_analysis_record_id}`));
+  }
   const situation = view.situation;
   nodes.push(recordEl("p", "footnote",
     `Hero 座位 ${situation.hero_seat} · 手牌 ${situation.hero_cards.join(" ")} · `
@@ -87,6 +147,10 @@ function renderRecord(view, envelope) {
     + `${String(view.rules.rules_revision).slice(0, 12)} · 当前修订 `
     + `${String(view.rules.current_rules_revision).slice(0, 12)}`
     + (view.historical ? "（保存后桌规已变更，本结果是历史版本）" : "")));
+  // The rule VALUES, not only a revision digest.
+  const ruleRows = recordRuleRows(view.rules.effective_rules);
+  nodes.push(recordDetails(`核对时使用的规则数值（${ruleRows.length} 项）`,
+    [recordTable(["规则项", "值"], ruleRows)]));
   nodes.push(recordEl("p", "footnote",
     `容量：声明组合乘积 ${view.capacity.declared_combo_product} · `
     + `本街最高下注 ${view.capacity.current_bet} · 推算底池 ${view.capacity.implied_pot} · `
@@ -103,6 +167,18 @@ function renderRecord(view, envelope) {
         ? `${translated(row.kind)} 至 ${row.target_decimal}`
         : translated(row.kind),
       row.additional_cost, row.ev, row.ev_exact])));
+  // The opponent model behind those numbers, so it can be checked rather than
+  // taken on trust.
+  const rangeRows = recordRangeRows(view.assumptions);
+  const weightRows = recordWeightRows(view.assumptions);
+  nodes.push(recordDetails(
+    `本次使用的对手假设（范围 ${rangeRows.length} 个组合 · 响应权重 ${weightRows.length} 条）`,
+    [recordTable(["座位", "组合", "相对权重"], rangeRows),
+     recordTable(["座位", "动作", "权重"], weightRows),
+     recordEl("p", "footnote",
+              `加注尺寸 ${(view.assumptions.aggression_targets || []).join(",") || "（无）"}`
+              + ` · 加注次数上限 ${view.assumptions.max_aggressions}`
+              + ` · 额外费用 ${JSON.stringify(view.assumptions.other_fees)}`)]));
   if (view.history.length) {
     nodes.push(...recordList("公开历史标签：", view.history.map(row => row.label)));
   } else {
@@ -123,6 +199,10 @@ async function recordsRefresh() {
     if (!response.ok) throw Error(text(body.detail));
     recordsList = body.items || [];
     const select = el("records-select");
+    // The selection is read HERE, at the moment the answer is applied: a save
+    // finishes with an automatic refresh, and the human may already have moved
+    // to another record while it was in flight. Their choice must survive.
+    const keep = select.value;
     select.replaceChildren();
     if (!recordsList.length) {
       const option = document.createElement("option");
@@ -137,6 +217,7 @@ async function recordsRefresh() {
       option.dataset.permitted = row.display_permitted ? "true" : "false";
       select.append(option);
     }
+    if (keep && recordsList.some(row => row.record_id === keep)) select.value = keep;
     el("records-open").disabled = !recordsList.length;
     el("records-count").textContent = `${recordsList.length} 条`;
     recordFeedback(recordsList.length
@@ -161,6 +242,13 @@ async function recordsSave() {
     return;
   }
   el("records-save").disabled = true;
+  // The save is bound to the analysis it was issued for: if the panel has moved
+  // on by the time the answer lands, the receipt must not be reported as if it
+  // described the CURRENT result.
+  const sentBinding = binding, sentJob = accepted;
+  const parent = receipt.scenario_record_id
+    || (typeof handSource !== "undefined" ? handSource.parent_analysis_record_id
+      : null) || null;
   try {
     const response = await fetch("/api/analysis/records", {
       method: "POST", headers: {...headers, "Content-Type": "application/json"},
@@ -171,14 +259,28 @@ async function recordsSave() {
           issue_id: handSource.issue_id, saved_at: handSource.saved_at,
           preview_sha256: handSource.preview_sha256,
           source_frame: handSource.source_frame, scope: handSource.scope,
+          parent_analysis_record_id: parent,
         },
         label: el("records-label").value.trim(),
       })});
     const body = await response.json();
+    const moved = typeof acceptedAnalysisId !== "undefined"
+      && (acceptedAnalysisId !== sentJob || analysisBinding !== sentBinding);
     if (!response.ok) throw Error(text(body.detail));
-    recordFeedback(body.duplicate_of_existing
-      ? `这次分析已经保存过：记录 ${body.record_id}（不会重复新增）。`
-      : `已保存本次分析：记录 ${body.record_id}。`, false);
+    if (body.display_permitted !== true || !body.record_id) {
+      recordFeedback(`保存回执未通过自洽校验，已按失败处理：`
+                     + `${(body.notes || []).join("；")}`, true);
+      await recordsRefresh();
+      return;
+    }
+    if (moved) {
+      recordFeedback(`已保存的是发起保存时的那次分析（记录 ${body.record_id}）；`
+                     + "当前面板已经换成了另一次分析，这条记录不属于它。", true);
+    } else {
+      recordFeedback(body.duplicate_of_existing
+        ? `这次分析已经保存过：记录 ${body.record_id}（不会重复新增）。`
+        : `已保存本次分析：记录 ${body.record_id}。`, false);
+    }
     await recordsRefresh();
   } catch (error) {
     recordFeedback(`保存失败：${error.message}`, true);
@@ -187,13 +289,27 @@ async function recordsSave() {
   }
 }
 async function recordsOpen() {
-  const recordId = el("records-select").value;
-  if (!recordId) { recordFeedback("先选择一条已保存的分析。", true); return; }
+  const targetId = el("records-select").value;
+  if (!targetId) { recordFeedback("先选择一条已保存的分析。", true); return; }
+  // Void first: whatever is on screen belongs to another target now, and its
+  // recompute buttons must not survive a failed or superseded open.
+  recordVoid("正在打开保存的历史结果……");
+  const epoch = recordsEpoch;
   try {
     const response = await fetch(
-      `/api/analysis/records/${encodeURIComponent(recordId)}`, {cache: "no-store"});
+      `/api/analysis/records/${encodeURIComponent(targetId)}`, {cache: "no-store"});
     const body = await response.json();
+    if (epoch !== recordsEpoch) return;
+    if (el("records-select").value !== targetId) {
+      recordFeedback("选择已经改变，这次打开的回包不再对应当前选择，已忽略。", true);
+      return;
+    }
     if (!response.ok) throw Error(text(body.detail));
+    if (body.record_id !== targetId) {
+      recordFeedback("返回的记录与请求的目标不是同一条，这次打开已放弃：不会展示任何数值。",
+                     true);
+      return;
+    }
     openedRecord = body;
     renderRecord(body.view, body);
     el("records-recompute-saved").disabled = !body.display_permitted;
@@ -202,56 +318,83 @@ async function recordsOpen() {
       ? "已打开保存的历史结果（未重新计算）。"
       : "这份记录未通过自洽校验，已拒绝展示数值；文件保持原样。", !body.display_permitted);
   } catch (error) {
-    openedRecord = null; el("records-view").replaceChildren();
-    recordFeedback(`打开失败：${error.message}`, true);
+    if (epoch === recordsEpoch) recordFeedback(`打开失败：${error.message}`, true);
   }
 }
 async function recordsRecompute(mode) {
-  const recordId = el("records-select").value;
-  if (!recordId) { recordFeedback("先选择一条已保存的分析。", true); return; }
+  const targetId = el("records-select").value;
+  const parent = openedRecord;
+  if (!targetId) { recordFeedback("先选择一条已保存的分析。", true); return; }
+  if (!parent || parent.record_id !== targetId || !parent.display_permitted) {
+    recordFeedback("请先打开这条记录：只有通过自洽校验、且仍被选中的记录可以用来重算。",
+                   true);
+    return;
+  }
+  // Void FIRST. The previous hand's fields, opponent assumptions, verified
+  // receipt and rendered result are all dropped before the request leaves, so a
+  // superseded answer can never be loaded into a form that belongs to A while
+  // the receipt still belongs to B.
+  recordVoid(`正在按${RECOMPUTE_LABELS[mode]}重算：上一套字段、假设与下方旧结果已全部作废。`);
+  try {
+    if (typeof handResetForSource === "function") {
+      handResetForSource({
+        kind: mode === "saved" ? "analysis_record_saved_rules"
+                               : "analysis_record_current_rules",
+        issue_id: null, saved_at: parent.saved_at ?? null,
+        preview_sha256: null, source_frame: null, scope: null,
+      }, `正在按${RECOMPUTE_LABELS[mode]}重算记录 ${targetId}：`
+         + "上一套字段、假设、结束确认与下方旧结果已全部作废。");
+    }
+  } catch (_) { /* hand_input.js not loaded: the record panel still stands alone */ }
+  const epoch = recordsEpoch;
+  // The form the answer will be loaded into: an edit, a clear or a rules change
+  // during the flight bumps this, and then the answer is dropped instead of
+  // being written over what the human now has in front of them.
+  const formToken = typeof handToken !== "undefined" ? handToken : null;
   try {
     const response = await fetch(
-      `/api/analysis/records/${encodeURIComponent(recordId)}/scenario`,
-      {cache: "no-store"});
+      `/api/analysis/records/${encodeURIComponent(targetId)}/scenario`, {cache: "no-store"});
     const body = await response.json();
-    if (!response.ok) throw Error(text(body.detail));
-    if (mode === "saved") {
-      // Saved conditions: load the frozen document verbatim, so the sent rules
-      // are the saved ones. Nothing about the global table rules changes.
-      el("analysis-kind").value = "threeway";
-      el("analysis-use-rules").checked = false;
-      el("analysis-input").value = JSON.stringify(body.input, null, 2);
-      if (typeof analysisEdited === "function") analysisEdited();
-      el("analysis-status").textContent =
-        `已载入记录 ${recordId} 保存时的输入与规则（修订 `
-        + `${String(body.saved_rules_revision).slice(0, 12)}）。`
-        + "按「计算条件收益」会用这套保存条件重新计算；不会改动本桌规则。";
-    } else {
-      // Current rules: put the saved facts back in the form, so re-verifying
-      // rebuilds the document against the CURRENT table rules by definition.
-      if (typeof handApplyImportedFacts === "function") {
-        handApplyImportedFacts(recordId, {
-          facts: body.facts, gaps: ["已从保存记录载入事实；请核对后再用当前桌规核对。"],
-          source: {issue_id: recordId, saved_at: body.saved_at, scope: null}});
-      }
-      el("analysis-status").textContent =
-        `已把记录 ${recordId} 的事实载入上方表单：请点「核对输入」用当前桌规重新核对，`
-        + "再计算；不会自动把桌规改回保存时的版本。";
+    if (epoch !== recordsEpoch) return;                        // a newer target owns it
+    if (el("records-select").value !== targetId) {
+      recordFeedback("选择已经改变，这次重算材料的回包不再对应当前选择，已忽略。", true);
+      return;
     }
-    recordFeedback(mode === "saved"
-      ? "已按保存条件载入；请显式点击计算。"
-      : "已载入事实到录入区；请重新核对后再计算。", false);
+    if (formToken !== null && handToken !== formToken) {
+      recordFeedback("这次重算的回包到达时录入区已经被改动（清空 / 改表单 / 换规则）："
+                     + "已丢弃该回包，不会把它载入表单。", true);
+      return;
+    }
+    if (!response.ok) throw Error(text(body.detail));
+    if (body.record_id !== targetId
+        || !body.facts || !body.assumptions || !body.input) {
+      recordFeedback("返回的重算材料与请求的目标不是同一条，这次重算已放弃："
+                     + "不会改动表单，也不会展示任何数值。", true);
+      return;
+    }
+    if (typeof handLoadRecordScenario !== "function") {
+      recordFeedback("当前页面没有加载录入表单，无法把这条记录载入重算。", true);
+      return;
+    }
+    // The ORIGINAL review link travels with the recompute; the analysis-record
+    // id stays in its own field and is never used as an observed-review id.
+    const reviewIssueId = ((parent.view || {}).source || {}).issue_id ?? null;
+    handLoadRecordScenario(targetId, body, mode, reviewIssueId);
+    recordFeedback(`已按${RECOMPUTE_LABELS[mode]}载入记录 ${targetId}；`
+                   + `请点「核对输入」用${mode === "saved" ? "记录里的规则情景" : "本桌当前规则"}`
+                   + "重新核对，再计算并保存为新记录。", false);
   } catch (error) {
-    recordFeedback(`载入失败：${error.message}`, true);
+    if (epoch === recordsEpoch) {
+      recordFeedback(`重算材料载入失败：${error.message}`, true);
+    }
   }
 }
 el("records-save").addEventListener("click", recordsSave);
 el("records-refresh").addEventListener("click", recordsRefresh);
 el("records-open").addEventListener("click", recordsOpen);
 el("records-select").addEventListener("change", () => {
-  el("records-view").replaceChildren(); openedRecord = null;
-  el("records-recompute-saved").disabled = true;
-  el("records-recompute-current").disabled = true;
+  // Changing the target voids the open record AND any in-flight open/recompute.
+  recordVoid("已切换记录：上一条的数值与重算按钮已失效，请重新打开。");
 });
 el("records-recompute-saved").addEventListener(
   "click", () => recordsRecompute("saved"));

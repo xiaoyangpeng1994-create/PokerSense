@@ -1,5 +1,10 @@
 # USABLE-001 U2 · 保存本次计算 → 关闭程序 → 重新启动 → 校验重开
 
+> **部分被取代（U2-R1）**：本文档关于「两类重算只载入 / 只要求重新核对」「记录标记
+> `rubric=synthetic_input_labelled`」「重算→保存尚未走通」的表述已由
+> `docs/research/usable-001-u2-r1-recompute-binding.zh-CN.md` 取代。保存所有权、幂等、只读重开、
+> 启动器与真实样本状态的结论仍然有效（但记录现在另带内容封存摘要与显式 `source_kind`）。
+
 run_id `USABLE-001-U2-20260916T2225Z` · 基线 `44cb006597264107421698135a816e0b1ea34eb4`（U1-R3 验收 head）
 分支 `codex/usable-001-hand-review` · 同一个 Draft PR #28 · 依据执行单 `issuecomment-5698965857`（U1-R3 `PASS_WITH_SCOPE`）
 **本轮只做 U2**；不重做 U1/R1/R2/R3、不扩算法/人数/街道/上限、不新增 Git/MCP/自动化、不合并、不覆盖用户旧程序。

@@ -18,6 +18,11 @@ let handSource = handBlankSource(), handOrigin = {};
 // The receipt records WHICH table-rules version the verified document was built
 // against, so a compute can never pair an old document with a newer revision.
 let handReceipt = null;
+// A recompute of a saved analysis may legitimately use THAT RECORD'S rules
+// instead of this table's. The scenario is set only by the records panel and is
+// cleared by every source reset; it is used as a scenario and is never written
+// back into the global table settings.
+let handScenario = null;
 const handStatus = message => { el("hand-input-tag").textContent = message; };
 const handFeedback = (message, isError) => {
   el("hand-status").textContent = message;
@@ -392,7 +397,15 @@ async function handVerify() {
     return null;
   }
   el("hand-gaps").replaceChildren();
-  if (!el("hand-use-rules").checked) {
+  const scenario = handScenario;
+  if (scenario) {
+    // Recomputed from a saved record: the rules come from THAT record and are
+    // carried as this scenario's own rules. The table settings are untouched and
+    // the server is told the rules come from the document, not from the table.
+    facts = {...facts, table_rules: {
+      value: scenario.rules, provenance: "human_confirmed",
+      candidate: {revision: scenario.revision}}};
+  } else if (!el("hand-use-rules").checked) {
     handRulesInFlight = null;
     handFeedback("本轮只支持使用「本桌规则」里已保存的完整规则；"
                  + "请先勾选该选项并在设置页补齐桌规（未知项不能自动补零）。", true);
@@ -401,8 +414,10 @@ async function handVerify() {
   try {
     const response = await fetch("/api/hand-input/build", {
       method: "POST", headers: {...headers, "Content-Type": "application/json"},
-      body: JSON.stringify({facts, assumptions, rules_source: "table",
-        rules_revision: handRulesInFlight})});
+      body: JSON.stringify({facts, assumptions,
+        rules_source: scenario ? "document" : "table",
+        rules_revision: scenario ? (statusData.table_rules?.revision ?? null)
+                                 : handRulesInFlight})});
     const result = await response.json();
     if (token !== handToken) return null;
     handRulesInFlight = null;
@@ -427,6 +442,9 @@ async function handVerify() {
       // hand the server the same provenance instead of a re-typed copy.
       facts, assumptions,
       capacity: result.capacity ?? null,
+      // The saved record this recompute descends from, if any. It travels on the
+      // receipt so the new record can name its parent.
+      scenario_record_id: scenario ? scenario.record_id : null,
     };
     if (!handReceipt.rules_revision) {
       // Without the revision the receipt was built against, no compute can prove
@@ -438,8 +456,11 @@ async function handVerify() {
     handRender(result, facts);
     el("hand-compute").disabled = false;
     handStatus("已核对");
-    handFeedback("输入通过支持性检查；按「按上述假设计算」会用现有内核针对本次输入计算。",
-                 false);
+    handFeedback(scenario
+      ? `输入通过支持性检查；本次使用记录 ${scenario.record_id} 保存时的规则情景`
+        + "（本桌规则未被改动）。按「按上述假设计算」会用现有内核针对本次输入计算。"
+      : "输入通过支持性检查；按「按上述假设计算」会用现有内核针对本次输入计算。",
+      false);
     return result;
   } catch (error) {
     handRulesInFlight = null;
@@ -497,6 +518,7 @@ function handResetForSource(source, message) {
   el("hand-fees").value = "unknown";
   for (const block of Object.keys(HAND_BLOCKS)) handClearRows(block);
   handOrigin = {};
+  handScenario = null;
   handSource = {...source};
   handInvalidate(message);
 }
@@ -560,8 +582,10 @@ function handImportFailed(issueId, message) {
 const HAND_FACT_LABELS = {hero_cards: "Hero 手牌", board_cards: "公共牌",
                           pot_display: "显示底池", hero_seat: "Hero 座位",
                           action_order: "行动顺序", seats: "各座位"};
-function handApplyImportedFacts(issueId, body) {
-  const facts = body.facts || {};
+function handApplyFacts(facts) {
+  // The ONE place that turns a facts block into controls. Every import path -
+  // the review record AND a saved analysis record - goes through it, so the
+  // provenance/candidate handling cannot differ between the two.
   const applied = [], missing = [];
   const scalars = [
     ["hand-hero", "hero_cards", value => value.join(" ")],
@@ -609,6 +633,53 @@ function handApplyImportedFacts(issueId, body) {
   } else {
     missing.push(HAND_FACT_LABELS.history);
   }
+  return {applied, missing};
+}
+const HAND_ASSUMPTION_LABELS = {ranges: "对手范围", weights: "响应权重",
+                                targets: "加注尺寸", fees: "额外费用"};
+function handApplyAssumptions(assumptions) {
+  // The opponent model travels with the record: ranges, response weights, size
+  // grid and fee scenario are REPLACED, so nothing of the previous hand's
+  // assumptions can be inherited silently.
+  const applied = [], missing = [];
+  const rangeRows = [];
+  for (const item of assumptions.ranges || []) {
+    for (const combo of item.combos || []) {
+      rangeRows.push({seat_id: item.seat_id, combo: combo.combo,
+                      weight: combo.weight});
+    }
+  }
+  handFillRows("ranges", rangeRows, "human_confirmed", null);
+  if (rangeRows.length) applied.push(HAND_ASSUMPTION_LABELS.ranges);
+  else missing.push(HAND_ASSUMPTION_LABELS.ranges);
+  const weightRows = (assumptions.models || []).map(row => (
+    {seat_id: row.seat_id, key: row.key, weight: row.weight}));
+  handFillRows("weights", weightRows, "human_confirmed", null);
+  if (weightRows.length) applied.push(HAND_ASSUMPTION_LABELS.weights);
+  else missing.push(HAND_ASSUMPTION_LABELS.weights);
+  const targets = assumptions.aggression_targets || [];
+  el("hand-targets").value = targets.join(",");
+  if (targets.length) applied.push(HAND_ASSUMPTION_LABELS.targets);
+  else missing.push(HAND_ASSUMPTION_LABELS.targets);
+  if (assumptions.max_aggressions !== undefined
+      && assumptions.max_aggressions !== null) {
+    el("hand-max-agg").value = String(assumptions.max_aggressions);
+  }
+  const fees = assumptions.other_fees || {};
+  const feeValue = fees.value === null || fees.value === undefined
+    ? "" : String(fees.value).trim();
+  if (feeValue === "") {
+    el("hand-fees").value = "unknown";
+    missing.push(HAND_ASSUMPTION_LABELS.fees);
+  } else {
+    el("hand-fees").value = fees.provenance === "assumed"
+      ? "assumed_zero" : "confirmed_zero";
+    applied.push(HAND_ASSUMPTION_LABELS.fees);
+  }
+  return {applied, missing};
+}
+function handApplyImportedFacts(issueId, body) {
+  const {applied, missing} = handApplyFacts(body.facts || {});
   handSource = {...handSource, kind: "saved_observed_snapshot", issue_id: issueId,
                 saved_at: (body.source && body.source.saved_at) || handSource.saved_at,
                 preview_sha256: (body.source && body.source.preview_sha256) || null,
@@ -626,6 +697,55 @@ function handApplyImportedFacts(issueId, body) {
   handFeedback(`已带入 ${applied.length} 项有证据的字段（来源标记为候选）；`
                + "带入不等于已核对：请补齐未知项、勾选「本手已结束」并选择费用状态，"
                + "再点「核对输入」。", false);
+}
+function handLoadRecordScenario(recordId, body, mode, reviewIssueId) {
+  // The records panel calls this AFTER handResetForSource, so the previous hand's
+  // fields, assumptions, receipt and result are already gone. The analysis-record
+  // id is kept in its OWN field and is never passed off as an observed-review id;
+  // the original review link, when the record had one, is carried over.
+  const saved = mode === "saved";
+  const {missing: factGaps} = handApplyFacts(body.facts || {});
+  const {applied: assumptionApplied, missing: assumptionGaps} =
+    handApplyAssumptions(body.assumptions || {});
+  const ended = (body.facts || {}).ended_hand_confirmed;
+  el("hand-ended").checked = !!(ended && ended.value === true);
+  el("hand-no-history").checked = false;
+  handSource = {...handSource,
+                kind: saved ? "analysis_record_saved_rules"
+                            : "analysis_record_current_rules",
+                issue_id: reviewIssueId ?? null,
+                analysis_record_id: recordId,
+                parent_analysis_record_id: recordId,
+                saved_at: body.saved_at ?? null,
+                preview_sha256: null, source_frame: null,
+                scope: "MANUAL_HYPOTHESIS_OFFLINE_NOT_LIVE_ADVICE",
+                revised_by_human: false};
+  handScenario = saved
+    ? {record_id: recordId, rules: body.effective_rules,
+       revision: body.saved_rules_revision} : null;
+  el("hand-use-rules").checked = !saved;
+  const gaps = [...factGaps.map(name => `${name}：这条记录里没有可用值，需要人工录入/确认`),
+                ...assumptionGaps.map(name =>
+                  `${name}：这条记录里没有可用假设，需要人工补齐`),
+                "记录里的原候选只作为对照；未知项不会因为重算变成确认值",
+                "重算不会改动原记录，也不会把桌规改回保存时的版本"];
+  el("hand-gaps").replaceChildren(...handList(
+    saved
+      ? `已载入记录 ${recordId} 保存时的事实、假设与规则情景（保存时修订 `
+        + `${String(body.saved_rules_revision).slice(0, 12)}）。`
+        + "确认无误后点「核对输入」，再用下方「按上述假设计算」重算；"
+        + "新结果会另存为新记录。"
+      : `已载入记录 ${recordId} 保存时的事实与假设（不含它当时的桌规）。`
+        + "请点「核对输入」，这会用「本桌规则」当前版本重新核对成新的输入，"
+        + "再计算；新结果会另存为新记录。",
+    gaps, "blockers"));
+  handStatus("待重新核对");
+  handFeedback(saved
+    ? `已载入记录 ${recordId} 的保存条件（${assumptionApplied.length} 组假设有值）：`
+      + "请核对后再计算；重算只产生新记录，原记录保持原样。"
+    : `已载入记录 ${recordId} 的牌局事实与假设：`
+      + "请用当前桌规重新核对（旧核对与旧结果已作废）。", false);
+  return handScenario;
 }
 async function handImportRecord() {
   const record = typeof selectedReview !== "undefined" ? selectedReview : null;

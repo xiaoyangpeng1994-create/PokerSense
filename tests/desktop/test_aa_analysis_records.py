@@ -170,7 +170,7 @@ def test_a_completed_job_is_frozen_and_re_derived_on_reopen(store):
     assert view["rules"]["rules_revision"] == "r1"
     assert view["strategy_eligible"] is False and view["advice_emitted"] is False
     assert isinstance(view["history"], list) and len(view["history"]) == 2
-    assert view["rubric"] == "synthetic_input_labelled"
+    assert view["rubric"] == module.SOURCE_KIND_MANUAL
     # Reopening is a fresh read, and it really re-derives from disk.
     again = store.store.get(envelope["record_id"])
     assert again["view"] == view
@@ -418,3 +418,165 @@ def test_a_refused_record_cannot_be_used_as_a_recompute_source(store):
                 decimal="0.001"))
     with pytest.raises(module.AnalysisRecordError, match="自洽校验"):
         store.store.scenario(envelope["record_id"])
+
+
+# ---------------------------------------------------------------------------
+# U2-R1 / review C: the stored CONTENT - the server result, its source link and
+# every amount - must be sealed and re-verified, not just the input hashes.
+# Every case below keeps the identity digests untouched on purpose: they are
+# exactly the edits the previous head still reported as CURRENT.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("mutate,keyword", [
+    # EV exact and decimal rewritten TOGETHER: the pair still agrees with
+    # itself, so only the sealed content can tell it is not the server result.
+    (lambda doc: doc["report"]["result"]["root_actions"][2]["ev"].update(
+        exact="999/2", decimal="499.5"), "封存"),
+    # A raised size that is not on the declared grid.
+    (lambda doc: doc["report"]["result"]["root_actions"][2]["action"].update(
+        target="999"), "动作"),
+    # A raise whose additional cost no longer matches the verified amount.
+    (lambda doc: doc["report"]["result"]["root_actions"][2].update(
+        additional_cost="999"), "追加"),
+    # The source link changed while identity.source_issue_id stayed put.
+    (lambda doc: doc["source"].update(issue_id="20260101T000000-aaaaaaaaaaaa"),
+     "来源"),
+    # The job id changed while identity.job_id stayed put.
+    (lambda doc: doc["job"].update(job_id="job-somewhere-else"), "任务"),
+    # A derived pot the frozen input cannot produce.
+    (lambda doc: doc["capacity"].update(implied_pot="999999"), "底池"),
+    # The same derived numbers live in three blocks; one block moving is a
+    # disagreement between the sealed blocks themselves.
+    (lambda doc: doc["support"].update(to_call="999"), "应付"),
+    (lambda doc: doc["amounts"].update(current_bet="999"), "最高下注"),
+    (lambda doc: doc["support"]["root_actions"][2].update(additional_chips="999"),
+     "动作"),
+    (lambda doc: doc["report"]["result"]["root_actions"][2]["action"].update(
+        actor=3), "行动者"),
+])
+def test_a_rewritten_content_field_is_refused(store, mutate, keyword):
+    document = document_for()
+    store.analysis.complete(document)
+    envelope = store.save()
+    assert envelope["display_permitted"] is True
+    _tamper(store, envelope["record_id"], mutate)
+    reopened = store.store.get(envelope["record_id"])
+    assert reopened["display_permitted"] is False
+    assert reopened["view"] is None
+    assert reopened["status"] == module.INVALID
+    assert any(keyword in note for note in reopened["notes"]), reopened["notes"]
+
+
+def test_a_record_id_that_does_not_match_its_directory_is_refused(store):
+    """The folder names the record; the file must not rename itself."""
+    document = document_for()
+    store.analysis.complete(document)
+    envelope = store.save()
+    other = "20260101T000000-abcdefabcdef"
+    _tamper(store, envelope["record_id"],
+            lambda doc: doc.update(record_id=other))
+    reopened = store.store.get(envelope["record_id"])
+    assert reopened["display_permitted"] is False
+    assert reopened["view"] is None
+    assert reopened["record_id"] == envelope["record_id"]
+    assert any("编号" in note or "目录" in note for note in reopened["notes"])
+
+
+def test_every_read_path_runs_the_same_verification(store):
+    """get / recent / scenario / the idempotent lookup all agree."""
+    document = document_for()
+    store.analysis.complete(document, job_id="job-a")
+    first = store.save(job_id="job-a", source={"issue_id": None})
+    store.analysis.complete(document, job_id="job-b")
+    second = store.save(job_id="job-b", source={"issue_id": None})
+    _tamper(store, first["record_id"],
+            lambda doc: doc["capacity"].update(implied_pot="999999"))
+
+    opened = store.store.get(first["record_id"])
+    assert opened["display_permitted"] is False
+    rows = {row["record_id"]: row for row in store.store.recent()}
+    assert rows[first["record_id"]]["display_permitted"] is False
+    assert rows[first["record_id"]]["status"] == module.INVALID
+    # A broken record must not take its neighbours down with it.
+    assert rows[second["record_id"]]["display_permitted"] is True
+    assert rows[second["record_id"]]["status"] == module.OK
+    with pytest.raises(module.AnalysisRecordError):
+        store.store.scenario(first["record_id"])
+    # Re-saving the same job must never hand back the broken file as an
+    # already-saved duplicate; the lookup runs the same check as a read.
+    with pytest.raises(module.AnalysisRecordError):
+        store.save(job_id="job-a", source={"issue_id": None})
+    assert len([path for path in store.store.directory.iterdir()
+                if path.is_dir()]) == 2
+
+
+def test_a_legacy_record_is_not_silently_accepted(store):
+    """An older file without the content seal is named, not silently approved."""
+    document = document_for()
+    store.analysis.complete(document)
+    envelope = store.save()
+    _tamper(store, envelope["record_id"],
+            lambda doc: doc.pop("content_seal", None))
+    reopened = store.store.get(envelope["record_id"])
+    assert reopened["display_permitted"] is False
+    assert reopened["view"] is None
+    assert reopened["status"] == module.UNVERIFIED_FORMAT
+    assert any("旧格式" in note or "封存" in note for note in reopened["notes"])
+    path = store.store.directory / envelope["record_id"] / "record.json"
+    assert "content_seal" not in path.read_text(encoding="utf-8")
+    with pytest.raises(module.AnalysisRecordError):
+        store.store.scenario(envelope["record_id"])
+
+
+def test_the_saved_content_is_sealed_with_an_explicit_schema(store):
+    document = document_for()
+    store.analysis.complete(document)
+    envelope = store.save()
+    path = store.store.directory / envelope["record_id"] / "record.json"
+    stored = json.loads(path.read_text(encoding="utf-8"))
+    seal = stored["content_seal"]
+    assert seal["schema"] == module.CONTENT_SEAL_SCHEMA
+    assert module.HEX64.fullmatch(seal["sha256"])
+    # The seal covers the whole frozen content, so any field is inside it.
+    assert seal["sha256"] == module.digest(
+        {key: value for key, value in stored.items() if key != "content_seal"})
+
+
+def test_the_source_kind_is_explicit_and_defaults_to_unverified(store):
+    """No evidence means a manual unverified input, never a claimed real hand."""
+    document = document_for()
+    store.analysis.complete(document, job_id="job-plain")
+    plain = store.save(job_id="job-plain", source=None)
+    assert plain["view"]["rubric"] == module.SOURCE_KIND_MANUAL
+    assert plain["view"]["source_kind"] == module.SOURCE_KIND_MANUAL
+
+    store.analysis.complete(document, job_id="job-linked")
+    linked = store.save(job_id="job-linked", source={"issue_id": "issue-7"})
+    assert linked["view"]["source_kind"] == module.SOURCE_KIND_LINKED
+
+    store.analysis.complete(document, job_id="job-child")
+    child = store.save(job_id="job-child", source={
+        "issue_id": "issue-7", "parent_analysis_record_id": plain["record_id"]})
+    assert child["view"]["source_kind"] == module.SOURCE_KIND_RECOMPUTED
+    assert child["view"]["source"]["parent_analysis_record_id"] == (
+        plain["record_id"])
+
+
+def test_the_view_makes_the_assumptions_and_rule_values_readable(store):
+    """The detail must show what was assumed, not only revision digests."""
+    document = document_for()
+    store.analysis.complete(document)
+    envelope = store.save()
+    view = envelope["view"]
+    assert view["rubric"] and view["rubric"] != "linked_to_review_record"
+    ranges = {item["seat_id"]: item["combos"]
+              for item in view["assumptions"]["ranges"]}
+    assert ranges[1][0] == {"combo": "JhJd", "weight": "1"}
+    models = {(row["seat_id"], row["key"]): row["weight"]
+              for row in view["assumptions"]["models"]}
+    assert models[(1, "bet")] == "2"
+    assert view["assumptions"]["aggression_targets"] == ["20", "40", "80"]
+    assert view["rules"]["effective_rules"]["rake_percent"] == "0"
+    assert view["rules"]["rules_source"] in ("document", "table")
+    assert view["facts"]["hero_cards"]["value"] == ["Qs", "Qd"]

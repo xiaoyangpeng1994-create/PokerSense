@@ -1,9 +1,8 @@
-"""U2 end-to-end: compute this input -> save -> restart the service -> reopen.
+"""U2-R1 end-to-end: compute -> save -> reopen -> recompute BOTH ways -> save a
+new result each time -> restart the service -> reopen everything again.
 
-Two real server processes share one records directory, so the restart is a real
-restart rather than a re-request: phase one computes and saves, the process is
-stopped, a new process starts on the same directory, and phase two reopens both
-records and compares the numbers.
+Three real server processes share one records directory, so every restart is a
+real restart rather than a re-request.
 """
 
 import json
@@ -22,6 +21,83 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 FLOW_SERVER = REPO_ROOT / "tests" / "js" / "analysis_flow_server.py"
 HARNESS = REPO_ROOT / "tests" / "js" / "hand_records_flow_test.mjs"
 NODE = shutil.which("node")
+
+PHASE_ONE = (
+    "the_page_scripts_are_loaded",
+    "the_table_rules_are_saved_through_controls",
+    "input_one_completes_on_the_real_kernel",
+    "the_receipt_keeps_the_facts_this_analysis_used",
+    "saving_the_current_analysis_creates_one_record",
+    "the_saved_record_shows_this_input_not_a_fixed_sample",
+    "the_saved_record_labels_its_source_kind",
+    "the_saved_record_states_the_sample_type_in_words",
+    "the_saved_record_shows_the_assumptions_and_the_rule_values",
+    "input_two_completes_on_the_real_kernel",
+    "the_second_analysis_is_a_second_record",
+    "the_second_record_has_the_second_hand_numbers",
+    "the_two_records_have_different_facts_AND_different_assumptions",
+    "a_repeated_save_does_not_create_a_second_record",
+    "a_third_analysis_computes_for_the_stale_case",
+    "changing_the_input_makes_the_old_job_unsavable",
+    "the_fourth_analysis_computes_before_the_rules_change",
+    "the_rules_really_changed",
+    "changing_the_rules_does_not_touch_the_existing_records",
+    "an_older_rules_record_is_still_viewable_as_history",
+    "the_historical_record_says_it_is_not_a_current_recomputation",
+    # A / P1: the recompute must go back through the verified, invalidating flow.
+    "the_recompute_starts_from_an_existing_receipt",
+    "recompute_with_current_rules_voids_the_old_receipt_and_result",
+    "recompute_with_current_rules_loads_A_facts_not_the_previous_hand",
+    "recompute_with_current_rules_loads_A_own_opponent_assumptions",
+    "recompute_with_current_rules_is_not_wired_to_an_analysis_record_id",
+    "recompute_with_current_rules_does_not_change_the_table_rules",
+    "the_current_rules_recompute_completes_on_the_real_kernel",
+    "the_current_rules_recompute_saves_as_a_NEW_record",
+    "the_new_current_rules_record_names_its_parent_and_its_own_rules",
+    "the_original_A_record_is_unchanged_by_the_recompute",
+    # B / P1: request identity, out-of-order, forged and failed responses.
+    "an_out_of_order_open_paints_only_the_current_selection",
+    "a_response_for_another_record_is_refused_without_numbers",
+    "no_recompute_button_survives_a_refused_open",
+    "a_failed_open_leaves_no_numbers_and_no_recompute",
+    "a_late_recompute_answer_does_not_touch_a_form_cleared_while_it_flew",
+    "a_late_list_refresh_does_not_steal_the_selection",
+    # C / P1: the stored content is sealed and re-verified on every read path.
+    "every_rewritten_content_field_is_refused_on_every_read_path",
+    "a_refused_record_is_never_deleted_or_rewritten",
+    "a_legacy_record_without_a_content_seal_is_not_silently_accepted",
+    "restoring_the_original_file_makes_it_readable_again",
+    "an_edited_display_value_is_reported_as_invalid",
+    "the_ui_refuses_to_show_numbers_for_a_broken_record",
+    "no_innerhtml_used",
+)
+PHASE_TWO = (
+    "run2_record_1_reopens_with_the_same_numbers",
+    "run2_record_2_reopens_with_the_same_numbers",
+    "run2_record_3_reopens_with_the_same_numbers",
+    "run2_the_parent_record_is_readable_before_the_saved_conditions_run",
+    "run2_a_fresh_page_starts_without_a_receipt",
+    "run2_saved_conditions_recompute_loads_the_frozen_facts_and_assumptions",
+    "run2_saved_conditions_recompute_did_not_touch_the_global_rules",
+    "run2_the_saved_conditions_input_reverifies_and_computes_on_the_kernel",
+    "run2_the_saved_conditions_result_saves_as_a_NEW_record",
+    "run2_the_child_record_names_its_parent_and_keeps_the_review_link",
+    "run2_the_child_used_the_PARENT_rules_not_the_current_ones",
+    "run2_the_parent_record_is_untouched_by_the_recompute",
+    "run2_the_saved_conditions_recompute_did_not_change_the_table_rules",
+    "run2_the_new_record_reopens_with_its_own_numbers",
+)
+PHASE_THREE = (
+    "run3_record_1_reopens_with_the_same_numbers",
+    "run3_record_2_reopens_with_the_same_numbers",
+    "run3_record_3_reopens_with_the_same_numbers",
+    "run3_record_4_reopens_with_the_same_numbers",
+    "run3_every_record_survived_the_second_restart",
+    "run3_every_record_still_passes_its_self_check",
+    "run3_each_record_keeps_its_identity_and_numbers",
+    "run3_both_recomputed_records_are_readable_as_themselves",
+    "run3_nothing_was_recomputed_on_any_reopen",
+)
 
 
 def free_port():
@@ -73,73 +149,58 @@ def run_phase(server, phase, handoff):
     proc = subprocess.run(
         [NODE, str(HARNESS), server.base, phase, str(handoff)],
         cwd=str(REPO_ROOT), capture_output=True, text=True, encoding="utf-8",
-        errors="replace", timeout=600, env=env)
+        errors="replace", timeout=900, env=env)
     checks = [json.loads(line) for line in proc.stdout.splitlines()
               if line.strip().startswith("{")]
     failures = [item for item in checks if not item.get("ok")]
     assert proc.returncode == 0, (
-        f"{phase} failed checks: {failures}\nstderr: {proc.stderr[-2500:]}")
+        f"{phase} failed checks: {failures}\n"
+        f"stdout tail:\n{proc.stdout[-3000:]}\nstderr: {proc.stderr[-2500:]}")
     return checks
 
 
+def require(checks, names, phase):
+    present = {item["name"] for item in checks}
+    for required in names:
+        assert required in present, f"missing {phase} check: {required}"
+
+
 @pytest.mark.skipif(NODE is None, reason="node is unavailable")
-def test_a_saved_analysis_survives_a_real_service_restart(tmp_path):
+def test_both_recomputes_save_new_records_and_survive_two_real_restarts(tmp_path):
     handoff = tmp_path / "handoff.json"
     work = tmp_path / "run"
     first = RunningServer(work)
     try:
         checks = run_phase(first, "run1", handoff)
-        names = {item["name"] for item in checks}
-        for required in (
-                "the_page_scripts_are_loaded",
-                "the_table_rules_are_saved_through_controls",
-                "input_one_completes_on_the_real_kernel",
-                "the_receipt_keeps_the_facts_this_analysis_used",
-                "saving_the_current_analysis_creates_one_record",
-                "the_saved_record_shows_this_input_not_a_fixed_sample",
-                "the_saved_record_labels_its_source_kind",
-                "input_two_completes_on_the_real_kernel",
-                "the_second_analysis_is_a_second_record",
-                "the_second_record_has_the_second_hand_numbers",
-                "the_two_records_are_not_the_same_result",
-                "a_repeated_save_does_not_create_a_second_record",
-                "a_third_analysis_computes_for_the_stale_case",
-                "changing_the_input_makes_the_old_job_unsavable",
-                "the_fourth_analysis_computes_before_the_rules_change",
-                "the_rules_really_changed",
-                "changing_the_rules_does_not_touch_the_existing_records",
-                "an_older_rules_record_is_still_viewable_as_history",
-                "the_historical_record_says_it_is_not_a_current_recomputation",
-                "recompute_under_saved_conditions_loads_the_saved_rules",
-                "recompute_under_saved_conditions_does_not_change_the_table_rules",
-                "recompute_with_current_rules_loads_the_facts_and_asks_for_a_recheck",
-                "an_edited_display_value_is_reported_as_invalid",
-                "the_ui_refuses_to_show_numbers_for_a_broken_record",
-                "restoring_the_original_value_makes_it_readable_again"):
-            assert required in names, f"missing phase-1 check: {required}"
+        require(checks, PHASE_ONE, "phase-1")
         assert handoff.is_file(), "phase one did not hand off its record ids"
     finally:
         first.stop()
     # The service really is gone before the second one starts.
+    import urllib.request
     with pytest.raises(OSError):
-        import urllib.request
         urllib.request.urlopen(first.base + "/api/rules", timeout=3).read()
     handoff_data = json.loads(handoff.read_text(encoding="utf-8"))
-    assert len(handoff_data["ids"]) == 2
+    assert len(handoff_data["ids"]) == 3, handoff_data["ids"]
+    assert len(handoff_data["views"]) == 3
 
     second = RunningServer(work)
     try:
         checks = run_phase(second, "run2", handoff)
-        names = {item["name"] for item in checks}
-        for required in (
-                "run2_the_records_survive_the_restart",
-                "run2_every_record_still_passes_its_self_check",
-                "run2_record_1_reopens_with_the_same_numbers",
-                "run2_record_2_reopens_with_the_same_numbers",
-                "run2_reopen_did_not_run_the_kernel"):
-            assert required in names, f"missing phase-2 check: {required}"
+        require(checks, PHASE_TWO, "phase-2")
     finally:
         second.stop()
+    with pytest.raises(OSError):
+        urllib.request.urlopen(second.base + "/api/rules", timeout=3).read()
+    handoff_data = json.loads(handoff.read_text(encoding="utf-8"))
+    assert len(handoff_data["ids"]) == 4, handoff_data["ids"]
+
+    third = RunningServer(work)
+    try:
+        checks = run_phase(third, "run3", handoff)
+        require(checks, PHASE_THREE, "phase-3")
+    finally:
+        third.stop()
 
 
 def test_the_page_serves_the_records_panel():
