@@ -39,7 +39,10 @@ PROTOCOL = os.path.join(REPO_ROOT, "configs", "strategy", "examples",
                         "threeway-validation-protocol-v1.json")
 TOOL = os.path.join(REPO_ROOT, "tools", "validate_threeway_models.py")
 
+
 @pytest.fixture(scope="module")
+
+
 def report(tmp_path_factory):
     """Run the real tool once and return its report."""
     # the tool refuses to write into an existing directory
@@ -60,7 +63,6 @@ def report(tmp_path_factory):
 def _is_negative(encoded) -> bool:
     """Strictly negative, evaluated on the exact Fraction string."""
     return Fraction(encoded["exact"]) < 0
-
 
 
 def _scenario(key_record) -> tuple:
