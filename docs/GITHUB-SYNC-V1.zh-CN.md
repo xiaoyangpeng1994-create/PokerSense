@@ -1,5 +1,7 @@
 # 标准 Git 同步：诊断结论与可复用入口（GITHUB-001）
 
+> 第二轮（审查 GITHUB-001-R1 后）已按 P1-A/B/C/D 与三项对齐要求返工；变更见文末「第二轮返工」。
+
 本文件说明 **PokerSense 在 Windows 本机上让标准 `git push` 可用**所需的配置、根因证据和使用方式。
 它记录的是已验证事实，不是方案设想。
 
@@ -62,7 +64,19 @@ $PYTHON tools/git_sync.py --repo $REPO --branch $BRANCH --pr $PR verify
   这是**命令进度**，不是「研究有进展」的心跳。
 - **无管道死锁**：stdout/stderr 由独立 reader 线程排空。
 - **拒绝假成功**：三方 SHA 不全等即视为未通过；空值不算相等。
-- **幂等发布**：`publish()` 只在树变化时才有提交；同分支已存在 PR 则复用，不重复开 PR。
+- **幂等发布**：`publish()` **不创建 commit**（提交由调用者负责）；同分支已存在且兼容的 PR 则复用，
+  否则报错；创建/复用后一定**重新读取并校验** head/base/state，不靠返回值假定成功。
+
+### 第二轮返工（审查 GITHUB-001-R1）
+
+| 项 | 变更 |
+| --- | --- |
+| P1-A 进程组归属 | POSIX 用 `start_new_session=True` 让每条命令自成一会话/进程组，只对该组发信号；Windows 用有界 `taskkill /T` 并核对是否真的退出。kill 失败会**如实上报**（`kill_ok=false`、`survivors`）。期限用单调时钟；非有限/非正 timeout 直接拒绝。 |
+| P1-B 仓库绑定 | 每个 git 调用带 `-C <已解析 repo>`，gh 调用带 `cwd=<repo>`；**任何远端写入之前**校验远端 slug、目标 ref 前缀（`refs/heads/codex/`）与待推 SHA，不通过则 `blocked_before_write`。 |
+| P1-C 单一执行路径 | `ls-remote`、`pr view`、`pr list`、`pr create` 全部走 `run()`，因此都受同一超时、同一凭据修复、同一进度轨迹约束。 |
+| P1-D 判定诚实 | GIT_SYNC 与 PR_SYNC 分级；API 失败即报错；PR 复用需 OPEN+Draft+base 匹配+head 实测一致。 |
+| 对齐 1 | 不再硬编码本机代理：`--proxy` / `$POKERSENSE_GIT_PROXY`，否则继承环境。 |
+| 对齐 2 | 本文件按 `publish()` 真实职责改写。 |
 
 ### 它不做（硬边界）
 
