@@ -21,6 +21,7 @@ from .aa_issues import save_issue
 from .aa_analysis import AAConditionalAnalysis
 from .aa_review import AAReviewDesk, ReviewError
 from .aa_saved_strategy import SavedStrategyInputs
+from .aa_study_records import AAStudyRecordStore, StudyRecordError
 from poker_engine.strategy.river_bounds_v1 import river_payoff_bounds
 
 
@@ -33,7 +34,7 @@ def ui_root():
 def create_app(profile_path, *, replay_pool=None, replay_first=None,
                replay_last=None, replay_playlist=None, allow_capture=False,
                session=None, rules_path=None, records_dir=None, bundle_sha256=None,
-               analysis_service=None, review_service=None):
+               analysis_service=None, review_service=None, study_service=None):
     profile_path = Path(profile_path)
     service = session or AARecognitionSession(
         source_factory(profile_path, replay_pool=replay_pool,
@@ -46,6 +47,7 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     rules = AATableConfigStore(rules_path)
     analysis = analysis_service or AAConditionalAnalysis()
     review = review_service or AAReviewDesk(records_dir)
+    study = study_service or AAStudyRecordStore(records_dir)
     saved_strategy = SavedStrategyInputs(profile_path, bundle_sha256)
     controls_lock = threading.RLock()
     profile_status = (preflight_profile(profile_path, bundle_sha256=bundle_sha256)
@@ -57,6 +59,7 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
         service.stop()
         analysis.cancel()
         review.close()
+        study.close()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None,
                   lifespan=lifespan)
@@ -106,6 +109,39 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     @app.get("/review.js")
     def review_script():
         return FileResponse(ui_root() / "review.js", media_type="text/javascript")
+
+    @app.get("/study.js")
+    def study_script_view():
+        return FileResponse(ui_root() / "study.js", media_type="text/javascript")
+
+    def study_call(function, *args):
+        try:
+            return function(*args)
+        except StudyRecordError as exc:
+            raise HTTPException(400, str(exc)) from None
+        except (ValueError, TypeError, OSError, KeyError):
+            raise HTTPException(400, "研究记录未完成，请检查示例来源与记录目录") from None
+
+    @app.get("/api/study/examples")
+    def study_examples():
+        return study_call(study.examples_view)
+
+    @app.get("/api/study/examples/{example_id}/view")
+    def study_example_view(example_id: str):
+        return study_call(study.view, example_id)
+
+    @app.get("/api/study/records")
+    def study_records():
+        return study_call(study.recent)
+
+    @app.post("/api/study/records")
+    async def save_study_record(request: Request):
+        body = await review_body(request, ("example_id",))
+        return study_call(study.save, body["example_id"])
+
+    @app.get("/api/study/records/{record_id}")
+    def study_record(record_id: str):
+        return study_call(study.get, record_id)
 
     async def review_body(request, keys):
         raw = await request.body()
