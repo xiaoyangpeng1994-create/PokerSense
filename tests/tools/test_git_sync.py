@@ -490,5 +490,32 @@ def test_publish_verifies_pr_head_after_reuse(monkeypatch, tmp_path):
     assert out["status"] == "PR_VERIFY_FAILED"
 
 
+# ------------------------------------------- R3: remote read cannot be hidden
+
+@pytest.mark.parametrize('remote_kwargs', [
+    {'ls_exit': 1},
+    {'remote_sha': SHA_B},
+])
+@pytest.mark.parametrize('action', ['verify', 'push'])
+def test_cli_remote_failure_cannot_be_hidden_by_matching_pr(
+        monkeypatch, tmp_path, capsys, remote_kwargs, action):
+    """R3 P1: local == PR must NOT be reported as three-way when the remote ref
+    could not be read, or differs from the local commit."""
+    fake = FakeGit(pr_json={
+        'number': 26, 'state': 'OPEN', 'isDraft': True,
+        'baseRefName': 'main', 'headRefName': 'codex/b',
+        'headRefOid': SHA_A, 'url': 'u',
+    }, **remote_kwargs)
+    monkeypatch.setattr(git_sync, 'run', fake)
+    rc = git_sync.main([
+        '--repo', str(tmp_path), '--branch', 'codex/b',
+        '--pr', '26', action,
+    ])
+    payload = json.loads(capsys.readouterr().out)
+    assert rc != 0
+    assert payload['git_sync_ok'] is False
+    assert payload['three_way_equal'] is not True
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))

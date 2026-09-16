@@ -492,12 +492,14 @@ def three_way_equal(a: str, b: str, c: str) -> bool:
 
 
 def check_pr_sync(ctx: Ctx, pr: int, branch: str, base: str,
-                  local_sha: str) -> dict:
+                  local_sha: str, remote_sha: str) -> dict:
     """Validate the PR at the CLI entry, not only inside publish()."""
     meta = pr_view(ctx, pr)
     if not meta.get("ok"):
         return {"pr_sync": "PR_READ_ERROR", "pr_error": meta.get("error"),
-                "pr_head_sha": None, "problems": ["PR API read failed"]}
+                "pr_head_sha": None, "pr_metadata_ok": False,
+                "three_way_equal": False,
+                "problems": ["PR API read failed"]}
     problems = []
     head = meta.get("headRefOid") or ""
     if head != local_sha:
@@ -511,9 +513,18 @@ def check_pr_sync(ctx: Ctx, pr: int, branch: str, base: str,
         problems.append("pr state %s is not OPEN" % meta.get("state"))
     if not meta.get("isDraft"):
         problems.append("pr must stay Draft")
-    if not three_way_equal(local_sha, local_sha, head):
-        problems.append("pr head is not the commit being published")
-    return {"pr_sync": "PR_SYNC_PASS" if not problems else "PR_SYNC_FAIL",
+    metadata_ok = not problems
+    # The overall verdict must use the REAL remote sha: a PR that merely
+    # matches the local commit is not evidence that the remote branch was
+    # read successfully and agrees.
+    three = three_way_equal(local_sha, remote_sha, head)
+    if not three:
+        problems.append("three-way mismatch: local=%s remote=%s pr=%s"
+                        % (local_sha or "?", remote_sha or "?", head or "?"))
+    return {"pr_sync": ("PR_SYNC_PASS" if metadata_ok and three
+                        else "PR_SYNC_FAIL"),
+            "pr_metadata_ok": metadata_ok,
+            "three_way_equal": three,
             "pr_head_sha": head or None, "pr_state": meta.get("state"),
             "pr_base": meta.get("baseRefName"),
             "pr_head_branch": meta.get("headRefName"), "problems": problems,
@@ -587,9 +598,9 @@ def do_push(ctx: Ctx, branch: str, remote: str = "origin",
         verdict["three_way_equal"] = None
         return verdict
 
-    prc = check_pr_sync(ctx, pr, branch, base, local.get("sha", ""))
+    prc = check_pr_sync(ctx, pr, branch, base,
+                        local.get("sha", ""), remote_info.get("sha", ""))
     verdict.update(prc)
-    verdict["three_way_equal"] = (prc["pr_sync"] == "PR_SYNC_PASS")
     return verdict
 
 
@@ -648,7 +659,9 @@ def publish(ctx: Ctx, branch: str, title: str, body_file: str, base: str,
                     "status": "PR_CREATE_UNPARSABLE", "raw": url[:200]}
         stage = "pr_created"
 
-    prc = check_pr_sync(ctx, number, branch, base, push.get("local_head", ""))
+    prc = check_pr_sync(ctx, number, branch, base,
+                        push.get("local_head", ""),
+                        push.get("remote_branch_sha", ""))
     if prc["pr_sync"] != "PR_SYNC_PASS":
         return {**push, **prc, "ok": False, "stage": "pr_verify",
                 "status": "PR_VERIFY_FAILED", "pr": number, "url": url}
@@ -668,20 +681,32 @@ def _print(obj) -> None:
 def _exit_code(out: dict, pr_given: bool) -> int:
     """Single success criterion for the CLI entry.
 
-    With --pr, a two-way result must never count as success; a command error or
-    timeout must never be hidden by an equal SHA.
+    Success requires: the command itself succeeded (when one ran), every required
+    read was error-free, the local and remote commits agree, and - when a PR was
+    requested - the PR metadata passed AND the three-way verdict really holds.
+    A PR that merely matches a local commit can never stand in for a remote read
+    that failed or disagreed.
     """
     if out.get("timed_out"):
         return 3
     if out.get("kill_ok") is False:
         return 3
+    if out.get("command_ok") is False:
+        return 3
+    if out.get("local_ref_error"):
+        return 3
+    if out.get("remote_read_error"):
+        return 3
+    if out.get("git_sync_ok") is not True:
+        return 3
     if pr_given:
+        if out.get("pr_error"):
+            return 3
         if out.get("pr_sync") != "PR_SYNC_PASS":
             return 3
-        return 0 if out.get("command_ok", True) else 3
-    if not out.get("git_sync_ok"):
-        return 3
-    return 0 if out.get("command_ok", True) else 3
+        if out.get("three_way_equal") is not True:
+            return 3
+    return 0
 
 
 def main(argv=None) -> int:
@@ -725,9 +750,11 @@ def main(argv=None) -> int:
             local = read_ref_sha(ctx, "refs/heads/" + args.branch)
             remote = remote_branch_sha(ctx, args.remote, args.branch)
             prc = ({"pr_sync": "PR_NOT_CHECKED", "pr_head_sha": None,
-                    "pr_error": "", "problems": []} if args.pr is None
+                    "pr_error": "", "problems": [],
+                    "three_way_equal": None} if args.pr is None
                    else check_pr_sync(ctx, args.pr, args.branch, args.base,
-                                      local.get("sha", "")))
+                                      local.get("sha", ""),
+                                      remote.get("sha", "")))
             out = {"local_head": local.get("sha", ""),
                    "local_ref_error": local.get("error", ""),
                    "source_ref": "refs/heads/" + args.branch,
@@ -736,7 +763,7 @@ def main(argv=None) -> int:
                    "git_sync_ok": git_sync_verdict(local.get("sha", ""),
                                                    remote.get("sha", "")),
                    "proxy_configured": bool(resolve_proxy(ctx.proxy)), **prc}
-            out["three_way_equal"] = (prc["pr_sync"] == "PR_SYNC_PASS"
+            out["three_way_equal"] = (prc.get("three_way_equal")
                                       if args.pr is not None else None)
     except SyncError as exc:
         _print({"ok": False, "error": str(exc)})
