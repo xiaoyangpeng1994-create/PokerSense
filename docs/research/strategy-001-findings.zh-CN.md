@@ -110,8 +110,11 @@ calibration_status=NOT_REAL_CALIBRATION
 正确表述：上述两条事实只说明**比较对象在某些世界上退化** —— `ref` 列与 `check/call` 列给出同一个数、
 未下注根上 `ref` 与选中策略无差异。这是**诊断/可读性**问题，**不改变**失败场景数 18，
 也**不证明**两套策略等价。计数语义回归见 `tests/tools/test_validate_threeway_models_counting.py`。
-即：当前筛选计数把「selected 劣于 check/call」同时记了一次「劣于 ref」。
-这不改变「存在失败」这一结论，但**改变失败规模的可解释性**，必须在下一轮修正口径后再报数。
+
+**因此不存在「先修口径才能报数」这一步**：`ref` 与 `check/call` 数值相等只是让三列读数里实际只有两个独立比较对象，
+既不加倍计数，也不改变 18 这个场景数，更不需要先修正任何统计口径（旧稿中「同时记了一次」「必须在下一轮修正口径后再报数」
+两句与同段更正、生产计数和新回归测试相互矛盾，现一并撤回）。本文件 §2 的 18 条读数按当前口径即为有效读数；
+下一步不是改口径，而是 B 阶段：用冻结策略本的可达公开历史给出**分支级**证据与精确收益对账。
 
 ---
 
@@ -134,7 +137,8 @@ D 为长期约束。事实 1/2 只影响**读数可读性**，不影响 18 这�
 
 | 模块 | 能力 | 本轮是否复用 | 结论 |
 | --- | --- | --- | --- |
-| `threeway_policy_evaluation_v1.py` | 冻结策略评价、fallback 记录、精确 Fraction EV | ✅ 实跑 | **复用**；需补比较口径 |
+| `threeway_policy_evaluation_v1.py` | 冻结策略评价、fallback 记录、精确 Fraction EV | ✅ 实跑 | **复用**；B 阶段只加**可选终局路径 trace**（`evaluate_policy_book(..., trace=True)`），未重写 solver、未改策略选择/结算/基线 |
+| `tools/threeway_path_diagnostics.py`（B 阶段新增） | 逐路径展开三套策略的终局路径、精确到达概率、条件终局 EV 与加权贡献，并做精确对账 | ✅ 实跑 | **新增工具**，只读复用同一内核；离线条件 EV，不是最优动作证明 |
 | `response_model_calibration_v1.py` | 有限候选 log loss 选择、训练/验证隔离 | ✅ 间接（选择结果 `calling_public_v1`） | **复用**；不扩大模型族 |
 | `robust_policy_selection_v1.py` | 最坏相对损失选择 | ✅ 间接 | **复用**；结论按 FAIL/INSUFFICIENT_EVIDENCE 表述 |
 | `opponent_dataset_v1.py` | 真实数据准入闸门 | 未实跑 | **保持严格**；不用不足数据拟合 |

@@ -1,0 +1,1196 @@
+{
+  "schema_version": 1,
+  "scope": "OFFLINE_FIXED_POLICY_TERMINAL_PATH_DIAGNOSIS_NOT_LIVE_ADVICE",
+  "quantity_encoding": "exact_rational_string_n_over_d",
+  "input_sha256": "fc58393e4c415a5396a887442b4dab212324716a0472726b15f650acf40b7db9",
+  "policy_book": {
+    "policy_id": "manual-policy-v1",
+    "book_sha256": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+    "planning_scenario_sha256": "3bcb069c64e60fef1f73c425041b30adb02b550c2c555a134585e93e3fee344b",
+    "planning_best_ev": "19407/242",
+    "public_conditions_sha256": "44f341495623f20702ddd0f311ba984d8c42e871e7bcc1a34eb970c6896a9d4d",
+    "decisions": [
+      {
+        "history": [
+          {
+            "actor": 1,
+            "kind": "bet",
+            "target": "20"
+          },
+          {
+            "actor": 2,
+            "kind": "call",
+            "target": "0"
+          }
+        ],
+        "action": {
+          "actor": 0,
+          "kind": "raise",
+          "target": "40"
+        }
+      }
+    ]
+  },
+  "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+  "reasons": [],
+  "evaluation": {
+    "nodes": 12,
+    "policy_hash_before": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+    "policy_hash_after": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+    "world_scenario_sha256": "22289cd9c42f01318cdc0861ff0b7414f772326f39e3e69015b33fb4f2ade978",
+    "response_family": "planning_family_parameters",
+    "history_likelihood": "5/18",
+    "root_posterior": [
+      "1/16",
+      "3/16",
+      "3/16",
+      "9/16"
+    ],
+    "metrics": [
+      {
+        "name": "frozen_policy",
+        "net_ev_chips": "19407/242",
+        "conditional_net_ev_bb": "19407/484",
+        "probability_of_any_fallback": "0",
+        "expected_fallback_count": "0",
+        "unsupported_histories": 0,
+        "nodes": 8
+      },
+      {
+        "name": "check_fold",
+        "net_ev_chips": "0",
+        "conditional_net_ev_bb": "0",
+        "probability_of_any_fallback": "0",
+        "expected_fallback_count": "0",
+        "unsupported_histories": 0,
+        "nodes": 2
+      },
+      {
+        "name": "check_call",
+        "net_ev_chips": "497/8",
+        "conditional_net_ev_bb": "497/16",
+        "probability_of_any_fallback": "0",
+        "expected_fallback_count": "0",
+        "unsupported_histories": 0,
+        "nodes": 2
+      }
+    ],
+    "delta_vs_check_fold_chips": "19407/242",
+    "delta_vs_check_call_chips": "17491/968"
+  },
+  "trace": {
+    "enabled": true,
+    "trace_node_budget": 20000,
+    "ledger_completeness": [
+      "COMPLETE_TERMINAL_PATH_LEDGER"
+    ]
+  },
+  "ledgers": [
+    {
+      "policy_name": "frozen_policy",
+      "completeness": "COMPLETE_TERMINAL_PATH_LEDGER",
+      "policy_book_sha256": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+      "world_scenario_sha256": "22289cd9c42f01318cdc0861ff0b7414f772326f39e3e69015b33fb4f2ade978",
+      "terminal_paths": 6,
+      "reachable_paths": 4,
+      "unreachable_paths": 2,
+      "reach_probability_sum": "1",
+      "contribution_sum_chips": "19407/242",
+      "contribution_sum_bb": "19407/484",
+      "fallback_reach_sum": "0",
+      "nodes_visited": 10,
+      "trace_node_budget": 20000,
+      "qualification": [
+        "terminal_paths_are_mutually_exclusive_and_exhaustive_under_one_policy",
+        "reach_probability_is_exact_under_the_declared_world_not_an_estimate",
+        "conditional_terminal_EV_is_undefined_for_an_unreachable_path",
+        "weighted_contributions_sum_to_the_policy_conditional_net_EV_chips",
+        "only_terminal_paths_are_summed_so_ancestors_are_never_added_again",
+        "offline_conditional_expectation_only_no_best_action_or_profitability_claim"
+      ],
+      "paths": [
+        {
+          "history_key": "1:bet:20|2:call|0:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "REACHED",
+          "fallback_used": false,
+          "reach_probability": "100/121",
+          "conditional_terminal_net_ev_chips": "607/8",
+          "contribution_chips": "15175/242"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "REACHED",
+          "fallback_used": false,
+          "reach_probability": "10/121",
+          "conditional_terminal_net_ev_chips": "199/2",
+          "contribution_chips": "995/121"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "REACHED",
+          "fallback_used": false,
+          "reach_probability": "10/121",
+          "conditional_terminal_net_ev_chips": "199/2",
+          "contribution_chips": "995/121"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "REACHED",
+          "fallback_used": false,
+          "reach_probability": "1/121",
+          "conditional_terminal_net_ev_chips": "126",
+          "contribution_chips": "126/121"
+        }
+      ]
+    },
+    {
+      "policy_name": "check_fold",
+      "completeness": "COMPLETE_TERMINAL_PATH_LEDGER",
+      "policy_book_sha256": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+      "world_scenario_sha256": "22289cd9c42f01318cdc0861ff0b7414f772326f39e3e69015b33fb4f2ade978",
+      "terminal_paths": 6,
+      "reachable_paths": 1,
+      "unreachable_paths": 5,
+      "reach_probability_sum": "1",
+      "contribution_sum_chips": "0",
+      "contribution_sum_bb": "0",
+      "fallback_reach_sum": "0",
+      "nodes_visited": 10,
+      "trace_node_budget": 20000,
+      "qualification": [
+        "terminal_paths_are_mutually_exclusive_and_exhaustive_under_one_policy",
+        "reach_probability_is_exact_under_the_declared_world_not_an_estimate",
+        "conditional_terminal_EV_is_undefined_for_an_unreachable_path",
+        "weighted_contributions_sum_to_the_policy_conditional_net_EV_chips",
+        "only_terminal_paths_are_summed_so_ancestors_are_never_added_again",
+        "offline_conditional_expectation_only_no_best_action_or_profitability_claim"
+      ],
+      "paths": [
+        {
+          "history_key": "1:bet:20|2:call|0:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "REACHED",
+          "fallback_used": false,
+          "reach_probability": "1",
+          "conditional_terminal_net_ev_chips": "0",
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        }
+      ]
+    },
+    {
+      "policy_name": "check_call",
+      "completeness": "COMPLETE_TERMINAL_PATH_LEDGER",
+      "policy_book_sha256": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+      "world_scenario_sha256": "22289cd9c42f01318cdc0861ff0b7414f772326f39e3e69015b33fb4f2ade978",
+      "terminal_paths": 6,
+      "reachable_paths": 1,
+      "unreachable_paths": 5,
+      "reach_probability_sum": "1",
+      "contribution_sum_chips": "497/8",
+      "contribution_sum_bb": "497/16",
+      "fallback_reach_sum": "0",
+      "nodes_visited": 10,
+      "trace_node_budget": 20000,
+      "qualification": [
+        "terminal_paths_are_mutually_exclusive_and_exhaustive_under_one_policy",
+        "reach_probability_is_exact_under_the_declared_world_not_an_estimate",
+        "conditional_terminal_EV_is_undefined_for_an_unreachable_path",
+        "weighted_contributions_sum_to_the_policy_conditional_net_EV_chips",
+        "only_terminal_paths_are_summed_so_ancestors_are_never_added_again",
+        "offline_conditional_expectation_only_no_best_action_or_profitability_claim"
+      ],
+      "paths": [
+        {
+          "history_key": "1:bet:20|2:call|0:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "REACHED",
+          "fallback_used": false,
+          "reach_probability": "1",
+          "conditional_terminal_net_ev_chips": "497/8",
+          "contribution_chips": "497/8"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "status": "UNREACHABLE",
+          "fallback_used": false,
+          "reach_probability": "0",
+          "conditional_terminal_net_ev_chips": null,
+          "contribution_chips": "0"
+        }
+      ]
+    }
+  ],
+  "reconciliations": [
+    {
+      "left_policy": "frozen_policy",
+      "right_policy": "check_fold",
+      "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+      "policy_book_sha256": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+      "world_scenario_sha256": "22289cd9c42f01318cdc0861ff0b7414f772326f39e3e69015b33fb4f2ade978",
+      "total_ev_difference_chips": "19407/242",
+      "contribution_difference_sum_chips": "19407/242",
+      "reach_status_counts": {
+        "REACHED_BY_BOTH": 0,
+        "REACHED_BY_LEFT_ONLY": 4,
+        "REACHED_BY_RIGHT_ONLY": 1,
+        "UNREACHABLE_BY_BOTH": 1
+      },
+      "rows": [
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "100/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "15175/242",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "15175/242",
+          "conditional_terminal_net_ev_chips_left": "607/8",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "10/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "995/121",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "995/121",
+          "conditional_terminal_net_ev_chips_left": "199/2",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "10/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "995/121",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "995/121",
+          "conditional_terminal_net_ev_chips_left": "199/2",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "1/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "126/121",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "126/121",
+          "conditional_terminal_net_ev_chips_left": "126",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "reach_status": "UNREACHABLE_BY_BOTH",
+          "reach_probability_left": "0",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "0",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "0",
+          "conditional_terminal_net_ev_chips_left": null,
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_RIGHT_ONLY",
+          "reach_probability_left": "0",
+          "reach_probability_right": "1",
+          "contribution_chips_left": "0",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "0",
+          "conditional_terminal_net_ev_chips_left": null,
+          "conditional_terminal_net_ev_chips_right": "0"
+        }
+      ]
+    },
+    {
+      "left_policy": "frozen_policy",
+      "right_policy": "check_call",
+      "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+      "policy_book_sha256": "49ad196cc9d38a405d11d9ad8f698fbc19070aa4e78d335dc1d9c06d3774fc24",
+      "world_scenario_sha256": "22289cd9c42f01318cdc0861ff0b7414f772326f39e3e69015b33fb4f2ade978",
+      "total_ev_difference_chips": "17491/968",
+      "contribution_difference_sum_chips": "17491/968",
+      "reach_status_counts": {
+        "REACHED_BY_BOTH": 0,
+        "REACHED_BY_LEFT_ONLY": 4,
+        "REACHED_BY_RIGHT_ONLY": 1,
+        "UNREACHABLE_BY_BOTH": 1
+      },
+      "rows": [
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "100/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "15175/242",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "15175/242",
+          "conditional_terminal_net_ev_chips_left": "607/8",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "10/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "995/121",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "995/121",
+          "conditional_terminal_net_ev_chips_left": "199/2",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "10/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "995/121",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "995/121",
+          "conditional_terminal_net_ev_chips_left": "199/2",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "raise",
+              "target": "40"
+            },
+            {
+              "actor": 1,
+              "kind": "fold",
+              "target": "0"
+            },
+            {
+              "actor": 2,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_LEFT_ONLY",
+          "reach_probability_left": "1/121",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "126/121",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "126/121",
+          "conditional_terminal_net_ev_chips_left": "126",
+          "conditional_terminal_net_ev_chips_right": null
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:call",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "call",
+              "target": "0"
+            }
+          ],
+          "reach_status": "REACHED_BY_RIGHT_ONLY",
+          "reach_probability_left": "0",
+          "reach_probability_right": "1",
+          "contribution_chips_left": "0",
+          "contribution_chips_right": "497/8",
+          "contribution_chips_difference": "-497/8",
+          "conditional_terminal_net_ev_chips_left": null,
+          "conditional_terminal_net_ev_chips_right": "497/8"
+        },
+        {
+          "history_key": "1:bet:20|2:call|0:fold",
+          "history": [
+            {
+              "actor": 1,
+              "kind": "bet",
+              "target": "20"
+            },
+            {
+              "actor": 2,
+              "kind": "call",
+              "target": "0"
+            },
+            {
+              "actor": 0,
+              "kind": "fold",
+              "target": "0"
+            }
+          ],
+          "reach_status": "UNREACHABLE_BY_BOTH",
+          "reach_probability_left": "0",
+          "reach_probability_right": "0",
+          "contribution_chips_left": "0",
+          "contribution_chips_right": "0",
+          "contribution_chips_difference": "0",
+          "conditional_terminal_net_ev_chips_left": null,
+          "conditional_terminal_net_ev_chips_right": null
+        }
+      ]
+    }
+  ],
+  "qualification": [
+    "fixed_policies_are_frozen_before_the_world_is_evaluated",
+    "the_evaluated_world_never_calls_an_optimizing_entry_point",
+    "manual_synthetic_world_not_observed_ranges_or_calibrated_models",
+    "conditional_river_chips_not_bb_per_100_and_no_confidence_interval",
+    "strategy_eligible_and_advice_emitted_are_false_by_construction"
+  ],
+  "strategy_eligible": false,
+  "advice_emitted": false
+}

@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "mode": "manual_hypothesis",
+  "range_start": "river_start",
+  "range_assumptions": "Synthetic path-diagnosis sample: the river-start ranges of the committed manual example, with no observed AA hand and no live session behind them. Public history is conditioned exactly once.",
+  "model_assumptions": "Synthetic uniform response weights (call-heavy) declared for this path-diagnosis sample only. The bounded action grid is deliberately small so the complete terminal path set stays auditable. This world is NOT one of the declared stress-screen worlds or candidates, adds no response-model family, and is not a calibrated or empirical estimate.",
+  "rules": {
+    "schema_version": 2,
+    "table_size": 6,
+    "small_blind": "1",
+    "big_blind": "2",
+    "ante": "0",
+    "ante_mode": "none",
+    "straddle_mode": "none",
+    "straddle_amount": "0",
+    "rake_percent": "0.03",
+    "rake_cap_bb": "2",
+    "rake_application": "all_pots",
+    "rake_rounding": "exact",
+    "rake_distribution": "proportional_all_pots",
+    "minimum_chip": "1",
+    "verification_status": "simulation",
+    "source": "Manually configured arithmetic assumptions, not verified platform rules"
+  },
+  "seats": [
+    {
+      "seat_id": 0,
+      "stack": "200",
+      "hand_committed": "20",
+      "status": "ACTIVE"
+    },
+    {
+      "seat_id": 1,
+      "stack": "200",
+      "hand_committed": "20",
+      "status": "ACTIVE"
+    },
+    {
+      "seat_id": 2,
+      "stack": "200",
+      "hand_committed": "20",
+      "status": "ACTIVE"
+    },
+    {
+      "seat_id": 3,
+      "stack": "200",
+      "hand_committed": "10",
+      "status": "FOLDED"
+    },
+    {
+      "seat_id": 4,
+      "stack": "200",
+      "hand_committed": "10",
+      "status": "FOLDED"
+    },
+    {
+      "seat_id": 5,
+      "stack": "200",
+      "hand_committed": "10",
+      "status": "FOLDED"
+    }
+  ],
+  "hero_seat": 0,
+  "hero_cards": [
+    "Qs",
+    "Qd"
+  ],
+  "board_cards": [
+    "2c",
+    "4d",
+    "7h",
+    "9s",
+    "Jc"
+  ],
+  "action_order": [
+    1,
+    2,
+    0
+  ],
+  "ranges": [
+    {
+      "seat_id": 1,
+      "combos": {
+        "JhJd": "1",
+        "TcTd": "3"
+      }
+    },
+    {
+      "seat_id": 2,
+      "combos": {
+        "7c7s": "1",
+        "KhTh": "3"
+      }
+    }
+  ],
+  "models": [
+    {
+      "seat_id": 1,
+      "name": "uniform-call-heavy-path-sample-v1",
+      "source": "manual_example",
+      "weights": {
+        "fold": "1",
+        "check": "1",
+        "call": "10",
+        "bet": "1",
+        "raise": "1"
+      },
+      "category_weights": {},
+      "price_multipliers": []
+    },
+    {
+      "seat_id": 2,
+      "name": "uniform-call-heavy-path-sample-v1",
+      "source": "manual_example",
+      "weights": {
+        "fold": "1",
+        "check": "1",
+        "call": "10",
+        "bet": "1",
+        "raise": "1"
+      },
+      "category_weights": {},
+      "price_multipliers": []
+    }
+  ],
+  "aggression_targets": [
+    "20",
+    "40"
+  ],
+  "max_aggressions": 2,
+  "history": [
+    {
+      "actor": 1,
+      "kind": "bet",
+      "target": "20"
+    },
+    {
+      "actor": 2,
+      "kind": "call",
+      "target": "0"
+    }
+  ],
+  "other_fees": "0"
+}
