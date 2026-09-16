@@ -5,16 +5,16 @@
   "quantity_encoding": "exact_rational_string_n_over_d",
   "parent_head": "a1367c5bfe826774fb6cc18d15a7dbb3a73c0617",
   "protocol": {
-    "path": "configs\\strategy\\examples\\strategy-diag-c-range-protocol-v1.json",
+    "path": "configs/strategy/examples/strategy-diag-c-range-protocol-v1.json",
     "sha256": "7b77d280a05336916f2e9b8230e0f7294df0ea931a9f955094af23dd9012f8ce",
     "frozen_status": "FROZEN_BEFORE_ANY_PERTURBED_WORLD_WAS_RUN"
   },
   "input": {
-    "path": "configs\\strategy\\examples\\threeway-river-response-manual.json",
+    "path": "configs/strategy/examples/threeway-river-response-manual.json",
     "sha256": "4f5d11f7446e77e755bfb4266c79fe32fc9092c0f7fbf630b0e63e4930905a64"
   },
   "study_protocol": {
-    "path": "configs\\strategy\\examples\\threeway-validation-protocol-v1.json",
+    "path": "configs/strategy/examples/threeway-validation-protocol-v1.json",
     "sha256": "7a34e781aaa02a2ca8c301957ae0a274a1690b6ee2e826d24ff1758052798759"
   },
   "study_group": "n6-facing_bet",
@@ -92,7 +92,7 @@
         "manual_reference": {
           "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
           "reasons": [],
-          "elapsed_ms": 4.235,
+          "elapsed_ms": 4.157,
           "perturbed_range": {
             "seat_id": 1,
             "combo_weights": [
@@ -368,7 +368,7 @@
         "training_selected": {
           "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
           "reasons": [],
-          "elapsed_ms": 5.071,
+          "elapsed_ms": 5.217,
           "perturbed_range": {
             "seat_id": 1,
             "combo_weights": [
@@ -778,7 +778,7 @@
         "manual_reference": {
           "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
           "reasons": [],
-          "elapsed_ms": 4.205,
+          "elapsed_ms": 4.182,
           "perturbed_range": {
             "seat_id": 1,
             "combo_weights": [
@@ -1054,7 +1054,7 @@
         "training_selected": {
           "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
           "reasons": [],
-          "elapsed_ms": 4.784,
+          "elapsed_ms": 4.746,
           "perturbed_range": {
             "seat_id": 1,
             "combo_weights": [
@@ -1467,7 +1467,7 @@
         "manual_reference": {
           "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
           "reasons": [],
-          "elapsed_ms": 4.323,
+          "elapsed_ms": 4.191,
           "perturbed_range": {
             "seat_id": 1,
             "combo_weights": [
@@ -1743,7 +1743,7 @@
         "training_selected": {
           "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
           "reasons": [],
-          "elapsed_ms": 4.777,
+          "elapsed_ms": 5.104,
           "perturbed_range": {
             "seat_id": 1,
             "combo_weights": [

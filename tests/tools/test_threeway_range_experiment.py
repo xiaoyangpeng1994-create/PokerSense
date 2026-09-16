@@ -324,6 +324,16 @@ def test_protocol_mutations_are_rejected(tmp_path, broken):
         module.load_protocol(path)
 
 
+def test_sample_has_no_platform_specific_path_separators(sample):
+    """A committed report must not encode the platform it was generated on."""
+    text = json.dumps(sample, ensure_ascii=False)
+    assert "\\" not in text
+    for key in ("protocol", "input", "study_protocol"):
+        assert sample[key]["path"].startswith("configs/strategy/examples/")
+        assert sample[key]["sha256"]
+    assert driver().stable_view(sample) == driver().stable_view(sample)
+
+
 def test_budget_exhaustion_blocks_every_world_without_partial_readings(tmp_path):
     module = driver()
     protocol = load(PROTOCOL)
