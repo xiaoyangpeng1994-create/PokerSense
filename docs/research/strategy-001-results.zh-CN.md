@@ -76,7 +76,7 @@ Issue 允许「没有合理代码改动时明确 REPORT_AND_REPRO_ONLY」。本�
 
 **当前已批准次序：B → C → D。**
 
-#### B：固定策略的终局路径诊断与精确收益对账（**本轮已批准并执行**）
+#### B：固定策略的终局路径诊断与精确收益对账（**已执行，PASS_WITH_SCOPE**）
 
 - **范围**：`threeway_policy_evaluation_v1.py` 增加**可选** trace（`trace=True`）；沿用 `_Evaluation.walk` /
   `evaluate_policy_book`；**不**重写 solver、**不**改策略选择、结算、原基线与风险边界。
@@ -87,18 +87,24 @@ Issue 允许「没有合理代码改动时明确 REPORT_AND_REPRO_ONLY」。本�
   `tools/threeway_path_diagnostics.py`（可复跑）、`tests/strategy/test_threeway_policy_evaluation_v1.py`、
   `tests/tools/test_threeway_path_diagnostics.py`、合成样例
   `configs/strategy/examples/threeway-path-diagnostics{,-sample}-v1.json`。
+- **报告**：`docs/research/strategy-001-path-diagnostics.zh-CN.md`。
 
-#### C（**保留待办，本轮 NOT_RUN**）：单因素实验（不改内核）
+#### C：一个原失败场景、一项对手范围参数、同一本冻结策略的真实对照（**本轮已执行**）
 
-- **假设 H2**：`selected` 在 `value_heavy` / `rank_aware` / `check_trap` 上的劣势可由「命中跟注的频率」解释。
-- 保留原候选、原世界、原指标，同时展示**收益与代价**。
-- **失败判据**：若敏感性无法区分 `selected` 与 `manual_reference` 的行为差异，记录为「当前世界不具区分度」并停止扩大。
+- **协议先冻结后运行**：`configs/strategy/examples/strategy-diag-c-range-protocol-v1.json`
+  （其提交早于结果提交），声明场景 `n6-facing_bet / reference_control`、唯一变化对象
+  （seat 1 的 `JhJd` 相对权重）、因子 `0.5 / 1 / 2`，以及因子 1 的期望基线读数。
+- **不得在每个扰动世界重新规划 Hero**：两本策略本各编译一次，三个世界复用并校验哈希前后一致。
+- **实测**：因子 1 精确复现原失败读数 `-30444/189457`；因子 0.5 变为 **正** `+353982/17719`；
+  因子 2 变为 `-5755044/284867` —— 该比较的**符号**随这一个范围参数反转。**不声称策略变强**。
+- **报告**：`docs/research/strategy-diag-c-range-experiment.zh-CN.md`。
 
-#### D（**保留待办，本轮 NOT_RUN**）：真实数据准入缺口清单（不猜值）
+#### D（**保留待办，本轮 NOT_RUN**）：现有离线复盘的最小接入
 
-- 依 `opponent_dataset_v1` 的严格口径列出：需要哪些字段、需要几个完整会话、
-  当前已审阅记录缺哪些字段（已知：完整合法菜单、决策前状态、动作时点）。
-- **禁止**：用不足数据拟合、扫描未授权媒体、把摊牌子样本当全体范围。
+- **名称已在 2026-09-16 按 B 审查更正**：D 的批准目标是**把现有离线复盘以最小方式接入**，
+  **不是**「真实数据准入缺口清单」；旧稿把 D 写成数据准入清单属于误标，不作为交付目标。
+- D 的具体范围与验收在执行单评论 `5692125395` 中定义，留到 D 的检查点再展开，本轮不预写。
+- **边界提醒（仍然有效）**：不用不足数据拟合、不扫描未授权媒体、不把摊牌子样本当全体范围。
 
 ### 任务 2（**已被上面的 C 取代，保留原文以便追溯**）：在固定世界里做响应模型敏感性（不改内核）
 

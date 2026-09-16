@@ -10,7 +10,7 @@ from poker_engine.strategy.threeway_policy_evaluation_v1 import (
     REACHED, UNREACHABLE, PolicyPathLedger, TerminalPath, WorldResponseOverride,
     _Evaluation, _override_probabilities, _world_branches, compare_policy_paths,
     compile_policy_book, evaluate_policy_book, path_key, policy_book_hash,
-    public_conditions_json,
+    public_conditions_json, reconcile_path_ledgers,
 )
 from poker_engine.strategy.threeway_river_v1 import RiverAction, _Node, _Tree
 from .helpers import card
@@ -478,3 +478,46 @@ def test_ledger_and_path_dataclasses_are_self_verifying():
         TerminalPath((RiverAction(0, "check"),), "0:check", Fraction(0), False,
                      None, Fraction(0), REACHED)
     assert isinstance(item, PolicyPathLedger)
+
+
+def test_cross_book_reconciliation_requires_an_explicit_opt_in():
+    s = hand_example()
+    book = compile_policy_book(s)
+    other = compile_policy_book(s, policy_id="second-book-v1")
+    assert other.book_sha256 != book.book_sha256
+    left = ledger(evaluate_policy_book(book, s, trace=True), "frozen_policy")
+    right = ledger(evaluate_policy_book(other, s, trace=True), "frozen_policy")
+    total = (left.reconciled_policy_net_ev_chips
+             - right.reconciled_policy_net_ev_chips)
+    with pytest.raises(ValueError, match="different_books"):
+        reconcile_path_ledgers(left, right, total)
+    reconciliation = reconcile_path_ledgers(left, right, total,
+                                            allow_distinct_books=True)
+    assert reconciliation.distinct_books is True
+    assert reconciliation.right_policy_book_sha256 == other.book_sha256
+    assert reconciliation.policy_book_sha256 == book.book_sha256
+    assert reconciliation.total_ev_difference_chips == 0
+    assert reconciliation.contribution_difference_sum_chips == 0
+    for row in reconciliation.rows:
+        assert row.contribution_chips_difference == 0
+    with pytest.raises(ValueError, match="path_ledgers_describe_different_worlds"):
+        reconcile_path_ledgers(
+            left, replace(right, world_scenario_sha256="0" * 64),
+            total, allow_distinct_books=True)
+    with pytest.raises(ValueError, match="explicit_exact_ev_difference"):
+        reconcile_path_ledgers(left, right, 0.0, allow_distinct_books=True)
+    with pytest.raises(ValueError):
+        reconcile_path_ledgers(left, right, Fraction(1),
+                               allow_distinct_books=True)
+
+
+def test_reconciliation_dataclass_rejects_a_misstated_book_relation():
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    reconciliation = compare_policy_paths(result)
+    assert reconciliation.distinct_books is False
+    assert reconciliation.right_policy_book_sha256 is None
+    with pytest.raises(ValueError):
+        replace(reconciliation, distinct_books=True)
+    with pytest.raises(ValueError):
+        replace(reconciliation, right_policy_book_sha256="f" * 64)

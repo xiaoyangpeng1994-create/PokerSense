@@ -1,7 +1,8 @@
 # STRATEGY-DIAG-R1 · B 阶段：固定策略终局路径诊断与精确收益对账
 
 任务：STRATEGY-DIAG-R1（Issue #23）· 检查点来源 = 评论 5692346242 + 审查 `pullrequestreview-5218709490`
-**范围：只有 B。C（单因素实验）/ D（真实数据准入）本轮 NOT_RUN。**
+**范围：只有 B（本文件）与 C（另见 `strategy-diag-c-range-experiment.zh-CN.md`）。
+D（现有离线复盘的最小接入）本轮 NOT_RUN。**
 
 ## 1. 做了什么
 
@@ -24,7 +25,7 @@ trace 只调用 `legal` / `advance` / `terminal` 与既有 `_world_branches`，*
 ```powershell
 $env:PYTHONPATH='src;.'; $env:PYTHONUTF8='1'
 & $PYTHON tools/threeway_path_diagnostics.py            # 打印摘要
-& $PYTHON tools/threeway_path_diagnostics.py --check    # 与已提交样例逐字比对，exit 0
+& $PYTHON tools/threeway_path_diagnostics.py --check    # 解析后 JSON 内容一致即 exit 0
 ```
 
 合成样例（脱敏、机器可读、精确有理数字符串）：

@@ -344,7 +344,13 @@ class PathContributionRow:
 
 @dataclass(frozen=True)
 class PathReconciliation:
-    """Subtract two traced policies on the union of their terminal paths."""
+    """Subtract two traced policies on the union of their terminal paths.
+
+    `distinct_books` is False when both ledgers come from one evaluation of one
+    frozen policy book, and True when two separately frozen books are compared
+    inside the same world; the latter is a difference between two frozen
+    policies, not between two policies of a single evaluation.
+    """
 
     left_policy: str
     right_policy: str
@@ -353,6 +359,8 @@ class PathReconciliation:
     rows: tuple[PathContributionRow, ...]
     total_ev_difference_chips: Fraction
     completeness: str = PATH_RECONCILED
+    distinct_books: bool = False
+    right_policy_book_sha256: str | None = None
 
     @property
     def contribution_difference_sum_chips(self):
@@ -367,8 +375,15 @@ class PathReconciliation:
                 or not all(isinstance(r, PathContributionRow) for r in self.rows)
                 or len({row.history_key for row in self.rows}) != len(self.rows)
                 or self.completeness != PATH_RECONCILED
+                or type(self.distinct_books) is not bool
                 or not isinstance(self.total_ev_difference_chips, Fraction)):
             raise ValueError("invalid_path_reconciliation")
+        if self.distinct_books:
+            if (not isinstance(self.right_policy_book_sha256, str)
+                    or self.right_policy_book_sha256 == self.policy_book_sha256):
+                raise ValueError("distinct_books_require_two_different_book_hashes")
+        elif self.right_policy_book_sha256 not in (None, self.policy_book_sha256):
+            raise ValueError("same_book_reconciliation_carries_another_book_hash")
         if (self.contribution_difference_sum_chips
                 != self.total_ev_difference_chips):
             raise ValueError("path_contribution_differences_do_not_match_EV_delta")
@@ -564,31 +579,32 @@ def _build_ledger(traced, metric, book_sha256, world_sha256, big_blind):
         traced.max_nodes, metric.net_ev_chips, metric.probability_of_any_fallback)
 
 
-def compare_policy_paths(evaluation, left="frozen_policy", right="check_fold"):
-    """Reconcile two traced policies path by path on their union.
+def reconcile_path_ledgers(left_ledger, right_ledger, total_ev_difference_chips,
+                           *, allow_distinct_books=False):
+    """Reconcile two traced ledgers path by path on their union.
 
-    Contributions are subtracted for the same path; the sum of those
-    differences equals the difference of the two original policy EVs. This is
-    the offline conditional expectation of one declared world: it is not a
-    proof that any action is optimal, and no live advice is produced.
+    Contributions are subtracted for the same path, so the sum of those
+    differences must equal `total_ev_difference_chips`, which the caller takes
+    from the independently reported policy EVs. Both ledgers must describe the
+    same evaluation world; comparing two different frozen books is allowed only
+    with `allow_distinct_books=True`, and the result records that it is a
+    difference between two frozen policies rather than within one evaluation.
     """
-    if not isinstance(evaluation, PolicyEvaluation):
-        raise ValueError("policy_evaluation_required")
-    if evaluation.status != "COMPLETE_CONDITIONAL_FIXED_POLICY":
-        raise ValueError("path_diagnosis_requires_complete_evaluation")
-    if (not isinstance(left, str) or not isinstance(right, str) or left == right):
+    for ledger in (left_ledger, right_ledger):
+        if not isinstance(ledger, PolicyPathLedger):
+            raise ValueError("policy_path_ledger_required")
+    if not isinstance(total_ev_difference_chips, Fraction):
+        raise ValueError("explicit_exact_ev_difference_required")
+    if (left_ledger.world_scenario_sha256 != right_ledger.world_scenario_sha256
+            or left_ledger.big_blind != right_ledger.big_blind):
+        raise ValueError("path_ledgers_describe_different_worlds")
+    distinct = left_ledger.policy_book_sha256 != right_ledger.policy_book_sha256
+    if distinct and not allow_distinct_books:
+        raise ValueError("path_ledgers_belong_to_different_books")
+    if (not distinct and left_ledger.policy_name == right_ledger.policy_name):
         raise ValueError("two_distinct_policy_names_required")
-    ledgers = {item.policy_name: item for item in evaluation.path_ledgers}
-    metrics = {item.name: item for item in evaluation.metrics}
-    if not {left, right} <= set(ledgers) or not {left, right} <= set(metrics):
-        raise ValueError("path_trace_not_collected_for_named_policy")
-    if (ledgers[left].policy_book_sha256 != ledgers[right].policy_book_sha256
-            or ledgers[left].world_scenario_sha256
-            != ledgers[right].world_scenario_sha256
-            or ledgers[left].big_blind != ledgers[right].big_blind):
-        raise ValueError("path_ledgers_belong_to_different_book_or_world")
-    maps = [{p.history_key: p for p in ledgers[name].paths}
-            for name in (left, right)]
+    maps = [{p.history_key: p for p in ledger.paths}
+            for ledger in (left_ledger, right_ledger)]
     rows = []
     for key in sorted(set(maps[0]) | set(maps[1])):
         first, second = maps[0].get(key), maps[1].get(key)
@@ -605,8 +621,32 @@ def compare_policy_paths(evaluation, left="frozen_policy", right="check_fold"):
         -row.contribution_chips_left, -row.contribution_chips_right,
         row.history_key))
     return PathReconciliation(
-        left, right, ledgers[left].policy_book_sha256,
-        ledgers[left].world_scenario_sha256, tuple(rows),
+        left_ledger.policy_name, right_ledger.policy_name,
+        left_ledger.policy_book_sha256, left_ledger.world_scenario_sha256,
+        tuple(rows), total_ev_difference_chips,
+        distinct_books=distinct,
+        right_policy_book_sha256=(
+            right_ledger.policy_book_sha256 if distinct else None))
+
+
+def compare_policy_paths(evaluation, left="frozen_policy", right="check_fold"):
+    """Reconcile two traced policies of one evaluation on their path union.
+
+    This is the offline conditional expectation of one declared world: it is
+    not a proof that any action is optimal, and no live advice is produced.
+    """
+    if not isinstance(evaluation, PolicyEvaluation):
+        raise ValueError("policy_evaluation_required")
+    if evaluation.status != "COMPLETE_CONDITIONAL_FIXED_POLICY":
+        raise ValueError("path_diagnosis_requires_complete_evaluation")
+    if (not isinstance(left, str) or not isinstance(right, str) or left == right):
+        raise ValueError("two_distinct_policy_names_required")
+    ledgers = {item.policy_name: item for item in evaluation.path_ledgers}
+    metrics = {item.name: item for item in evaluation.metrics}
+    if not {left, right} <= set(ledgers) or not {left, right} <= set(metrics):
+        raise ValueError("path_trace_not_collected_for_named_policy")
+    return reconcile_path_ledgers(
+        ledgers[left], ledgers[right],
         metrics[left].net_ev_chips - metrics[right].net_ev_chips)
 
 

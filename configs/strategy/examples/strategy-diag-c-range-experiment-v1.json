@@ -1,0 +1,2191 @@
+{
+  "schema_version": 1,
+  "experiment_id": "STRATEGY-DIAG-C-ONE-RANGE-PARAMETER-V1",
+  "scope": "OFFLINE_FIXED_POLICY_SINGLE_FACTOR_RANGE_SENSITIVITY_NOT_LIVE_ADVICE",
+  "quantity_encoding": "exact_rational_string_n_over_d",
+  "parent_head": "a1367c5bfe826774fb6cc18d15a7dbb3a73c0617",
+  "protocol": {
+    "path": "configs\\strategy\\examples\\strategy-diag-c-range-protocol-v1.json",
+    "sha256": "7b77d280a05336916f2e9b8230e0f7294df0ea931a9f955094af23dd9012f8ce",
+    "frozen_status": "FROZEN_BEFORE_ANY_PERTURBED_WORLD_WAS_RUN"
+  },
+  "input": {
+    "path": "configs\\strategy\\examples\\threeway-river-response-manual.json",
+    "sha256": "4f5d11f7446e77e755bfb4266c79fe32fc9092c0f7fbf630b0e63e4930905a64"
+  },
+  "study_protocol": {
+    "path": "configs\\strategy\\examples\\threeway-validation-protocol-v1.json",
+    "sha256": "7a34e781aaa02a2ca8c301957ae0a274a1690b6ee2e826d24ff1758052798759"
+  },
+  "study_group": "n6-facing_bet",
+  "study_world": "reference_control",
+  "selected_id": "calling_public_v1",
+  "fixed_single_varied_object": {
+    "target_opponent_seat": 1,
+    "target_combos": [
+      "JhJd"
+    ],
+    "relative_factors": [
+      "0.5",
+      "1",
+      "2"
+    ],
+    "selection_rationale": "Seat 1 is the opponent that made the pre-root bet in the conditioned public history, so its range is the one the facing-bet decision is most exposed to. Within that range JhJd is the only combo that beats Hero QsQd on 2c4d7h9sJc (trip jacks with the Jc river), while TcTd is an overpair that loses; scaling exactly that combo therefore moves the mass on the hand that dominates Hero's made hand instead of rescaling the range uniformly."
+  },
+  "frozen_books": [
+    {
+      "name": "manual_reference",
+      "policy_book_sha256_before": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+      "policy_book_sha256_after": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+      "unchanged_across_worlds": true,
+      "planning_best_ev_chips": "543196/15151",
+      "decisions": 5
+    },
+    {
+      "name": "training_selected",
+      "policy_book_sha256_before": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+      "policy_book_sha256_after": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+      "unchanged_across_worlds": true,
+      "planning_best_ev_chips": "223149/2023",
+      "decisions": 5
+    }
+  ],
+  "baseline_verification": {
+    "declared": {
+      "training_selected_frozen_policy": "737057752/20650813",
+      "manual_reference_frozen_policy": "543196/15151",
+      "selected_minus_manual_reference": "-30444/189457",
+      "selected_delta_vs_check_fold": "737057752/20650813",
+      "selected_delta_vs_check_call": "-30444/189457",
+      "history_likelihood": "15151/180320",
+      "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c"
+    },
+    "observed": {
+      "training_selected_frozen_policy": "737057752/20650813",
+      "manual_reference_frozen_policy": "543196/15151",
+      "selected_minus_manual_reference": "-30444/189457",
+      "selected_delta_vs_check_fold": "737057752/20650813",
+      "selected_delta_vs_check_call": "-30444/189457",
+      "history_likelihood": "15151/180320",
+      "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c"
+    },
+    "matches_original_reading": true,
+    "mismatches": []
+  },
+  "worlds": [
+    {
+      "factor": "0.5",
+      "is_declared_baseline_factor": false,
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "reasons": [],
+      "world_scenario_sha256": "a36e70441455fc24766cdf6b674a9505eddf49723a9ea1c3d1386823f69da25f",
+      "history_likelihood": "2834/39445",
+      "joint_assignments": 4,
+      "nonzero_posterior_entries": 4,
+      "root_posterior": [
+        "875/11336",
+        "735/2834",
+        "1725/11336",
+        "1449/2834"
+      ],
+      "books": {
+        "manual_reference": {
+          "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+          "reasons": [],
+          "elapsed_ms": 4.235,
+          "perturbed_range": {
+            "seat_id": 1,
+            "combo_weights": [
+              [
+                "JhJd",
+                "0.5"
+              ],
+              [
+                "TcTd",
+                "3"
+              ]
+            ]
+          },
+          "policy_hash_before": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+          "policy_hash_after": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+          "policy_unchanged_during_world": true,
+          "metrics": [
+            {
+              "name": "frozen_policy",
+              "net_ev_chips": "77437/1417",
+              "conditional_net_ev_bb": "77437/2834",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_fold",
+              "net_ev_chips": "0",
+              "conditional_net_ev_bb": "0",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_call",
+              "net_ev_chips": "77437/1417",
+              "conditional_net_ev_bb": "77437/2834",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            }
+          ],
+          "delta_vs_check_fold_chips": "77437/1417",
+          "delta_vs_check_call_chips": "0",
+          "nodes": 6,
+          "trace": {
+            "terminal_paths": 20,
+            "reachable_paths": 1,
+            "unreachable_paths": 19,
+            "reach_probability_sum": "1",
+            "contribution_sum_chips": "77437/1417",
+            "fallback_reach_sum": "0",
+            "nodes_visited": 34
+          },
+          "terminal_paths": [
+            {
+              "history_key": "1:bet:20|2:call|0:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1",
+              "conditional_terminal_net_ev_chips": "77437/1417",
+              "contribution_chips": "77437/1417"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            }
+          ],
+          "reconciliations": [
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_fold",
+              "left_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "a36e70441455fc24766cdf6b674a9505eddf49723a9ea1c3d1386823f69da25f",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "77437/1417",
+              "contribution_difference_sum_chips": "77437/1417",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 1,
+              "zero_difference_rows": 19,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 1,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 18
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "77437/1417",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "77437/1417"
+                }
+              ]
+            },
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_call",
+              "left_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "a36e70441455fc24766cdf6b674a9505eddf49723a9ea1c3d1386823f69da25f",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "0",
+              "contribution_difference_sum_chips": "0",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 0,
+              "zero_difference_rows": 20,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 1,
+                "REACHED_BY_LEFT_ONLY": 0,
+                "REACHED_BY_RIGHT_ONLY": 0,
+                "UNREACHABLE_BY_BOTH": 19
+              },
+              "rows": []
+            }
+          ]
+        },
+        "training_selected": {
+          "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+          "reasons": [],
+          "elapsed_ms": 5.071,
+          "perturbed_range": {
+            "seat_id": 1,
+            "combo_weights": [
+              [
+                "JhJd",
+                "0.5"
+              ],
+              [
+                "TcTd",
+                "3"
+              ]
+            ]
+          },
+          "policy_hash_before": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+          "policy_hash_after": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+          "policy_unchanged_during_world": true,
+          "metrics": [
+            {
+              "name": "frozen_policy",
+              "net_ev_chips": "144130669/1931371",
+              "conditional_net_ev_bb": "144130669/3862742",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 8
+            },
+            {
+              "name": "check_fold",
+              "net_ev_chips": "0",
+              "conditional_net_ev_bb": "0",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_call",
+              "net_ev_chips": "77437/1417",
+              "conditional_net_ev_bb": "77437/2834",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            }
+          ],
+          "delta_vs_check_fold_chips": "144130669/1931371",
+          "delta_vs_check_call_chips": "353982/17719",
+          "nodes": 12,
+          "trace": {
+            "terminal_paths": 20,
+            "reachable_paths": 4,
+            "unreachable_paths": 16,
+            "reach_probability_sum": "1",
+            "contribution_sum_chips": "144130669/1931371",
+            "fallback_reach_sum": "0",
+            "nodes_visited": 34
+          },
+          "terminal_paths": [
+            {
+              "history_key": "1:bet:20|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1231331/1643720",
+              "conditional_terminal_net_ev_chips": "82885136/1231331",
+              "contribution_chips": "10360642/205465"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "56091/410930",
+              "conditional_terminal_net_ev_chips": "226816/2671",
+              "contribution_chips": "2381568/205465"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1332735/15450968",
+              "conditional_terminal_net_ev_chips": "405968/3863",
+              "contribution_chips": "17507370/1931371"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "108675/3862742",
+              "conditional_terminal_net_ev_chips": "126",
+              "contribution_chips": "6846525/1931371"
+            }
+          ],
+          "reconciliations": [
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_fold",
+              "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "a36e70441455fc24766cdf6b674a9505eddf49723a9ea1c3d1386823f69da25f",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "144130669/1931371",
+              "contribution_difference_sum_chips": "144130669/1931371",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 4,
+              "zero_difference_rows": 16,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 4,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 15
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "10360642/205465",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "10360642/205465"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "2381568/205465",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "2381568/205465"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "17507370/1931371",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "17507370/1931371"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "6846525/1931371",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "6846525/1931371"
+                }
+              ]
+            },
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_call",
+              "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "a36e70441455fc24766cdf6b674a9505eddf49723a9ea1c3d1386823f69da25f",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "353982/17719",
+              "contribution_difference_sum_chips": "353982/17719",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 5,
+              "zero_difference_rows": 15,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 4,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 15
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "10360642/205465",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "10360642/205465"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "2381568/205465",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "2381568/205465"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "17507370/1931371",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "17507370/1931371"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "6846525/1931371",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "6846525/1931371"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:call",
+                  "reach_status": "REACHED_BY_RIGHT_ONLY",
+                  "contribution_chips_left": "0",
+                  "contribution_chips_right": "77437/1417",
+                  "contribution_chips_difference": "-77437/1417"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "selected_minus_manual_reference_chips": "353982/17719",
+      "failure_gate_fired": [],
+      "cross_book_branch_difference": {
+        "left_policy": "frozen_policy",
+        "right_policy": "frozen_policy",
+        "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+        "right_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+        "distinct_books": true,
+        "world_scenario_sha256": "a36e70441455fc24766cdf6b674a9505eddf49723a9ea1c3d1386823f69da25f",
+        "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+        "total_ev_difference_chips": "353982/17719",
+        "contribution_difference_sum_chips": "353982/17719",
+        "rows_total": 20,
+        "rows_with_nonzero_difference": 5,
+        "zero_difference_rows": 15,
+        "reach_status_counts": {
+          "REACHED_BY_BOTH": 0,
+          "REACHED_BY_LEFT_ONLY": 4,
+          "REACHED_BY_RIGHT_ONLY": 1,
+          "UNREACHABLE_BY_BOTH": 15
+        },
+        "rows": [
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "10360642/205465",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "10360642/205465"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "2381568/205465",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "2381568/205465"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "17507370/1931371",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "17507370/1931371"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "6846525/1931371",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "6846525/1931371"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:call",
+            "reach_status": "REACHED_BY_RIGHT_ONLY",
+            "contribution_chips_left": "0",
+            "contribution_chips_right": "77437/1417",
+            "contribution_chips_difference": "-77437/1417"
+          }
+        ]
+      }
+    },
+    {
+      "factor": "1",
+      "is_declared_baseline_factor": true,
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "reasons": [],
+      "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+      "history_likelihood": "15151/180320",
+      "joint_assignments": 4,
+      "nonzero_posterior_entries": 4,
+      "root_posterior": [
+        "1750/15151",
+        "5880/15151",
+        "1725/15151",
+        "5796/15151"
+      ],
+      "books": {
+        "manual_reference": {
+          "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+          "reasons": [],
+          "elapsed_ms": 4.205,
+          "perturbed_range": {
+            "seat_id": 1,
+            "combo_weights": [
+              [
+                "JhJd",
+                "1"
+              ],
+              [
+                "TcTd",
+                "3"
+              ]
+            ]
+          },
+          "policy_hash_before": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+          "policy_hash_after": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+          "policy_unchanged_during_world": true,
+          "metrics": [
+            {
+              "name": "frozen_policy",
+              "net_ev_chips": "543196/15151",
+              "conditional_net_ev_bb": "271598/15151",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_fold",
+              "net_ev_chips": "0",
+              "conditional_net_ev_bb": "0",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_call",
+              "net_ev_chips": "543196/15151",
+              "conditional_net_ev_bb": "271598/15151",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            }
+          ],
+          "delta_vs_check_fold_chips": "543196/15151",
+          "delta_vs_check_call_chips": "0",
+          "nodes": 6,
+          "trace": {
+            "terminal_paths": 20,
+            "reachable_paths": 1,
+            "unreachable_paths": 19,
+            "reach_probability_sum": "1",
+            "contribution_sum_chips": "543196/15151",
+            "fallback_reach_sum": "0",
+            "nodes_visited": 34
+          },
+          "terminal_paths": [
+            {
+              "history_key": "1:bet:20|2:call|0:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1",
+              "conditional_terminal_net_ev_chips": "543196/15151",
+              "contribution_chips": "543196/15151"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            }
+          ],
+          "reconciliations": [
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_fold",
+              "left_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "543196/15151",
+              "contribution_difference_sum_chips": "543196/15151",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 1,
+              "zero_difference_rows": 19,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 1,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 18
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "543196/15151",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "543196/15151"
+                }
+              ]
+            },
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_call",
+              "left_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "0",
+              "contribution_difference_sum_chips": "0",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 0,
+              "zero_difference_rows": 20,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 1,
+                "REACHED_BY_LEFT_ONLY": 0,
+                "REACHED_BY_RIGHT_ONLY": 0,
+                "UNREACHABLE_BY_BOTH": 19
+              },
+              "rows": []
+            }
+          ]
+        },
+        "training_selected": {
+          "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+          "reasons": [],
+          "elapsed_ms": 4.784,
+          "perturbed_range": {
+            "seat_id": 1,
+            "combo_weights": [
+              [
+                "JhJd",
+                "1"
+              ],
+              [
+                "TcTd",
+                "3"
+              ]
+            ]
+          },
+          "policy_hash_before": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+          "policy_hash_after": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+          "policy_unchanged_during_world": true,
+          "metrics": [
+            {
+              "name": "frozen_policy",
+              "net_ev_chips": "737057752/20650813",
+              "conditional_net_ev_bb": "368528876/20650813",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 8
+            },
+            {
+              "name": "check_fold",
+              "net_ev_chips": "0",
+              "conditional_net_ev_bb": "0",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_call",
+              "net_ev_chips": "543196/15151",
+              "conditional_net_ev_bb": "271598/15151",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            }
+          ],
+          "delta_vs_check_fold_chips": "737057752/20650813",
+          "delta_vs_check_call_chips": "-30444/189457",
+          "nodes": 12,
+          "trace": {
+            "terminal_paths": 20,
+            "reachable_paths": 4,
+            "unreachable_paths": 16,
+            "reach_probability_sum": "1",
+            "contribution_sum_chips": "737057752/20650813",
+            "fallback_reach_sum": "0",
+            "nodes_visited": 34
+          },
+          "terminal_paths": [
+            {
+              "history_key": "1:bet:20|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1699246/2196895",
+              "conditional_terminal_net_ev_chips": "22725968/849623",
+              "contribution_chips": "45451936/2196895"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "309624/2196895",
+              "conditional_terminal_net_ev_chips": "3832/97",
+              "contribution_chips": "12231744/2196895"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1332735/20650813",
+              "conditional_terminal_net_ev_chips": "405968/3863",
+              "contribution_chips": "140058960/20650813"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "434700/20650813",
+              "conditional_terminal_net_ev_chips": "126",
+              "contribution_chips": "54772200/20650813"
+            }
+          ],
+          "reconciliations": [
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_fold",
+              "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "737057752/20650813",
+              "contribution_difference_sum_chips": "737057752/20650813",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 4,
+              "zero_difference_rows": 16,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 4,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 15
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "45451936/2196895",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "45451936/2196895"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "140058960/20650813",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "140058960/20650813"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "12231744/2196895",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "12231744/2196895"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "54772200/20650813",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "54772200/20650813"
+                }
+              ]
+            },
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_call",
+              "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "-30444/189457",
+              "contribution_difference_sum_chips": "-30444/189457",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 5,
+              "zero_difference_rows": 15,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 4,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 15
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "45451936/2196895",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "45451936/2196895"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "140058960/20650813",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "140058960/20650813"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "12231744/2196895",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "12231744/2196895"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "54772200/20650813",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "54772200/20650813"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:call",
+                  "reach_status": "REACHED_BY_RIGHT_ONLY",
+                  "contribution_chips_left": "0",
+                  "contribution_chips_right": "543196/15151",
+                  "contribution_chips_difference": "-543196/15151"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "selected_minus_manual_reference_chips": "-30444/189457",
+      "failure_gate_fired": [
+        "selected_minus_manual_reference",
+        "selected_delta_vs_check_call"
+      ],
+      "cross_book_branch_difference": {
+        "left_policy": "frozen_policy",
+        "right_policy": "frozen_policy",
+        "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+        "right_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+        "distinct_books": true,
+        "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+        "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+        "total_ev_difference_chips": "-30444/189457",
+        "contribution_difference_sum_chips": "-30444/189457",
+        "rows_total": 20,
+        "rows_with_nonzero_difference": 5,
+        "zero_difference_rows": 15,
+        "reach_status_counts": {
+          "REACHED_BY_BOTH": 0,
+          "REACHED_BY_LEFT_ONLY": 4,
+          "REACHED_BY_RIGHT_ONLY": 1,
+          "UNREACHABLE_BY_BOTH": 15
+        },
+        "rows": [
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "45451936/2196895",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "45451936/2196895"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "140058960/20650813",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "140058960/20650813"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "12231744/2196895",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "12231744/2196895"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "54772200/20650813",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "54772200/20650813"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:call",
+            "reach_status": "REACHED_BY_RIGHT_ONLY",
+            "contribution_chips_left": "0",
+            "contribution_chips_right": "543196/15151",
+            "contribution_chips_difference": "-543196/15151"
+          }
+        ]
+      }
+    },
+    {
+      "factor": "2",
+      "is_declared_baseline_factor": false,
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "reasons": [],
+      "world_scenario_sha256": "ffb5af3007ff9ef4678478ac3a28b10d6da3d80476b1c02c09932e764675996a",
+      "history_likelihood": "22781/225400",
+      "joint_assignments": 4,
+      "nonzero_posterior_entries": 4,
+      "root_posterior": [
+        "3500/22781",
+        "11760/22781",
+        "1725/22781",
+        "5796/22781"
+      ],
+      "books": {
+        "manual_reference": {
+          "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+          "reasons": [],
+          "elapsed_ms": 4.323,
+          "perturbed_range": {
+            "seat_id": 1,
+            "combo_weights": [
+              [
+                "JhJd",
+                "2"
+              ],
+              [
+                "TcTd",
+                "3"
+              ]
+            ]
+          },
+          "policy_hash_before": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+          "policy_hash_after": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+          "policy_unchanged_during_world": true,
+          "metrics": [
+            {
+              "name": "frozen_policy",
+              "net_ev_chips": "390596/22781",
+              "conditional_net_ev_bb": "195298/22781",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_fold",
+              "net_ev_chips": "0",
+              "conditional_net_ev_bb": "0",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_call",
+              "net_ev_chips": "390596/22781",
+              "conditional_net_ev_bb": "195298/22781",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            }
+          ],
+          "delta_vs_check_fold_chips": "390596/22781",
+          "delta_vs_check_call_chips": "0",
+          "nodes": 6,
+          "trace": {
+            "terminal_paths": 20,
+            "reachable_paths": 1,
+            "unreachable_paths": 19,
+            "reach_probability_sum": "1",
+            "contribution_sum_chips": "390596/22781",
+            "fallback_reach_sum": "0",
+            "nodes_visited": 34
+          },
+          "terminal_paths": [
+            {
+              "history_key": "1:bet:20|2:call|0:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1",
+              "conditional_terminal_net_ev_chips": "390596/22781",
+              "contribution_chips": "390596/22781"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            }
+          ],
+          "reconciliations": [
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_fold",
+              "left_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "ffb5af3007ff9ef4678478ac3a28b10d6da3d80476b1c02c09932e764675996a",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "390596/22781",
+              "contribution_difference_sum_chips": "390596/22781",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 1,
+              "zero_difference_rows": 19,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 1,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 18
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "390596/22781",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "390596/22781"
+                }
+              ]
+            },
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_call",
+              "left_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "ffb5af3007ff9ef4678478ac3a28b10d6da3d80476b1c02c09932e764675996a",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "0",
+              "contribution_difference_sum_chips": "0",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 0,
+              "zero_difference_rows": 20,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 1,
+                "REACHED_BY_LEFT_ONLY": 0,
+                "REACHED_BY_RIGHT_ONLY": 0,
+                "UNREACHABLE_BY_BOTH": 19
+              },
+              "rows": []
+            }
+          ]
+        },
+        "training_selected": {
+          "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+          "reasons": [],
+          "elapsed_ms": 4.777,
+          "perturbed_range": {
+            "seat_id": 1,
+            "combo_weights": [
+              [
+                "JhJd",
+                "2"
+              ],
+              [
+                "TcTd",
+                "3"
+              ]
+            ]
+          },
+          "policy_hash_before": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+          "policy_hash_after": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+          "policy_unchanged_during_world": true,
+          "metrics": [
+            {
+              "name": "frozen_policy",
+              "net_ev_chips": "-94917448/31050503",
+              "conditional_net_ev_bb": "-47458724/31050503",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 8
+            },
+            {
+              "name": "check_fold",
+              "net_ev_chips": "0",
+              "conditional_net_ev_bb": "0",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            },
+            {
+              "name": "check_call",
+              "net_ev_chips": "390596/22781",
+              "conditional_net_ev_bb": "195298/22781",
+              "probability_of_any_fallback": "0",
+              "expected_fallback_count": "0",
+              "unsupported_histories": 0,
+              "nodes": 2
+            }
+          ],
+          "delta_vs_check_fold_chips": "-94917448/31050503",
+          "delta_vs_check_call_chips": "-5755044/284867",
+          "nodes": 12,
+          "trace": {
+            "terminal_paths": 20,
+            "reachable_paths": 4,
+            "unreachable_paths": 16,
+            "reach_probability_sum": "1",
+            "contribution_sum_chips": "-94917448/31050503",
+            "fallback_reach_sum": "0",
+            "nodes_visited": 34
+          },
+          "terminal_paths": [
+            {
+              "history_key": "1:bet:20|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:call|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:call|2:raise:80|0:fold|1:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:fold|2:raise:80|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:call|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:call",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:40|1:raise:80|2:fold|0:fold",
+              "status": "UNREACHABLE",
+              "fallback_used": false,
+              "reach_probability": "0",
+              "conditional_terminal_net_ev_chips": null,
+              "contribution_chips": "0"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "2635076/3303245",
+              "conditional_terminal_net_ev_chips": "-7353616/658769",
+              "contribution_chips": "-29414464/3303245"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "480144/3303245",
+              "conditional_terminal_net_ev_chips": "-4196/1429",
+              "contribution_chips": "-1409856/3303245"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "1332735/31050503",
+              "conditional_terminal_net_ev_chips": "405968/3863",
+              "contribution_chips": "140058960/31050503"
+            },
+            {
+              "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+              "status": "REACHED",
+              "fallback_used": false,
+              "reach_probability": "434700/31050503",
+              "conditional_terminal_net_ev_chips": "126",
+              "contribution_chips": "54772200/31050503"
+            }
+          ],
+          "reconciliations": [
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_fold",
+              "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "ffb5af3007ff9ef4678478ac3a28b10d6da3d80476b1c02c09932e764675996a",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "-94917448/31050503",
+              "contribution_difference_sum_chips": "-94917448/31050503",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 4,
+              "zero_difference_rows": 16,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 4,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 15
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "140058960/31050503",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "140058960/31050503"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "54772200/31050503",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "54772200/31050503"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "-1409856/3303245",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "-1409856/3303245"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "-29414464/3303245",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "-29414464/3303245"
+                }
+              ]
+            },
+            {
+              "left_policy": "frozen_policy",
+              "right_policy": "check_call",
+              "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+              "right_policy_book_sha256": null,
+              "distinct_books": false,
+              "world_scenario_sha256": "ffb5af3007ff9ef4678478ac3a28b10d6da3d80476b1c02c09932e764675996a",
+              "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+              "total_ev_difference_chips": "-5755044/284867",
+              "contribution_difference_sum_chips": "-5755044/284867",
+              "rows_total": 20,
+              "rows_with_nonzero_difference": 5,
+              "zero_difference_rows": 15,
+              "reach_status_counts": {
+                "REACHED_BY_BOTH": 0,
+                "REACHED_BY_LEFT_ONLY": 4,
+                "REACHED_BY_RIGHT_ONLY": 1,
+                "UNREACHABLE_BY_BOTH": 15
+              },
+              "rows": [
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "140058960/31050503",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "140058960/31050503"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "54772200/31050503",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "54772200/31050503"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:call",
+                  "reach_status": "REACHED_BY_RIGHT_ONLY",
+                  "contribution_chips_left": "0",
+                  "contribution_chips_right": "390596/22781",
+                  "contribution_chips_difference": "-390596/22781"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "-1409856/3303245",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "-1409856/3303245"
+                },
+                {
+                  "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+                  "reach_status": "REACHED_BY_LEFT_ONLY",
+                  "contribution_chips_left": "-29414464/3303245",
+                  "contribution_chips_right": "0",
+                  "contribution_chips_difference": "-29414464/3303245"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "selected_minus_manual_reference_chips": "-5755044/284867",
+      "failure_gate_fired": [
+        "selected_minus_manual_reference",
+        "selected_delta_vs_check_fold",
+        "selected_delta_vs_check_call"
+      ],
+      "cross_book_branch_difference": {
+        "left_policy": "frozen_policy",
+        "right_policy": "frozen_policy",
+        "left_policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+        "right_policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+        "distinct_books": true,
+        "world_scenario_sha256": "ffb5af3007ff9ef4678478ac3a28b10d6da3d80476b1c02c09932e764675996a",
+        "completeness": "RECONCILED_EXACT_PATH_CONTRIBUTIONS",
+        "total_ev_difference_chips": "-5755044/284867",
+        "contribution_difference_sum_chips": "-5755044/284867",
+        "rows_total": 20,
+        "rows_with_nonzero_difference": 5,
+        "zero_difference_rows": 15,
+        "reach_status_counts": {
+          "REACHED_BY_BOTH": 0,
+          "REACHED_BY_LEFT_ONLY": 4,
+          "REACHED_BY_RIGHT_ONLY": 1,
+          "UNREACHABLE_BY_BOTH": 15
+        },
+        "rows": [
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:call",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "140058960/31050503",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "140058960/31050503"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:fold|2:fold",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "54772200/31050503",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "54772200/31050503"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:call",
+            "reach_status": "REACHED_BY_RIGHT_ONLY",
+            "contribution_chips_left": "0",
+            "contribution_chips_right": "390596/22781",
+            "contribution_chips_difference": "-390596/22781"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:fold",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "-1409856/3303245",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "-1409856/3303245"
+          },
+          {
+            "history_key": "1:bet:20|2:call|0:raise:80|1:call|2:call",
+            "reach_status": "REACHED_BY_LEFT_ONLY",
+            "contribution_chips_left": "-29414464/3303245",
+            "contribution_chips_right": "0",
+            "contribution_chips_difference": "-29414464/3303245"
+          }
+        ]
+      }
+    }
+  ],
+  "readings_by_factor": {
+    "0.5": {
+      "training_selected_frozen_policy": "144130669/1931371",
+      "manual_reference_frozen_policy": "77437/1417",
+      "selected_minus_manual_reference": "353982/17719",
+      "selected_delta_vs_check_fold": "144130669/1931371",
+      "selected_delta_vs_check_call": "353982/17719",
+      "history_likelihood": "2834/39445"
+    },
+    "1": {
+      "training_selected_frozen_policy": "737057752/20650813",
+      "manual_reference_frozen_policy": "543196/15151",
+      "selected_minus_manual_reference": "-30444/189457",
+      "selected_delta_vs_check_fold": "737057752/20650813",
+      "selected_delta_vs_check_call": "-30444/189457",
+      "history_likelihood": "15151/180320"
+    },
+    "2": {
+      "training_selected_frozen_policy": "-94917448/31050503",
+      "manual_reference_frozen_policy": "390596/22781",
+      "selected_minus_manual_reference": "-5755044/284867",
+      "selected_delta_vs_check_fold": "-94917448/31050503",
+      "selected_delta_vs_check_call": "-5755044/284867",
+      "history_likelihood": "22781/225400"
+    }
+  },
+  "descriptive_direction_over_0.5_1_2": {
+    "factor_order": [
+      "0.5",
+      "1",
+      "2"
+    ],
+    "direction": {
+      "training_selected_frozen_policy": "decreasing",
+      "manual_reference_frozen_policy": "decreasing",
+      "selected_minus_manual_reference": "decreasing",
+      "selected_delta_vs_check_fold": "decreasing",
+      "selected_delta_vs_check_call": "decreasing",
+      "history_likelihood": "increasing"
+    },
+    "qualification": "descriptive_only_no_improvement_claim"
+  },
+  "claims_not_made": [
+    "no new optimal policy, no policy improvement and no ranking reversal is claimed regardless of the outcome",
+    "no independent real-opponent validation, no bb per 100, no profitability and no GTO claim",
+    "the perturbed combos are declared synthetic variations of a handwritten illustrative range, not observed frequencies"
+  ],
+  "strategy_eligible": false,
+  "advice_emitted": false
+}
