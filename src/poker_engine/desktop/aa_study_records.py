@@ -12,7 +12,7 @@ the decimal readings exist for display only.
 """
 
 from datetime import datetime, timezone
-from decimal import Decimal, localcontext
+from decimal import Decimal, InvalidOperation, localcontext
 from fractions import Fraction
 import hashlib
 import json
@@ -38,6 +38,26 @@ MAX_RECENT = 30
 EXACT_ENCODING = "exact_rational_string_n_over_d"
 OUTCOMES = ("frozen_policy", "check_fold", "check_call")
 BOOK_NAMES = ("manual_reference", "training_selected")
+CURRENT = "CURRENT"
+PREVIEW = "PREVIEW_NOT_SAVED"
+HISTORICAL = "HISTORICAL_UNVERIFIED"
+INVALID = "INVALID"
+IDENTITY_KEYS = (
+    "source_type", "example_id", "report_sha256", "protocol_sha256",
+    "input_sha256", "study_protocol_sha256", "experiment_id", "parent_head",
+    "study_group", "study_world", "policy_book_sha256", "world_scenario_sha256",
+    "source_revision", "bound_record_id", "bound_input_sha256", "note")
+VIEW_KEYS = ("source", "factors", "table_context", "claims", "missing",
+             "decision")
+DECISION_KEYS = ("strategy_eligible", "advice_emitted", "live_advice")
+CONTEXT_KEYS = ("source_type", "scope_label", "hero_seat", "hero_cards",
+                "board_cards", "history", "unit", "rules_summary",
+                "pot_at_decision", "pot_components", "to_call", "root_actions",
+                "synthetic_assumption", "missing")
+HERO_LABEL = {"manual_reference": "手工参考策略本",
+              "training_selected": "训练选中策略本"}
+BOOK_LABEL = {"manual_reference": "手工参考策略", "training_selected": "训练选中策略"}
+UNIT = "chips"
 CLAIMS = (
     "本示例是固定输入的合成研究，不是本桌数据，也不是任何一手真实牌局。",
     "条件净 EV 的单位是筹码（chips）；小数仅供参考展示，精确值以分数为准，"
@@ -106,7 +126,12 @@ def display(value):
         return f"{Decimal(value.numerator) / Decimal(value.denominator):.4f}"
 
 
-def amount(value, unit="chips"):
+def amount(value, unit=UNIT):
+    """Exact amount envelope; a declared Decimal is converted exactly."""
+    if isinstance(value, Decimal):
+        if not value.is_finite():
+            raise StudyRecordError("金额必须是有限数值")
+        value = Fraction(value)
     if not isinstance(value, Fraction):
         raise StudyRecordError("精确数值必须是分数")
     return {"exact": str(value), "display": display(value), "unit": unit}
@@ -147,6 +172,167 @@ def declared_path(value, label):
     if name is None or name.startswith("/") or not name.endswith(".json"):
         raise StudyRecordError(f"{label}不是受支持的仓库内相对路径")
     return name.rsplit("/", 1)[-1]
+
+
+def parse_declared_amount(value, label):
+    """Exact decimal reading of one declared amount string."""
+    if not isinstance(value, str):
+        raise StudyRecordError(f"{label}必须是十进制字符串")
+    try:
+        number = Decimal(value)
+    except InvalidOperation:
+        raise StudyRecordError(f"{label}不是合法数值") from None
+    if not number.is_finite() or number < 0:
+        raise StudyRecordError(f"{label}必须是有限非负数")
+    return number
+
+
+def replay_public_history(history, hero_seat, seat_ids):
+    """Street wagers and the current bet implied by the declared public history.
+
+    Display arithmetic only: it re-states what the verified input file declares
+    and never calls the solver or the settlement kernel.
+    """
+    street = {seat: Decimal(0) for seat in seat_ids}
+    current_bet = Decimal(0)
+    for item in history:
+        actor, kind = item["actor"], item["kind"]
+        if actor not in street:
+            raise StudyRecordError("示例输入的公开历史引用了未知座位")
+        if kind in ("bet", "raise"):
+            street[actor] = parse_declared_amount(item["target"], "公开历史金额")
+            current_bet = street[actor]
+        elif kind == "call":
+            street[actor] = current_bet
+        elif kind != "fold":
+            raise StudyRecordError("示例输入的公开历史含不支持的动作")
+    return street, current_bet
+
+
+def parse_action_key(segment):
+    """Decode one `actor:kind[:target]` public-history segment."""
+    parts = segment.split(":")
+    if len(parts) not in (2, 3) or not parts[0].isdigit():
+        raise StudyRecordError("终局路径键格式不受支持")
+    actor, kind = int(parts[0]), parts[1]
+    target = Decimal(0)
+    if len(parts) == 3:
+        if kind not in ("bet", "raise"):
+            raise StudyRecordError("只有下注/加注才带金额")
+        try:
+            target = Decimal(parts[2])
+        except InvalidOperation:
+            raise StudyRecordError("终局路径键金额不是合法数值") from None
+    return actor, kind, target
+
+
+def build_table_context(raw_input, report):
+    """Minimal synthetic experiment context, derived from verified sources.
+
+    Cards, history, amounts and both books' root actions come from the pinned
+    input file and the validated report only; nothing is taken from an observed
+    hand, and no policy is re-planned for display.
+    """
+    document = parse_json(raw_input, "示例输入")
+    keys = ("schema_version", "mode", "range_start", "range_assumptions",
+            "model_assumptions", "rules", "seats", "hero_seat", "hero_cards",
+            "board_cards", "action_order", "ranges", "models",
+            "aggression_targets", "max_aggressions", "history", "other_fees")
+    exact_keys(document, keys, "示例输入")
+    hero_seat = document["hero_seat"]
+    hero_cards = document["hero_cards"]
+    board_cards = document["board_cards"]
+    history = document["history"]
+    seats = document["seats"]
+    if (not isinstance(hero_cards, list) or len(hero_cards) != 2
+            or not isinstance(board_cards, list) or len(board_cards) != 5
+            or not all(isinstance(card, str) and len(card) == 2
+                       for card in hero_cards + board_cards)):
+        raise StudyRecordError("示例输入的手牌或公共牌不受支持")
+    seat_ids = [item["seat_id"] for item in seats]
+    street, current_bet = replay_public_history(history, hero_seat, seat_ids)
+    committed = sum((parse_declared_amount(item["hand_committed"], "各座已投入")
+                     for item in seats), Decimal(0))
+    street_total = sum(street.values(), Decimal(0))
+    pot = committed + street_total
+    to_call = current_bet - street[hero_seat]
+    if to_call < 0:
+        raise StudyRecordError("示例输入的公开历史与 Hero 投入不一致")
+    actions = []
+    for book in BOOK_NAMES:
+        actions.append({
+            "book": book,
+            "label": BOOK_LABEL[book],
+            "policy_book_sha256": next(
+                item["policy_book_sha256_before"] for item in report["frozen_books"]
+                if item["name"] == book),
+            "action": root_action_of(report, book, hero_seat),
+            "synthetic_assumption": True,
+        })
+    for item in actions:
+        action = item["action"]
+        target = parse_declared_amount(action["target"], "根动作金额")
+        if action["kind"] in ("bet", "raise"):
+            additional = target - street[hero_seat]
+        elif action["kind"] == "call":
+            additional = to_call
+        else:
+            additional = Decimal(0)
+        item["raise_to"] = (str(target)
+                            if action["kind"] in ("bet", "raise") else None)
+        item["additional_chips"] = str(additional)
+        item["amount_reading"] = (
+            f"加注到 {target}（本街追加 {additional}）"
+            if action["kind"] in ("bet", "raise")
+            else f"跟注（本街追加 {additional}）" if action["kind"] == "call"
+            else f"{action['kind']}（本街追加 {additional}）")
+    return {
+        "source_type": "SYNTHETIC_STUDY_EXAMPLE",
+        "scope_label": "合成实验局面 · 非本桌 · 非真实牌局",
+        "hero_seat": hero_seat,
+        "hero_cards": list(hero_cards),
+        "board_cards": list(board_cards),
+        "history": [{"actor": item["actor"], "kind": item["kind"],
+                     "target": str(item["target"])} for item in history],
+        "unit": UNIT,
+        "rules_summary": {
+            "table_size": document["rules"]["table_size"],
+            "small_blind": document["rules"]["small_blind"],
+            "big_blind": document["rules"]["big_blind"],
+            "rake_percent": document["rules"]["rake_percent"],
+        },
+        "pot_at_decision": amount(pot),
+        "pot_components": {
+            "committed_before_street": str(committed),
+            "street_wagers_from_history": str(street_total),
+            "definition": "各座已投入 + 公开历史的本街投入（按示例输入声明相加，未调用引擎）",
+        },
+        "to_call": amount(to_call),
+        "root_actions": actions,
+        "synthetic_assumption": True,
+        "missing": [
+            "局面来自固定示例输入，不是任何观测到的牌局。",
+            "底池由示例输入声明相加得出，不代表真实抽水或封顶。",
+        ],
+    }
+
+
+def root_action_of(report, book, hero_seat):
+    """The frozen book's first Hero action, read off its reached paths."""
+    choices = set()
+    for world in report["worlds"]:
+        for path in world["books"][book]["terminal_paths"]:
+            if path["status"] != "REACHED":
+                continue
+            for segment in path["history_key"].split("|"):
+                actor, kind, target = parse_action_key(segment)
+                if actor == hero_seat:
+                    choices.add((kind, str(target)))
+                    break
+    if len(choices) != 1:
+        raise StudyRecordError("冻结策略本的根动作无法唯一确定")
+    kind, target = next(iter(choices))
+    return {"actor": hero_seat, "kind": kind, "target": target}
 
 
 def read_text(path, label, maximum=MAX_REPORT_BYTES):
@@ -445,7 +631,7 @@ def factor_sentence(factor, reading, delta):
             f"差 {display(delta)} 筹码（{verdict}该基线）。")
 
 
-def build_view(example, report):
+def build_view(example, report, raw_input):
     """Numbers-first display model; every sentence is computed from values."""
     readings = report["readings_by_factor"]
     factors = []
@@ -540,6 +726,7 @@ def build_view(example, report):
             },
         },
         "factors": factors,
+        "table_context": build_table_context(raw_input, report),
         "claims": list(CLAIMS),
         "missing": list(MISSING),
         "decision": {
@@ -648,11 +835,14 @@ class AAStudyRecordStore:
     def view(self, example_id):
         """Read-only preview of a controlled example; nothing is persisted."""
         example = self._example(example_id)
-        report, _ = self._validated(example, self._source_bytes(example))
+        raw = self._source_bytes(example)
+        report, _ = self._validated(example, raw)
         return {"record_id": None, "source_type": example["source_type"],
-                "content_status": "PREVIEW_NOT_SAVED",
+                "content_status": PREVIEW,
+                "display_permitted": True,
+                "reason": None,
                 "identity": self._identity(example, report),
-                "view": build_view(example, report)}
+                "view": build_view(example, report, raw["input"])}
 
     def _identity(self, example, report):
         return {
@@ -679,7 +869,8 @@ class AAStudyRecordStore:
 
     def save(self, example_id):
         example = self._example(example_id)
-        report, _ = self._validated(example, self._source_bytes(example))
+        raw = self._source_bytes(example)
+        report, _ = self._validated(example, raw)
         record_id = (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
                      + "-" + uuid.uuid4().hex[:12])
         document = {
@@ -688,14 +879,14 @@ class AAStudyRecordStore:
             "saved_at": now(),
             "implementation_version": IMPLEMENTATION_VERSION,
             "identity": self._identity(example, report),
-            "view": build_view(example, report),
+            "view": build_view(example, report, raw["input"]),
             "strategy_eligible": False,
             "advice_emitted": False,
         }
         with self.lock:
             folder = self._folder_for_write(record_id)
             self._write(folder / "record.json", document)
-        return self._present(document, "CURRENT")
+        return self._present(document, CURRENT)
 
     def _folder_for_write(self, record_id):
         root = self._root()
@@ -725,9 +916,44 @@ class AAStudyRecordStore:
                    "研究记录")
         if (document["schema_version"] != SCHEMA_VERSION
                 or document["record_id"] != record_id
+                or not isinstance(document["saved_at"], str)
+                or not document["saved_at"]
+                or document["implementation_version"] != IMPLEMENTATION_VERSION
                 or document["strategy_eligible"] is not False
                 or document["advice_emitted"] is not False):
             raise StudyRecordError("研究记录的版本或身份与文件名不一致")
+        identity = exact_keys(document["identity"], IDENTITY_KEYS, "研究记录身份")
+        if (identity["source_type"] != "SYNTHETIC_STUDY_EXAMPLE"
+                or identity["bound_record_id"] is not None
+                or identity["source_revision"] != 1
+                or not isinstance(identity["experiment_id"], str)
+                or not identity["experiment_id"]
+                or not isinstance(identity["study_group"], str)
+                or not identity["study_group"]
+                or not isinstance(identity["study_world"], str)
+                or not identity["study_world"]):
+            raise StudyRecordError("研究记录身份不受支持")
+        for key in ("report_sha256", "protocol_sha256", "input_sha256",
+                    "study_protocol_sha256", "bound_input_sha256"):
+            hex_id(identity[key], f"研究记录身份 {key}")
+        hex_id(identity["parent_head"], "研究记录身份 parent_head", HEX40)
+        policies = identity["policy_book_sha256"]
+        if (not isinstance(policies, dict) or sorted(policies) != sorted(BOOK_NAMES)
+                or any(hex_id(value, "研究记录身份 策略本哈希") != value
+                       for value in policies.values())):
+            raise StudyRecordError("研究记录身份缺少完整的策略本哈希")
+        worlds = identity["world_scenario_sha256"]
+        if not isinstance(worlds, list) or len(worlds) < 2:
+            raise StudyRecordError("研究记录身份缺少世界哈希")
+        for value in worlds:
+            hex_id(value, "研究记录身份 世界哈希")
+        view = exact_keys(document["view"], VIEW_KEYS, "研究记录内容")
+        decision = exact_keys(view["decision"], DECISION_KEYS, "研究记录决策状态")
+        if any(decision[key] is not False for key in DECISION_KEYS):
+            raise StudyRecordError("研究记录不能被标记为可实战或已产生建议")
+        context = exact_keys(view["table_context"], CONTEXT_KEYS, "研究记录实验局面")
+        if context["source_type"] != "SYNTHETIC_STUDY_EXAMPLE":
+            raise StudyRecordError("研究记录的实验局面不是合成来源")
         return document
 
     def recent(self):
@@ -739,34 +965,72 @@ class AAStudyRecordStore:
             try:
                 document = self._load(folder.name)
             except StudyRecordError as exc:
-                items.append({"record_id": folder.name, "content_status": "INVALID",
-                              "reason": str(exc), "saved_at": None,
-                              "source_type": None, "title": None,
-                              "example_id": None})
+                items.append(self._invalid_envelope(folder.name, str(exc)))
                 continue
-            items.append(self._envelope(document,
-                                        self._status(document)))
+            status, reason = self._verify(document)
+            envelope = self._envelope(document, status)
+            envelope["display_permitted"] = status == CURRENT
+            envelope["reason"] = reason
+            items.append(envelope)
         return {"items": items, "scope": LINEAGE, "max_records": MAX_RECENT}
 
     def get(self, record_id):
-        document = self._load(record_id)
-        return self._present(document, self._status(document))
+        self._folder(record_id)  # an unknown record id stays an error
+        try:
+            document = self._load(record_id)
+        except StudyRecordError as exc:
+            return self._invalid_envelope(record_id, str(exc))
+        status, reason = self._verify(document)
+        return self._present(document, status, reason)
 
-    def _status(self, document):
+    def _invalid_envelope(self, record_id, reason):
+        return {
+            "record_id": record_id,
+            "saved_at": None,
+            "content_status": INVALID,
+            "display_permitted": False,
+            "reason": reason,
+            "identity": None,
+            "view": None,
+            "source_type": None,
+            "example_id": None,
+            "title": None,
+            "source_revision": None,
+            "report_sha256": None,
+            "scope": LINEAGE,
+            "strategy_eligible": False,
+            "advice_emitted": False,
+        }
+
+    def _verify(self, document):
+        """Re-derive the record from the verified source; never trust the file.
+
+        The saved record only ever holds an identity and a display view. Both are
+        recomputed here from the pinned, hash-checked source, so a record whose
+        numbers, labels, binding or example were edited on disk cannot come back
+        as a current result. When the registered source itself is no longer
+        available or no longer matches, the record is kept on disk but can only
+        be reported as unverified history.
+        """
         identity = document["identity"]
         try:
             example = self._example(identity["example_id"])
-        except StudyRecordError:
-            return "INVALID"
+        except StudyRecordError as exc:
+            return INVALID, f"记录绑定的示例未登记：{exc}"
         try:
-            current = self._source_bytes(example)
+            raw = self._source_bytes(example)
         except StudyRecordError:
-            return "SUPERSEDED_SOURCE"
-        if (digest(current["report"]) != identity["report_sha256"]
-                or digest(current["protocol"]) != identity["protocol_sha256"]
-                or digest(current["input"]) != identity["input_sha256"]):
-            return "SUPERSEDED_SOURCE"
-        return "CURRENT"
+            return HISTORICAL, ("登记的示例源已被替换或不可用：本条记录保留文件，"
+                                "但无法再与已验证来源核对，仅作历史留存。")
+        try:
+            report, _ = self._validated(example, raw)
+        except StudyRecordError as exc:
+            return INVALID, f"示例来源未通过校验：{exc}"
+        if identity != self._identity(example, report):
+            return INVALID, "记录身份与已验证来源不一致（可能被改写或来自旧版本）。"
+        if document["view"] != build_view(example, report, raw["input"]):
+            return INVALID, "记录内容与已验证来源重建的结果不一致（可能被改写或来自旧版本）。"
+        return CURRENT, None
 
     def _envelope(self, document, status):
         identity = document["identity"]
@@ -783,16 +1047,15 @@ class AAStudyRecordStore:
             "report_sha256": identity.get("report_sha256"),
         }
 
-    def _present(self, document, status):
+    def _present(self, document, status, reason=None):
         envelope = self._envelope(document, status)
         envelope["identity"] = document["identity"]
-        envelope["view"] = document["view"]
+        envelope["display_permitted"] = status == CURRENT
+        envelope["view"] = document["view"] if envelope["display_permitted"] else None
+        envelope["reason"] = reason
         envelope["scope"] = LINEAGE
         envelope["strategy_eligible"] = False
         envelope["advice_emitted"] = False
-        if status == "SUPERSEDED_SOURCE":
-            envelope["reason"] = ("登记的研究报告已在提交中被替换："
-                                  "本条记录保留保存时的内容，仅作历史展示。")
         return envelope
 
     def close(self):

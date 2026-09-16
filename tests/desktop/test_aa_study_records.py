@@ -236,16 +236,21 @@ def test_report_declared_path_strings_are_compared_but_never_opened(tmp_path):
     assert outside.read_text(encoding="utf-8") == "{}"
 
 
-def test_superseded_source_keeps_the_saved_content_as_history(tmp_path):
+def test_superseded_source_keeps_the_file_but_never_shows_it_as_current(tmp_path):
+    """A replaced source cannot be re-checked, so the record is unverified history."""
     instance, root, _ = store(tmp_path)
     saved = instance.save(EXAMPLE)
     report = root / "strategy-diag-c-range-experiment-v1.json"
     report.write_bytes(report.read_bytes() + b"\n")
     reopened = instance.get(saved["record_id"])
-    assert reopened["content_status"] == "SUPERSEDED_SOURCE"
-    assert reopened["view"] == saved["view"]
-    assert reopened["identity"] == saved["identity"]
+    assert reopened["content_status"] == "HISTORICAL_UNVERIFIED"
+    assert reopened["display_permitted"] is False
+    assert reopened["view"] is None
     assert "历史" in reopened["reason"]
+    # The file itself is preserved: the saved bytes are still on disk.
+    assert saved["view"] == json.loads((tmp_path / "records" / "study-records"
+                                        / saved["record_id"] / "record.json")
+                                       .read_text(encoding="utf-8"))["view"]
 
 
 def test_records_are_independent_and_never_join_the_frame_namespace(tmp_path):
@@ -270,8 +275,10 @@ def test_record_files_must_stay_inside_the_supported_structure(tmp_path):
     document["unexpected"] = 1
     (folder / "record.json").write_text(json.dumps(document, ensure_ascii=False),
                                         encoding="utf-8", newline="\n")
-    with pytest.raises(StudyRecordError):
-        instance.get(saved["record_id"])
+    opened = instance.get(saved["record_id"])
+    assert opened["content_status"] == "INVALID"
+    assert opened["view"] is None and opened["display_permitted"] is False
+    assert opened["reason"]
     assert instance.recent()["items"][0]["content_status"] == "INVALID"
 
 
@@ -281,13 +288,14 @@ def test_oversized_and_duplicate_key_records_are_rejected(tmp_path):
     folder = tmp_path / "records" / "study-records" / saved["record_id"]
     (folder / "record.json").write_text("x" * (module.MAX_REPORT_BYTES + 1),
                                         encoding="utf-8", newline="\n")
-    with pytest.raises(StudyRecordError):
-        instance.get(saved["record_id"])
+    oversized = instance.get(saved["record_id"])
+    assert oversized["content_status"] == "INVALID" and oversized["view"] is None
     (folder / "record.json").write_text(
         '{"schema_version": 1, "schema_version": 1}', encoding="utf-8",
         newline="\n")
-    with pytest.raises(StudyRecordError):
-        instance.get(saved["record_id"])
+    duplicated = instance.get(saved["record_id"])
+    assert duplicated["content_status"] == "INVALID"
+    assert duplicated["view"] is None
 
 
 def test_unregistered_example_and_missing_directory_are_rejected(tmp_path):
@@ -360,3 +368,148 @@ def test_view_model_is_plain_json_and_display_values_are_read_only(tmp_path):
     shown = factor["deltas"]["vs_manual_reference"]["display"]
     assert f"{float(expected):.4f}" == shown
     assert deepcopy(saved) == saved
+
+
+def record_path(tmp_path, record_id):
+    return (tmp_path / "records" / "study-records" / record_id / "record.json")
+
+
+def rewrite_record(tmp_path, record_id, mutate):
+    path = record_path(tmp_path, record_id)
+    document = json.loads(path.read_text(encoding="utf-8"))
+    mutate(document)
+    path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8", newline="\n")
+    return document
+
+
+def view_is_displayable(opened):
+    """A record is only usable when the server vouches for a complete view."""
+    return (opened.get("content_status") == "CURRENT"
+            and opened.get("display_permitted") is True
+            and isinstance(opened.get("view"), dict))
+
+
+def test_reopening_a_saved_record_revalidates_the_saved_content(tmp_path):
+    """A saved view must be re-derived, never returned on the record's word."""
+    instance, _, _ = store(tmp_path)
+    saved = instance.save(EXAMPLE)
+    reopened = instance.get(saved["record_id"])
+    assert view_is_displayable(reopened)
+    assert reopened["view"] == saved["view"]
+    assert reopened["identity"] == saved["identity"]
+
+
+def tamper_display(document):
+    document["view"]["factors"][1]["deltas"]["vs_manual_reference"][
+        "display"] = "999999.0000"
+
+
+def tamper_exact(document):
+    document["view"]["factors"][1]["deltas"]["vs_manual_reference"][
+        "exact"] = "1/1000"
+
+
+def tamper_exact_and_display(document):
+    document["view"]["factors"][1]["deltas"]["vs_manual_reference"].update(
+        {"exact": "1/1000", "display": "0.0010"})
+
+
+def tamper_path_contribution(document):
+    document["view"]["factors"][1]["paths"][0]["difference"]["exact"] = "1/2"
+
+
+def tamper_identity_binding(document):
+    document["identity"]["bound_record_id"] = ISSUE_LIKE
+    document["identity"]["source_type"] = "OBSERVED_HAND"
+    document["identity"]["policy_book_sha256"] = {}
+
+
+def tamper_example(document):
+    document["identity"]["example_id"] = "not-registered"
+
+
+def tamper_nested_decision(document):
+    document["view"]["decision"]["strategy_eligible"] = True
+
+
+def tamper_top_level_false(document):
+    document["advice_emitted"] = True
+
+
+def tamper_nested_structure(document):
+    document["view"]["factors"][1]["outcomes"] = []
+
+
+def tamper_factor_count(document):
+    document["view"]["factors"] = document["view"]["factors"][:1]
+
+
+def tamper_source_hash(document):
+    document["identity"]["input_sha256"] = "0" * 64
+
+
+def tamper_world_hash(document):
+    document["identity"]["world_scenario_sha256"] = ["0" * 64]
+
+
+@pytest.mark.parametrize("mutate", [
+    tamper_display, tamper_exact, tamper_exact_and_display,
+    tamper_path_contribution, tamper_identity_binding, tamper_example,
+    tamper_nested_decision, tamper_top_level_false, tamper_nested_structure,
+    tamper_factor_count, tamper_source_hash, tamper_world_hash,
+])
+def test_a_tampered_record_is_never_displayed_as_a_valid_result(tmp_path, mutate):
+    instance, _, _ = store(tmp_path)
+    saved = instance.save(EXAMPLE)
+    rewrite_record(tmp_path, saved["record_id"], mutate)
+    opened = instance.get(saved["record_id"])
+    assert not view_is_displayable(opened), opened.get("content_status")
+    assert opened["view"] is None
+    assert opened["content_status"] in ("INVALID", "HISTORICAL_UNVERIFIED")
+    assert opened["reason"]
+    listed = next(item for item in instance.recent()["items"]
+                  if item["record_id"] == saved["record_id"])
+    assert listed["content_status"] in ("INVALID", "HISTORICAL_UNVERIFIED")
+
+
+def test_untampered_record_round_trips_through_disk(tmp_path):
+    """Positive control: the same fixture with no mutation stays displayable."""
+    instance, _, _ = store(tmp_path)
+    saved = instance.save(EXAMPLE)
+    document = json.loads(record_path(tmp_path, saved["record_id"]).read_text(
+        encoding="utf-8"))
+    assert document["view"] == saved["view"]
+    assert document["identity"] == saved["identity"]
+    assert view_is_displayable(instance.get(saved["record_id"]))
+
+
+def test_study_view_carries_the_minimal_experiment_context(tmp_path):
+    """The page must show the cards, the history and both fixed root actions."""
+    instance, _, _ = store(tmp_path)
+    view = instance.view(EXAMPLE)["view"]
+    context = view["table_context"]
+    assert context["source_type"] == "SYNTHETIC_STUDY_EXAMPLE"
+    assert context["hero_cards"] == ["Qs", "Qd"]
+    assert context["board_cards"] == ["2c", "4d", "7h", "9s", "Jc"]
+    assert [item["kind"] for item in context["history"]] == ["bet", "call"]
+    assert context["unit"] == "chips"
+    assert context["pot_at_decision"] == {
+        "exact": "130", "display": "130.0000", "unit": "chips"}
+    assert context["pot_components"]["committed_before_street"] == "90"
+    assert context["pot_components"]["street_wagers_from_history"] == "40"
+    assert context["to_call"] == {"exact": "20", "display": "20.0000",
+                                  "unit": "chips"}
+    actions = {item["book"]: item for item in context["root_actions"]}
+    assert sorted(actions) == ["manual_reference", "training_selected"]
+    assert actions["training_selected"]["action"]["kind"] == "raise"
+    assert actions["training_selected"]["action"]["target"] == "80"
+    assert actions["training_selected"]["raise_to"] == "80"
+    assert actions["training_selected"]["additional_chips"] == "80"
+    assert actions["manual_reference"]["action"]["kind"] == "call"
+    assert actions["manual_reference"]["additional_chips"] == "20"
+    assert all(item["synthetic_assumption"] is True
+               for item in context["root_actions"])
+    saved = instance.save(EXAMPLE)
+    reopened = instance.get(saved["record_id"])
+    assert reopened["view"]["table_context"] == context

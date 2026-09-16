@@ -92,3 +92,68 @@ JS 交互测试覆盖：示例列表与 SYNTHETIC 标记、只读预览的数值
 - 未接入真实牌局：示例与观测记录**没有**任何自动关联路径，也不打算有。
 - 未改视觉规范（复用既有 `panel` / `footnote` / `tag` / `review-picker` / `analysis-table` 样式）。
 - 未新增常驻服务、队列或通用导入平台；未改观察、人工复查与 AI 候选数据。
+
+---
+
+## 7. D-R1 补修（2026-09-16，按审查 `pullrequestreview-5220426669`）
+
+审查判定 `IMPLEMENTATION_PRESENT / D_NOT_ACCEPTED_YET`，三项补修均已按「先补失败用例、再最小修复」完成。
+
+### 7.1 P1：重开记录时真正重算，不再信任记录自称
+
+**缺陷（修复前实测，`dr1-probe-before.txt`）**：
+
+| 落盘改动 | 修复前 | 修复后 |
+| --- | --- | --- |
+| 未改动 | `CURRENT`，返回 view，display `-0.1607` | `CURRENT`，返回 view，`display_permitted=true` |
+| 只改 `display` 为 `999999.0000`（exact/hash 不变） | **`CURRENT` 且原样返回错值** | `INVALID`，**不返回 view**，`display_permitted=false` |
+| 改 `bound_record_id` / `source_type` / 策略身份 | **`CURRENT`** | `INVALID`，不返回 view |
+| `example_id` 改为未登记 | `INVALID` 但**仍返回完整 view** | `INVALID`，不返回 view |
+
+**最小修复**：`_verify()` 在 `get`/`recent` 时从**已验证的登记源**重新推导 `identity` 与 `view`，
+逐项与落盘内容比较；`identity` 缺失/非 64 位十六进制、`bound_record_id` 非空、嵌套 `decision` 非 false、
+`table_context` 非合成来源等一律判无效。源文件被替换或不可用时不再用「源 hash 正常」冒充，
+而是 `HISTORICAL_UNVERIFIED` + `display_permitted=false`（文件保留、不删除、不改写 Git 历史）。
+`INVALID` 与历史记录都**不返回 view**，前端也不渲染数值、不写成功反馈。
+
+### 7.2 P2：选择变化 / 关闭面板 / 迟到响应 / 无效结果
+
+**缺陷（修复前）**：token 只在 Load/Save/Open 开始时增加，选择变化与关闭面板不失效；
+`INVALID` 仍被渲染并给出「与保存时一致」的成功反馈。
+
+**最小修复**：新增 `invalidateStudy()`（自增 token、清空内容、隐藏、禁用保存、复位标签），
+在**新请求开始前**以及 `study-example` / `study-record-select` 的 `change`、`study-tools` 的 `toggle`（关闭）时调用；
+`renderStudy(record, token, expectedTarget)` 除 token 外还核对**目标身份**（`studyAcceptsTarget`）
+与 `display_permitted`，不满足时不渲染数值。
+
+### 7.3 P2：面板补最小实验局面
+
+`build_view()` 新增 `table_context`（来自已核对身份的登记输入与已验证报告）：
+Hero 手牌 `Qs Qd`、公牌 `2c 4d 7h 9s Jc`、公开历史「座位1 bet 20 → 座位2 call」、
+底池 130（各座已投入 90 + 本街历史投入 40）**chips**、决策点需跟注 20，
+以及两套固定策略的根动作：**手工参考策略 = 跟注（本街追加 20）**、**训练选中策略 = 加注到 80（本街追加 80）**，
+并显式标注「合成假设，不是实战指令」。底池由声明数值相加得出（`definition` 字段写明未调用引擎），
+根动作从已验证报告的**可达终局路径**唯一确定——不为展示重新规划策略。重开后逐字一致（同一字段参与 `view` 比较）。
+
+### 7.4 先红后绿
+
+| 阶段 | 结果 |
+| --- | --- |
+| 先写失败用例（后端 15 例 + JS 6 项检查） | `pytest tests/desktop/test_aa_study_records.py`：**15 failed**（其余既有 24 例通过） |
+| 最小修复后同批 | 该文件 **39 passed**；`tests/desktop/test_aa_study_ui.py` 的 JS 检查 **34/34 passed**（修复前 32 passed / 2 failed） |
+| 全仓 | **3999 passed / 1 skipped / 2 warnings，61.54 s**（D 基线 3984 = +15 例） |
+| Lint | `flake8 src tests tools` 0 项 |
+
+### 7.5 实际界面检查（本机 Chromium）
+
+| 文件 | 内容 | 大小 / sha256 前 16 |
+| --- | --- | --- |
+| `dr1-context.png` | 新实验局面区块：手牌/公牌/公开历史/底池 130/需跟注 20 + 两套根动作表（跟注 20 vs 加注到 80） | 56,203 B / `675e763d9db1411a` |
+| `dr1-invalid.png` | 落盘被改写后的记录：标签「无效记录 · 不可作为结果」+ 拒绝理由 + 身份行，**不显示任何数值**、保存按钮禁用 | 66,760 B / `00aace07eb1a0639` |
+
+浏览器限制同 §5：会话只在单条命令内保持，`127.0.0.1` 空白而 `localhost` 正常。
+
+### 7.6 本轮边界
+
+未改冻结协议与 C 数据；未新增算法、自动化、Git 工具或平台；未接触视觉/实时/采集链路；
+未删除任何记录文件；`strategy_eligible` / `advice_emitted` / `live_advice` 恒为 `false`。

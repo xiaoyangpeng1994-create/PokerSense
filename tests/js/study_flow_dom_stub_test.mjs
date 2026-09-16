@@ -8,12 +8,13 @@
 // Usage: node study_flow_dom_stub_test.mjs <base-url>
 // Output: one JSON object per line; the last line has ok/exiting verdicts.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import vm from "node:vm";
 
 const base = (process.argv[2] || "").replace(/\/$/, "");
+const recordsDir = process.argv[3] || "";
 if (!base.startsWith("http://127.0.0.1:")) {
   console.log(JSON.stringify({name: "base_url", ok: false, detail: base}));
   process.exit(2);
@@ -85,6 +86,11 @@ vm.runInContext(source, context, {filename: "study.js"});
 const run = expression => vm.runInContext(expression, context);
 const click = async id => {
   for (const handler of el(id).handlers.click || []) await handler({});
+};
+const fire = async (id, type, event = {}) => {
+  let ran = 0;
+  for (const handler of el(id).handlers[type] || []) { ran += 1; await handler(event); }
+  return ran;
 };
 const recordText = () => el("study-content").textContent;
 const feedback = () => el("study-feedback").textContent;
@@ -178,6 +184,69 @@ check("no_vision_or_capture_requests",
       `${calls.length} study calls`);
 check("post_carries_explicit_header",
       calls.filter(call => call.method === "POST").length > 0, "POST seen");
+
+// --- interaction invalidation: select change, panel close, INVALID results ---
+check("target_identity_helper",
+      run(`studyAcceptsTarget("A", "A")`) === true
+      && run(`studyAcceptsTarget("A", "B")`) === false, "studyAcceptsTarget");
+
+el("study-record-select").value = firstId;
+await run(`studyOpenRecord(${JSON.stringify(firstId)})`);
+const contextTokens = ["Qs", "2c", "加注到 80", "跟注", "公开历史", "本街追加"];
+check("experiment_context_rendered",
+      contextTokens.every(token => recordText().includes(token)),
+      `missing=${contextTokens.filter(token => !recordText().includes(token)).join(",")}`);
+
+delays.push({match: `/api/study/records/${firstId}`, ms: 600, used: false});
+const pendingOpen = run(`studyOpenRecord(${JSON.stringify(firstId)})`);
+await sleep(60);
+el("study-record-select").value = secondId;
+await fire("study-record-select", "change", {});
+await pendingOpen;
+await sleep(700);
+check("selection_change_invalidates_a_late_open",
+      run("studyCurrent") === null && recordText() === "",
+      `current=${JSON.stringify(run("studyCurrent && studyCurrent.record_id"))}`);
+check("selection_change_disables_save", el("study-save").disabled === true,
+      String(el("study-save").disabled));
+
+el("study-record-select").value = firstId;
+delays.push({match: `/api/study/records/${firstId}`, ms: 600, used: false});
+const pendingClose = run(`studyOpenRecord(${JSON.stringify(firstId)})`);
+await sleep(60);
+el("study-tools").open = false;
+await fire("study-tools", "toggle", {});
+await pendingClose;
+await sleep(700);
+check("panel_close_invalidates_a_late_open",
+      run("studyCurrent") === null && el("study-content").hidden === true,
+      `hidden=${el("study-content").hidden}`);
+
+if (recordsDir) {
+  const recordFile = join(recordsDir, "study-records", firstId, "record.json");
+  const document = JSON.parse(readFileSync(recordFile, "utf8"));
+  document.view.factors[1].deltas.vs_manual_reference.display = "999999.0000";
+  writeFileSync(recordFile, JSON.stringify(document, null, 2) + "\n", "utf8");
+  el("study-record-select").value = firstId;
+  const before = feedback();
+  await run(`studyOpenRecord(${JSON.stringify(firstId)})`);
+  const shown = recordText();
+  check("tampered_record_is_not_rendered_as_valid",
+        !shown.includes("999999") && !shown.includes("已重开")
+        && el("study-save").disabled === true, shown.slice(0, 60));
+  check("tampered_record_reports_an_invalid_or_history_state",
+        /无效|历史/.test(feedback()) && feedback() !== before,
+        feedback().slice(0, 80));
+  check("tampered_record_has_no_view",
+        run("studyCurrent") === null
+        || run("studyCurrent.view") === null, "view withheld");
+} else {
+  check("tampered_record_is_not_rendered_as_valid", false,
+        "records dir not provided");
+  check("tampered_record_reports_an_invalid_or_history_state", false,
+        "records dir not provided");
+  check("tampered_record_has_no_view", false, "records dir not provided");
+}
 
 const failed = checks.filter(item => !item.ok);
 for (const item of checks) console.log(JSON.stringify(item));

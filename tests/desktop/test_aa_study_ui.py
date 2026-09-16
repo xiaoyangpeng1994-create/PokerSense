@@ -38,8 +38,8 @@ def free_port():
 @pytest.fixture(scope="module")
 def study_server(tmp_path_factory):
     directory = tmp_path_factory.mktemp("study-ui")
-    app = aa_server.create_app(directory / "profile.json",
-                               records_dir=directory / "records")
+    records = directory / "records"
+    app = aa_server.create_app(directory / "profile.json", records_dir=records)
     port = free_port()
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port,
                                            log_level="warning"))
@@ -49,7 +49,7 @@ def study_server(tmp_path_factory):
     while not server.started and time.time() < deadline:
         time.sleep(0.05)
     assert server.started, "the local AA server did not start"
-    yield f"http://127.0.0.1:{port}"
+    yield {"base": f"http://127.0.0.1:{port}", "records": str(records)}
     server.should_exit = True
     thread.join(timeout=10)
 
@@ -58,9 +58,10 @@ def study_server(tmp_path_factory):
     NODE is None,
     reason="node is unavailable, so the shipped JS cannot be exercised here")
 def test_study_flow_drives_the_shipped_javascript(study_server):
-    proc = subprocess.run([NODE, str(HARNESS), study_server], cwd=str(REPO_ROOT),
+    proc = subprocess.run([NODE, str(HARNESS), study_server["base"],
+                           study_server["records"]], cwd=str(REPO_ROOT),
                           capture_output=True, text=True, encoding="utf-8",
-                          errors="replace", timeout=180)
+                          errors="replace", timeout=240)
     lines = [line for line in proc.stdout.splitlines() if line.strip()]
     checks = [json.loads(line) for line in lines]
     failures = [item for item in checks if not item.get("ok")]
@@ -68,7 +69,7 @@ def test_study_flow_drives_the_shipped_javascript(study_server):
         f"failed checks: {failures}\nstderr: {proc.stderr[-2000:]}")
     verdict = checks[-1]
     assert verdict["name"] == "verdict" and verdict["ok"] is True
-    assert verdict["failed"] == 0 and verdict["passed"] >= 20
+    assert verdict["failed"] == 0 and verdict["passed"] >= 30
     names = {item["name"] for item in checks}
     for required in ("wiring_ran", "preview_is_labeled_synthetic",
                      "preview_shows_readable_and_exact_values",
@@ -77,7 +78,13 @@ def test_study_flow_drives_the_shipped_javascript(study_server):
                      "late_response_does_not_overwrite",
                      "unknown_example_is_rejected",
                      "foreign_record_id_is_rejected", "no_innerhtml_used",
-                     "no_vision_or_capture_requests"):
+                     "no_vision_or_capture_requests",
+                     "experiment_context_rendered",
+                     "selection_change_invalidates_a_late_open",
+                     "panel_close_invalidates_a_late_open",
+                     "tampered_record_is_not_rendered_as_valid",
+                     "tampered_record_reports_an_invalid_or_history_state",
+                     "tampered_record_has_no_view"):
         assert required in names, f"missing check: {required}"
 
 

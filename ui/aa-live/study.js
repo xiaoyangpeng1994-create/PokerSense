@@ -10,7 +10,7 @@ let studyWired = false, studyBusy = false;
 const studyStatusLabels = {
   PREVIEW_NOT_SAVED: "示例预览 · 未保存",
   CURRENT: "已保存 · 当前版本",
-  SUPERSEDED_SOURCE: "历史记录 · 源文件已变更",
+  HISTORICAL_UNVERIFIED: "历史记录 · 来源无法再核对",
   INVALID: "无效记录 · 不可作为结果"
 };
 const studyOutcomeLabels = {frozen_policy:"冻结策略", check_fold:"过牌/弃牌基线", check_call:"过牌/跟注基线"};
@@ -28,6 +28,26 @@ const studyReachLabels = {
 function studyStatusLabel(status) { return studyStatusLabels[status] || text(status); }
 function studyAmount(value) { return value ? `${value.display} ${value.unit}` : "未知"; }
 function studyExact(value) { return value ? value.exact : "未定义"; }
+function studyAcceptsTarget(activeTarget, responseTarget) {
+  return typeof activeTarget === "string" && activeTarget !== ""
+    && activeTarget === responseTarget;
+}
+function studyDisplayable(record) {
+  return !!record && record.display_permitted === true && !!record.view
+    && (record.content_status === "CURRENT"
+        || record.content_status === "PREVIEW_NOT_SAVED");
+}
+function studyTargetOf(record) {
+  if (!record) return null;
+  return record.record_id || (record.identity && record.identity.example_id) || null;
+}
+function studyIdentityLabel(record) {
+  const identity = record && record.identity;
+  if (!identity) return "身份不可用";
+  return `示例 ${identity.example_id} · 报告 ${String(identity.report_sha256 || "").slice(0, 12)}…`
+    + ` · 策略本 ${Object.values(identity.policy_book_sha256 || {}).map(
+        value => String(value).slice(0, 8) + "…").join(" / ")}`;
+}
 function studyAcceptance(activeToken, responseToken) { return activeToken === responseToken; }
 function studyVersionOf(record) {
   return record?.content_status === "SUPERSEDED_SOURCE" ? "HISTORICAL_ONLY" : "CURRENT_ONLY";
@@ -83,6 +103,20 @@ function studyBlock(record) {
   nodes.push(studyElement("p", "footnote", `固定策略本（三世界复用，未重规划）：${books}`));
   const varied = source.varied_object || {};
   nodes.push(studyElement("p", "footnote", `唯一变化对象：座位 ${varied.target_opponent_seat} 的组合 ${(varied.target_combos || []).join("/")}，相对权重因子 ${(varied.relative_factors || []).join(" / ")}；其余范围、响应模型、桌规、公牌与行动网格未改。`));
+  const context = view.table_context;
+  if (context) {
+    nodes.push(studyElement("p", "footnote", `实验局面（${context.scope_label}）：Hero 座位 ${context.hero_seat} · 手牌 ${(context.hero_cards || []).join(" ")} · 公牌 ${(context.board_cards || []).join(" ")}`));
+    const history = (context.history || []).map(item => `座位${item.actor} ${item.kind === "bet" || item.kind === "raise" ? `${item.kind} ${item.target}` : item.kind}`);
+    nodes.push(studyElement("p", "footnote", `公开历史：${history.length ? history.join(" → ") : "无"}；底池 ${studyAmount(context.pot_at_decision)}（各座已投入 ${context.pot_components.committed_before_street} + 本街历史投入 ${context.pot_components.street_wagers_from_history}，${context.pot_components.definition}）；决策点需跟注 ${studyAmount(context.to_call)}`));
+    nodes.push(studyElement("p", "footnote", "两套固定策略在根节点的动作（合成假设，不是实战指令）："));
+    nodes.push(studyTable(["策略本", "根动作", "本街追加", "金额口径"],
+      (context.root_actions || []).map(item => [
+        item.label,
+        item.action.kind === "bet" || item.action.kind === "raise"
+          ? `加注到 ${item.action.target}` : item.action.kind === "call" ? "跟注" : item.action.kind,
+        `${item.additional_chips} ${context.unit}`,
+        item.amount_reading])));
+  }
   const rows = (view.factors || []).map(factor => [
     factor.factor_label + (factor.is_baseline ? "（原基准）" : ""),
     studyAmount((factor.outcomes || []).find(item => item.name === "frozen_policy")?.net_ev_chips),
@@ -117,21 +151,53 @@ function studyBlock(record) {
   nodes.push(studyElement("p", "footnote", "固定说明（由数值生成，不由模型临时解释）："), claims);
   return nodes;
 }
-function renderStudy(record, token) {
+function studyNotice(record) {
+  return [
+    studyElement("p", "footnote", `记录编号 ${(record && record.record_id) || "未保存"} · ${studyStatusLabel(record && record.content_status)}`),
+    studyElement("p", "error", (record && record.reason) || "该记录没有可展示的已验证结果。"),
+    studyElement("p", "footnote", `身份：${studyIdentityLabel(record)}`),
+    studyElement("p", "footnote", "原始文件已保留；这里不展示任何数值，也不允许保存或比较。")
+  ];
+}
+function renderStudy(record, token, expectedTarget) {
   if (!studyAcceptance(studyToken, token)) return false;
-  studyCurrent = record;
+  if (!studyAcceptsTarget(expectedTarget, studyTargetOf(record))) {
+    invalidateStudy("回包与请求的目标不一致，结果已丢弃。", true);
+    return false;
+  }
   const content = el("study-content");
-  if (!record || !record.view) { content.replaceChildren(); content.hidden = true; el("study-raw").textContent = "无结果"; return true; }
+  el("study-source-tag").textContent = studyStatusLabel(record.content_status);
+  if (!studyDisplayable(record)) {
+    studyCurrent = null;
+    content.replaceChildren(...studyNotice(record));
+    content.hidden = false;
+    el("study-raw").textContent = JSON.stringify({
+      source_type: record.source_type, content_status: record.content_status,
+      display_permitted: record.display_permitted, reason: record.reason,
+      identity: record.identity}, null, 2);
+    el("study-save").disabled = true;
+    return true;
+  }
+  studyCurrent = record;
   content.replaceChildren(...studyBlock(record));
   content.hidden = false;
   el("study-raw").textContent = JSON.stringify({source_type: record.source_type, content_status: record.content_status, identity: record.identity, view: record.view}, null, 2);
-  el("study-source-tag").textContent = studyStatusLabel(record.content_status);
   return true;
 }
 function studyFeedback(message, isError) {
   el("study-feedback").textContent = message;
   el("study-error").hidden = !isError;
   if (isError) el("study-error").textContent = message;
+}
+function invalidateStudy(message, isError = false) {
+  ++studyToken;  // anything already in flight is stale from here on
+  studyCurrent = null;
+  const content = el("study-content");
+  content.replaceChildren(); content.hidden = true;
+  el("study-raw").textContent = "无结果";
+  el("study-save").disabled = true;
+  el("study-source-tag").textContent = "尚未载入";
+  if (message) studyFeedback(message, isError);
 }
 async function studyRequest(path, body) {
   const options = {headers, cache: "no-store"};
@@ -162,20 +228,23 @@ async function studyLoadExample() {
 }
 async function studyLoadExampleFor(exampleId) {
   if (!exampleId) return;
-  // A newer request supersedes an older one: the token guard below decides who
-  // may paint, so a late response can never overwrite the current content.
-  const token = ++studyToken;
+  // Invalidate first: the previous content must not survive the new request,
+  // and the token guard keeps a slow earlier response from painting over it.
+  invalidateStudy("正在读取新的示例来源，旧结果已失效。", false);
+  const token = studyToken;
   try {
     const preview = await studyRequest(`/api/study/examples/${encodeURIComponent(exampleId)}/view`);
     if (!studyAcceptance(studyToken, token)) return;
-    renderStudy(preview, token);
-    el("study-save").disabled = false;
-    studyFeedback("已载入只读预览（未保存）。核对来源与数值后保存为独立记录。", false);
+    if (!renderStudy(preview, token, exampleId)) return;
+    if (studyDisplayable(preview)) {
+      el("study-save").disabled = false;
+      studyFeedback("已载入只读预览（未保存）。核对来源与数值后保存为独立记录。", false);
+    } else {
+      studyFeedback(`示例未提供可展示结果：${preview.reason || studyStatusLabel(preview.content_status)}`, true);
+    }
   } catch (error) {
     if (studyAcceptance(studyToken, token)) {
-      el("study-content").replaceChildren(); el("study-content").hidden = true;
-      el("study-raw").textContent = "无结果"; el("study-save").disabled = true;
-      studyFeedback(`示例未载入：${error.message}`, true);
+      invalidateStudy(`示例未载入：${error.message}`, true);
     }
   }
 }
@@ -183,18 +252,22 @@ async function studySave() {
   const exampleId = el("study-example").value;
   if (!exampleId || studyBusy) return;
   studyBusy = true; el("study-save").disabled = true;
-  const token = ++studyToken;
+  invalidateStudy("正在保存为独立记录，旧结果已失效。", false);
+  const token = studyToken;
   try {
     const saved = await studyRequest("/api/study/records", {example_id: exampleId});
     if (!studyAcceptance(studyToken, token)) return;
-    renderStudy(saved, token);
-    studyFeedback(`已保存为独立研究记录 ${saved.record_id}（来源类型 ${saved.source_type}，未绑定任何观测牌局）。`, false);
+    if (!renderStudy(saved, token, saved.record_id)) return;
+    if (studyDisplayable(saved)) {
+      studyFeedback(`已保存为独立研究记录 ${saved.record_id}（来源类型 ${saved.source_type}，未绑定任何观测牌局）。`, false);
+    } else {
+      studyFeedback(`保存在磁盘上，但没有可展示的已验证结果：${saved.reason || studyStatusLabel(saved.content_status)}`, true);
+    }
     await studyRefreshRecords();
   } catch (error) {
     if (studyAcceptance(studyToken, token)) {
-      el("study-content").replaceChildren(); el("study-content").hidden = true;
-      el("study-raw").textContent = "无结果"; el("study-save").disabled = false;
-      studyFeedback(`未保存：${error.message}`, true);
+      invalidateStudy(`未保存：${error.message}`, true);
+      el("study-save").disabled = false;
     }
   } finally { studyBusy = false; }
 }
@@ -223,18 +296,21 @@ async function studyRefreshRecords() {
 async function studyOpenRecord(recordId) {
   const target = recordId || el("study-record-select").value;
   if (!target) return;
-  const token = ++studyToken;
+  invalidateStudy(`正在打开记录 ${target}，旧结果已失效。`, false);
+  const token = studyToken;
   try {
     const record = await studyRequest(`/api/study/records/${encodeURIComponent(target)}`);
     if (!studyAcceptance(studyToken, token)) return;
-    renderStudy(record, token);
-    el("study-save").disabled = false;
-    studyFeedback(`已重开 ${record.record_id}：内容、标签与来源身份与保存时一致。`, false);
+    if (!renderStudy(record, token, target)) return;
+    if (studyDisplayable(record)) {
+      el("study-save").disabled = false;
+      studyFeedback(`已重开 ${record.record_id}：内容、标签与来源身份与保存时一致。`, false);
+    } else {
+      studyFeedback(`${studyStatusLabel(record.content_status)}：${record.reason || "该记录没有可展示的已验证结果。"}`, true);
+    }
   } catch (error) {
     if (studyAcceptance(studyToken, token)) {
-      el("study-content").replaceChildren(); el("study-content").hidden = true;
-      el("study-raw").textContent = "无结果";
-      studyFeedback(`记录未打开：${error.message}`, true);
+      invalidateStudy(`记录未打开：${error.message}`, true);
     }
   }
 }
@@ -243,6 +319,15 @@ if (typeof document !== "undefined" && typeof el === "function" && el("study-loa
   el("study-save").addEventListener("click", studySave);
   el("study-record-refresh").addEventListener("click", studyRefreshRecords);
   el("study-record-open").addEventListener("click", () => studyOpenRecord());
+  el("study-example").addEventListener("change", () =>
+    invalidateStudy("示例选择已变化，旧结果已失效。请重新载入。", false));
+  el("study-record-select").addEventListener("change", () =>
+    invalidateStudy("已切换记录条目，请点「重开结果」重新读取。", false));
+  el("study-tools").addEventListener("toggle", () => {
+    if (!el("study-tools").open) {
+      invalidateStudy("面板已关闭，当前结果已清空。", false);
+    }
+  });
   studyWired = true;
   studyInit().then(studyRefreshRecords);
 }
