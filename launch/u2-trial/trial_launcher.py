@@ -136,11 +136,13 @@ def serve(args):
         print("服务未能在 60 秒内就绪，未打开浏览器。", file=sys.stderr)
         return 3
     base = f"http://127.0.0.1:{port}/"
-    print(banner(base, paths, note), flush=True)
+    # The ready line is written BEFORE the banner: a caller that waits on this
+    # file must not depend on the banner being flushable in its environment.
     if args.ready_file:
         Path(args.ready_file).write_text(
             json.dumps({"base": base, "port": port, "records": str(paths["records"]),
                         "version": VERSION}), encoding="utf-8")
+    print(banner(base, paths, note), flush=True)
     if not args.no_browser:
         # Only after the service really answers, so the page never opens blank.
         webbrowser.open(base)
@@ -186,7 +188,19 @@ def main(argv=None):
     parser.add_argument("--version", action="version",
                         version=f"{VERSION} ({IMPLEMENTATION})")
     args = parser.parse_args(argv)
-    return self_check(args) if args.self_check else serve(args)
+    if args.self_check:
+        return self_check(args)
+    try:
+        return serve(args)
+    except SystemExit:
+        raise
+    except BaseException:  # noqa: BLE001 - a trial start must never fail silently
+        import traceback
+        traceback.print_exc()
+        if args.ready_file:
+            Path(str(args.ready_file) + ".error").write_text(
+                traceback.format_exc(), encoding="utf-8")
+        return 4
 
 
 if __name__ == "__main__":

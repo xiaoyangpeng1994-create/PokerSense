@@ -91,13 +91,29 @@ def test_prepare_state_never_overwrites_existing_files(tmp_path):
     assert again["records"].is_dir()
 
 
-def _wait_ready(path, timeout=60):
+def _wait_ready(path, process, timeout=90):
+    """Wait for the ready file, and report WHY the launcher gave up if it did."""
     deadline = time.time() + timeout
     while time.time() < deadline:
         if Path(path).is_file():
             return json.loads(Path(path).read_text(encoding="utf-8"))
+        if process.poll() is not None:
+            raise AssertionError(
+                f"the launcher exited with {process.returncode} before readiness; "
+                f"stderr: {(process.stderr.read() if process.stderr else '')[-2000:]}")
         time.sleep(0.2)
-    raise AssertionError("the launcher never reported readiness")
+    process.terminate()
+    output = ""
+    try:
+        process.wait(timeout=20)
+        output = (process.stdout.read() if process.stdout else "")[-1500:]
+    except subprocess.TimeoutExpired:
+        process.kill()
+    error = Path(str(path) + ".error")
+    raise AssertionError(
+        "the launcher never reported readiness; "
+        f"stdout: {output} | error file: "
+        f"{error.read_text(encoding='utf-8')[-2000:] if error.is_file() else 'none'}")
 
 
 def test_the_launcher_serves_and_reads_the_same_records_after_a_restart(tmp_path):
@@ -118,7 +134,7 @@ def test_the_launcher_serves_and_reads_the_same_records_after_a_restart(tmp_path
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             encoding="utf-8")
         try:
-            info = _wait_ready(ready)
+            info = _wait_ready(ready, process)
             bases.append(info["base"])
             rules = json.loads(urllib.request.urlopen(
                 info["base"] + "api/rules", timeout=10).read().decode("utf-8"))
