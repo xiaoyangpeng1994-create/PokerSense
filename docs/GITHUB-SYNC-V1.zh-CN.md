@@ -1,6 +1,7 @@
 # 标准 Git 同步：诊断结论与可复用入口（GITHUB-001）
 
-> 第二轮（审查 GITHUB-001-R1 后）已按 P1-A/B/C/D 与三项对齐要求返工；变更见文末「第二轮返工」。
+> 第二轮（审查 GITHUB-001-R1 后）已按 P1-A/B/C/D 与三项对齐要求返工；
+> 第三轮（审查 GITHUB-001-R2 后）已收紧**命令行入口判定**、**写入前校验**与**代理贯通**；见文末「第三轮返工」。
 
 本文件说明 **PokerSense 在 Windows 本机上让标准 `git push` 可用**所需的配置、根因证据和使用方式。
 它记录的是已验证事实，不是方案设想。
@@ -77,6 +78,15 @@ $PYTHON tools/git_sync.py --repo $REPO --branch $BRANCH --pr $PR verify
 | P1-D 判定诚实 | GIT_SYNC 与 PR_SYNC 分级；API 失败即报错；PR 复用需 OPEN+Draft+base 匹配+head 实测一致。 |
 | 对齐 1 | 不再硬编码本机代理：`--proxy` / `$POKERSENSE_GIT_PROXY`，否则继承环境。 |
 | 对齐 2 | 本文件按 `publish()` 真实职责改写。 |
+
+### 第三轮返工（审查 GITHUB-001-R2）
+
+| 项 | 变更 |
+| --- | --- |
+| **入口判定（P1-a）** | `main()` 使用**单一成功判据**：给了 `--pr` 时以 `PR_SYNC_PASS` 为准（两方一致**不再**算成功）；命令报错/超时/**清理失败**（`kill_ok=false`）一律非零，**不被「SHA 恰好相等」掩盖**；无 `--pr` 时才允许以两方结果成功并保留 `PR_NOT_CHECKED`。`verify` 保留 `local_ref_error`、`remote_read_error`、`pr_error`，不再只显示空 SHA。PR 的仓库/head 分支/OPEN/Draft/base 校验移到**入口共用路径**，不只在 `publish()` 内。 |
+| **写入前校验（P1-b）** | 远端身份**失败关闭**：读取失败或为空即**拒绝**写入（此前空值会跳过检查）；远端 URL 用实际 **host + 仓库路径**解析（含 scp 式 `user@host`）并与期望值比对；push 前解析并核对**完整 source ref / 目标 ref / 已批准 SHA**，并校验 HEAD 与 source ref 一致；不匹配则在写入前 `blocked_before_write`。 |
+| **代理贯通（P2）** | 引入单一执行上下文 `Ctx(repo, proxy, timeout, progress)`；代理随上下文到达 `resolve_repo` / `remote_url` / `rev-parse` / **push** / **ls-remote** / **pr view** / **pr list** / **pr create**，`main verify --proxy` 同样生效；**不回写全局环境**。 |
+| 如实保留的限制 | `terminate_owned_group` 的 `kill_scope` 明确标注为 `group-leader-only`：`survivors` **只证明组长退出**，**不**证明全部后代退出；整树证明留待后续补测试。 |
 
 ### 它不做（硬边界）
 

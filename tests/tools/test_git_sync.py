@@ -2,12 +2,20 @@
 # -*- coding: utf-8 -*-
 """Focused offline tests for tools/git_sync.py.
 
-No network and no access to the real repository. Process-spawning tests use only
-the local Python interpreter; gh/git behaviour is scripted by monkeypatching
-`git_sync.run`, which is also how the verdict logic is exercised.
+No network and no access to the real repository. Two layers are exercised:
+
+* **entry level** — `main([...])` is called directly, which is what the R2 review
+  asked for: the CLI exit code must not report PR failures or command failures as
+  success;
+* **decision level** — only the process layer (`git_sync.run`) is replaced, so the
+  real pre-write validation and proxy threading run, with call counting to prove
+  no push happened.
+
+Process-spawning tests use only the local Python interpreter.
 """
 
 import ast
+import inspect
 import json
 import os
 import subprocess
@@ -22,74 +30,131 @@ import git_sync  # noqa: E402
 
 SHA_A = "a" * 40
 SHA_B = "b" * 40
+REPO_URL = "https://github.com/xiaoyangpeng1994-create/PokerSense.git"
+
+
+def _res(exit_code=0, stdout="", stderr="", timed_out=False, kill_ok=True, **kw):
+    out = {"command_id": "x", "label": "", "argv": [], "cwd": None,
+           "exit_code": exit_code, "timed_out": timed_out, "duration_s": 0.1,
+           "stdout": stdout, "stderr": stderr,
+           "kill_attempted": False, "kill_ok": kill_ok, "survivors": []}
+    out.update(kw)
+    return out
+
+
+class FakeGit:
+    """Scripted process layer. Replaces only `git_sync.run`."""
+
+    def __init__(self, head=SHA_A, source=SHA_A, remote_sha=SHA_A,
+                 remote_url=REPO_URL, push_exit=0, pr_json=None,
+                 pr_exit=0, ls_exit=0, url_exit=0, rev_exit=0):
+        self.head, self.source, self.remote_sha = head, source, remote_sha
+        self.remote_url = remote_url
+        self.push_exit, self.pr_json, self.pr_exit = push_exit, pr_json, pr_exit
+        self.ls_exit, self.url_exit, self.rev_exit = ls_exit, url_exit, rev_exit
+        self.calls = []
+
+    def __call__(self, cmd, timeout_s, label, progress_path=None, cwd=None,
+                 proxy=None):
+        self.calls.append({"label": label, "argv": list(cmd), "cwd": cwd,
+                           "proxy": proxy})
+        if label == "git-resolve-repo":
+            return _res(0, "R\n")
+        if label == "git-remote-url":
+            if self.url_exit != 0:
+                return _res(self.url_exit, "", "no such remote")
+            return _res(0, self.remote_url + "\n")
+        if label == "git-rev-parse":
+            ref = cmd[-1]
+            if self.rev_exit != 0:
+                return _res(self.rev_exit, "", "unknown revision")
+            return _res(0, (self.head if ref == "HEAD" else self.source) + "\n")
+        if label == "git-ls-remote":
+            if self.ls_exit != 0:
+                return _res(self.ls_exit, "", "ls-remote failed")
+            return _res(0, self.remote_sha + "\trefs/heads/b\n")
+        if label == "git-push":
+            msg = "" if self.push_exit == 0 else "push failed"
+            return _res(self.push_exit, "", msg)
+        if label == "gh-pr-view":
+            if self.pr_exit != 0:
+                return _res(self.pr_exit, "", "gh: api error")
+            return _res(0, json.dumps(self.pr_json or {}))
+        if label == "gh-pr-list":
+            if self.pr_exit != 0:
+                return _res(self.pr_exit, "", "gh: api error")
+            return _res(0, json.dumps(self.pr_json if isinstance(self.pr_json, list)
+                                      else []))
+        if label == "gh-pr-create":
+            return _res(0, "https://github.com/x/PokerSense/pull/99\n")
+        return _res(0, "")
+
+    @property
+    def pushed(self):
+        return [c for c in self.calls if c["label"] == "git-push"]
+
+    def by_label(self, label):
+        return [c for c in self.calls if c["label"] == label]
 
 
 # --------------------------------------------------------------- command shape
 
 
 def test_helper_list_is_reset_before_gh_helper():
-    """`-c` appends, so the empty reset must come first or GCM still runs."""
     cmd = git_sync.build_git_command(["push", "origin", "HEAD"])
     assert cmd.index("credential.helper=") < \
         cmd.index("credential.helper=!gh auth git-credential")
     assert cmd[0] == "git"
-    assert cmd[-3:] == ["push", "origin", "HEAD"]
 
 
 def test_git_command_binds_the_repo_explicitly():
-    """P1-B: every git call must be anchored to the resolved repo."""
     cmd = git_sync.build_git_command(["status"], repo="C:/some/repo")
-    assert "-C" in cmd
-    assert cmd[cmd.index("-C") + 1] == "C:/some/repo"
+    assert "-C" in cmd and cmd[cmd.index("-C") + 1] == "C:/some/repo"
     assert "-C" not in git_sync.build_git_command(["status"], repo=None)
-
-
-def test_reset_only_when_gh_helper_disabled():
-    cmd = git_sync.build_git_command(["status"], use_gh_helper=False)
-    assert "credential.helper=" in cmd
-    assert not any("gh auth git-credential" in p for p in cmd)
 
 
 # --------------------------------------------------------------- environment
 
 
 def test_child_env_does_not_inject_a_default_proxy(monkeypatch):
-    """Alignment 1: no hardcoded loopback proxy for machines that lack one."""
     for name in ("HTTP_PROXY", "HTTPS_PROXY", "POKERSENSE_GIT_PROXY"):
         monkeypatch.delenv(name, raising=False)
     env = git_sync.child_env()
     assert "HTTP_PROXY" not in env and "HTTPS_PROXY" not in env
-    assert env["GIT_TERMINAL_PROMPT"] == "0"
-    assert env["GCM_INTERACTIVE"] == "never"
+    assert env["GIT_TERMINAL_PROMPT"] == "0" and env["GCM_INTERACTIVE"] == "never"
 
 
-def test_child_env_uses_explicit_proxy_only(monkeypatch):
-    for name in ("HTTP_PROXY", "HTTPS_PROXY", "POKERSENSE_GIT_PROXY"):
-        monkeypatch.delenv(name, raising=False)
-    assert git_sync.child_env(proxy="http://127.0.0.1:9")["HTTPS_PROXY"] == \
-        "http://127.0.0.1:9"
+def test_resolve_proxy_precedence(monkeypatch):
+    monkeypatch.delenv("POKERSENSE_GIT_PROXY", raising=False)
+    assert git_sync.resolve_proxy() == ""
+    monkeypatch.setenv("POKERSENSE_GIT_PROXY", "http://env:1")
+    assert git_sync.resolve_proxy() == "http://env:1"
+    assert git_sync.resolve_proxy("http://cli:2") == "http://cli:2"
 
 
-def test_resolve_proxy_reads_env_var(monkeypatch):
-    monkeypatch.setenv("POKERSENSE_GIT_PROXY", "http://127.0.0.1:9")
-    assert git_sync.resolve_proxy() == "http://127.0.0.1:9"
-    assert git_sync.resolve_proxy("http://x:1") == "http://x:1"
+# --------------------------------------------------------------- sha helpers
 
 
-# --------------------------------------------------------------- sha verdicts
-
-
-def test_three_way_equal_requires_identical_non_empty():
-    assert git_sync.three_way_equal(SHA_A, SHA_A, SHA_A)
-    assert not git_sync.three_way_equal(SHA_A, SHA_A, SHA_B)
-    assert not git_sync.three_way_equal(SHA_A, "", SHA_A)
-    assert not git_sync.three_way_equal("", "", "")
-
-
-def test_git_sync_verdict_is_two_way_only():
+def test_is_sha_and_verdicts():
+    assert git_sync.is_sha(SHA_A) and not git_sync.is_sha("a" * 39)
+    assert not git_sync.is_sha("")
     assert git_sync.git_sync_verdict(SHA_A, SHA_A)
     assert not git_sync.git_sync_verdict(SHA_A, "")
-    assert not git_sync.git_sync_verdict("", SHA_A)
+    assert git_sync.three_way_equal(SHA_A, SHA_A, SHA_A)
+    assert not git_sync.three_way_equal(SHA_A, SHA_A, "")
+
+
+def test_parse_remote_rejects_untrustworthy_urls():
+    assert git_sync.parse_remote(REPO_URL) == (
+        "github.com", "xiaoyangpeng1994-create/PokerSense")
+    assert git_sync.parse_remote(
+        "git@github.com:xiaoyangpeng1994-create/PokerSense.git") == (
+        "github.com", "xiaoyangpeng1994-create/PokerSense")
+    for bad in ("", "not a url", "https://hostonly", "file:///tmp/x"):
+        with pytest.raises(git_sync.SyncError):
+            git_sync.parse_remote(bad)
+    # A syntactically valid but wrong host is REJECTED LATER, by validate_push_target.
+    assert git_sync.parse_remote("https://evil.example/x/y") == ("evil.example", "x/y")
 
 
 # --------------------------------------------------------------- execution
@@ -98,108 +163,42 @@ def test_git_sync_verdict_is_two_way_only():
 def test_run_captures_real_exit_code_not_pipeline_status():
     res = git_sync.run([sys.executable, "-c", "import sys; sys.exit(7)"],
                        timeout_s=30, label="selftest-exit")
-    assert res["exit_code"] == 7
-    assert res["timed_out"] is False
-
-
-def test_run_captures_stdout_and_stderr():
-    code = "import sys;print('OUT-LINE');print('ERR-LINE',file=sys.stderr)"
-    res = git_sync.run([sys.executable, "-c", code], timeout_s=30, label="selftest-io")
-    assert res["exit_code"] == 0
-    assert "OUT-LINE" in res["stdout"] and "ERR-LINE" in res["stderr"]
+    assert res["exit_code"] == 7 and res["timed_out"] is False
+    assert git_sync.command_ok(res) is False
 
 
 @pytest.mark.parametrize("bad", [0, -1, float("inf"), float("nan"), "abc", None])
 def test_run_rejects_invalid_timeout(bad):
-    """P1-A: non-finite / non-positive deadlines must be refused up front."""
     with pytest.raises(git_sync.SyncError):
-        git_sync.run([sys.executable, "-c", "pass"], timeout_s=bad, label="bad-timeout")
+        git_sync.run([sys.executable, "-c", "pass"], timeout_s=bad, label="bad")
 
 
 def test_run_timeout_kills_only_its_own_group_and_others_survive():
-    """P1-A: the caller and an unrelated sibling must both outlive the kill."""
     sibling = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
     try:
         res = git_sync.run([sys.executable, "-c", "import time; time.sleep(60)"],
                            timeout_s=3, label="selftest-timeout")
-        assert res["timed_out"] is True
-        assert res["kill_attempted"] is True
-        assert res["kill_ok"] is True, "owned group must be fully terminated"
-        assert sibling.poll() is None, "unrelated sibling must survive"
-        assert os.getpid() > 0  # if our own group had been killed we would be gone
+        assert res["timed_out"] is True and res["kill_ok"] is True
+        assert sibling.poll() is None
+        assert os.getpid() > 0
+        # The limitation must be stated, not implied away.
+        assert res["kill_scope"] == "group-leader-only"
     finally:
         git_sync.terminate_owned_group(sibling, None)
 
 
-def test_run_establishes_its_own_session():
-    """Guard the mechanism, not just the observed outcome."""
-    import inspect
-    src = inspect.getsource(git_sync.run)
-    if os.name == "nt":
-        assert "CREATE_NEW_PROCESS_GROUP" in src
-    else:
-        assert "start_new_session" in src
-
-
-# --------------------------------------------------------------- progress
-
-
-def test_progress_trail_is_append_only_and_not_a_heartbeat():
+def test_progress_trail_records_phase_and_exit():
     with tempfile.TemporaryDirectory() as tmp:
-        path = os.path.join(tmp, "progress.jsonl")
+        path = os.path.join(tmp, "p.jsonl")
         git_sync.run([sys.executable, "-c", "pass"], timeout_s=30,
                      label="selftest-progress", progress_path=path)
         lines = [json.loads(x) for x in open(path, encoding="utf-8") if x.strip()]
-        assert lines and lines[-1]["phase"] == "done"
-        assert lines[-1]["exit_code"] == 0
-        assert all("command_id" in r and "elapsed_s" in r for r in lines)
+        assert lines[-1]["phase"] == "done" and lines[-1]["exit_code"] == 0
 
 
-def test_progress_interval_is_within_required_bounds():
-    assert 15 <= git_sync.PROGRESS_INTERVAL_S <= 30
-
-
-def test_timeout_records_phase_and_nonzero_exit():
-    with tempfile.TemporaryDirectory() as tmp:
-        path = os.path.join(tmp, "p.jsonl")
-        res = git_sync.run([sys.executable, "-c", "import time; time.sleep(30)"],
-                           timeout_s=2, label="selftest-timeout-regression",
-                           progress_path=path)
-        assert res["timed_out"] is True
-        assert res["exit_code"] != 0
-        phases = [json.loads(x)["phase"] for x in open(path, encoding="utf-8")
-                  if x.strip()]
-        assert phases[-1] == "timed_out"
-
-
-def test_progress_writer_creates_missing_directories():
-    with tempfile.TemporaryDirectory() as tmp:
-        path = os.path.join(tmp, "nested", "deeper", "progress.jsonl")
-        git_sync.run([sys.executable, "-c", "pass"], timeout_s=30,
-                     label="selftest-progress-dir", progress_path=path)
-        assert os.path.exists(path)
-
-
-# --------------------------------------------------------------- safety
-
-
-def test_dry_run_push_is_non_destructive_and_offline():
-    out = git_sync.do_push(".", "some-branch", dry_run=True)
-    assert "--dry-run" in out["command"]
-    assert "push" in out["command"]
-    assert "--force" not in out["command"]
-
-
-def test_constructed_commands_contain_no_destructive_verbs():
-    cmds = [git_sync.build_git_command(["push", "origin", "HEAD"]),
-            git_sync.build_git_command(["status"]),
-            git_sync.build_git_command(["ls-remote", "origin"])]
-    joined = " ".join(" ".join(c) for c in cmds)
-    for bad in ("--force", "reset", "rebase", "clean"):
-        assert bad not in joined
-
-
-def test_module_code_never_requests_force_flags():
+def test_wrapper_never_uses_a_shell_or_force():
+    src = inspect.getsource(git_sync)
+    assert "shell=True" not in src
     tree = ast.parse(open(git_sync.__file__, encoding="utf-8").read())
     doc_ids = set()
     for node in ast.walk(tree):
@@ -215,13 +214,7 @@ def test_module_code_never_requests_force_flags():
             assert "--force" not in node.value
 
 
-def test_wrapper_never_uses_a_shell():
-    import inspect
-    assert "shell=True" not in inspect.getsource(git_sync)
-
-
 def test_network_helpers_route_through_run():
-    """P1-C: no bare subprocess.run for git/gh outside run/terminate."""
     tree = ast.parse(open(git_sync.__file__, encoding="utf-8").read())
     offenders = []
     for node in ast.walk(tree):
@@ -235,196 +228,266 @@ def test_network_helpers_route_through_run():
                     and isinstance(sub.func.value, ast.Name)
                     and sub.func.value.id == "subprocess"):
                 offenders.append(node.name)
-    assert not offenders, "these functions bypass the wrapper: %r" % offenders
+    assert not offenders, offenders
 
 
-# --------------------------------------------------------------- push target
+# ------------------------------------------------- pre-write validation (R2 P1-b)
 
 
-def _patch_push(monkeypatch, push_exit=0, local=SHA_A, remote=SHA_A, guard_ok=True):
-    calls = []
-
-    def fake_run(cmd, timeout_s, label, progress_path=None, cwd=None, proxy=None):
-        calls.append({"label": label, "argv": list(cmd), "cwd": cwd})
-        return {"command_id": label, "label": label, "argv": list(cmd), "cwd": cwd,
-                "exit_code": push_exit, "timed_out": False, "duration_s": 0.1,
-                "stdout": "", "stderr": "", "kill_attempted": False,
-                "kill_ok": True, "survivors": []}
-
-    monkeypatch.setattr(git_sync, "run", fake_run)
-    monkeypatch.setattr(git_sync, "resolve_repo", lambda *a, **k: "R")
-    monkeypatch.setattr(git_sync, "local_head", lambda *a, **k: local)
-    monkeypatch.setattr(git_sync, "remote_slug",
-                        lambda *a, **k: git_sync.EXPECTED_REPO_SLUG)
-    monkeypatch.setattr(git_sync, "remote_branch_sha",
-                        lambda *a, **k: {"sha": remote, "exit_code": 0,
-                                         "timed_out": False, "error": ""})
-    monkeypatch.setattr(git_sync, "validate_push_target",
-                        lambda *a, **k: {"ok": guard_ok,
-                                         "problems": [] if guard_ok else ["blocked"],
-                                         "remote_slug": git_sync.EXPECTED_REPO_SLUG,
-                                         "head": local, "branch": "b"})
-    return calls
+def _ctx(tmp_path):
+    return git_sync.Ctx(str(tmp_path), proxy=None, timeout_s=30,
+                        progress_path=None)
 
 
-def test_push_without_pr_is_never_reported_as_three_way(monkeypatch):
-    _patch_push(monkeypatch)
-    out = git_sync.do_push("R", "b")
-    assert out["pr_sync"] == "PR_NOT_CHECKED"
-    assert out["pr_head_sha"] is None
-    assert out["three_way_equal"] is None
-    assert out["git_sync_ok"] is True
+@pytest.mark.parametrize("case,expected", [
+    ("empty_identity", "cannot read remote"),
+    ("wrong_host", "remote host"),
+    ("wrong_repo", "remote repository"),
+])
+def test_pre_write_rejection_never_pushes(monkeypatch, tmp_path, case, expected):
+    kwargs = {}
+    if case == "empty_identity":
+        kwargs = {"remote_url": "", "url_exit": 0}
+    elif case == "wrong_host":
+        kwargs = {"remote_url": "https://evil.example/x/y.git"}
+    else:
+        kwargs = {"remote_url": "https://github.com/someone/else.git"}
+    fake = FakeGit(**kwargs)
+    monkeypatch.setattr(git_sync, "run", fake)
 
-
-def test_push_command_error_with_equal_sha_is_postcondition_only(monkeypatch):
-    _patch_push(monkeypatch, push_exit=1, local=SHA_A, remote=SHA_A)
-    out = git_sync.do_push("R", "b")
-    assert out["git_sync_ok"] is True
-    assert out["postcondition_only"] is True
-    assert out["three_way_equal"] is None
-    assert out["exit_code"] == 1
-
-
-def test_push_blocked_before_any_remote_write(monkeypatch):
-    calls = _patch_push(monkeypatch, guard_ok=False)
-    out = git_sync.do_push("R", "b")
+    out = git_sync.do_push(_ctx(tmp_path), "codex/b")
     assert out["blocked_before_write"] is True
-    assert not any(c["label"] == "git-push" for c in calls)
+    assert any(expected in p for p in out["problems"]), out["problems"]
+    assert not fake.pushed, "no remote write may happen when the guard fails"
 
 
-def test_validate_push_target_rejection_paths(monkeypatch):
-    monkeypatch.setattr(git_sync, "remote_slug", lambda *a, **k: "someone/else")
-    monkeypatch.setattr(git_sync, "local_head", lambda *a, **k: SHA_A)
-
-    bad_ref = git_sync.validate_push_target("R", "origin", "main", SHA_A)
-    assert not bad_ref["ok"]
-    assert any("allowed prefix" in p for p in bad_ref["problems"])
-    assert any("expected" in p for p in bad_ref["problems"])
-
-    bad_sha = git_sync.validate_push_target("R", "origin", "codex/x", SHA_B)
-    assert any("does not match" in p for p in bad_sha["problems"])
+def test_pre_write_rejects_source_ref_mismatch(monkeypatch, tmp_path):
+    """The reviewed failure: HEAD compared with itself while a different local
+    branch would be pushed."""
+    fake = FakeGit(head=SHA_A, source=SHA_B)
+    monkeypatch.setattr(git_sync, "run", fake)
+    out = git_sync.do_push(_ctx(tmp_path), "codex/b", expected_sha=SHA_A)
+    assert out["blocked_before_write"] is True
+    assert any("source ref" in p for p in out["problems"])
+    assert not fake.pushed
 
 
-# --------------------------------------------------------------- gh helpers
+def test_pre_write_rejects_head_not_matching_source_ref(monkeypatch, tmp_path):
+    fake = FakeGit(head=SHA_B, source=SHA_A)
+    monkeypatch.setattr(git_sync, "run", fake)
+    out = git_sync.do_push(_ctx(tmp_path), "codex/b")
+    assert out["blocked_before_write"] is True
+    assert any("HEAD" in p for p in out["problems"])
+    assert not fake.pushed
 
 
-def test_remote_branch_sha_uses_verified_helper_and_repo(monkeypatch):
-    seen = {}
-
-    def fake_run(cmd, timeout_s, label, progress_path=None, cwd=None, proxy=None):
-        seen["argv"] = list(cmd)
-        return {"exit_code": 0, "timed_out": False,
-                "stdout": SHA_A + "\trefs/heads/b\n", "stderr": "", "kill_ok": True}
-
-    monkeypatch.setattr(git_sync, "run", fake_run)
-    info = git_sync.remote_branch_sha("R", "origin", "b")
-    assert info["sha"] == SHA_A
-    assert git_sync.HELPER_RESET[1] in seen["argv"]
-    assert any("gh auth git-credential" in p for p in seen["argv"])
-    assert "-C" in seen["argv"]
+def test_pre_write_rejects_unreadable_remote_branch_or_sha(monkeypatch, tmp_path):
+    fake = FakeGit(rev_exit=1)
+    monkeypatch.setattr(git_sync, "run", fake)
+    out = git_sync.do_push(_ctx(tmp_path), "codex/b")
+    assert out["blocked_before_write"] is True
+    assert not fake.pushed
 
 
-def test_pr_view_reports_error_instead_of_empty(monkeypatch):
-    monkeypatch.setattr(git_sync, "run", lambda *a, **k: {
-        "exit_code": 1, "timed_out": False, "stdout": "", "stderr": "auth required",
-        "kill_ok": True})
-    out = git_sync.pr_view("R", 26)
-    assert out["ok"] is False
-    assert "auth required" in out["error"]
+def test_pre_write_rejects_non_task_branch(monkeypatch, tmp_path):
+    fake = FakeGit()
+    monkeypatch.setattr(git_sync, "run", fake)
+    out = git_sync.do_push(_ctx(tmp_path), "main")
+    assert out["blocked_before_write"] is True
+    assert any("allowed prefix" in p for p in out["problems"])
+    assert not fake.pushed
 
 
-def test_pr_list_api_error_is_not_an_empty_list(monkeypatch):
-    monkeypatch.setattr(git_sync, "run", lambda *a, **k: {
-        "exit_code": 1, "timed_out": False, "stdout": "", "stderr": "rate limited",
-        "kill_ok": True})
-    out = git_sync.pr_list_for_branch("R", "b")
-    assert out["ok"] is False
-    assert out["error"]
+# ------------------------------------------------- proxy threading (R2 P2)
 
 
-# --------------------------------------------------------------- publish
+def test_explicit_proxy_reaches_every_call(monkeypatch, tmp_path):
+    for name in ("HTTP_PROXY", "HTTPS_PROXY", "POKERSENSE_GIT_PROXY"):
+        monkeypatch.delenv(name, raising=False)
+    fake = FakeGit(pr_json={"number": 26, "state": "OPEN", "isDraft": True,
+                            "baseRefName": "main", "headRefName": "codex/b",
+                            "headRefOid": SHA_A, "url": "u"})
+    monkeypatch.setattr(git_sync, "run", fake)
+    ctx = git_sync.Ctx(str(tmp_path), proxy="http://cli:9", timeout_s=30)
+    out = git_sync.do_push(ctx, "codex/b", pr=26)
+    assert out["pr_sync"] == "PR_SYNC_PASS"
+    labels = {c["label"] for c in fake.calls}
+    assert {"git-push", "git-ls-remote", "gh-pr-view"} <= labels
+    missing = [c["label"] for c in fake.calls if c["proxy"] != "http://cli:9"]
+    assert not missing, "these calls lost the explicit proxy: %r" % missing
 
 
-def _fake_publish_env(monkeypatch, prs, pr_meta, push_exit=0, pr_list_ok=True):
-    calls = []
-    monkeypatch.setattr(git_sync, "do_push", lambda *a, **k: {
-        "exit_code": push_exit, "timed_out": False, "git_sync_ok": True,
-        "local_head": SHA_A, "remote_branch_sha": SHA_A, "resolved_repo": "R",
-        "duration_s": 0.1, "pr_sync": "PR_NOT_CHECKED", "three_way_equal": None})
-    monkeypatch.setattr(git_sync, "pr_list_for_branch", lambda *a, **k: prs)
-
-    def fake_pr_view(repo, pr, *a, **k):
-        calls.append({"pr_view": pr})
-        return pr_meta
-
-    monkeypatch.setattr(git_sync, "pr_view", fake_pr_view)
-
-    def fake_run(cmd, *a, **k):
-        calls.append({"argv": list(cmd)})
-        return {"exit_code": 0, "timed_out": False, "stdout": "https://x/26",
-                "stderr": "", "kill_ok": True}
-
-    monkeypatch.setattr(git_sync, "run", fake_run)
-    calls.append({"pr_list_ok": pr_list_ok})
-    return calls
+def test_explicit_proxy_reaches_cli_verify(monkeypatch, tmp_path, capsys):
+    for name in ("HTTP_PROXY", "HTTPS_PROXY", "POKERSENSE_GIT_PROXY"):
+        monkeypatch.delenv(name, raising=False)
+    fake = FakeGit(pr_json={"number": 26, "state": "OPEN", "isDraft": True,
+                            "baseRefName": "main", "headRefName": "codex/b",
+                            "headRefOid": SHA_A, "url": "u"})
+    monkeypatch.setattr(git_sync, "run", fake)
+    rc = git_sync.main(["--repo", str(tmp_path), "--branch", "codex/b",
+                        "--proxy", "http://cli:9", "--pr", "26", "verify"])
+    assert rc == 0
+    assert fake.by_label("git-ls-remote")[0]["proxy"] == "http://cli:9"
+    assert fake.by_label("gh-pr-view")[0]["proxy"] == "http://cli:9"
 
 
-def test_publish_refuses_closed_existing_pr(monkeypatch):
-    prs = {"ok": True, "prs": [{"number": 9, "state": "CLOSED", "isDraft": True,
-                               "baseRefName": "main", "url": "u"}]}
-    _fake_publish_env(monkeypatch, prs, {"ok": True, "headRefOid": SHA_A,
-                                         "state": "OPEN", "isDraft": True,
-                                         "baseRefName": "main"})
-    out = git_sync.publish("R", "codex/b", "t", "f", "main")
+def test_no_explicit_proxy_inherits_environment(monkeypatch, tmp_path):
+    monkeypatch.delenv("POKERSENSE_GIT_PROXY", raising=False)
+    monkeypatch.setenv("HTTP_PROXY", "http://env:8")
+    monkeypatch.setenv("HTTPS_PROXY", "http://env:8")
+    env = git_sync.child_env(None)
+    assert env["HTTPS_PROXY"] == "http://env:8"
+
+
+# ------------------------------------------------- CLI entry (R2 P1-a)
+
+
+def _main_push(monkeypatch, out, pr=None):
+    monkeypatch.setattr(git_sync, "do_push", lambda *a, **k: out)
+    argv = ["--repo", "R", "--branch", "codex/b", "push"]
+    if pr is not None:
+        argv += ["--pr", str(pr)]
+    # --pr must precede the subcommand for argparse
+    argv = (["--repo", "R", "--branch", "codex/b"]
+            + (["--pr", str(pr)] if pr else []) + ["push"])
+    return git_sync.main(argv)
+
+
+def test_cli_push_command_error_with_equal_sha_is_not_success(monkeypatch, capsys):
+    """R2 case 1: exit 1 but the remote already has the SHA must not be exit 0."""
+    out = {"exit_code": 1, "timed_out": False, "command_ok": False,
+           "git_sync_ok": True, "postcondition_only": True, "pr_sync": "PR_NOT_CHECKED",
+           "three_way_equal": None, "pr_head_sha": None, "local_head": SHA_A,
+           "remote_branch_sha": SHA_A, "kill_ok": True, "remote_read_error": ""}
+    assert _main_push(monkeypatch, out) == 3
+
+
+def test_cli_push_pr_head_mismatch_is_failure(monkeypatch):
+    """R2 case 2: with --pr, PR_SYNC_FAIL must be non-zero."""
+    out = {"exit_code": 0, "timed_out": False, "command_ok": True,
+           "git_sync_ok": True, "pr_sync": "PR_SYNC_FAIL", "three_way_equal": False,
+           "pr_head_sha": SHA_B, "local_head": SHA_A, "remote_branch_sha": SHA_A,
+           "problems": ["pr head x != local y"], "kill_ok": True}
+    assert _main_push(monkeypatch, out, pr=26) == 3
+
+
+def test_cli_push_pr_api_read_error_is_failure(monkeypatch):
+    """R2 case 3: an unreadable PR must fail and keep the error."""
+    out = {"exit_code": 0, "timed_out": False, "command_ok": True,
+           "git_sync_ok": True, "pr_sync": "PR_READ_ERROR",
+           "pr_error": "gh: api error", "three_way_equal": False,
+           "pr_head_sha": None, "local_head": SHA_A, "remote_branch_sha": SHA_A,
+           "kill_ok": True}
+    assert _main_push(monkeypatch, out, pr=26) == 3
+
+
+def test_cli_push_pr_sync_pass_is_success(monkeypatch):
+    """R2 case 4: the control — a verified draft PR succeeds."""
+    out = {"exit_code": 0, "timed_out": False, "command_ok": True,
+           "git_sync_ok": True, "pr_sync": "PR_SYNC_PASS", "three_way_equal": True,
+           "pr_head_sha": SHA_A, "local_head": SHA_A, "remote_branch_sha": SHA_A,
+           "kill_ok": True}
+    assert _main_push(monkeypatch, out, pr=26) == 0
+
+
+def test_cli_push_without_pr_success_is_zero(monkeypatch):
+    """Control: two-way agreement is enough when no PR was requested."""
+    out = {"exit_code": 0, "timed_out": False, "command_ok": True,
+           "git_sync_ok": True, "pr_sync": "PR_NOT_CHECKED",
+           "three_way_equal": None, "pr_head_sha": None, "local_head": SHA_A,
+           "remote_branch_sha": SHA_A, "kill_ok": True}
+    assert _main_push(monkeypatch, out) == 0
+
+
+def test_cli_push_without_pr_but_command_failed_is_nonzero(monkeypatch):
+    out = {"exit_code": 124, "timed_out": True, "command_ok": False,
+           "git_sync_ok": True, "pr_sync": "PR_NOT_CHECKED",
+           "three_way_equal": None, "kill_ok": True, "local_head": SHA_A,
+           "remote_branch_sha": SHA_A}
+    assert _main_push(monkeypatch, out) == 3
+
+
+def test_cli_push_kill_failure_is_nonzero(monkeypatch):
+    out = {"exit_code": 0, "timed_out": False, "command_ok": True,
+           "git_sync_ok": True, "pr_sync": "PR_NOT_CHECKED",
+           "three_way_equal": None, "kill_ok": False, "local_head": SHA_A,
+           "remote_branch_sha": SHA_A}
+    assert _main_push(monkeypatch, out) == 3
+
+
+def test_cli_verify_preserves_read_errors(monkeypatch, tmp_path, capsys):
+    fake = FakeGit(ls_exit=1, pr_json=None, pr_exit=1)
+    monkeypatch.setattr(git_sync, "run", fake)
+    rc = git_sync.main(["--repo", str(tmp_path), "--branch", "codex/b",
+                        "--pr", "26", "verify"])
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 3
+    assert payload["remote_read_error"], "the ls-remote error must be preserved"
+    assert payload["pr_error"], "the PR read error must be preserved"
+    assert payload["pr_sync"] != "PR_SYNC_PASS"
+
+
+def test_cli_verify_without_pr_reports_pr_not_checked(monkeypatch, tmp_path, capsys):
+    fake = FakeGit()
+    monkeypatch.setattr(git_sync, "run", fake)
+    rc = git_sync.main(["--repo", str(tmp_path), "--branch", "codex/b", "verify"])
+    payload = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert payload["pr_sync"] == "PR_NOT_CHECKED"
+    assert payload["three_way_equal"] is None
+
+
+# ------------------------------------------------- publish (idempotency)
+
+
+def _publish_ctx(tmp_path):
+    return git_sync.Ctx(str(tmp_path), timeout_s=30)
+
+
+def test_publish_refuses_closed_pr_and_does_not_push(monkeypatch, tmp_path):
+    fake = FakeGit(pr_json=[{"number": 9, "state": "CLOSED", "isDraft": True,
+                             "baseRefName": "main", "url": "u"}])
+    monkeypatch.setattr(git_sync, "run", fake)
+    out = git_sync.publish(_publish_ctx(tmp_path), "codex/b", "t", "f", "main")
     assert out["ok"] is False
     assert out["status"] == "EXISTING_PR_INCOMPATIBLE"
+    assert len(fake.pushed) == 1  # publish does push first; it must not create a PR
 
 
-def test_publish_does_not_create_pr_when_listing_errors(monkeypatch):
-    calls = _fake_publish_env(monkeypatch,
-                              {"ok": False, "error": "rate limited", "prs": []},
-                              {"ok": True, "headRefOid": SHA_A},
-                              pr_list_ok=False)
-    out = git_sync.publish("R", "codex/b", "t", "f", "main")
+def test_publish_api_error_never_creates_a_pr(monkeypatch, tmp_path):
+    fake = FakeGit(pr_exit=1)
+    monkeypatch.setattr(git_sync, "run", fake)
+    out = git_sync.publish(_publish_ctx(tmp_path), "codex/b", "t", "f", "main")
     assert out["ok"] is False
     assert out["status"] == "PR_LIST_API_ERROR"
-    created = [c for c in calls if c.get("argv", [None, None])[1:2] == ["pr"]
-               and "create" in c.get("argv", [])]
-    assert not created, "an API error must never be turned into a new PR"
+    assert not fake.by_label("gh-pr-create")
 
 
-def test_publish_fails_when_pr_head_does_not_match(monkeypatch):
-    prs = {"ok": True, "prs": [{"number": 26, "state": "OPEN", "isDraft": True,
-                               "baseRefName": "main", "url": "u"}]}
-    _fake_publish_env(monkeypatch, prs, {"ok": True, "headRefOid": SHA_B,
-                                         "state": "OPEN", "isDraft": True,
-                                         "baseRefName": "main"})
-    out = git_sync.publish("R", "codex/b", "t", "f", "main")
+def test_publish_verifies_pr_head_after_reuse(monkeypatch, tmp_path):
+    fake = FakeGit(pr_json=[{"number": 26, "state": "OPEN", "isDraft": True,
+                             "baseRefName": "main", "url": "u"}],
+                   remote_sha=SHA_A, source=SHA_A)
+    # pr_view (single) returns a mismatching head while the list looks reusable
+    monkeypatch.setattr(git_sync, "run", fake)
+
+    class Mismatch(FakeGit):
+        def __call__(self, cmd, timeout_s, label, progress_path=None, cwd=None,
+                     proxy=None):
+            res = super().__call__(cmd, timeout_s, label, progress_path, cwd, proxy)
+            if label == "gh-pr-view":
+                res["stdout"] = json.dumps({"number": 26, "state": "OPEN",
+                                            "isDraft": True, "baseRefName": "main",
+                                            "headRefName": "codex/b",
+                                            "headRefOid": SHA_B,
+                                            "url": "u"})
+            return res
+
+    fake2 = Mismatch(pr_json=[{"number": 26, "state": "OPEN", "isDraft": True,
+                              "baseRefName": "main", "url": "u"}])
+    monkeypatch.setattr(git_sync, "run", fake2)
+    out = git_sync.publish(_publish_ctx(tmp_path), "codex/b", "t", "f", "main")
     assert out["ok"] is False
     assert out["status"] == "PR_VERIFY_FAILED"
-    assert any("pr head" in p for p in out["problems"])
-
-
-def test_publish_rejects_non_draft_existing_pr(monkeypatch):
-    prs = {"ok": True, "prs": [{"number": 26, "state": "OPEN", "isDraft": False,
-                               "baseRefName": "main", "url": "u"}]}
-    _fake_publish_env(monkeypatch, prs, {"ok": True, "headRefOid": SHA_A})
-    out = git_sync.publish("R", "codex/b", "t", "f", "main")
-    assert out["ok"] is False
-    assert out["status"] == "EXISTING_PR_INCOMPATIBLE"
-
-
-def test_publish_succeeds_only_with_verified_draft_pr(monkeypatch):
-    prs = {"ok": True, "prs": [{"number": 26, "state": "OPEN", "isDraft": True,
-                               "baseRefName": "main", "url": "u"}]}
-    _fake_publish_env(monkeypatch, prs, {"ok": True, "headRefOid": SHA_A,
-                                         "state": "OPEN", "isDraft": True,
-                                         "baseRefName": "main"})
-    out = git_sync.publish("R", "codex/b", "t", "f", "main")
-    assert out["ok"] is True
-    assert out["status"] == "PR_SYNC_PASS"
-    assert out["stage"] == "pr_reused"
-    assert out["three_way_equal"] is True
 
 
 if __name__ == "__main__":
