@@ -1,4 +1,11 @@
-"""U1-R1 regressions: no guessing on import, legal Hero history, row amounts."""
+"""U1-R1 regressions: no guessing on import, legal Hero history, row amounts.
+
+The snapshot fixture here was corrected in U1-R2: it used a made-up ledger status
+(`HAND_COMMITMENTS_OBSERVED_CANDIDATE`) and carried no river-start evidence, so it
+passed for the wrong reason. It now uses the real token and the real evidence
+fields, and the "no start evidence" variants are negatives in
+`test_aa_hand_input_r2.py`.
+"""
 
 import json
 
@@ -12,6 +19,7 @@ from tools.analyze_threeway_river import scenario_from_dict
 RULES = {**json.load(open(
     "configs/strategy/examples/threeway-river-response-manual.json",
     encoding="utf-8"))["rules"], "rake_percent": "0", "rake_cap_bb": "0"}
+EPOCH = "20260916T101530-aaaaaaaaaaaa"
 
 
 def seats_block(rows=None):
@@ -68,17 +76,36 @@ def assumptions(**overrides):
 
 def snapshot(**overrides):
     payload = {
+        "frame": 1500,
         "cards": {"hero": ["5d", "6d"],
                   "board_slots": ["5h", "6c", "6s", "Tc", "3d"]},
-        "pot": {"value": "623"},
+        "pot": {"value": "90"},
         "hand_ledger_v2": {
-            "status": "HAND_COMMITMENTS_OBSERVED_CANDIDATE",
+            "frame": 1500, "epoch": EPOCH,
+            "status": "OBSERVED_HAND_COMMITMENTS_CANDIDATE",
             "hand_commitments": {"0": "20", "1": "20", "2": "20",
-                                 "3": "10", "4": "10", "5": "10"}},
-        "observed_state_v2": {"participants": {
-            "0": {"state": "active"}, "1": {"state": "active"},
-            "2": {"state": "active"}, "3": {"state": "folded"},
-            "4": {"state": "folded"}, "5": {"state": "folded"}}},
+                                 "3": "10", "4": "10", "5": "10"},
+            "observed_total": "90", "displayed_pot": "90",
+            "unallocated_difference": "0",
+            "opening_evidence": {"frame": 20, "first_frame": 18,
+                                 "debits": {"0": "20", "1": "20", "2": "20",
+                                            "3": "10", "4": "10", "5": "10"},
+                                 "excluded_na_slots": [],
+                                 "authoritative_boundary": True},
+            "applied_action_count": 4, "taint_reasons": [],
+            "complete_and_canonical_verified": False, "strategy_eligible": False},
+        "causal_street_wagers_v2": {
+            "status": "OBSERVED_STREET_WAGERS_CANDIDATE",
+            "title_center_ledger_reconciled": True,
+            "wagers": {str(seat): "0" for seat in range(8)},
+            "street_price": "0"},
+        "observed_state_v2": {
+            "observed_epoch": EPOCH, "street_candidate": "river",
+            "pending_actions": 0,
+            "participants": {
+                seat: {"state": state, "epoch": EPOCH} for seat, state in
+                ((0, "active"), (1, "active"), (2, "active"),
+                 (3, "folded"), (4, "folded"), (5, "folded"))}},
         "stacks": {str(seat): {"value": "200"} for seat in range(6)},
         "current_actor": 0,
     }
@@ -104,7 +131,12 @@ def test_snapshot_never_guesses_hero_action_order_or_seat_status():
 
 
 def test_snapshot_preserves_folded_and_ambiguous_participant_states():
-    """R1-B: statuses come from evidence only; ambiguity stays a gap."""
+    """R1-B / R2: statuses come from evidence only; ambiguity stays a gap.
+
+    The fixture now carries the real ledger status and the river-start evidence,
+    so "observed" is earned. Without that evidence the same snapshot yields no
+    seats at all (see the R2 negatives).
+    """
     clear, gaps = module.facts_from_snapshot(snapshot(), source="rec-1")
     states = {row["seat_id"]: row["status"] for row in clear["seats"]["value"]}
     assert states[3] == "FOLDED" and states[4] == "FOLDED"
@@ -113,8 +145,16 @@ def test_snapshot_preserves_folded_and_ambiguous_participant_states():
     assert clear["hero_seat"]["provenance"] == "unknown"
     assert clear["action_order"]["provenance"] == "unknown"
 
+    no_evidence = snapshot()
+    no_evidence.pop("causal_street_wagers_v2")
+    withheld, withheld_gaps = module.facts_from_snapshot(no_evidence,
+                                                         source="rec-1b")
+    assert withheld["seats"]["provenance"] == "unknown"
+    assert any("起点" in gap for gap in withheld_gaps), withheld_gaps
+
     ambiguous = snapshot()
-    ambiguous["observed_state_v2"] = {"participants": {
+    ambiguous["observed_state_v2"] = {**ambiguous["observed_state_v2"],
+                                      "participants": {
         "0": {"state": "active"}, "1": {"state": "unknown"},
         "2": {"state": "active"}, "3": {"state": "folded"},
         "4": {"state": "folded"}, "5": {"state": "folded"}}}

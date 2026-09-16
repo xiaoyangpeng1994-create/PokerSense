@@ -45,13 +45,21 @@ function harness() {
   return h;
 }
 
-function report(id = "old", generation = 1, revision = "r1", status = "COMPLETE") {
-  return {job_id: id, kind: "terminal", status,
-    binding: {generation, table_rules_revision: revision, effective_rules: {source: "effective-table-rules", rake_percent: "0.03"}},
+const DIGEST_A = "a".repeat(64), DIGEST_B = "b".repeat(64);
+function report(id = "old", generation = 1, revision = "r1", status = "COMPLETE",
+                digest = DIGEST_A) {
+  return {job_id: id, kind: "terminal", status, input_sha256: digest,
+    binding: {generation, table_rules_revision: revision, rules_source: "document",
+              effective_rules: {source: "effective-table-rules", rake_percent: "0.03"}},
     result: status === "COMPLETE" ? {fold_ev: {decimal: "0"}, call_net_ev: {decimal: "256"}} : null};
 }
 function seed(h, value = report()) {
-  h.run(`acceptedAnalysisId=${JSON.stringify(value.job_id)};analysisBinding=${JSON.stringify(value.binding)};analysisInput={mode:"manual_hypothesis",rules:{source:"original-document"}};renderAnalysis(${JSON.stringify(value)});`);
+  // The panel copies the receipt's identity and kind onto its own binding; a
+  // form-initiated run also carries the digest the form verified.
+  const binding = {...value.binding, kind: value.kind,
+                   input_sha256: value.input_sha256,
+                   expected_input_sha256: value.input_sha256};
+  h.run(`acceptedAnalysisId=${JSON.stringify(value.job_id)};analysisBinding=${JSON.stringify(binding)};analysisExpectedInput=${JSON.stringify(value.input_sha256)};analysisInput={mode:"manual_hypothesis",rules:{source:"original-document"}};renderAnalysis(${JSON.stringify(value)});`);
   assert.equal(h.el("analysis-export").disabled, false);
 }
 function cleared(h) {
@@ -306,6 +314,32 @@ async function main() {
     const message = h.el("analysis-status").textContent;
     h.run('renderAnalysis({status:"IDLE",job_id:null},{generation:1,table_rules:{revision:"r1"}})');
     assert.equal(h.el("analysis-status").textContent, message); cases++;
+  }
+  // U1-R2: a receipt whose identity does not match the one the entry form
+  // verified must be refused before it is ever accepted, and a COMPLETE report
+  // whose identity is missing must not slip through the gap either.
+  {
+    const h = harness();
+    h.run(`analysisExpectedInput=${JSON.stringify(DIGEST_A)};analysisDraftSource={kind:"hand_input_form",input_sha256:${JSON.stringify(DIGEST_A)}};`);
+    h.el("analysis-input").value = '{"mode":"manual_hypothesis","rules":{}}';
+    h.fetchImpl = url => response(url === "/api/analysis"
+      ? report("foreign", 1, "r1", "RUNNING", DIGEST_B) : {});
+    await h.el("analysis-start").dispatch("click");
+    assert.equal(h.run("acceptedAnalysisId"), null);
+    assert.ok(h.el("analysis-status").textContent.includes("不是同一份")); cases++;
+  }
+  {
+    const h = harness(); seed(h, report("same", 1, "r1", "COMPLETE", DIGEST_A));
+    const anonymous = {...report("same", 1, "r1", "COMPLETE"), input_sha256: null};
+    h.run(`renderAnalysis(${JSON.stringify(anonymous)},${JSON.stringify({generation: 1, table_rules: {revision: "r1"}})});`);
+    cleared(h);
+    assert.ok(h.el("analysis-status").textContent.includes("身份")); cases++;
+  }
+  {
+    const h = harness(); seed(h, report("same", 1, "r1", "COMPLETE", DIGEST_A));
+    const foreign = {...report("same", 1, "r1", "COMPLETE"), input_sha256: DIGEST_B};
+    h.run(`renderAnalysis(${JSON.stringify(foreign)},${JSON.stringify({generation: 1, table_rules: {revision: "r1"}})});`);
+    cleared(h); cases++;
   }
   for (const action of ["start", "stop"]) {
     const h = harness(); seed(h); let atRequest;

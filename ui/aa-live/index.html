@@ -63,7 +63,7 @@
 </div>
 <div class="button-row"><button id="hand-build" type="button">核对输入</button><button id="hand-compute" type="button" disabled>按上述假设计算</button><button id="hand-clear" class="secondary" type="button">清空录入</button><button id="hand-import-record" class="secondary" type="button">从选中的复查记录带入有证据的字段</button></div>
 <div class="hand-block"><div class="hand-block-head"><h3>各座位（每行一个座位）</h3><button id="hand-add-seat" class="secondary" type="button">添加一行</button></div><div id="hand-rows-seats" class="hand-rows"></div></div>
-<div class="hand-block"><div class="hand-block-head"><h3>公开历史（按发生顺序）</h3><button id="hand-add-history" class="secondary" type="button">添加一行</button></div><div id="hand-rows-history" class="hand-rows"></div></div>
+<div class="hand-block"><div class="hand-block-head"><h3>公开历史（按发生顺序）</h3><button id="hand-add-history" class="secondary" type="button">添加一行</button></div><label class="inline-label"><input id="hand-no-history" type="checkbox"> 确认本手没有任何公开行动（不勾选时，留空 = 未知，不能计算）</label><div id="hand-rows-history" class="hand-rows"></div></div>
 <div class="hand-block"><div class="hand-block-head"><h3>对手范围（每行一个组合）</h3><button id="hand-add-range" class="secondary" type="button">添加一行</button></div><div id="hand-rows-ranges" class="hand-rows"></div></div>
 <div class="hand-block"><div class="hand-block-head"><h3>响应权重（每行一个动作）</h3><button id="hand-add-weight" class="secondary" type="button">添加一行</button></div><div id="hand-rows-weights" class="hand-rows"></div></div>
 <details><summary>高级：粘贴 CSV 批量生成逐行控件</summary>

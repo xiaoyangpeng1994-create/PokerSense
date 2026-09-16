@@ -33,6 +33,7 @@ from poker_engine.desktop import aa_server
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS = REPO_ROOT / "tests" / "js" / "hand_input_dom_stub_test.mjs"
 FLOW_HARNESS = REPO_ROOT / "tests" / "js" / "analysis_flow_test.mjs"
+IMPORT_HARNESS = REPO_ROOT / "tests" / "js" / "hand_import_flow_test.mjs"
 FLOW_SERVER = REPO_ROOT / "tests" / "js" / "analysis_flow_server.py"
 NODE = shutil.which("node")
 TABLE_RULES = {
@@ -105,13 +106,76 @@ def flow_server(tmp_path_factory):
                         f"the flow server never answered on {base}; stderr: "
                         f"{process.stderr.read()[-1500:]}") from None
                 time.sleep(0.2)
-        yield base
+        yield _FlowServer(base, directory / "records")
     finally:
         process.terminate()
         try:
             process.wait(timeout=15)
         except subprocess.TimeoutExpired:
             process.kill()
+
+
+class _FlowServer:
+    """The running flow server's base URL and its review-record directory."""
+
+    def __init__(self, base, records):
+        self.base = base
+        self.records = Path(records)
+
+    def __str__(self):
+        return self.base
+
+
+RECORD_A = "20260916T101530-aaaaaaaaaaaa"
+RECORD_B = "20260916T101600-bbbbbbbbbbbb"
+
+
+def write_review_record(server, issue_id, payload):
+    """A synthetic structured review record on disk (no media, payload only)."""
+    folder = server.records / issue_id
+    folder.mkdir(parents=True, exist_ok=True)
+    document = {"issue_id": issue_id,
+                "saved_at": "2026-09-16T10:15:30+08:00",
+                "preview_sha256": "0" * 64,
+                "scope": "TEST_SYNTHETIC_STRUCTURED_SNAPSHOT",
+                "observation": {"source_frame": 1500, "payload": payload}}
+    (folder / "issue.json").write_text(
+        json.dumps(document, ensure_ascii=False), encoding="utf-8")
+    return folder
+
+
+def river_start_payload(cards, board, pot, commitments, stacks="200"):
+    """A payload that really proves it is a river-start frame."""
+    seats = {str(seat): value for seat, value in commitments.items()}
+    participants = {seat: {"state": state, "epoch": RECORD_A} for seat, state in (
+        (0, "active"), (1, "active"), (2, "active"),
+        (3, "folded"), (4, "folded"), (5, "folded"))}
+    return {
+        "frame": 1500,
+        "cards": {"hero": list(cards), "board_slots": list(board)},
+        "pot": {"value": pot},
+        "hand_ledger_v2": {
+            "frame": 1500, "epoch": RECORD_A,
+            "status": "OBSERVED_HAND_COMMITMENTS_CANDIDATE",
+            "hand_commitments": seats, "observed_total": pot,
+            "displayed_pot": pot, "unallocated_difference": "0",
+            "opening_evidence": {"frame": 20, "first_frame": 18, "debits": seats,
+                                 "excluded_na_slots": [],
+                                 "authoritative_boundary": True},
+            "applied_action_count": 4, "taint_reasons": [],
+            "complete_and_canonical_verified": False, "strategy_eligible": False},
+        "causal_street_wagers_v2": {
+            "status": "OBSERVED_STREET_WAGERS_CANDIDATE",
+            "title_center_ledger_reconciled": True,
+            "wagers": {str(seat): "0" for seat in range(8)},
+            "street_price": "0"},
+        "observed_state_v2": {"observed_epoch": RECORD_A,
+                              "street_candidate": "river",
+                              "pending_actions": 0,
+                              "participants": participants},
+        "stacks": {str(seat): {"value": stacks} for seat in range(6)},
+        "current_actor": 0,
+    }
 
 
 def post_rules(base):
@@ -127,8 +191,8 @@ def post_rules(base):
         "utf-8"))
 
 
-def run_harness(harness, base, timeout=240):
-    proc = subprocess.run([NODE, str(harness), base], cwd=str(REPO_ROOT),
+def run_harness(harness, base, timeout=240, extra=()):
+    proc = subprocess.run([NODE, str(harness), base, *extra], cwd=str(REPO_ROOT),
                           capture_output=True, text=True, encoding="utf-8",
                           errors="replace", timeout=timeout)
     checks = [json.loads(line) for line in proc.stdout.splitlines()
@@ -177,9 +241,9 @@ def test_hand_input_flow_drives_the_shipped_javascript(hand_server):
     reason="node is unavailable, so the shipped JS cannot be exercised here")
 def test_input_reaches_the_real_kernel_and_survives_invalidation(flow_server):
     """input → kernel → result → change input / late response → recompute."""
-    saved = post_rules(flow_server)
+    saved = post_rules(flow_server.base)
     assert saved["conditional_analysis_ready"] is True, saved
-    checks, verdict = run_harness(FLOW_HARNESS, flow_server, timeout=420)
+    checks, verdict = run_harness(FLOW_HARNESS, flow_server.base, timeout=420)
     assert verdict["failed"] == 0 and verdict["passed"] >= 14
     names = {item["name"] for item in checks}
     for required in (
@@ -206,6 +270,56 @@ def test_input_reaches_the_real_kernel_and_survives_invalidation(flow_server):
         assert required in names, f"missing check: {required}"
 
 
+@pytest.mark.skipif(
+    NODE is None,
+    reason="node is unavailable, so the shipped JS cannot be exercised here")
+def test_import_replacement_and_identity_are_enforced(flow_server):
+    """U1-R2: compute A -> import an incomplete B -> fill B -> compute B."""
+    write_review_record(flow_server, RECORD_A, river_start_payload(
+        ("5d", "6d"), ("5h", "6c", "6s", "Tc", "3d"), "90",
+        {0: "20", 1: "20", 2: "20", 3: "10", 4: "10", 5: "10"}))
+    write_review_record(flow_server, RECORD_B,
+                        {"frame": 1500, "cards": {"hero": ["2h", "3d"]}})
+    saved = post_rules(flow_server.base)
+    assert saved["conditional_analysis_ready"] is True, saved
+    checks, verdict = run_harness(IMPORT_HARNESS, flow_server.base, timeout=420,
+                                  extra=(RECORD_A, RECORD_B))
+    assert verdict["failed"] == 0 and verdict["passed"] >= 20, verdict
+    names = {item["name"] for item in checks}
+    for required in (
+            "both_shipped_scripts_loaded",
+            "the_import_clears_the_previous_hand",
+            "the_import_voids_the_verified_receipt",
+            "the_import_voids_the_shown_result",
+            "the_import_reports_the_unknowns_it_could_not_fill",
+            "the_old_receipt_cannot_be_computed_again",
+            "hand_b_verifies_after_the_human_fills_it",
+            "hand_b_computes_for_real",
+            "hand_b_is_a_different_input_from_hand_a",
+            "hand_b_identity_matches_the_backend",
+            "the_export_reports_the_form_source_and_provenance",
+            "imported_values_keep_their_observed_provenance",
+            "an_untouched_unknown_stays_unknown",
+            "editing_an_imported_value_confirms_it_and_keeps_the_candidate",
+            "an_empty_history_is_unknown_not_confirmed_empty",
+            "the_explicit_confirmation_makes_it_an_empty_history",
+            "a_blank_seat_id_is_refused_in_chinese",
+            "a_csv_apply_voids_the_receipt",
+            "an_import_landing_after_an_edit_is_dropped",
+            "an_import_landing_after_a_clear_is_dropped",
+            "a_failed_import_leaves_nothing_of_the_previous_hand",
+            "switching_to_a_different_record_voids_the_form",
+            "record_a_is_imported",
+            "a_manual_form_keeps_its_values_and_only_loses_the_receipt",
+            "an_out_of_order_import_cannot_clobber_the_newer_target",
+            "the_real_report_identity_matches_everywhere",
+            "a_report_with_a_foreign_identity_is_refused",
+            "the_identity_check_does_not_break_a_legitimate_run",
+            "a_report_without_an_identity_is_refused_not_skipped",
+            "a_start_response_for_a_different_input_is_rejected"):
+        assert required in names, f"missing check: {required}"
+
+
 def test_page_serves_the_form_and_keeps_safe_text_nodes():
     source = (REPO_ROOT / "ui" / "aa-live" / "hand_input.js").read_text(
         encoding="utf-8")
@@ -220,7 +334,8 @@ def test_page_serves_the_form_and_keeps_safe_text_nodes():
                    'id="hand-rows-weights"', 'id="hand-add-seat"',
                    'id="hand-add-history"', 'id="hand-add-range"',
                    'id="hand-add-weight"', 'id="hand-fees"',
-                   'id="hand-import-record"', 'id="hand-csv"',
+                   'id="hand-import-record"', 'id="hand-no-history"',
+                   'id="hand-csv"',
                    'id="hand-csv-target"', 'id="hand-csv-apply"',
                    'id="hand-build"', 'id="hand-compute"', 'id="hand-gaps"'):
         assert anchor in page, anchor

@@ -34,21 +34,33 @@ function actionName(action) {
   if (typeof action === "string") return translated(action.toLowerCase());
   return `${translated(action?.kind)}${["bet", "raise"].includes(action?.kind) && action?.target != null ? ` 至 ${action.target}` : ""}`;
 }
+const analysisHex = value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 function renderAnalysis(report, state) {
   if (acceptedAnalysisId === null) return;
   if (!analysisBinding || state && (analysisBinding.generation !== state.generation || analysisBinding.table_rules_revision !== state.table_rules?.revision)) {
     invalidateAnalysis("来源或本桌规则已变更，旧分析已失效。"); return;
   }
-  if (analysisBinding.expected_input_sha256
-      && analysisBinding.expected_input_sha256 !== analysisExpectedInput) {
+  const expected = analysisBinding.expected_input_sha256;
+  if (expected !== null && expected !== undefined && expected !== analysisExpectedInput) {
     invalidateAnalysis("录入表单的输入身份已变更，旧分析已失效，请重新核对后计算。"); return;
   }
-  if (analysisBinding.input_sha256 && report?.input_sha256
-      && report.input_sha256 !== analysisBinding.input_sha256) {
-    invalidateAnalysis("这条结果不是针对当前输入算出的，已失效。"); return;
-  }
-  if (!report || report.job_id !== acceptedAnalysisId || report.binding?.generation !== analysisBinding.generation || report.binding?.table_rules_revision !== analysisBinding.table_rules_revision) {
+  if (!report || report.job_id !== acceptedAnalysisId
+      || report.kind !== analysisBinding.kind
+      || report.binding?.generation !== analysisBinding.generation
+      || report.binding?.table_rules_revision !== analysisBinding.table_rules_revision
+      || report.binding?.rules_source !== analysisBinding.rules_source) {
     invalidateAnalysis("分析已被其他操作替换，请重新计算。"); return;
+  }
+  // The identity of the input has to survive all the way to the rendered report:
+  // the digest this panel accepted, the digest the report states and - when the
+  // computation came from the entry form - the digest that form verified must be
+  // the same non-empty value. Three hashes that merely exist are not a check, and
+  // a missing one must not be skipped either.
+  const accepted = analysisBinding.input_sha256, reported = report.input_sha256;
+  if (!analysisHex(accepted) || !analysisHex(reported) || reported !== accepted
+      || (expected !== null && expected !== undefined
+          && (!analysisHex(expected) || accepted !== expected))) {
+    invalidateAnalysis("这条结果无法与核对过的输入对上（身份缺失或不一致），已失效，请重新核对后计算。"); return;
   }
   el("analysis-status").textContent = `${analysisLabels[report.status] || report.status}${report.error ? `：${report.error}` : ""}`;
   if (report.status !== "COMPLETE") {
@@ -93,13 +105,24 @@ el("analysis-start").addEventListener("click", async () => {
         && (!analysisDraftSource || analysisDraftSource.input_sha256 !== expectedInput)) {
       el("analysis-status").textContent = "录入表单的身份与本场景不匹配：请回到录入区重新核对后计算。"; return;
     }
+    if (expectedInput !== null && el("analysis-use-rules").checked) {
+      el("analysis-status").textContent = "本桌规则会覆盖这个场景的规则，无法与录入表单核对同一份输入：请取消勾选「使用本桌规则」后重新核对。"; return;
+    }
     const document = JSON.parse(el("analysis-input").value);
     const r = await fetch("/api/analysis", {method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({kind:el("analysis-kind").value,document,rules_source:el("analysis-use-rules").checked ? "table" : "document",rules_revision:statusData.table_rules?.revision})});
     const result = await r.json(); if (epoch !== analysisEpoch) return; if (!r.ok) throw Error(text(result.detail));
+    const reported = analysisHex(result.input_sha256) ? result.input_sha256 : null;
+    if (expectedInput !== null && reported !== expectedInput) {
+      // The document really sent did not hash to the identity the form verified,
+      // so this result does not belong to the input the human checked.
+      el("analysis-status").textContent = "后端收到的输入与录入表单核对过的输入不是同一份，已拒绝这次计算：请回到录入区重新核对。";
+      return;
+    }
     acceptedAnalysisId = result.job_id; analysisInput = document;
     analysisBinding = JSON.parse(JSON.stringify(result.binding));
+    analysisBinding.kind = result.kind ?? el("analysis-kind").value;
     analysisBinding.expected_input_sha256 = expectedInput;
-    analysisBinding.input_sha256 = result.input_sha256 ?? null;
+    analysisBinding.input_sha256 = reported;
     renderAnalysis(result);
   } catch (e) { if (epoch === analysisEpoch) el("analysis-status").textContent = `未开始计算：${e.message}`; }
   finally { analysisBusy = false; el("analysis-start").disabled = false; }

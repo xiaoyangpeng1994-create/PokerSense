@@ -4,9 +4,17 @@
 // policy, never reads an observed hand by itself and never fills an unknown.
 //
 // Row controls (not CSV) are the normal path; the CSV box is an import/export
-// helper. Every edit invalidates both the verified input and any analysis result
-// that was produced from a previous input.
+// helper. EVERY mutation of the form - a keystroke, adding or deleting a row, a
+// programmatic import, a CSV apply, clearing, changing the selected source -
+// voids the verified receipt and the downstream result through the single
+// `handInvalidate` path, so what is displayed and what would be computed can
+// never belong to different hands.
+//
+// Facts keep their provenance: a value brought in from a structured snapshot
+// stays `observed` with its original candidate until the human edits it, at which
+// point it becomes `human_confirmed` and the candidate is kept for comparison.
 let handToken = 0, handBuilt = null, handWired = false, handExpectedInput = null;
+let handSource = handBlankSource(), handOrigin = {};
 const handStatus = message => { el("hand-input-tag").textContent = message; };
 const handFeedback = (message, isError) => {
   el("hand-status").textContent = message;
@@ -17,6 +25,30 @@ function handElement(tag, className, value) {
   if (className) node.className = className;
   if (value !== undefined) node.textContent = value;
   return node;
+}
+function handBlankSource() {
+  return {kind: "manual_form", issue_id: null, saved_at: null,
+          preview_sha256: null, source_frame: null, scope: null};
+}
+function handSeatId(value, where) {
+  const raw = String(value === null || value === undefined ? "" : value).trim();
+  if (!raw) throw Error(`${where}座位号不能为空：空值不会被当成座位 0`);
+  if (!/^\d+$/.test(raw)) throw Error(`${where}座位号必须是 0–7 的整数（当前「${raw}」）`);
+  return Number(raw);
+}
+function handSetOrigin(key, provenance, candidate) {
+  handOrigin[key] = {provenance, candidate: candidate ?? null};
+}
+function handOriginOf(key) {
+  return handOrigin[key] || {provenance: "human_confirmed", candidate: null};
+}
+function handFact(key, value) {
+  // `value` already carries the empty-vs-filled decision.
+  const origin = handOriginOf(key);
+  if (value === null || value === undefined || value === "") {
+    return handUnknown(origin.candidate);
+  }
+  return {value, provenance: origin.provenance, candidate: origin.candidate};
 }
 const HAND_BLOCKS = {
   seats: ["座位", [
@@ -30,7 +62,9 @@ const HAND_BLOCKS = {
     {key: "kind", label: "动作", type: "select", options: [
       ["check", "过牌"], ["fold", "弃牌"], ["call", "跟注"],
       ["bet", "下注"], ["raise", "加注"]]},
-    {key: "target", label: "本街累计金额", type: "text"}], "hand-rows-history"],
+    {key: "target", label: "本街累计金额（仅下注/加注需要填）", type: "text"},
+    {key: "call_amount", label: "跟注追加额（可选核对）", type: "text"}],
+   "hand-rows-history"],
   ranges: ["对手范围（每行一个组合）", [
     {key: "seat_id", label: "座位号", type: "number"},
     {key: "combo", label: "组合（如 JhJd）", type: "text"},
@@ -41,6 +75,24 @@ const HAND_BLOCKS = {
       ["check", "过牌"], ["fold", "弃牌"], ["call", "跟注"],
       ["bet", "下注"], ["raise", "加注"]]},
     {key: "weight", label: "权重", type: "text"}], "hand-rows-weights"],
+};
+// The kernel's own sentinel for an action that carries no size. The human never
+// types it: it is generated here and shown as read-only.
+const HAND_SIZE_LESS = ["check", "fold", "call"];
+const HAND_ROW_HOOKS = {
+  history: row => {
+    const nodes = row.querySelectorAll("input,select");
+    const kind = nodes[1], target = nodes[2], callAmount = nodes[3];
+    const sync = () => {
+      const sizeLess = HAND_SIZE_LESS.includes(kind.value);
+      target.disabled = sizeLess;
+      target.value = sizeLess ? "0" : (target.value === "0" ? "" : target.value);
+      callAmount.disabled = kind.value !== "call";
+      if (kind.value !== "call") callAmount.value = "";
+    };
+    kind.addEventListener("change", sync);
+    sync();
+  },
 };
 function handField(field, value) {
   if (field.type === "select") {
@@ -75,15 +127,23 @@ function handAddRow(block, values = {}, used = false) {
   remove.type = "button";
   remove.addEventListener("click", () => { row.remove(); handCareful(); });
   row.append(remove);
+  if (HAND_ROW_HOOKS[block]) HAND_ROW_HOOKS[block](row);
   for (const node of row.querySelectorAll("input,select")) {
-    node.addEventListener("input", handTouched(row));
-    node.addEventListener("change", handTouched(row));
+    node.addEventListener("input", handTouched(row, block));
+    node.addEventListener("change", handTouched(row, block));
   }
   el(container).append(row);
   return row;
 }
-function handTouched(row) {
-  return () => { row.dataset.used = "true"; handCareful(); };
+function handTouched(row, block) {
+  return () => {
+    row.dataset.used = "true";
+    // A human touch makes the whole block human-confirmed; the original observed
+    // candidate is preserved so the difference stays visible.
+    const origin = handOriginOf(block);
+    handSetOrigin(block, "human_confirmed", origin.candidate);
+    handCareful();
+  };
 }
 function handRows(block) {
   const fields = HAND_BLOCKS[block][1], container = HAND_BLOCKS[block][2];
@@ -99,10 +159,14 @@ function handRows(block) {
   }
   return rows;
 }
-function handClearRows(block) { el(HAND_BLOCKS[block][2]).replaceChildren(); }
-function handFillRows(block, rows) {
+function handClearRows(block) {
+  el(HAND_BLOCKS[block][2]).replaceChildren();
+  delete handOrigin[block];
+}
+function handFillRows(block, rows, provenance, candidate) {
   handClearRows(block);
   for (const values of rows) handAddRow(block, values, true);
+  if (rows.length) handSetOrigin(block, provenance || "human_confirmed", candidate);
 }
 function handConfirm(value) { return {value, provenance: "human_confirmed", candidate: null}; }
 function handUnknown(candidate = null) { return {value: null, provenance: "unknown", candidate}; }
@@ -116,30 +180,52 @@ function handFeeBlock() {
   if (choice === "confirmed_zero") return {value: "0", provenance: "human_confirmed"};
   return {value: "0", provenance: "assumed"};
 }
+function handSplit(text) {
+  return String(text || "").split(",").map(value => value.trim()).filter(Boolean);
+}
 function handFacts() {
   const hero = handCards(el("hand-hero").value, 2);
   const board = handCards(el("hand-board").value, 5);
   if (!hero) throw Error("Hero 手牌需要两张牌（如 Qs Qd）");
   if (!board) throw Error("公共牌需要五张牌");
-  const seats = handRows("seats").map(values => ({
-    seat_id: Number(values.seat_id), status: values.status,
-    stack: values.stack, hand_committed: values.hand_committed}));
-  if (!seats.length) throw Error("请用「添加一行」录入座位（每行一个座位）");
-  const history = handRows("history").map(values => ({
-    actor: Number(values.actor), kind: values.kind, target: values.target}));
-  const order = String(el("hand-order").value || "").split(",")
-    .map(value => value.trim()).filter(Boolean).map(Number);
+  const seatRows = handRows("seats");
+  if (!seatRows.length) throw Error("请用「添加一行」录入座位（每行一个座位）");
+  const seats = seatRows.map(values => ({
+    seat_id: handSeatId(values.seat_id, "座位表里的"),
+    status: values.status, stack: values.stack,
+    hand_committed: values.hand_committed}));
+  const historyRows = handRows("history");
+  const noHistory = el("hand-no-history").checked;
+  if (noHistory && historyRows.length) {
+    throw Error("你既勾选了「本手没有任何公开行动」，又填了公开历史：请二选一");
+  }
+  const history = historyRows.map(values => {
+    const kind = String(values.kind || "").trim().toLowerCase();
+    const entry = {
+      actor: handSeatId(values.actor, "公开历史里的"),
+      kind,
+      target: HAND_SIZE_LESS.includes(kind) ? "0"
+        : String(values.target || "").trim(),
+    };
+    const declared = String(values.call_amount || "").trim();
+    if (kind === "call" && declared) entry.call_amount = declared;
+    return entry;
+  });
+  const order = handSplit(el("hand-order").value).map(value =>
+    handSeatId(value, "行动顺序里的"));
   return {
-    source: null, source_kind: "manual_form",
+    source: handSource.issue_id, source_kind: handSource.kind,
     ended_hand_confirmed: handConfirm(el("hand-ended").checked),
-    hero_seat: el("hand-hero-seat").value === "" ? handUnknown()
-      : handConfirm(Number(el("hand-hero-seat").value)),
-    hero_cards: handConfirm(hero), board_cards: handConfirm(board),
-    action_order: handConfirm(order), seats: handConfirm(seats),
-    history: handConfirm(history),
-    pot_display: el("hand-pot").value.trim() ? handConfirm(el("hand-pot").value.trim())
-      : handUnknown(),
-    table_rules: handUnknown(), observed_at: null,
+    hero_seat: handFact("hand-hero-seat",
+                        String(el("hand-hero-seat").value).trim() === "" ? ""
+                          : Number(String(el("hand-hero-seat").value).trim())),
+    hero_cards: handFact("hand-hero", hero), board_cards: handFact("hand-board", board),
+    action_order: order.length ? handFact("hand-order", order) : handUnknown(),
+    seats: handFact("seats", seats),
+    history: historyRows.length ? handFact("history", history)
+      : (noHistory ? handConfirm([]) : handUnknown()),
+    pot_display: handFact("hand-pot", String(el("hand-pot").value).trim()),
+    table_rules: handUnknown(), observed_at: handSource.saved_at ?? null,
   };
 }
 function handGroupRanges(rows) {
@@ -147,10 +233,10 @@ function handGroupRanges(rows) {
   // by the seat the human typed is a mechanical fold, not an inference: a
   // duplicate combination inside a seat is still rejected downstream.
   const bySeat = new Map();
-  for (const row of rows) {
-    const seat = Number(row.seat_id);
+  for (const values of rows) {
+    const seat = handSeatId(values.seat_id, "范围表里的");
     if (!bySeat.has(seat)) bySeat.set(seat, []);
-    bySeat.get(seat).push({combo: row.combo, weight: row.weight});
+    bySeat.get(seat).push({combo: values.combo, weight: values.weight});
   }
   return [...bySeat.entries()].map(([seat_id, combos]) => ({seat_id, combos}));
 }
@@ -159,9 +245,9 @@ function handAssumptions() {
     range_source: "manual_unvalidated",
     ranges: handGroupRanges(handRows("ranges")),
     models: handRows("weights").map(values => ({
-      seat_id: Number(values.seat_id), key: values.key, weight: values.weight})),
-    aggression_targets: String(el("hand-targets").value || "").split(",")
-      .map(value => value.trim()).filter(Boolean),
+      seat_id: handSeatId(values.seat_id, "响应权重表里的"),
+      key: values.key, weight: values.weight})),
+    aggression_targets: handSplit(el("hand-targets").value),
     max_aggressions: Number(el("hand-max-agg").value || 1),
     other_fees: handFeeBlock(),
   };
@@ -171,22 +257,37 @@ function handBindAnalysisInput(value) {
   // script is not on the page, the form still works on its own.
   try { analysisExpectedInput = value; return true; } catch (_) { return false; }
 }
+function handDropReceipt() {
+  handBuilt = null; handExpectedInput = null;
+  el("hand-compute").disabled = true;
+}
 function handFailAnalysis(reason) {
   // Reuse the existing analysis invalidation path (and its debounced cancel)
   // instead of firing a second cancel that could land after a new start.
-  handExpectedInput = null;
+  handDropReceipt();
   try { analysisInputChanged(reason); return true; } catch (_) { return false; }
 }
+function handMarkRevised() {
+  // A human edit on an imported hand does not erase where it came from; it marks
+  // the chain so the export never passes an edited import off as pure manual entry.
+  if (handSource.issue_id !== null && handSource.revised_by_human !== true) {
+    handSource = {...handSource, revised_by_human: true};
+  }
+}
+const HAND_VOIDED = "上方牌局输入已变更：下方按旧输入算出的结果已失效。";
 function handInvalidate(message) {
-  ++handToken; handBuilt = null; handExpectedInput = null;
-  el("hand-compute").disabled = true;
+  ++handToken;
+  handDropReceipt();
   el("hand-gaps").replaceChildren(); el("hand-capacity").replaceChildren();
   el("hand-identity").textContent = "无结果";
   handStatus("未核对");
-  handFailAnalysis("上方牌局输入已变更：下方按旧输入算出的结果已失效。");
+  handFailAnalysis(HAND_VOIDED);
   if (message) handFeedback(message, false);
 }
-function handCareful() { handInvalidate("输入已变更，请重新核对后再计算。"); }
+function handCareful() {
+  handMarkRevised();
+  handInvalidate("输入已变更，请重新核对后再计算。");
+}
 function handList(title, items, className) {
   const nodes = [];
   if (!items.length) return nodes;
@@ -210,6 +311,9 @@ function handTable(headers, rows) {
   return table;
 }
 const HAND_STATUS_LABELS = {ACTIVE: "参与", FOLDED: "已弃牌", ALL_IN: "全下"};
+const HAND_ORIGIN_LABELS = {observed: "结构化快照候选（未人工修改）",
+                            human_confirmed: "人工填写/确认",
+                            assumed: "假设"};
 function handRender(result, facts) {
   const amounts = result.amounts, labels = amounts.labels, room = result.capacity;
   const rows = amounts.rows.map(row => [
@@ -238,15 +342,21 @@ function handRender(result, facts) {
                   ? `加注到 ${action.target}`
                   : {check: "过牌", fold: "弃牌", call: "跟注"}[action.kind],
                 action.additional_chips, action.reading])));
+  const provenance = {};
+  for (const [key, block] of Object.entries(facts)) {
+    if (block && typeof block === "object" && "provenance" in block) {
+      provenance[key] = {provenance: block.provenance,
+                         candidate: block.candidate === undefined ? null : block.candidate};
+    }
+  }
   el("hand-identity").textContent = JSON.stringify({
     facts_sha256: result.hashes.facts_sha256,
     assumptions_sha256: result.hashes.assumptions_sha256,
     input_sha256: result.hashes.input_sha256,
     implementation_version: result.hashes.implementation_version,
     kernel: result.hashes.kernel, scope: result.hashes.scope,
-    provenance: Object.fromEntries(Object.entries(facts).filter(
-      ([, value]) => value && typeof value === "object" && "provenance" in value
-    ).map(([key, value]) => [key, value.provenance])),
+    source: handSource, provenance,
+    note: "任一行被人工修改后，该块整体记为人工确认；原候选保留在 candidate 里",
   }, null, 2);
 }
 async function handVerify() {
@@ -257,14 +367,12 @@ async function handVerify() {
     facts = handFacts(); assumptions = handAssumptions();
   } catch (error) {
     handFeedback(error.message, true);
-    el("hand-compute").disabled = true;
     return null;
   }
   el("hand-gaps").replaceChildren();
   if (!el("hand-use-rules").checked) {
     handFeedback("本轮只支持使用「本桌规则」里已保存的完整规则；"
                  + "请先勾选该选项并在设置页补齐桌规（未知项不能自动补零）。", true);
-    el("hand-compute").disabled = true;
     return null;
   }
   try {
@@ -276,15 +384,12 @@ async function handVerify() {
     if (token !== handToken) return null;
     if (!response.ok) {
       handFeedback(`未通过核对：${text(result.detail)}`, true);
-      el("hand-compute").disabled = true;
       return null;
     }
     if (!result.ok) {
       el("hand-gaps").replaceChildren(...handList("还缺什么（不会自动补齐）：",
                                                   result.reasons, "blockers"));
       handFeedback(`输入尚不能被内核接受（${result.reasons.length} 项）。`, true);
-      el("hand-compute").disabled = true;
-      handBuilt = null;
       return null;
     }
     handBuilt = result.document;
@@ -297,7 +402,6 @@ async function handVerify() {
     return result;
   } catch (error) {
     if (token === handToken) handFeedback(`核对失败：${error.message}`, true);
-    el("hand-compute").disabled = true;
     return null;
   }
 }
@@ -309,12 +413,15 @@ function handCompute() {
     handFeedback("当前页面没有加载条件分析面板，无法把输入交给内核。", true);
     return;
   }
+  const provenance = {...handOrigin};
   analysisDraftSource = {
     kind: "hand_input_form",
     input_sha256: handExpectedInput,
     scope: "MANUAL_HYPOTHESIS_OFFLINE_NOT_LIVE_ADVICE",
     rules_revision: statusData.table_rules?.revision ?? null,
-    note: "手工录入的已结束牌局 + 人工假设；不是观测验证样本",
+    form_source: {...handSource},
+    provenance,
+    note: "手工录入/带入的已结束牌局 + 人工假设；不是观测验证样本，也不代表实战建议",
   };
   el("analysis-kind").value = "threeway";
   el("analysis-use-rules").checked = false;
@@ -322,16 +429,108 @@ function handCompute() {
   handFeedback("已把本次输入交给下方条件分析；结果只针对这次输入。", false);
   el("analysis-start").click();
 }
-function handClear() {
+function handResetForSource(source, message) {
+  // Replacing the source voids every fact that belonged to the previous one: the
+  // old fields, the old end-of-hand confirmation and the old opponent
+  // assumptions must not be inherited silently.
   for (const id of ["hand-hero", "hand-board", "hand-hero-seat", "hand-order",
-                    "hand-pot", "hand-targets", "hand-csv"]) {
+                    "hand-pot", "hand-targets"]) {
     el(id).value = "";
   }
   el("hand-max-agg").value = "2";
   el("hand-ended").checked = false;
+  el("hand-no-history").checked = false;
   el("hand-fees").value = "unknown";
   for (const block of Object.keys(HAND_BLOCKS)) handClearRows(block);
-  handInvalidate("已清空录入。");
+  handOrigin = {};
+  handSource = {...source};
+  handInvalidate(message);
+}
+function handClear() {
+  el("hand-csv").value = "";
+  handResetForSource(handBlankSource(), "已清空录入与假设：来源恢复为手工输入。");
+}
+function handSourceChanged(issueId) {
+  // The review desk selected another record (or cleared the selection). A receipt
+  // and a result never survive a source change; facts that came from a DIFFERENT
+  // record cannot be kept as if they still belonged to the new selection. A purely
+  // hand-typed form keeps its values - nothing about it came from a record.
+  const next = issueId === undefined
+    ? ((typeof selectedReview !== "undefined" && selectedReview && selectedReview.issue)
+        ? selectedReview.issue.issue_id : null)
+    : issueId;
+  const cameFromAnotherRecord = handSource.issue_id !== null
+    && handSource.issue_id !== next;
+  if (cameFromAnotherRecord) {
+    handResetForSource(
+      {...handBlankSource(), kind: next ? "selected_record_not_imported" : "manual_form",
+       issue_id: next},
+      next ? `已切换复查记录为 ${next}，而上一套字段来自 ${handSource.issue_id}：`
+              + "旧字段、结束确认与对手假设已全部作废；请重新带入或重新录入。"
+           : `已取消复查记录选择，而上一套字段来自 ${handSource.issue_id}：`
+              + "旧字段、结束确认与对手假设已全部作废。");
+    return;
+  }
+  handSource = {...handSource, kind: next ? "selected_record_not_imported" : "manual_form",
+                issue_id: next};
+  handInvalidate(next
+    ? `已切换复查记录为 ${next}：请点「带入」重新载入有证据的字段。`
+    : "已取消复查记录选择：按「带入」前不会使用任何记录里的字段。");
+}
+function handImportFailed(issueId, message) {
+  // The record stays on the source so the failure is visible, but nothing of it
+  // is treated as a confirmed fact.
+  handSource = {...handSource, kind: "import_failed", issue_id: issueId};
+  handFeedback(`带入失败：${message}`, true);
+}
+const HAND_FACT_LABELS = {hero_cards: "Hero 手牌", board_cards: "公共牌",
+                          pot_display: "显示底池", hero_seat: "Hero 座位",
+                          action_order: "行动顺序", seats: "各座位"};
+function handApplyImportedFacts(issueId, body) {
+  const facts = body.facts || {};
+  const applied = [], missing = [];
+  const scalars = [
+    ["hand-hero", "hero_cards", value => value.join(" ")],
+    ["hand-board", "board_cards", value => value.join(" ")],
+    ["hand-pot", "pot_display", value => String(value)],
+    ["hand-hero-seat", "hero_seat", value => String(value)],
+    ["hand-order", "action_order", value => value.join(",")],
+  ];
+  for (const [id, key, render] of scalars) {
+    const block = facts[key];
+    const usable = block && block.value !== null && block.value !== undefined
+      && String(block.value).trim() !== "";
+    if (usable) {
+      el(id).value = render(block.value);
+      handSetOrigin(id, block.provenance || "observed", block.candidate);
+      applied.push(HAND_FACT_LABELS[key]);
+    } else {
+      missing.push(HAND_FACT_LABELS[key]);
+    }
+  }
+  if (facts.seats && facts.seats.value) {
+    handFillRows("seats", facts.seats.value, facts.seats.provenance || "observed",
+                 facts.seats.candidate);
+    applied.push(HAND_FACT_LABELS.seats);
+  } else {
+    missing.push(HAND_FACT_LABELS.seats);
+  }
+  handSource = {...handSource, kind: "saved_observed_snapshot", issue_id: issueId,
+                saved_at: (body.source && body.source.saved_at) || handSource.saved_at,
+                preview_sha256: (body.source && body.source.preview_sha256) || null,
+                source_frame: (body.source && body.source.source_frame) || null,
+                scope: (body.source && body.source.scope) || null};
+  const gaps = [...(body.gaps || [])];
+  for (const name of missing) {
+    gaps.push(`${name}：该记录没有可用候选，需要人工录入`);
+  }
+  el("hand-gaps").replaceChildren(...handList(
+    `已带入记录 ${issueId}；只有下面这些有证据，其余仍是未知，`
+    + "必须人工补齐并确认后才能计算：", gaps, "blockers"));
+  handStatus("已带入候选");
+  handFeedback(`已带入 ${applied.length} 项有证据的字段（来源标记为候选）；`
+               + "带入不等于已核对：请补齐未知项、勾选「本手已结束」并选择费用状态，"
+               + "再点「核对输入」。", false);
 }
 async function handImportRecord() {
   const record = typeof selectedReview !== "undefined" ? selectedReview : null;
@@ -340,28 +539,35 @@ async function handImportRecord() {
     return null;
   }
   const issueId = record.issue.issue_id;
+  const revision = statusData.table_rules?.revision ?? null;
+  // Void first: the displayed form and any result must never describe the
+  // previous hand while the new one is being fetched.
+  handResetForSource({kind: "saved_observed_snapshot_pending", issue_id: issueId,
+                      saved_at: record.issue.saved_at ?? null,
+                      preview_sha256: record.issue.preview_sha256 ?? null,
+                      source_frame: null, scope: null},
+                     `正在从记录 ${issueId} 带入：上一来源的字段、结束确认、`
+                     + "对手假设与下方旧结果已全部作废。");
+  const token = handToken;
   try {
     const response = await fetch(
       `/api/hand-input/facts/${encodeURIComponent(issueId)}`);
     const body = await response.json();
-    if (!response.ok) throw Error(text(body.detail));
-    const facts = body.facts;
-    if (facts.hero_cards.value) el("hand-hero").value = facts.hero_cards.value.join(" ");
-    if (facts.board_cards.value) el("hand-board").value = facts.board_cards.value.join(" ");
-    if (facts.pot_display.value) el("hand-pot").value = facts.pot_display.value;
-    if (facts.hero_seat.value !== null) el("hand-hero-seat").value = facts.hero_seat.value;
-    if (facts.action_order.value) {
-      el("hand-order").value = facts.action_order.value.join(",");
+    if (token !== handToken) return null;   // a newer change owns the form now
+    if ((statusData.table_rules?.revision ?? null) !== revision) {
+      handImportFailed(issueId, "本桌规则在带入过程中变更；请重新核对规则后再带入。");
+      return null;
     }
-    if (facts.seats.value) handFillRows("seats", facts.seats.value);
-    el("hand-gaps").replaceChildren(...handList(
-      `已带入记录 ${issueId} 的结构化候选；下面这些必须人工确认后才能计算：`,
-      body.gaps, "blockers"));
-    handStatus("已带入候选");
-    handFeedback("带入只填有证据的字段；未确认的字段保持未知，不会猜。", false);
+    if (!response.ok) throw Error(text(body.detail));
+    if (!body.source || body.source.issue_id !== issueId) {
+      handImportFailed(issueId, "返回的记录与请求的目标不是同一条，这次带入已放弃。");
+      return null;
+    }
+    handApplyImportedFacts(issueId, body);
     return body;
   } catch (error) {
-    handFeedback(`带入失败：${error.message}`, true);
+    if (token !== handToken) return null;
+    handImportFailed(issueId, error.message);
     return null;
   }
 }
@@ -380,8 +586,12 @@ function handCsvApply() {
     }
     rows.push(Object.fromEntries(fields.map((key, index) => [key, parts[index]])));
   }
-  handFillRows(wanted, rows);
-  handFeedback(`已把 ${rows.length} 行 CSV 转成逐行控件，请核对后再计算。`, false);
+  // Replacing a block voids the receipt and the result exactly like typing does.
+  handMarkRevised();
+  handInvalidate(`已用 CSV 替换「${HAND_BLOCKS[wanted][0]}」整块：旧核对与旧结果已失效。`);
+  handFillRows(wanted, rows, "human_confirmed", null);
+  handFeedback(`已把 ${rows.length} 行 CSV 转成逐行控件并作废旧核对，请核对后再计算。`,
+               false);
 }
 if (typeof document !== "undefined" && typeof el === "function"
     && el("hand-build")) {
@@ -406,10 +616,15 @@ if (typeof document !== "undefined" && typeof el === "function"
   handAddRow("weights", {key: "check", weight: "1"});
   for (const id of ["hand-hero", "hand-board", "hand-hero-seat", "hand-order",
                     "hand-pot", "hand-targets", "hand-max-agg"]) {
-    el(id).addEventListener("input", handCareful);
+    el(id).addEventListener("input", () => {
+      const origin = handOriginOf(id);
+      handSetOrigin(id, "human_confirmed", origin.candidate);
+      handCareful();
+    });
   }
-  el("hand-ended").addEventListener("change", handCareful);
-  el("hand-use-rules").addEventListener("change", handCareful);
+  for (const id of ["hand-ended", "hand-use-rules", "hand-no-history"]) {
+    el(id).addEventListener("change", handCareful);
+  }
   el("hand-fees").addEventListener("change", handCareful);
   handWired = true;
   handFeedback("尚未核对输入。未知项留空即可；核对后会给出还缺什么。", false);
