@@ -94,14 +94,35 @@ def blank_facts():
 
 
 def blank_assumptions():
+    """Assumptions start unknown: a fee state must be confirmed, never defaulted."""
     return {
         "range_source": "manual_unvalidated",
         "ranges": [],
         "models": [],
         "aggression_targets": [],
         "max_aggressions": 1,
-        "other_fees": "0",
+        "other_fees": {"value": None, "provenance": "unknown"},
     }
+
+
+REQUIRED_FACTS = (
+    ("hero_seat", "Hero 座位号未知：请确认河牌开始时 Hero 的座位"),
+    ("hero_cards", "Hero 手牌未知：请填写或从结构化快照带入"),
+    ("board_cards", "公共牌未知：请填写五张河牌"),
+    ("action_order", "行动顺序未知：请填写河牌开始时三名活跃玩家的行动顺序"),
+    ("seats", "各座位状态、筹码与已投入未知：请补录或从结构化快照带入"),
+    ("history", "公开历史未知：请填写，或明确确认「本手没有任何公开行动」"),
+    ("pot_display", "显示底池未知：请填写（底池必须能与投入对账）"),
+    ("table_rules", "本桌规则未知：请先在本桌规则里保存完整桌规"),
+)
+
+
+def _require_known(facts):
+    for key, message in REQUIRED_FACTS:
+        block = facts.get(key)
+        if not isinstance(block, dict) or block.get("provenance") == "unknown" \
+                or block.get("value") is None:
+            raise HandInputError(message)
 
 
 def _amount(text, label):
@@ -143,11 +164,9 @@ def normalise_facts(facts):
         raise HandInputError("缺少牌局事实")
     if facts.get("ended_hand_confirmed", {}).get("value") is not True:
         raise HandInputError("当前只分析已结束的牌局：请先勾选「本手已结束」")
-    seats = facts.get("seats")
-    if seats.get("value") is None:
-        raise HandInputError("缺少各座位状态与筹码：请补录或从已保存记录带入")
+    _require_known(facts)
     rows = []
-    for item in seats["value"]:
+    for item in facts["seats"]["value"]:
         rows.append({
             "seat_id": int(item["seat_id"]),
             "stack": str(_amount(item.get("stack"), "座位筹码")),
@@ -171,14 +190,16 @@ def normalise_facts(facts):
             f"河牌开始时必须恰好三名 ACTIVE 玩家（当前 {len(active)} 名）")
     if set(order) != set(active):
         raise HandInputError("行动顺序必须与三名 ACTIVE 玩家的座位号一致")
-    levels = {row["hand_committed"] for row in rows if row["status"] == "ACTIVE"}
+    levels = {Decimal(row["hand_committed"]) for row in rows
+              if row["status"] == "ACTIVE"}
     if len(levels) != 1:
         raise HandInputError("三名 ACTIVE 玩家的已投入必须相等（单底池，无边池）")
-    level = Decimal(next(iter(levels)))
+    level = next(iter(levels))
     if any(Decimal(row["hand_committed"]) > level for row in rows):
         raise HandInputError("有座位投入高于活跃玩家，存在边池，当前不支持")
+    raw_history = facts["history"]["value"]
     history = []
-    for item in facts["history"]["value"] or []:
+    for item in raw_history:
         actor = int(item["actor"])
         kind = str(item["kind"]).strip().lower()
         if actor not in [row["seat_id"] for row in rows]:
@@ -214,21 +235,30 @@ def normalise_assumptions(assumptions, active_seats, hero_seat):
         raise HandInputError("对手范围必须明确标记为人工未验证假设")
     opponents = sorted(set(active_seats) - {hero_seat})
     ranges = []
+    seen_seats = set()
     for item in assumptions.get("ranges") or []:
         seat = int(item.get("seat_id"))
+        if seat in seen_seats:
+            raise HandInputError(f"座位 {seat} 的范围重复给出；请合并为一行")
+        seen_seats.add(seat)
         combos = []
+        seen_combos = set()
         for entry in item.get("combos") or []:
             combo = str(entry.get("combo", "")).strip()
             if not COMBO.fullmatch(combo):
                 raise HandInputError(f"座位 {seat} 的范围组合「{combo}」格式非法（形如 JhJd）")
             if combo[0] == combo[2] and combo[1] == combo[3]:
                 raise HandInputError("范围组合不能是同一张牌")
+            normalized_combo = (combo[0].upper() + combo[1].lower()
+                                + combo[2].upper() + combo[3].lower())
+            if normalized_combo in seen_combos:
+                raise HandInputError(
+                    f"座位 {seat} 的组合 {normalized_combo} 重复；请合并权重而不是重复列出")
+            seen_combos.add(normalized_combo)
             weight = _amount(entry.get("weight", "1"), "组合权重")
             if weight <= 0:
                 raise HandInputError("组合权重必须为正数")
-            combos.append({"combo": combo[0].upper() + combo[1].lower()
-                           + combo[2].upper() + combo[3].lower(),
-                           "weight": str(weight)})
+            combos.append({"combo": normalized_combo, "weight": str(weight)})
         if not combos:
             raise HandInputError(f"座位 {seat} 至少要给出一个合法组合")
         if seat not in opponents:
@@ -237,19 +267,27 @@ def normalise_assumptions(assumptions, active_seats, hero_seat):
     if sorted(item["seat_id"] for item in ranges) != opponents:
         raise HandInputError("必须为两名 ACTIVE 对手各给出一套具体组合范围")
     models = []
-    for item in assumptions.get("models") or []:
-        seat = int(item.get("seat_id"))
-        weights = item.get("weights") or {}
+    grouped = {}
+    seen_rows = set()
+    for row in assumptions.get("models") or []:
+        seat = int(row.get("seat_id"))
+        key = str(row.get("key", "")).strip().lower()
+        if key not in WEIGHT_KEYS:
+            raise HandInputError(f"响应权重的动作「{key or '空'}」不受支持")
+        if (seat, key) in seen_rows:
+            raise HandInputError(
+                f"座位 {seat} 的 {key} 权重重复给出；请合并为一行")
+        seen_rows.add((seat, key))
         if seat not in opponents:
             raise HandInputError("响应权重只能给 ACTIVE 的对手座位")
-        table = []
-        for key in WEIGHT_KEYS:
-            if key in weights:
-                value = _amount(weights[key], "响应权重")
-                table.append({"key": key, "weight": str(value)})
-        if not table or all(Decimal(entry["weight"]) == 0 for entry in table):
+        value = _amount(row.get("weight"), "响应权重")
+        grouped.setdefault(seat, []).append({"key": key, "weight": str(value)})
+    for seat in sorted(grouped):
+        table = grouped[seat]
+        if all(Decimal(entry["weight"]) == 0 for entry in table):
             raise HandInputError(f"座位 {seat} 的响应权重不能全为 0")
-        models.append({"seat_id": seat, "weights": table})
+        models.append({"seat_id": seat,
+                       "weights": sorted(table, key=lambda entry: entry["key"])})
     if sorted(item["seat_id"] for item in models) != opponents:
         raise HandInputError("必须为两名 ACTIVE 对手各给出一套响应权重")
     targets = []
@@ -262,15 +300,21 @@ def normalise_assumptions(assumptions, active_seats, hero_seat):
     max_aggressions = assumptions.get("max_aggressions")
     if type(max_aggressions) is not int or not 1 <= max_aggressions <= 3:
         raise HandInputError("加注次数上限只能是 1–3")
-    other_fees = str(assumptions.get("other_fees", "0"))
-    if other_fees not in ("0", "0.0"):
+    fees = assumptions.get("other_fees")
+    if not isinstance(fees, dict) or fees.get("provenance") not in (
+            "human_confirmed", "assumed"):
         raise HandInputError(
-            "未知的额外费用不能当已知：当前内核只支持 other_fees = 0，"
-            "请把未确认的费用留在 UNKNOWN 并说明，而不是填一个估值")
+            "额外费用未知：请确认本手没有额外费用，或明确选择「零额外费用分析情景（假设）」；"
+            "未知费用不会自动当 0")
+    if str(fees.get("value")) not in ("0", "0.0"):
+        raise HandInputError(
+            "额外费用不是 0：当前内核只支持 other_fees = 0；"
+            "非零费用请单独作为未支持项说明，不能填估值")
     return {"range_source": "manual_unvalidated", "ranges": ranges,
             "models": models, "aggression_targets": targets,
             "max_aggressions": max_aggressions,
-            "other_fees": other_fees}
+            "other_fees": str(fees.get("value")),
+            "other_fees_provenance": fees["provenance"]}
 
 
 def check_support(facts, assumptions):
@@ -305,6 +349,10 @@ def check_support(facts, assumptions):
                  "call": "call（跟注）", "fold": "fold（弃牌）",
                  "raise": "raise（加注）"}
     for item in normalised_facts["history"]:
+        if item["actor"] == normalised_facts["hero_seat"]:
+            # Hero's own actions are never an opponent response: the kernel's own
+            # legal-transition replay below is what validates them.
+            continue
         weights = model_by_seat.get(item["actor"], {})
         if weights.get(item["kind"], Decimal(0)) <= 0:
             reasons.append(
@@ -361,27 +409,40 @@ def check_support(facts, assumptions):
     to_call = current - street.get(normalised_facts["hero_seat"], Decimal(0))
     if to_call < 0:
         reasons.append("按公开历史，Hero 的应付额小于已投入：请核对行动顺序与金额")
-    return {"facts": normalised_facts, "assumptions": normalised,
-            "reasons": reasons, "combo_product": product,
-            "current_bet": str(current), "to_call": str(max(to_call, Decimal(0))),
-            "implied_pot": str(implied), "street_wagers": {
-                str(seat): str(value) for seat, value in street.items()}}
+    checked = {"facts": normalised_facts, "assumptions": normalised,
+               "reasons": list(reasons), "combo_product": product,
+               "current_bet": str(current), "to_call": str(max(to_call, Decimal(0))),
+               "implied_pot": str(implied), "street_wagers": {
+                   str(seat): str(value) for seat, value in street.items()},
+               "hero_street_wager": str(street.get(normalised_facts["hero_seat"],
+                                                   Decimal(0))),
+               "row_amounts": [{
+                   "seat_id": row["seat_id"], "status": row["status"],
+                   "stack": row["stack"], "hand_committed": row["hand_committed"],
+                   "street_wager": str(street.get(row["seat_id"], Decimal(0))),
+                   "to_call": str(max(
+                       current - street.get(row["seat_id"], Decimal(0)),
+                       Decimal(0))) if row["status"] == "ACTIVE" else None,
+               } for row in normalised_facts["seats"]],
+               "document": None, "root_actions": []}
+    # The history is always replayed through the kernel's own transitions, even
+    # when a static check already failed, so a wrong order is reported as such.
+    document = _document(normalised_facts, normalised)
+    checked["document"] = document
+    replay = _replay(document, normalised_facts["hero_seat"])
+    checked["reasons"] = list(reasons) + replay["reasons"]
+    if not checked["reasons"]:
+        checked["root_actions"] = replay["actions"]
+    return checked
 
 
-def build_document(facts, assumptions):
-    """Build the exact document the existing threeway entry point accepts."""
-    checked = check_support(facts, assumptions)
-    if checked["reasons"]:
-        raise HandInputError("；".join(checked["reasons"]))
-    normalised_facts = checked["facts"]
-    normalised = checked["assumptions"]
+def _document(normalised_facts, normalised):
+    """The exact document the existing threeway entry point accepts."""
     rules = normalised_facts["rules"]
-    seats = []
-    for row in normalised_facts["seats"]:
-        seats.append({"seat_id": row["seat_id"], "stack": row["stack"],
-                      "hand_committed": row["hand_committed"],
-                      "status": row["status"]})
-    document = {
+    seats = [{"seat_id": row["seat_id"], "stack": row["stack"],
+              "hand_committed": row["hand_committed"], "status": row["status"]}
+             for row in normalised_facts["seats"]]
+    return {
         "schema_version": 1, "mode": MODE, "range_start": "river_start",
         "range_assumptions": "人工核对/补录的已结束牌局事实；不是观测验证范围",
         "model_assumptions": "人工未验证的对手响应权重假设；不是已校准模型",
@@ -406,7 +467,71 @@ def build_document(facts, assumptions):
                      "target": item["target"]} for item in normalised_facts["history"]],
         "other_fees": normalised["other_fees"],
     }
-    return document, checked
+
+
+def _replay(document, hero_seat):
+    """Replay the public history through the kernel's own legal transitions.
+
+    No second set of poker rules: the same `_Tree` / `_Node` the analysis entry
+    point uses decides whether each declared action is legal, whether the order
+    matches the declared actors, and whether the history ends at a Hero decision.
+    """
+    from poker_engine.core.errors import InvalidStateError
+    from poker_engine.strategy.threeway_river_v1 import _Node, _Tree
+    from tools.analyze_threeway_river import scenario_from_dict
+
+    try:
+        scenario = scenario_from_dict(document)
+        tree = _Tree(scenario, MAX_JOINT_ASSIGNMENTS, 20000)
+        node = _Node(tree.active, scenario.action_order,
+                     tuple(Decimal(0) for _ in scenario.seats), Decimal(0),
+                     scenario.rules.big_blind, 0, ())
+        for item in document["history"]:
+            legal = tree.legal(node)
+            wanted = next((action for action in legal
+                           if action.actor == item["actor"]
+                           and action.kind == item["kind"]
+                           and str(action.target) == item["target"]), None)
+            if wanted is None:
+                return {"reasons": [
+                    f"公开历史第 {document['history'].index(item) + 1} 步"
+                    f"（座位 {item['actor']} {item['kind']} {item['target']}）"
+                    "在当前合法行动里不存在：请核对行动顺序、金额与行动者"],
+                    "actions": []}
+            node = tree.advance(node, wanted)
+        if not tree.legal(node) or node.pending[0] != hero_seat:
+            return {"reasons": ["公开历史必须停在 Hero 的未结束决策点："
+                                "请检查是否多写或少写了行动"],
+                    "actions": []}
+        return {"reasons": [], "actions": [_action_row(tree, node, action)
+                                           for action in tree.legal(node)]}
+    except (ValueError, TypeError, ArithmeticError, InvalidStateError) as exc:
+        return {"reasons": [f"公开历史无法在内核里重放：{exc}"], "actions": []}
+
+
+def _action_row(tree, node, action):
+    hero = tree.s.hero_seat
+    wager = node.wagers[tree.index[hero]]
+    if action.kind in ("bet", "raise"):
+        additional = action.target - wager
+        reading = f"加注到 {action.target}（本街追加 {additional}）"
+    elif action.kind == "call":
+        additional = max(node.current_bet - wager, Decimal(0))
+        reading = f"跟注（本街追加 {additional}）"
+    else:
+        additional = Decimal(0)
+        reading = "过牌（无追加）" if action.kind == "check" else "弃牌（无追加）"
+    return {"kind": action.kind, "target": str(action.target),
+            "additional_chips": str(additional), "reading": reading,
+            "raise_to": str(action.target) if action.kind in ("bet", "raise") else None}
+
+
+def build_document(facts, assumptions):
+    """Build the exact document the existing threeway entry point accepts."""
+    checked = check_support(facts, assumptions)
+    if checked["reasons"]:
+        raise HandInputError("；".join(checked["reasons"]))
+    return checked["document"], checked
 
 
 def capacity(facts, assumptions):
@@ -467,21 +592,41 @@ class AAHandInput:
         checked = check_support(facts, assumptions)
         if checked["reasons"]:
             return {"ok": False, "reasons": checked["reasons"], "document": None,
-                    "capacity": None, "hashes": None}
-        document, checked = build_document(facts, assumptions)
+                    "capacity": None, "hashes": None, "amounts": None}
+        document = checked["document"]
         return {"ok": True, "reasons": [], "document": document,
                 "capacity": capacity(facts, assumptions),
-                "hashes": facts_hashes(facts, assumptions, document)}
+                "hashes": facts_hashes(facts, assumptions, document),
+                "amounts": {
+                    "rows": checked["row_amounts"],
+                    "root_actions": checked["root_actions"],
+                    "to_call": checked["to_call"],
+                    "current_bet": checked["current_bet"],
+                    "implied_pot": checked["implied_pot"],
+                    "hero_street_wager": checked["hero_street_wager"],
+                    "unit": UNIT,
+                    "labels": {
+                        "stack": "河牌起点剩余筹码",
+                        "hand_committed": "本手此前已投入",
+                        "street_wager": "本街已投入",
+                        "to_call": "若跟注需追加",
+                        "raise_to": "加注到的本街总额",
+                    }}}
 
     def from_record(self, record):
         return review_facts(record)
 
 
-def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
-    """Fill only what an authorised structured snapshot actually contains.
+SEAT_STATE_MAP = {"active": "ACTIVE", "folded": "FOLDED", "all_in": "ALL_IN"}
 
-    Unknown stays unknown: a missing commitment ledger or an ambiguous
-    participant state becomes a Chinese gap, never a zero.
+
+def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
+    """Fill only facts an authorised structured snapshot states for this point.
+
+    Nothing is inferred: an action-order list is not reconstructed from the seat
+    numbers, the Hero seat is not taken from whoever happens to be acting now,
+    and a live participant state is not treated as the river-start state. Unknown
+    stays `unknown` with a concrete Chinese gap, and every candidate is kept.
     """
     if not isinstance(payload, dict):
         raise HandInputError("结构化快照为空，无法带入事实")
@@ -491,12 +636,12 @@ def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
     gaps = []
     cards = payload.get("cards") or {}
     hero = cards.get("hero")
-    board = cards.get("board_slots")
     if isinstance(hero, list) and len(hero) == 2 and all(hero):
         facts["hero_cards"] = field([str(value) for value in hero], "observed",
                                     candidate=dict(cards))
     else:
         gaps.append("Hero 手牌：快照里没有可用候选，需要人工补录")
+    board = cards.get("board_slots")
     if isinstance(board, list) and len([value for value in board if value]) == 5:
         facts["board_cards"] = field([str(value) for value in board], "observed",
                                      candidate=dict(cards))
@@ -508,53 +653,63 @@ def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
                                      candidate=dict(pot))
     else:
         gaps.append("显示底池：快照里没有候选，需要人工录入")
+    declared_hero = payload.get("hero_seat")
+    if type(declared_hero) is int:
+        facts["hero_seat"] = field(declared_hero, "observed",
+                                   candidate={"hero_seat": declared_hero})
+    else:
+        facts["hero_seat"] = field(
+            None, "unknown", candidate={"current_actor": payload.get("current_actor")})
+        gaps.append("Hero 座位：快照没有明确标注 Hero（不按当前行动者或座位号推断），"
+                    "需要人工确认")
+    declared_order = payload.get("action_order")
+    if (isinstance(declared_order, list) and len(declared_order) == 3
+            and all(type(value) is int for value in declared_order)):
+        facts["action_order"] = field(list(declared_order), "observed",
+                                      candidate=list(declared_order))
+    else:
+        facts["action_order"] = field(None, "unknown",
+                                      candidate={"active_guess_rejected": True})
+        gaps.append("河牌起点的行动顺序：快照没有明确给出（不按座位号顺序推断），"
+                    "需要人工确认")
     ledger = payload.get("hand_ledger_v2") or {}
     commitments = ledger.get("hand_commitments")
+    participants = (payload.get("observed_state_v2") or {}).get("participants") or {}
+    states = {}
+    if isinstance(participants, dict):
+        for seat, item in participants.items():
+            if isinstance(item, dict):
+                states[int(seat)] = str(item.get("state", "")).lower()
+    unambiguous = bool(states) and set(states.values()) <= set(SEAT_STATE_MAP)
     if ledger.get("status") == "HAND_COMMITMENTS_UNKNOWN" or commitments is None:
         gaps.append("各座本手已投入：快照标注为 "
                     f"{ledger.get('status', 'HAND_COMMITMENTS_UNKNOWN')}"
                     + (f"（{ledger['taint_reasons'][0]}）"
                        if ledger.get("taint_reasons") else "")
                     + "，不能当 0，需要人工核对")
+    elif not isinstance(commitments, dict) or not commitments:
+        gaps.append("各座本手已投入：格式不受支持，需要人工核对")
+    elif not unambiguous:
+        gaps.append("各座状态：快照的参与状态缺失或含不明确项（在场状态不能直接"
+                    "当河牌起点状态），需要人工确认")
+    elif set(int(seat) for seat in commitments) != set(states):
+        gaps.append("各座状态与投入覆盖的座位不一致，需要人工核对")
     else:
         rows = []
-        for seat, value in sorted(commitments.items(), key=lambda item: int(item[0])):
-            rows.append({"seat_id": int(seat), "stack": str(
-                (payload.get("stacks") or {}).get(seat, {}).get("value", "")),
-                "hand_committed": str(value), "status": "ACTIVE"})
+        for seat in sorted(int(seat) for seat in commitments):
+            rows.append({
+                "seat_id": seat,
+                "stack": str((payload.get("stacks") or {}).get(
+                    str(seat), {}).get("value", "")),
+                "hand_committed": str(commitments[str(seat)]),
+                "status": SEAT_STATE_MAP[states[seat]]})
         facts["seats"] = field(rows, "observed", candidate=dict(ledger))
-    state = payload.get("observed_state_v2") or {}
-    participants = state.get("participants") or {}
-    states = {seat: str(item.get("state")) for seat, item in participants.items()
-              if isinstance(item, dict)} if isinstance(participants, dict) else {}
-    active = sorted(int(seat) for seat, value in states.items()
-                    if value.lower() in ("active", "dealt_in", "in_hand"))
-    ambiguous = sorted(seat for seat, value in states.items()
-                       if value.lower() in ("unknown", "waiting"))
-    if facts["seats"]["value"] is not None:
-        if len(active) != 3 or ambiguous:
-            gaps.append(
-                f"河牌开始的活跃人数：快照识别到 {len(active)} 名 active"
-                + (f"、{len(ambiguous)} 个状态不明确（座位 "
-                   f"{'、'.join(ambiguous)}）" if ambiguous else "")
-                + "，内核要求恰好 3 名，需要人工确认")
-        else:
-            order = payload.get("action_order") or active
-            facts["action_order"] = field([int(value) for value in order],
-                                          "observed", candidate=list(order))
-            facts["hero_seat"] = field(int(payload.get("hero_seat", active[0])),
-                                       "observed")
+    history = payload.get("action_history_candidate")
+    if isinstance(history, list) and history:
+        facts["history"] = field(None, "unknown", candidate=history)
+        gaps.append("公开行动历史：快照只有未确认候选，需要人工逐条确认后才可计算")
     else:
-        detail = (f"（快照识别到 {len(active)} 名 active、{len(ambiguous)} 个状态不明确）"
-                  if states else "")
-        gaps.append("各座状态与筹码：缺少投入账本，无法确定 ACTIVE 身份与单底池条件"
-                    + detail)
-    actor = payload.get("current_actor")
-    if actor is None:
-        gaps.append("当前行动者：快照为空（可能已结束或未识别），需要人工确认决策点")
-    else:
-        if facts["hero_seat"]["value"] is None:
-            facts["hero_seat"] = field(int(actor), "observed")
+        gaps.append("公开行动历史：快照没有候选，需要人工录入")
     return facts, gaps
 
 

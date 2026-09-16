@@ -59,14 +59,20 @@
 <label>加注次数上限<input id="hand-max-agg" type="number" min="1" max="3" step="1" value="2"></label>
 <label class="inline-label"><input id="hand-ended" type="checkbox"> 本手已结束（只分析已结束牌局）</label>
 <label class="inline-label"><input id="hand-use-rules" type="checkbox" checked> 使用本桌已保存规则</label>
+<label>额外费用（不能默认成 0）<select id="hand-fees"><option value="unknown">未知 —— 不能计算</option><option value="confirmed_zero">已确认本手没有额外费用</option><option value="assumed_zero">零额外费用分析情景（假设）</option></select></label>
 </div>
+<div class="button-row"><button id="hand-build" type="button">核对输入</button><button id="hand-compute" type="button" disabled>按上述假设计算</button><button id="hand-clear" class="secondary" type="button">清空录入</button><button id="hand-import-record" class="secondary" type="button">从选中的复查记录带入有证据的字段</button></div>
+<div class="hand-block"><div class="hand-block-head"><h3>各座位（每行一个座位）</h3><button id="hand-add-seat" class="secondary" type="button">添加一行</button></div><div id="hand-rows-seats" class="hand-rows"></div></div>
+<div class="hand-block"><div class="hand-block-head"><h3>公开历史（按发生顺序）</h3><button id="hand-add-history" class="secondary" type="button">添加一行</button></div><div id="hand-rows-history" class="hand-rows"></div></div>
+<div class="hand-block"><div class="hand-block-head"><h3>对手范围（每行一个组合）</h3><button id="hand-add-range" class="secondary" type="button">添加一行</button></div><div id="hand-rows-ranges" class="hand-rows"></div></div>
+<div class="hand-block"><div class="hand-block-head"><h3>响应权重（每行一个动作）</h3><button id="hand-add-weight" class="secondary" type="button">添加一行</button></div><div id="hand-rows-weights" class="hand-rows"></div></div>
+<details><summary>高级：粘贴 CSV 批量生成逐行控件</summary>
 <div class="rules-grid">
-<label for="hand-seats">座位（每行：座位号,状态,筹码,已投入）<textarea id="hand-seats" rows="4" spellcheck="false" placeholder="0,ACTIVE,200,20&#10;1,ACTIVE,200,20&#10;2,ACTIVE,200,20"></textarea></label>
-<label for="hand-history">公开历史（每行：座位号,动作,金额）<textarea id="hand-history" rows="3" spellcheck="false" placeholder="1,bet,20&#10;2,call,0"></textarea></label>
-<label for="hand-ranges">对手范围（每行：座位号,组合,权重）<textarea id="hand-ranges" rows="4" spellcheck="false" placeholder="1,JhJd,1&#10;1,TcTd,3&#10;2,7c7s,1"></textarea></label>
-<label for="hand-weights">响应权重（每行：座位号,动作,权重）<textarea id="hand-weights" rows="5" spellcheck="false" placeholder="1,check,1&#10;1,bet,2&#10;1,call,9&#10;1,fold,1"></textarea></label>
+<label>目标表格<select id="hand-csv-target"><option value="seats">座位</option><option value="history">公开历史</option><option value="ranges">对手范围</option><option value="weights">响应权重</option></select></label>
+<label>CSV（每行顺序与上表一致）<textarea id="hand-csv" rows="4" spellcheck="false" placeholder="0,ACTIVE,200,20&#10;1,ACTIVE,200,20&#10;2,ACTIVE,200,20"></textarea></label>
 </div>
-<div class="button-row"><button id="hand-build" type="button">核对输入</button><button id="hand-compute" type="button" disabled>按上述假设计算</button><button id="hand-clear" class="secondary" type="button">清空录入</button></div>
+<div class="button-row"><button id="hand-csv-apply" class="secondary" type="button">转成逐行控件</button></div>
+</details>
 <p id="hand-status" role="status" class="muted">尚未核对输入。</p>
 <div id="hand-gaps"></div><div id="hand-capacity"></div>
 <details><summary>本次输入与假设身份（哈希）</summary><pre id="hand-identity">无结果</pre></details>

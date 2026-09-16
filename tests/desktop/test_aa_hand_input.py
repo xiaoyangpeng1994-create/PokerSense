@@ -58,11 +58,15 @@ def assumptions(**overrides):
             {"seat_id": 2, "combos": [{"combo": "7c7s", "weight": "1"},
                                       {"combo": "KhTh", "weight": "3"}]}],
         "models": [
-            {"seat_id": 1, "weights": {"fold": "1", "check": "1", "call": "9",
-                                       "bet": "2"}},
-            {"seat_id": 2, "weights": {"fold": "1", "check": "1", "call": "9"}}],
+            {"seat_id": 1, "key": "fold", "weight": "1"},
+            {"seat_id": 1, "key": "check", "weight": "1"},
+            {"seat_id": 1, "key": "call", "weight": "9"},
+            {"seat_id": 1, "key": "bet", "weight": "2"},
+            {"seat_id": 2, "key": "fold", "weight": "1"},
+            {"seat_id": 2, "key": "check", "weight": "1"},
+            {"seat_id": 2, "key": "call", "weight": "9"}],
         "aggression_targets": ["20", "40", "80"], "max_aggressions": 2,
-        "other_fees": "0",
+        "other_fees": {"value": "0", "provenance": "assumed"},
     }
     base.update(overrides)
     return base
@@ -97,9 +101,13 @@ def test_hand_computed_amount_口径_matches_the_kernel():
                                       {"combo": "KhKd", "weight": "1"}]},
             {"seat_id": 2, "combos": [{"combo": "3c3d", "weight": "1"}]}],
         models=[
-            {"seat_id": 1, "weights": {"fold": "1", "check": "1", "call": "1",
-                                       "bet": "1"}},
-            {"seat_id": 2, "weights": {"fold": "1", "check": "1", "call": "1"}}],
+            {"seat_id": 1, "key": "fold", "weight": "1"},
+            {"seat_id": 1, "key": "check", "weight": "1"},
+            {"seat_id": 1, "key": "call", "weight": "1"},
+            {"seat_id": 1, "key": "bet", "weight": "1"},
+            {"seat_id": 2, "key": "fold", "weight": "1"},
+            {"seat_id": 2, "key": "check", "weight": "1"},
+            {"seat_id": 2, "key": "call", "weight": "1"}],
         aggression_targets=["20", "40"], max_aggressions=2)
     document, result = run_kernel(fact_block, assumption_block)
     assert result.status == "COMPLETE_CONDITIONAL_ABSTRACTION", result.reasons
@@ -168,10 +176,11 @@ def test_missing_range_or_fee_assumption_is_refused():
         module.check_support(facts(), assumptions(ranges=[
             {"seat_id": 1, "combos": [{"combo": "JhJd", "weight": "1"}]}]))
     with pytest.raises(module.HandInputError, match="额外费用"):
-        module.check_support(facts(), assumptions(other_fees="5"))
+        module.check_support(facts(), assumptions(
+            other_fees={"value": "5", "provenance": "human_confirmed"}))
     with pytest.raises(module.HandInputError, match="响应权重"):
         module.check_support(facts(), assumptions(models=[
-            {"seat_id": 1, "weights": {"fold": "0"}}]))
+            {"seat_id": 1, "key": "fold", "weight": "0"}]))
 
 
 def test_allin_non_threeway_and_overbudget_are_refused():
@@ -208,8 +217,12 @@ def test_allin_non_threeway_and_overbudget_are_refused():
 
 def test_history_must_have_probability_and_stay_inside_the_size_grid():
     checked = module.check_support(facts(), assumptions(models=[
-        {"seat_id": 1, "weights": {"fold": "1", "check": "1", "call": "1"}},
-        {"seat_id": 2, "weights": {"fold": "1", "check": "1", "call": "1"}}]))
+        {"seat_id": 1, "key": "fold", "weight": "1"},
+        {"seat_id": 1, "key": "check", "weight": "1"},
+        {"seat_id": 1, "key": "call", "weight": "1"},
+        {"seat_id": 2, "key": "fold", "weight": "1"},
+        {"seat_id": 2, "key": "check", "weight": "1"},
+        {"seat_id": 2, "key": "call", "weight": "1"}]))
     assert any("概率为 0" in reason for reason in checked["reasons"])
     checked = module.check_support(facts(), assumptions(
         aggression_targets=["40", "80"]))
@@ -237,7 +250,9 @@ def test_snapshot_facts_never_invent_a_missing_ledger():
     assert snapshot["seats"]["provenance"] == "unknown"
     assert snapshot["pot_display"]["value"] == "623"
     assert any("HAND_COMMITMENTS_UNKNOWN" in gap for gap in gaps)
-    assert any("1 名 active" in gap for gap in gaps)
+    assert any("Hero 座位" in gap for gap in gaps)
+    assert any("行动顺序" in gap for gap in gaps)
+    assert any("公开行动历史" in gap for gap in gaps)
     assert any("当前行动者" in gap for gap in gaps)
     with pytest.raises(module.HandInputError):
         module.build_document(snapshot, assumptions())

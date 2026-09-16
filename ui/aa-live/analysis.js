@@ -1,7 +1,7 @@
 "use strict";
 let analysisEpoch = 0, acceptedAnalysisId = null, analysisReport = null, analysisInput = null;
 let analysisBusy = false, cancelTimer = null, analysisBinding = null;
-let analysisDraftSource = null;
+let analysisDraftSource = null, analysisExpectedInput = null;
 const analysisLabels = {RUNNING:"正在计算（最多 10 秒）", COMPLETE:"条件计算完成", BLOCKED:"输入或场景不受支持", ERROR:"计算失败", CANCELLED:"分析已取消", TIMED_OUT:"计算超时，未返回局部结果", IDLE:"尚未计算"};
 function clearAnalysis(message) {
   acceptedAnalysisId = null; analysisReport = null; analysisBinding = null;
@@ -17,9 +17,17 @@ async function cancelAnalysis() {
   try { await fetch("/api/analysis/cancel", {method:"POST", headers:{...headers,"Content-Type":"application/json"},body:"{}"}); }
   catch (_) { /* Old results remain hidden even while offline. */ }
 }
-function analysisEdited() {
-  invalidateAnalysis("手工输入已变更，旧分析已失效。");
+// Any input change goes through one path: drop the identity, hide the result,
+// and cancel on a short debounce rather than immediately. The debounce is what
+// keeps a stale cancel from landing after a new analysis has already started;
+// the panel's own start handler clears it.
+function analysisInputChanged(reason) {
+  analysisExpectedInput = null; analysisDraftSource = null;
+  invalidateAnalysis(reason);
   cancelTimer = setTimeout(cancelAnalysis, 350);
+}
+function analysisEdited() {
+  analysisInputChanged("手工输入已变更，旧分析已失效。");
 }
 function exactAmount(value) { return value?.decimal ?? value?.exact ?? text(value); }
 function actionName(action) {
@@ -30,6 +38,14 @@ function renderAnalysis(report, state) {
   if (acceptedAnalysisId === null) return;
   if (!analysisBinding || state && (analysisBinding.generation !== state.generation || analysisBinding.table_rules_revision !== state.table_rules?.revision)) {
     invalidateAnalysis("来源或本桌规则已变更，旧分析已失效。"); return;
+  }
+  if (analysisBinding.expected_input_sha256
+      && analysisBinding.expected_input_sha256 !== analysisExpectedInput) {
+    invalidateAnalysis("录入表单的输入身份已变更，旧分析已失效，请重新核对后计算。"); return;
+  }
+  if (analysisBinding.input_sha256 && report?.input_sha256
+      && report.input_sha256 !== analysisBinding.input_sha256) {
+    invalidateAnalysis("这条结果不是针对当前输入算出的，已失效。"); return;
   }
   if (!report || report.job_id !== acceptedAnalysisId || report.binding?.generation !== analysisBinding.generation || report.binding?.table_rules_revision !== analysisBinding.table_rules_revision) {
     invalidateAnalysis("分析已被其他操作替换，请重新计算。"); return;
@@ -52,6 +68,7 @@ function renderAnalysis(report, state) {
 }
 el("analysis-example").addEventListener("click", async () => {
   analysisDraftSource = null;
+  analysisExpectedInput = null;
   el("strategy-draft-details").hidden = true;
   el("strategy-draft-origin").textContent = "";
   const cancelling = cancelAnalysis();
@@ -64,12 +81,26 @@ el("analysis-start").addEventListener("click", async () => {
   analysisBusy = true; el("analysis-start").disabled = true;
   clearTimeout(cancelTimer); const cancelling = cancelAnalysis();
   const epoch = analysisEpoch;
+  const expectedInput = analysisExpectedInput;
+  const expectedPayload = el("analysis-input").value;
   try {
     await cancelling; if (epoch !== analysisEpoch) return;
+    if (expectedInput !== analysisExpectedInput
+        || el("analysis-input").value !== expectedPayload) {
+      el("analysis-status").textContent = "输入在开始计算前被改动，请重新核对后再计算。"; return;
+    }
+    if (expectedInput !== null
+        && (!analysisDraftSource || analysisDraftSource.input_sha256 !== expectedInput)) {
+      el("analysis-status").textContent = "录入表单的身份与本场景不匹配：请回到录入区重新核对后计算。"; return;
+    }
     const document = JSON.parse(el("analysis-input").value);
     const r = await fetch("/api/analysis", {method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({kind:el("analysis-kind").value,document,rules_source:el("analysis-use-rules").checked ? "table" : "document",rules_revision:statusData.table_rules?.revision})});
     const result = await r.json(); if (epoch !== analysisEpoch) return; if (!r.ok) throw Error(text(result.detail));
-    acceptedAnalysisId = result.job_id; analysisInput = document; analysisBinding = JSON.parse(JSON.stringify(result.binding)); renderAnalysis(result);
+    acceptedAnalysisId = result.job_id; analysisInput = document;
+    analysisBinding = JSON.parse(JSON.stringify(result.binding));
+    analysisBinding.expected_input_sha256 = expectedInput;
+    analysisBinding.input_sha256 = result.input_sha256 ?? null;
+    renderAnalysis(result);
   } catch (e) { if (epoch === analysisEpoch) el("analysis-status").textContent = `未开始计算：${e.message}`; }
   finally { analysisBusy = false; el("analysis-start").disabled = false; }
 });
@@ -115,6 +146,7 @@ function terminalDraftFromReview(record) {
 }
 async function openStrategyDraft(record) {
   await cancelAnalysis();
+  analysisExpectedInput = null;
   const draft=terminalDraftFromReview(record); analysisDraftSource=draft.source;
   el("analysis-kind").value="terminal";el("analysis-use-rules").checked=false;
   el("analysis-input").value=JSON.stringify(draft.document,null,2);
