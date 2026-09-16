@@ -1,0 +1,6 @@
+# The trial's own state: configuration, table rules and saved analyses live here.
+# Records are the user's data, never repository content.
+state/
+
+# Never leave bytecode from the trial launcher in the tree.
+__pycache__/

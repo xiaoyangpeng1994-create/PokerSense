@@ -21,6 +21,7 @@ from .aa_issues import save_issue
 from .aa_analysis import AAConditionalAnalysis
 from .aa_review import AAReviewDesk, ReviewError
 from .aa_saved_strategy import SavedStrategyInputs
+from .aa_analysis_records import AAAnalysisRecordStore, AnalysisRecordError
 from .aa_hand_input import AAHandInput, HandInputError, digest
 from .aa_study_records import AAStudyRecordStore, StudyRecordError
 from poker_engine.strategy.river_bounds_v1 import river_payoff_bounds
@@ -36,7 +37,7 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
                replay_last=None, replay_playlist=None, allow_capture=False,
                session=None, rules_path=None, records_dir=None, bundle_sha256=None,
                analysis_service=None, review_service=None, study_service=None,
-               hand_input_service=None):
+               hand_input_service=None, analysis_records_service=None):
     profile_path = Path(profile_path)
     service = session or AARecognitionSession(
         source_factory(profile_path, replay_pool=replay_pool,
@@ -51,6 +52,9 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     review = review_service or AAReviewDesk(records_dir)
     study = study_service or AAStudyRecordStore(records_dir)
     hand_input = hand_input_service or AAHandInput()
+    analysis_records = analysis_records_service or AAAnalysisRecordStore(
+        None if records_dir is None else Path(records_dir) / "analysis-records",
+        analysis=analysis, rules_revision=lambda: rules.get()["revision"])
     saved_strategy = SavedStrategyInputs(profile_path, bundle_sha256)
     controls_lock = threading.RLock()
     profile_status = (preflight_profile(profile_path, bundle_sha256=bundle_sha256)
@@ -133,6 +137,48 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
         except (ValueError, TypeError, OSError, KeyError):
             raise HTTPException(400, "牌局输入未完成，请检查字段与假设") from None
 
+    async def record_body(request, keys, limit=220000):
+        raw = await request.body()
+        if len(raw) > limit:
+            raise HTTPException(413, "分析记录请求过大")
+        try:
+            body = json.loads(raw)
+        except ValueError:
+            raise HTTPException(400, "分析记录请求需要 JSON") from None
+        if not isinstance(body, dict) or set(body) != set(keys):
+            raise HTTPException(400, "分析记录请求字段不完整")
+        return body
+
+    def record_call(function, *args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except AnalysisRecordError as exc:
+            raise HTTPException(400, str(exc)) from None
+        except (ValueError, TypeError, OSError, KeyError):
+            raise HTTPException(400, "分析记录未完成，请检查记录目录与内容") from None
+
+    @app.post("/api/analysis/records")
+    async def save_analysis_record(request: Request):
+        """Freeze the CURRENT completed analysis; the server owns the numbers."""
+        body = await record_body(request, ("job_id", "input_sha256", "facts",
+                                           "assumptions", "source", "label"))
+        return record_call(analysis_records.save, job_id=body["job_id"],
+                           expected_input_sha256=body["input_sha256"],
+                           facts=body["facts"], assumptions=body["assumptions"],
+                           source=body["source"], label=body["label"])
+
+    @app.get("/api/analysis/records")
+    def list_analysis_records():
+        return {"items": record_call(analysis_records.recent)}
+
+    @app.get("/api/analysis/records/{record_id}")
+    def open_analysis_record(record_id: str):
+        return record_call(analysis_records.get, record_id)
+
+    @app.get("/api/analysis/records/{record_id}/scenario")
+    def analysis_record_scenario(record_id: str):
+        return record_call(analysis_records.scenario, record_id)
+
     @app.get("/api/hand-input/template")
     def hand_input_template():
         return hand_call(hand_input.template)
@@ -140,6 +186,11 @@ def create_app(profile_path, *, replay_pool=None, replay_first=None,
     @app.get("/hand_input.js")
     def hand_input_script():
         return FileResponse(ui_root() / "hand_input.js",
+                            media_type="text/javascript")
+
+    @app.get("/analysis_records.js")
+    def analysis_records_script():
+        return FileResponse(ui_root() / "analysis_records.js",
                             media_type="text/javascript")
 
     @app.get("/api/hand-input/facts/{issue_id}")

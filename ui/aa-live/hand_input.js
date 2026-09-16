@@ -423,6 +423,10 @@ async function handVerify() {
       rules_source: result.verified_rules?.rules_source ?? result.rules_source ?? null,
       rules_revision: result.verified_rules?.rules_revision ?? null,
       effective_rules_sha256: result.verified_rules?.effective_rules_sha256 ?? null,
+      // The exact facts/assumptions this receipt was built from, so a save can
+      // hand the server the same provenance instead of a re-typed copy.
+      facts, assumptions,
+      capacity: result.capacity ?? null,
     };
     if (!handReceipt.rules_revision) {
       // Without the revision the receipt was built against, no compute can prove
