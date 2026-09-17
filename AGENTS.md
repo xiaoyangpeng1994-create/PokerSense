@@ -33,6 +33,16 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-16 GITHUB-001 (Issue #25) STANDARD GIT SYNC:** Added tools/git_sync.py, a thin
+  verified wrapper around standard git/gh. Root cause of the observed push hang: the
+  user-level config installs a Git Credential Manager helper, and `-c credential.helper=X`
+  only APPENDS, so GCM still ran first and blocked. The wrapper resets the helper list
+  (`-c credential.helper=`) before adding `!gh auth git-credential`, sets
+  GIT_TERMINAL_PROMPT=0 / GCM_INTERACTIVE=never, runs every command under an external
+  timer that kills only its own child tree, writes a 20s progress trail, drains pipes on
+  reader threads, and refuses to report success without local HEAD == remote ref == PR
+  head SHA. It never force-pushes, resets, rebases or cleans. Focused offline tests live
+  in tests/tools/test_git_sync.py.
 
 - **2026-09-16 V5 OFFLINE STRATEGY ENTRY:** userendedplay;capturestopped,no
   subsequent device start. Reboot didnotlose saved20AI/600slog/90developmentsamples.
