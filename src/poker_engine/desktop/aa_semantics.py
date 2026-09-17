@@ -43,7 +43,10 @@ class AAObservationSemantics:
         # Ordinary (non all-in) river close: the frame the river first completed
         # for this epoch, the settlement evidence that followed it, and the
         # single confirmed outcome once the next hand boundary was observed.
+        # ``river_streak`` counts consecutive observations that agree the river
+        # is complete; the fact is latched on the second one (P0.1 G1).
         self.river_frame = None
+        self.river_streak = 0
         self.ordinary_river = None
         # Lifecycle contract, pinned BEFORE any consumer exists:
         #   ordinary_terminal      = the CONFIRMATION EVENT, emitted on the
@@ -196,6 +199,7 @@ class AAObservationSemantics:
                     "canonical_verified": False, "strategy_eligible": False}
                 self.ordinary_terminal_event = deepcopy(self.ordinary_terminal)
             self.river_frame = None
+            self.river_streak = 0
             self.ordinary_river = None
             self.epoch = epoch
             self.terminal_frame = self.last_ledger = None
@@ -220,6 +224,9 @@ class AAObservationSemantics:
             self.clear_streak = 0
             self.terminal_frame = None
             self.waiting = False
+            # A blocked row says nothing about the board, so it cannot be one of
+            # the two agreeing observations that latch a river: the run restarts.
+            self.river_streak = 0
             base.update(phase="SUSPENDED" if blocked(row) else "WAITING_OPENING",
                         current_ledger=None)
             return base
@@ -247,20 +254,40 @@ class AAObservationSemantics:
         terminal = closed and full_river
         if terminal and self.terminal_frame is None:
             self.terminal_frame = row["frame"]
-        # C1: an ordinary hand closes on a COMPLETE river, never on a partial
-        # board and never while an all-in showdown already explains the end.
-        # Once THIS epoch has been seen holding a complete river, that fact is
-        # STICKY for the rest of the epoch. The table tears a finished hand down
-        # -- the 5 board cards disappear for a stretch of frames while the epoch,
-        # the participants and the settlement credit all stay put -- and that
-        # teardown is not an un-deal. Only an all-in showdown, which explains the
-        # ending by itself, retracts the fact here; a real epoch change retracts
-        # it above. A row whose board read momentarily regressed must not be able
-        # to withdraw a pending close that was already earned.
+        # C1: an ordinary hand closes on a COMPLETE river whose actions have all
+        # been answered, never on a partial board, never while an all-in
+        # showdown already explains the end, and never on the strength of one
+        # self-contradictory row.
+        #
+        # The latch (first time only):
+        #   * G1 stability -- two CONSECUTIVE observations must agree that the
+        #     board is complete. One row can be a misread, or the previous hand's
+        #     board read past an epoch flip; a real river holds for tens of rows,
+        #     so a genuine one pays at most one row of extra latency. Rows are
+        #     frame-contiguous here (observe() resets on any gap or blocked row),
+        #     and the latched frame is the FIRST row of the run, so the guard
+        #     costs latency without re-stamping the river later than it was seen.
+        #   * G2 action count -- ``pending_actions == 0`` is part of C1 and is
+        #     consulted HERE, at the latch, and nowhere afterwards.
+        #
+        # Afterwards the fact is STICKY for the rest of the epoch. The table
+        # tears a finished hand down -- the 5 board cards disappear for a stretch
+        # of frames while the epoch, the participants and the settlement credit
+        # all stay put -- and that teardown is not an un-deal. Nor is a later
+        # action-count reading, or any other row-level noise: once two agreeing
+        # observations have established that this hand reached its river, no
+        # single later row may withdraw the close it earned. Only an all-in
+        # showdown, which explains the ending by itself, retracts it here; a real
+        # epoch change or a stream reset retracts it above.
         if closed:
             self.river_frame = None
-        elif full_river and self.river_frame is None:
-            self.river_frame = row["frame"]
+            self.river_streak = 0
+        elif full_river and state.get("pending_actions") == 0:
+            self.river_streak += 1
+            if self.river_frame is None and self.river_streak >= 2:
+                self.river_frame = row["frame"] - (self.river_streak - 1)
+        else:
+            self.river_streak = 0
         credits = []
         for credit in state.get("unallocated_positive_cash", []):
             confirmed = credit.get("confirmed_frame")

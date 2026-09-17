@@ -311,7 +311,7 @@ P0 判据逐条核对（授权原文的验收条件）：
 - **可达性**：需要一帧不一致读数（客户端把上一手的公牌拖过 epoch 翻转，或街/牌误读）。
 - **危害上限**：C2 仍要求**钱真的动过**，所以失败模式是**误分类**，不是「提前收盘」。
 - **本录像可达性**：**不可达** —— 5 手真实牌局的 `complete_frames` 为 168 / **67** / 153 / 149 / 151，最小值 **67**，单帧闪烁构不成完整河牌窗口。
-- **决定：只报告、不修补。** 授权被明确限定为「`river_frame` 只在 epoch 真正变化 / `reset()` 时清零」；加「必须已存在 `ordinary_river` 记录」的前置守卫会**收窄**该语义，属越权。守卫方案随回传提交待裁决。
+- **P0 当时的决定：只报告、不修补。** 授权被明确限定为「`river_frame` 只在 epoch 真正变化 / `reset()` 时清零」；加守卫会**收窄**该语义，属越权。守卫方案随回传提交待裁决 ⇒ **已在 P0.1 获授权并落地**，见 §7。
 
 本次改动影响的行为差异**只有一个组合**：
 `not closed ∧ not full_river ∧ river_frame 已置` ⇒ 修复前**清零**，修复后**保留**。
@@ -322,8 +322,9 @@ P0 判据逐条核对（授权原文的验收条件）：
 `ORDINARY_RIVER_CLOSED` 证明的是「**这手已经结束**」，**不等于**「开局投入已对账」，也不等于一份可核对的完整手牌记录。
 `REAL_HAND_ACCEPTANCE_PENDING` 因此保持不变。
 
-**一处口径偏差（本轮授权未覆盖，故未改动）**：`observed_deal_8622` 在其 epoch 内有 **13 行** `pending_actions != 0`，
-仍然被闭合 —— 即实现的 C1 **不检查** `pending_actions == 0`，详见 §3.2 的偏差说明。是否要把该条件并入 C1 需另行裁决。
+**一处口径偏差（P0 授权未覆盖，故 P0 未改动）**：`observed_deal_8622` 在其 epoch 内有 **13 行** `pending_actions != 0`，
+仍然被闭合 —— 即实现的 C1 **不检查** `pending_actions == 0`，详见 §3.2 的偏差说明。
+⇒ **已在 P0.1 获授权并修复**，见 §7。
 
 > 本节与 4.6 的各手帧号、结算 seat/金额由**一名独立复核者**用自写脚本另行推导，与本报告一致。
 
@@ -347,3 +348,95 @@ P0 判据逐条核对（授权原文的验收条件）：
 - 真实回放：见第 4 节（连续 0–27,287 帧，`ORDINARY_RIVER_CLOSED` 命中 **5**，两次独立回放一致，P0 判据逐条核对见 4.6，反例余量见 4.7）。
 - 独立复核：另起一个不了解本改动的复核者，用**自写脚本**直接从原始 JSON 重算（不使用本报告的 `analyse_p0.py`）：(a) 各手确实达到完整河牌、(b) 各手确实有 `confirmed_frame > river` 的 payout、(c) 无完整河牌的 epoch 确实无终局、(e) `observed_deal_14593` 帧号逐项一致 —— **全部 CONFIRMED**。
 - 端到端回放（真实池帧 1260–1330）：桌面链 epoch 由「1264 MULTI_POST + 1278 DEALER_ADVANCE」变为「**仅 1264 MULTI_POST**」，与纯 `AA8StateAdapterV2` 的历史行为一致。
+
+## 7 P0.1：终局 fail-closed 加固（`ORDINARY_TERMINAL_FAIL_CLOSED_GUARD`）
+
+授权：`issuecomment-5714727922`。本轮把 §4.7 的反例余量与 §4.8 的口径偏差一起收紧，
+**不新开功能** —— 目的是在把终局当作 PHH / PokerKit 的边界输入之前，先堵掉已知的不安全语义。
+
+### 7.1 G1：单帧假 river 不得建立 sticky river fact
+
+**改法**：`river_frame` **首次建立之前**要求 **≥2 个连续观测一致**。
+计数沿用既有的连续量概念（`clear_streak` 的同构），**没有按本录像的 67/149/168 帧硬编码任何阈值**；
+latch 时记录的是**该连续段的第一帧**，所以守卫只增加一帧延迟，**不会把河牌帧向后改写**。
+
+```python
+if closed:
+    self.river_frame = None
+    self.river_streak = 0
+elif full_river and state.get("pending_actions") == 0:
+    self.river_streak += 1
+    if self.river_frame is None and self.river_streak >= 2:
+        self.river_frame = row["frame"] - (self.river_streak - 1)
+else:
+    self.river_streak = 0
+```
+
+**一旦 latch，sticky 语义完全不变**：收尾动画、公牌读数回退、后续动作计数变化都**不得撤销**它；
+只有 epoch 真正变化 / `reset()` / `closed`（all-in 摊牌）才清空。
+
+### 7.2 G2：C1 恢复 `pending_actions == 0`，但只在 latch 时
+
+`pending_actions == 0` 重新并入 C1 **谓词**，但**只在 latch 那一刻**被查阅。
+latch 之后该字段**不再参与任何判断** —— 一条已经成立的历史事实，不会被后来的读数撤销。
+
+### 7.3 边界上的一个判断（如实说明）
+
+**被阻塞的行不能充当「两个一致观测」中的第二个。** `blocked(row)`（overlay / 场景不支持 / block-state 更新）
+对公牌什么都没说，所以它让连续段**重新开始**。方向上是 fail-closed。
+本录像 5 手真实牌局的 `blocked_frames` **全部为 0**，因此这个选择**没有代价**。
+
+### 7.4 反例先行（RED → GREEN）
+
+终局测试文件从 16 项加到 **21 项**，新增 5 项：
+
+| # | 用例 | 在不含修复的 head 上 |
+|---|---|---|
+| 1 | `test_a_single_frame_river_glitch_never_latches_a_river_fact` | **FAIL（RED）** |
+| 2 | `test_two_agreeing_river_rows_latch_on_the_first_of_them` | pass（两侧都必须绿的「不得过度修复」守卫） |
+| 3 | `test_an_unresolved_action_count_never_latches_a_river_fact` | **FAIL（RED）** |
+| 4 | `test_a_latched_river_is_not_revoked_by_a_later_action_count` | pass（同上，防过度修复） |
+| 5 | `test_a_blocked_row_makes_the_stability_run_start_over` | **FAIL（RED）** |
+
+修复前实测 **3 failed / 18 passed**，修复后 **21 passed**。
+
+## 8 P0.1 验证与真实回放
+
+- **代码改动**：`src/poker_engine/desktop/aa_semantics.py` **+39 / −12**（含注释）；测试 **+117**。无其它文件被改。
+- 真实回放（`aa-live-20260917-0430`，连续、顺序、不 seek、不稀疏抽帧、**不跳任何一帧**；
+  0–27,287 帧整段一次跑完，耗时 23m20s，`retrieve_fail / read_fail = 0 / 0`）：
+
+| 指标 | 结果 |
+|---|---|
+| 达到 **full river** 的 epoch | **6**（含无名的 `None` 挂起段） |
+| **latch** 出 river fact 的 epoch | **5** —— 恰好是 5 手具名牌局 |
+| 产生 `ordinary_river_pending` | **5** |
+| 产生 `ORDINARY_RIVER_CLOSED` | **5** |
+| `closed NOT exactly once` | **none** |
+| 逐手第一阻塞 | `CONFIRMED_ORDINARY_RIVER_CLOSED` ×5；`no_complete_river_observed` ×14；`no_real_hand_board` ×5；`suspended_bucket` ×1 |
+
+- **latch 逐手明细**（`p01_replay_after_audit.txt`）：river 帧与 P0 **逐一相同**，
+  latch 落在**第二帧**，且 latch 前**只看到 1 帧**完整河牌：
+
+| epoch | river 帧 | latch 帧 | latch 值 | latch 前完整帧 | 其中 `pending_actions != 0` |
+|---|---|---|---|---|---|
+| `observed_deal_8622` | 9512 | 9513 | **9512** | 1 | 0 |
+| `observed_deal_11609` | 12325 | 12326 | **12325** | 1 | 0 |
+| **`observed_deal_14593`** | **15033** | **15034** | **15033** | 1 | 0 |
+| `observed_deal_17323` | 18170 | 18171 | **18170** | 1 | 0 |
+| `observed_deal_24560` | 25674 | 25675 | **25674** | 1 | 0 |
+
+  ⇒ **G1 的代价恰好是 1 帧延迟，G2 的代价是 0** —— 两处守卫都**没有丢掉任何一手**。
+
+- **目标手 `observed_deal_14593` 仍然闭合**：river 15033 → latch 15034（记录值 15033）→
+  pending 连续 **50 行**（f15148–15197）→ **f15198** 由后继 epoch `observed_deal_15197` 的首帧确认。
+  Hero `4s 3s` ｜ board `3c 7s 3h Tc 6c` ｜ 结算 seat 4 `+134`（131 → 265，first 15147 / confirmed 15148）。
+
+- **误确认审计**（`p01_audit.py`，逐条 10 项 × 5 手）：**PROBLEMS: none**。
+  否证项包括「无完整河牌却被确认」「同一 epoch 确认两次」「payload 的 river 帧 ≠ latch 值」
+  「确认帧 ≠ 后继 epoch 首帧」「无结算证据」「声称任何可用性」，全部为空。
+
+- **一处如实标注的未归因事实**：无名 `None` 挂起段有 **119 帧**完整河牌却**未 latch**。
+  该段共 6569 帧、其中 **5126 帧被 block**，因此「连续段被逐帧打断」是合理解释，
+  但本轮**没有对该段做逐帧归因**，故只报事实、不报成因。
+  该段按设计（无 epoch 名 ⇒ C3 永不成立）本来也**永不确认**，因此无功能影响。

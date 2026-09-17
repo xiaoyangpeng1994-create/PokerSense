@@ -280,3 +280,120 @@ def test_a_sticky_river_is_still_retracted_by_an_all_in_showdown():
     assert result["ordinary_terminal"] is None
     confirmed = subject.observe(river_row(3, epoch="next"))["hand_phase"]
     assert confirmed["ordinary_terminal"] is None
+
+
+# --------------------------------------------------------------------------
+# P0.1 ORDINARY_TERMINAL_FAIL_CLOSED_GUARD
+#
+# Sticky is the right direction -- a hand being torn down is not an un-deal --
+# but sticky made the river fact inheritable from a SINGLE row, and it left
+# C1's ``pending_actions == 0`` out of the latch. Both windows are closed here:
+# the fact is latched only on two consecutive agreeing observations, and the
+# action counter is consulted at latch time only. Everything below that a real
+# recording exercises (board teardown, epoch change, all-in retraction) is
+# deliberately unchanged, and the two "must stay green" cases pin that down.
+# --------------------------------------------------------------------------
+
+
+def test_a_single_frame_river_glitch_never_latches_a_river_fact():
+    """P0.1 G1: one self-contradictory row must not become a sticky river.
+
+    A lone row claiming ``street_candidate == "river"`` with five valid distinct
+    cards is reachable without this hand ever reaching a river -- the previous
+    hand's board read across an epoch flip, or a street/card misread. Sticky
+    turned that one row into a settlement window, so a payout plus a next hand
+    was enough to name an ending. Nothing here is evidence that THIS hand
+    finished, so the whole fixture must stay UNKNOWN.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    for frame in (1, 2, 3):
+        phase = subject.observe(river_row(
+            frame, credited_at=1, street=None, board=None, hero=None,
+            pot="0"))["hand_phase"]
+        assert phase["ordinary_river_pending"] is None
+        assert phase["ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(4, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"] is None
+    assert confirmed["last_ordinary_terminal"] is None
+
+
+def test_two_agreeing_river_rows_latch_on_the_first_of_them():
+    """P0.1 G1: the guard costs one row of evidence, not the river's frame.
+
+    Two consecutive complete-river observations are enough to latch, and the
+    recorded ``river_complete_frame`` is the FIRST row of that run -- a
+    stability guard must not quietly re-stamp the river later than it was
+    actually seen, or C2's window would move with it.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    assert subject.observe(river_row(1))["hand_phase"][
+        "ordinary_river_pending"] is None
+    settled = subject.observe(river_row(2, credited_at=2))["hand_phase"]
+    assert settled["ordinary_river_pending"]["river_complete_frame"] == 0
+    confirmed = subject.observe(river_row(3, epoch="next"))["hand_phase"]
+    terminal = confirmed["ordinary_terminal"]
+    assert terminal["kind"] == "ORDINARY_RIVER_CLOSED"
+    assert terminal["river_complete_frame"] == 0
+    assert terminal["confirmed_by_epoch_frame"] == 3
+
+
+def test_an_unresolved_action_count_never_latches_a_river_fact():
+    """P0.1 G2: C1's ``pending_actions == 0`` gates the latch, and only it.
+
+    A complete board with actions still owed is not a finished hand. A payout
+    and a next-hand boundary on top of that must not turn it into one.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0, pending=2))
+    for frame in (1, 2, 3):
+        phase = subject.observe(river_row(
+            frame, pending=2, credited_at=3))["hand_phase"]
+        assert phase["ordinary_river_pending"] is None
+        assert phase["ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(4, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"] is None
+    assert confirmed["last_ordinary_terminal"] is None
+
+
+def test_a_latched_river_is_not_revoked_by_a_later_action_count():
+    """P0.1 G2: the counter cannot un-latch history it already allowed.
+
+    This is the over-fix guard. Once two agreeing rows have established the
+    river, a later non-zero ``pending_actions`` is table noise on top of a fact
+    that already happened -- the same reason the board teardown cannot withdraw
+    it -- so the close must still be reported.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    noisy = subject.observe(river_row(2, pending=3, credited_at=1))["hand_phase"]
+    assert noisy["ordinary_river_pending"]["river_complete_frame"] == 0
+    confirmed = subject.observe(river_row(3, epoch="next"))["hand_phase"]
+    terminal = confirmed["ordinary_terminal"]
+    assert terminal["kind"] == "ORDINARY_RIVER_CLOSED"
+    assert terminal["river_complete_frame"] == 0
+
+
+def test_a_blocked_row_makes_the_stability_run_start_over():
+    """The guard counts consecutive OBSERVATIONS, not consecutive frames.
+
+    A blocked row (overlay, unsupported scene, block-state update) says nothing
+    about the board, so it cannot stand in as the second agreeing observation.
+    Fail-closed means the run restarts -- and the latched frame is then the
+    first row AFTER the interruption, not the pre-interruption one.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    overlay = river_row(1)
+    overlay["special_modes"] = {"insurance": "VISIBLE"}
+    blocked = subject.observe(overlay)["hand_phase"]
+    assert blocked["phase"] == "SUSPENDED"
+    assert blocked["ordinary_river_pending"] is None
+    assert subject.observe(river_row(2))["hand_phase"][
+        "ordinary_river_pending"] is None
+    settled = subject.observe(river_row(3, credited_at=3))["hand_phase"]
+    assert settled["ordinary_river_pending"]["river_complete_frame"] == 2
+    confirmed = subject.observe(river_row(4, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"]["river_complete_frame"] == 2
