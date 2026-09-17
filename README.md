@@ -1,5 +1,23 @@
 # PokerSense
 
+## AA eight-seat development monitor
+
+[V5 offline review and conditional river bounds](docs/AA-STRATEGY-ENTRY-V5.zh-CN.md) adds saved-frame candidate inputs and a plain form that calculates and preserves conservative payoff bounds without an API key. Unknown fees do not produce a net-payoff guarantee. Opening/commitment continuity and call-price observations improve; a strong full-street policy and profitability remain unvalidated.
+
+Saved frames can seed a source-labelled manual river-analysis draft; missing ranges, fees and commitments remain unfilled. This does not emit live advice. The observation page polls every 250ms; end-to-end capture/display latency remains to be measured.
+
+The [focused observation and vision review desk](docs/AA-REVIEW-DESK-AND-VISION-API.zh-CN.md) separates observation, saved reviews and settings. Mark a frame without stopping observation, retain human correction history, and explicitly submit that saved image and its fields to DeepSeek for candidate review. The API key stays in server memory and must be re-entered after restart. Daily request caps apply; AI output never automatically trains models or enables live strategy.
+
+An explicitly authorized live round can also sample at most once per 30 seconds, with at most 20 attempts, sending those images and fields to DeepSeek. The finite sampler stops after source/session changes or observation stops. Timed receipts remain separate from human confirmation; rounds do not renew automatically.
+
+The portrait source preview is larger and includes a scrollable live image dialog. Closing it keeps playback running. See the [manual first-hand review steps](docs/AA8-FIRST-HAND-REVIEW-20260915.zh-CN.md#人工复查操作); the dialog does not pause or save frames.
+
+The [action/settlement interpretation layer](docs/AA8-ACTION-SEMANTICS-AND-SETTLEMENT.zh-CN.md) now separates bet/raise/call from all-in using pre-debit observations and keeps historical commitments out of the current cleared-pot difference. Original observations and unknown monetary attribution remain intact; this does not authorize live strategy.
+
+The [current AA workflow](docs/AA-TABLE-VALIDATION-V2.zh-CN.md) adds manual per-table rules, continuous development replay, explicit local issue snapshots and isolated manual river analysis. [Portable private resource bundles](docs/AA-RUNTIME-BUNDLE.zh-CN.md) remove old checkout path dependencies. Conditional examples remain separate from live observations and are not evidence of strategy profitability.
+
+A dedicated AA entry now provides explicit start/stop, device selection, registered development-frame replay, eight-seat candidate fields, preview and stale/error clearing. See [AA monitor setup and limitations](docs/AA-LIVE-MONITOR-V1.zh-CN.md). Source-based replay and browser controls were exercised; physical capture, complete legal state and reliable multiway strategy remain unverified. Private model references stay external to the public repository and executable.
+
 [简体中文](README.zh-CN.md) | **English**
 
 Current execution: [AA vision-first plan](PLAN-AA-vision-first.zh-CN.md), with
