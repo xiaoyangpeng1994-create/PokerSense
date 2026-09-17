@@ -289,6 +289,20 @@ P0 判据逐条核对（授权原文的验收条件）：
 5 条确认全部携带 `ledger_status: HAND_COMMITMENTS_UNKNOWN`，且 `canonical_verified / card_showdown_verified / rake_verified / strategy_eligible` 全为 `False`
 —— 本终局**不声称**任何 GTO 资格，也不等于一份可核对的完整手牌记录。
 
+**每手携带的那一条结算证据**（`source` 全为 `stable_visual_balance_increase`，且 `confirmed_frame` 都晚于该手自己的 river 帧）：
+
+| 闭合手 epoch | 座位 | 金额 | confirmed_frame |
+|---|---|---|---|
+| `observed_deal_8622` | seat 3 | 33 | 9680 |
+| `observed_deal_11609` | seat 5 | 172 | 12398 |
+| **`observed_deal_14593`** | **seat 4** | **134** | **15148** |
+| `observed_deal_17323` | seat 4 | 239 | 18323 |
+| `observed_deal_24560` | seat 1 | 123 | 25825 |
+
+> **一处口径问题（如实记录，未擅自改）**：`observed_deal_8622` 在其 epoch 内有 **13 行** `pending_actions != 0`，仍然被闭合。
+> 实现的 C1 只检查 `full_river and not closed`，**不检查** `pending_actions == 0`（该条件只出现在 all-in `closed` 的判据里，
+> `aa_semantics.py:239`）；而 §3.2 早前的文档版本把它写成了 C1 的条件。本轮授权**未覆盖**该条件，故未改动，见 §3.2 的偏差说明。
+
 ### 4.7 反例余量（**如实标注，未擅自加固**）
 
 对抗性验证（差分 harness：只把 `river_frame` 那一段换回修复前的写法，其余代码不动）找到**一个**由本次修复新引入的假阳性：
@@ -302,36 +316,16 @@ P0 判据逐条核对（授权原文的验收条件）：
 本次改动影响的行为差异**只有一个组合**：
 `not closed ∧ not full_river ∧ river_frame 已置` ⇒ 修复前**清零**，修复后**保留**。
 
-### 4.6 P0 验证：5 手真实牌局闭合，11 项判据全过
+### 4.8 尚未闭合的部分与一处口径偏差（如实标注）
 
-同一授权录像、同一连续顺序（0–27,287 帧）重放后的结果：
+**仍未闭合的字段**：5 手的 `ledger_status` 全部是 `HAND_COMMITMENTS_UNKNOWN` —— 即 4.2 的开局/账本缺口仍在。
+`ORDINARY_RIVER_CLOSED` 证明的是「**这手已经结束**」，**不等于**「开局投入已对账」，也不等于一份可核对的完整手牌记录。
+`REAL_HAND_ACCEPTANCE_PENDING` 因此保持不变。
 
-| 指标 | 修复前 | 修复后 |
-|---|---|---|
-| 达 full river 的 epoch | 6 | 6（不变） |
-| `ordinary_river_pending` | 1 | **5** |
-| **`ORDINARY_RIVER_CLOSED`** | **0** | **5** |
+**一处口径偏差（本轮授权未覆盖，故未改动）**：`observed_deal_8622` 在其 epoch 内有 **13 行** `pending_actions != 0`，
+仍然被闭合 —— 即实现的 C1 **不检查** `pending_actions == 0`，详见 §3.2 的偏差说明。是否要把该条件并入 C1 需另行裁决。
 
-5 手**各自恰好闭合一次**，且每一手都有：完整河牌帧、**该手自己 epoch** 的一条河牌后余额增加（`stable_visual_balance_increase`）、
-在后继 epoch 的首行确认（`confirmed_by_epoch_frame` == 后继 epoch 首帧）、`strategy_eligible: false`、`canonical_verified: false`。
-
-| 闭合手 epoch | river 帧 | 结算（座位/金额/confirmed_frame） | 确认帧 | Hero @ river | Board @ river |
-|---|---|---|---|---|---|
-| `observed_deal_8622` | 9512 | seat 3 / 33 / 9680 | 9787 | `6d Kc` | `Ks Qh 7h 9h 9s` |
-| `observed_deal_11609` | 12325 | seat 5 / 172 / 12398 | 12490 | `2d Kh` | `6h Ad 5s 4s 6d` |
-| **`observed_deal_14593`（P0 目标）** | **15033** | **seat 4 / 134 / 15148** | **15198** | **`4s 3s`** | **`3c 7s 3h Tc 6c`** |
-| `observed_deal_17323` | 18170 | seat 4 / 239 / 18323 | 18427 | `Ah Jh` | `2s Th Qs Ad 9s` |
-| `observed_deal_24560` | 25674 | seat 1 / 123 / 25825 | 25927 | `5h 5s` | `9s Jc 2d Jh 3s` |
-
-**P0 目标手逐条核对（11/11 PASS）**：`river_frame` 在 12 帧收尾期间保持 15033；pending 连续 50 行；该手**恰好闭合一次**；
-在 **15198** 确认；确认行之后**不再重复**；没有任何手闭合两次；每个发出 epoch 只有 **1 行**事件；
-事件从不声称可用性；**每个闭合手都有完整河牌**；**每个闭合手都有结算证据**。
-
-**仍未闭合的字段**：5 手的 `ledger_status` 全部是 `HAND_COMMITMENTS_UNKNOWN`——即 4.2 的 opening/ledger 缺口仍在，
-`ORDINARY_RIVER_CLOSED` 证明的是「这手已结束」，**不等于**「开局投入已对账」。`REAL_HAND_ACCEPTANCE_PENDING` 因此保持。
-
-**如实记录一处口径问题**：`observed_deal_8622` 在其 epoch 内有 **13 行** `pending_actions != 0`，仍然被闭合
-——见 §3.2 的偏差说明。本轮授权未覆盖该条件，故未改动。
+> 本节与 4.6 的各手帧号、结算 seat/金额由**一名独立复核者**用自写脚本另行推导，与本报告一致。
 
 ## 5 本轮未做
 
