@@ -168,7 +168,7 @@ C2 依赖「结算出现**可见的余额增加**」。§2.3 曾测得**本次�
 
 ### 4.1 命中统计（修复前 → 修复后）
 
-| 指标 | 修复前（`fbda7c52` / `f4b0298`） | 修复后（head 见 §6） |
+| 指标 | 修复前（`fbda7c52` / `f4b0298`） | 修复后（代码提交 `3d4f390`） |
 |---|---|---|
 | epoch（含 `None` 挂起段） | 25 | 25 |
 | 达到 **full river** 的 epoch | **6** | 6 |
@@ -302,6 +302,37 @@ P0 判据逐条核对（授权原文的验收条件）：
 本次改动影响的行为差异**只有一个组合**：
 `not closed ∧ not full_river ∧ river_frame 已置` ⇒ 修复前**清零**，修复后**保留**。
 
+### 4.6 P0 验证：5 手真实牌局闭合，11 项判据全过
+
+同一授权录像、同一连续顺序（0–27,287 帧）重放后的结果：
+
+| 指标 | 修复前 | 修复后 |
+|---|---|---|
+| 达 full river 的 epoch | 6 | 6（不变） |
+| `ordinary_river_pending` | 1 | **5** |
+| **`ORDINARY_RIVER_CLOSED`** | **0** | **5** |
+
+5 手**各自恰好闭合一次**，且每一手都有：完整河牌帧、**该手自己 epoch** 的一条河牌后余额增加（`stable_visual_balance_increase`）、
+在后继 epoch 的首行确认（`confirmed_by_epoch_frame` == 后继 epoch 首帧）、`strategy_eligible: false`、`canonical_verified: false`。
+
+| 闭合手 epoch | river 帧 | 结算（座位/金额/confirmed_frame） | 确认帧 | Hero @ river | Board @ river |
+|---|---|---|---|---|---|
+| `observed_deal_8622` | 9512 | seat 3 / 33 / 9680 | 9787 | `6d Kc` | `Ks Qh 7h 9h 9s` |
+| `observed_deal_11609` | 12325 | seat 5 / 172 / 12398 | 12490 | `2d Kh` | `6h Ad 5s 4s 6d` |
+| **`observed_deal_14593`（P0 目标）** | **15033** | **seat 4 / 134 / 15148** | **15198** | **`4s 3s`** | **`3c 7s 3h Tc 6c`** |
+| `observed_deal_17323` | 18170 | seat 4 / 239 / 18323 | 18427 | `Ah Jh` | `2s Th Qs Ad 9s` |
+| `observed_deal_24560` | 25674 | seat 1 / 123 / 25825 | 25927 | `5h 5s` | `9s Jc 2d Jh 3s` |
+
+**P0 目标手逐条核对（11/11 PASS）**：`river_frame` 在 12 帧收尾期间保持 15033；pending 连续 50 行；该手**恰好闭合一次**；
+在 **15198** 确认；确认行之后**不再重复**；没有任何手闭合两次；每个发出 epoch 只有 **1 行**事件；
+事件从不声称可用性；**每个闭合手都有完整河牌**；**每个闭合手都有结算证据**。
+
+**仍未闭合的字段**：5 手的 `ledger_status` 全部是 `HAND_COMMITMENTS_UNKNOWN`——即 4.2 的 opening/ledger 缺口仍在，
+`ORDINARY_RIVER_CLOSED` 证明的是「这手已结束」，**不等于**「开局投入已对账」。`REAL_HAND_ACCEPTANCE_PENDING` 因此保持。
+
+**如实记录一处口径问题**：`observed_deal_8622` 在其 epoch 内有 **13 行** `pending_actions != 0`，仍然被闭合
+——见 §3.2 的偏差说明。本轮授权未覆盖该条件，故未改动。
+
 ## 5 本轮未做
 
 未改 else 分支的语义、未改 `closed`/`full_river`/`terminal`、未改座位门槛、未改 `_posting` 的比较锚点与 `expires`、未重标 ROI、未调阈值、未动 `LiveCausalWagers`、未改前端、未合并发布。翻前/翻牌/转牌弃牌结束**未实现**（后续单独做）。
@@ -313,6 +344,8 @@ P0 判据逐条核对（授权原文的验收条件）：
 
 ## 6 验证
 
+- **本轮代码提交**：`3d4f390b2d20590f90ed43d40ae6a245ee0168d9`（`fix(usable-001): keep a completed river sticky for the rest of its epoch`）。
+  本报告为该提交**之后**的 docs-only 更新；代码与测试字节未再变动。
 - 全仓 `pytest -v`：**4128 passed / 1 skipped / 2 warnings / 419.46s**（上一基线 4124/1，本轮 +4 = sticky river 三项 + 会话边界守卫一项）。
 - 终局 + 开局边界两组测试：**19 passed**（`tests/desktop` 全目录 **445 passed**）。
 - `flake8 src tests tools`：0 项。
