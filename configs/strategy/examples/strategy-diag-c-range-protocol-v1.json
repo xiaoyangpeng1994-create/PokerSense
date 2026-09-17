@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "experiment_id": "STRATEGY-DIAG-C-ONE-RANGE-PARAMETER-V1",
+  "checkpoint": "STRATEGY-DIAG C (issue #23, comment 5692717861)",
+  "parent_head": "a1367c5bfe826774fb6cc18d15a7dbb3a73c0617",
+  "scope": "OFFLINE_FIXED_POLICY_SINGLE_FACTOR_RANGE_SENSITIVITY_NOT_LIVE_ADVICE",
+  "status_of_this_file": "FROZEN_BEFORE_ANY_PERTURBED_WORLD_WAS_RUN",
+
+  "original_failing_scenario": {
+    "study_tool": "tools/validate_threeway_models.py",
+    "study_group": "n6-facing_bet",
+    "study_world": "reference_control",
+    "input": "configs/strategy/examples/threeway-river-response-manual.json",
+    "input_sha256": "4f5d11f7446e77e755bfb4266c79fe32fc9092c0f7fbf630b0e63e4930905a64",
+    "study_protocol": "configs/strategy/examples/threeway-validation-protocol-v1.json",
+    "study_protocol_sha256": "7a34e781aaa02a2ca8c301957ae0a274a1690b6ee2e826d24ff1758052798759",
+    "calibration_status": "NOT_REAL_CALIBRATION",
+    "selection": "training_selected is the training-selected candidate calling_public_v1; manual_reference is the original hand-written policy book of the same planning scenario",
+    "failure_rule": "delta < 0 or delta_vs_check_fold < 0 or delta_vs_check_call < 0, where delta = training_selected frozen EV minus manual_reference frozen EV",
+    "applicability_check": {
+      "group_is_in_the_original_failure_set": true,
+      "target_opponent_seat": 1,
+      "target_opponent_combos": [
+        "JhJd",
+        "TcTd"
+      ],
+      "has_at_least_two_valid_combos": true,
+      "why_this_group": "reference_control keeps the original two-combo opponent ranges, so a proper non-empty combo subset exists. The value_heavy world replaces both ranges with a single combo each and therefore cannot host a proper subset; rank_aware and check_trap would additionally move the response-model overrides.",
+      "all_four_joint_assignments_legal": true,
+      "other_opponent_combos": [
+        "7c7s",
+        "KhTh"
+      ]
+    }
+  },
+
+  "frozen_policy_books": {
+    "compiled_from": "the original planning scenario only, before any evaluation world is touched",
+    "books": [
+      {
+        "name": "manual_reference",
+        "policy_book_sha256": "5838804bcc75922a4230abdadda4b81d022d0fb90be0397e524e3036845e6a50",
+        "planning_best_ev_chips": "543196/15151"
+      },
+      {
+        "name": "training_selected",
+        "policy_book_sha256": "420a33310bce8860f18f19153c98a09e2e47c18f9c3f35bbbfc1709f6189219f",
+        "planning_best_ev_chips": "223149/2023"
+      }
+    ],
+    "replanning_rule": "no Hero re-planning in any perturbed world: both books are compiled once and reused in all three worlds, and their hashes must be identical before and after every world",
+    "manual_reference_has_two_decisions": true
+  },
+
+  "single_varied_object": {
+    "kind": "relative_weight_of_one_opponent_combo_subset",
+    "target_opponent_seat": 1,
+    "target_combos": [
+      "JhJd"
+    ],
+    "untouched_combos_of_that_opponent": [
+      "TcTd"
+    ],
+    "selection_rationale": "Seat 1 is the opponent that made the pre-root bet in the conditioned public history, so its range is the one the facing-bet decision is most exposed to. Within that range JhJd is the only combo that beats Hero QsQd on 2c4d7h9sJc (trip jacks with the Jc river), while TcTd is an overpair that loses; scaling exactly that combo therefore moves the mass on the hand that dominates Hero's made hand instead of rescaling the range uniformly.",
+    "subset_is_nonempty_and_not_the_whole_range": true,
+    "relative_factors": [
+      "0.5",
+      "1",
+      "2"
+    ],
+    "baseline_factor": "1",
+    "derived_not_tuned": [
+      "prior_normalization_after_the_weight_change",
+      "card_blocking_joint_assignments",
+      "public_history_conditioning_and_history_likelihood",
+      "posterior_over_joint_assignments"
+    ],
+    "prohibited_after_reading_results": "changing the target seat, the combo subset or the factor list"
+  },
+
+  "held_fixed": [
+    "hero_cards_and_board_cards",
+    "other_opponent_seat_2_range",
+    "both_response_models_and_category_weights_and_price_bands",
+    "world_response_overrides_none_in_this_world",
+    "rules_rake_and_fee_assumptions",
+    "seats_stacks_and_hand_committed",
+    "public_history_and_action_order",
+    "aggression_targets_and_max_aggressions",
+    "planning_and_evaluation_budgets"
+  ],
+
+  "compute": {
+    "max_joint_assignments": 128,
+    "max_nodes": 20000,
+    "trace": true,
+    "trace_max_nodes": 20000,
+    "engine": "poker_engine.strategy.threeway_policy_evaluation_v1.evaluate_policy_book"
+  },
+
+  "expected_baseline_at_factor_1": {
+    "note": "original readings of this failing scenario, reproduced from tools/validate_threeway_models.py before this protocol was frozen; factor 1 must reproduce them exactly or the baseline construction differs and no improvement may be claimed",
+    "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+    "history_likelihood": "15151/180320",
+    "manual_reference_frozen_policy_net_ev_chips": "543196/15151",
+    "training_selected_frozen_policy_net_ev_chips": "737057752/20650813",
+    "check_fold_net_ev_chips": "0",
+    "check_call_net_ev_chips": "543196/15151",
+    "training_selected_minus_manual_reference_chips": "-30444/189457",
+    "training_selected_delta_vs_check_fold_chips": "737057752/20650813",
+    "training_selected_delta_vs_check_call_chips": "-30444/189457",
+    "probability_of_any_fallback": "0"
+  },
+
+  "reporting_requirements": [
+    "per world: exact conditional EV of every policy, deltas against every original baseline, policy and world and input hashes, public history likelihood, fallback probability and expected count, diagnostic nodes and wall time",
+    "per world: the dominant terminal-path weighted contributions and their differences, exactly reconciled on the shared path union",
+    "factor 1 must equal expected_baseline_at_factor_1 before any other world is interpreted"
+  ],
+
+  "blocked_rules": [
+    "an empty or whole-range combo subset is rejected: it would only rescale every weight and would not change the range",
+    "an unknown target combo, a non-positive factor, or a target seat that is not an opponent is rejected",
+    "a world with no legal joint assignment, zero public-history probability or an exceeded node budget is reported as BLOCKED with its reason, never as a partial or repaired reading"
+  ],
+
+  "claims_not_made": [
+    "no new optimal policy, no policy improvement and no ranking reversal is claimed regardless of the outcome",
+    "no independent real-opponent validation, no bb per 100, no profitability and no GTO claim",
+    "the perturbed combos are declared synthetic variations of a handwritten illustrative range, not observed frequencies"
+  ],
+
+  "strategy_eligible": false,
+  "advice_emitted": false
+}

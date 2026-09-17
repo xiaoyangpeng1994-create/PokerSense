@@ -7,8 +7,10 @@ import pytest
 from poker_engine.core.value_objects import ChipAmount
 from poker_engine.strategy import threeway_policy_evaluation_v1 as module
 from poker_engine.strategy.threeway_policy_evaluation_v1 import (
-    WorldResponseOverride, _Evaluation, _override_probabilities, _world_branches,
-    compile_policy_book, evaluate_policy_book, policy_book_hash, public_conditions_json,
+    REACHED, UNREACHABLE, PolicyPathLedger, TerminalPath, WorldResponseOverride,
+    _Evaluation, _override_probabilities, _world_branches, compare_policy_paths,
+    compile_policy_book, evaluate_policy_book, path_key, policy_book_hash,
+    public_conditions_json, reconcile_path_ledgers,
 )
 from poker_engine.strategy.threeway_river_v1 import RiverAction, _Node, _Tree
 from .helpers import card
@@ -237,3 +239,285 @@ def test_public_numeric_identity_never_rounds_under_decimal_context():
     b = replace(s, seats=(replace(s.seats[0], stack=ChipAmount(
         "10000000000000000000000000002")), *s.seats[1:]))
     assert public_conditions_json(a) != public_conditions_json(b)
+
+
+def hand_example():
+    """Three-handed river where every terminal EV is an integer.
+
+    Pot is 60 (three active seats committed 20). Hero QQ always wins the
+    showdown against 3c3d and 5h6h, so each terminal value is the pot Hero
+    collects minus the chips Hero adds after the decision root.
+    """
+    return replace(fixture(), ranges=ranges({1: "3c3d", 2: "5h6h"}),
+                   models=(model(1, check=1, bet=1, fold=1, call=1),
+                           model(2, check=1, fold=1, call=1)))
+
+
+# (reach probability, conditional terminal EV, contribution) per public history.
+# Derived by hand: Hero bet 100 -> 1/2 fold / 1/2 call each (pot 160 if one
+# opponent continues, 260 if both do, 60 when both fold), and the checked line
+# wins 60 unless Seat 1 bets, where the baselines fold (0) or call (160/260).
+HAND_PATHS = {
+    "frozen_policy": {
+        "0:bet:100|1:call|2:call": (Fraction(1, 4), Fraction(260), Fraction(65)),
+        "0:bet:100|1:call|2:fold": (Fraction(1, 4), Fraction(160), Fraction(40)),
+        "0:bet:100|1:fold|2:call": (Fraction(1, 4), Fraction(160), Fraction(40)),
+        "0:bet:100|1:fold|2:fold": (Fraction(1, 4), Fraction(60), Fraction(15)),
+    },
+    "check_fold": {
+        "0:check|1:bet:100|2:call|0:fold": (
+            Fraction(1, 4), Fraction(0), Fraction(0)),
+        "0:check|1:bet:100|2:fold|0:fold": (
+            Fraction(1, 4), Fraction(0), Fraction(0)),
+        "0:check|1:check|2:check": (Fraction(1, 2), Fraction(60), Fraction(30)),
+    },
+    "check_call": {
+        "0:check|1:bet:100|2:call|0:call": (
+            Fraction(1, 4), Fraction(260), Fraction(65)),
+        "0:check|1:bet:100|2:fold|0:call": (
+            Fraction(1, 4), Fraction(160), Fraction(40)),
+        "0:check|1:check|2:check": (Fraction(1, 2), Fraction(60), Fraction(30)),
+    },
+}
+HAND_EV = {"frozen_policy": Fraction(160), "check_fold": Fraction(30),
+           "check_call": Fraction(135)}
+
+
+def ledger(result, name):
+    assert result.status == "COMPLETE_CONDITIONAL_FIXED_POLICY", result.reasons
+    return next(item for item in result.path_ledgers if item.policy_name == name)
+
+
+def test_traced_terminal_paths_match_the_hand_computed_example():
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    assert {m.name: m.net_ev_chips for m in result.metrics} == HAND_EV
+    assert (result.delta_vs_check_fold_chips, result.delta_vs_check_call_chips) == (
+        130, 25)
+    for name, expected in HAND_PATHS.items():
+        item = ledger(result, name)
+        reachable = {p.history_key: (p.reach_probability,
+                                     p.conditional_terminal_net_ev_chips,
+                                     p.contribution_chips)
+                     for p in item.paths if p.status == REACHED}
+        assert reachable == expected
+        # Reachable and unreachable paths partition the same exhaustive union.
+        assert len(item.paths) == len(next(
+            ledger(result, other).paths for other in HAND_PATHS))
+        assert item.reach_probability_sum == 1
+        assert item.contribution_sum_chips == item.reconciled_policy_net_ev_chips
+        assert item.contribution_sum_chips == HAND_EV[name]
+        assert item.contribution_sum_bb == HAND_EV[name] / 2
+        assert item.nodes_visited == item.trace_node_budget or (
+            item.nodes_visited < item.trace_node_budget)
+        assert (item.reachable_paths, item.unreachable_paths) == (
+            len(expected), len(item.paths) - len(expected))
+
+
+def test_unreachable_paths_report_undefined_conditional_ev_and_zero_weight():
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    for item in result.path_ledgers:
+        for path in item.paths:
+            if path.status == REACHED:
+                assert path.reach_probability > 0
+                assert isinstance(path.conditional_terminal_net_ev_chips, Fraction)
+                assert path.contribution_chips == (
+                    path.reach_probability * path.conditional_terminal_net_ev_chips)
+            else:
+                assert path.status == UNREACHABLE
+                assert path.reach_probability == 0
+                assert path.conditional_terminal_net_ev_chips is None
+                assert path.contribution_chips == 0
+    # The zero-mass Hero branches are the policy difference, not lost mass.
+    assert {p.history_key for p in ledger(result, "check_fold").paths} == {
+        p.history_key for p in ledger(result, "frozen_policy").paths}
+
+
+def test_path_comparison_subtracts_the_union_without_adding_ancestors_twice():
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    keys = {p.history_key for p in ledger(result, "frozen_policy").paths}
+    # Every recorded row is a terminal path, so no row is an ancestor of another.
+    assert [key for key in keys if any(
+        other != key and key.startswith(other + "|") for other in keys)] == []
+    for left, right, expected in (("frozen_policy", "check_fold", Fraction(130)),
+                                  ("frozen_policy", "check_call", Fraction(25))):
+        reconciliation = compare_policy_paths(result, left, right)
+        assert {row.history_key for row in reconciliation.rows} == keys
+        assert reconciliation.contribution_difference_sum_chips == expected
+        assert reconciliation.total_ev_difference_chips == expected
+        moved = [row for row in reconciliation.rows
+                 if row.contribution_chips_difference]
+        assert moved and all(row.history_key in HAND_PATHS[left]
+                             or row.history_key in HAND_PATHS[right]
+                             for row in moved)
+        assert reconciliation.reach_status_count("REACHED_BY_BOTH") == 0
+
+
+def test_trace_switch_changes_only_the_populated_ledgers():
+    s = hand_example()
+    book = compile_policy_book(s)
+    plain = evaluate_policy_book(book, s)
+    traced = evaluate_policy_book(book, s, trace=True)
+    assert plain.path_ledgers == ()
+    assert traced.path_ledgers and all(
+        item.completeness == "COMPLETE_TERMINAL_PATH_LEDGER"
+        for item in traced.path_ledgers)
+    assert replace(traced, path_ledgers=()) == plain
+    assert policy_book_hash(book) == book.book_sha256
+    assert traced.policy_hash_before == traced.policy_hash_after == book.book_sha256
+
+
+def test_traced_evaluation_never_calls_an_optimizing_entry_point(monkeypatch):
+    s = hand_example()
+    book = compile_policy_book(s)
+    before = policy_book_hash(book)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("traced evaluation attempted to optimize Hero")
+
+    monkeypatch.setattr(module, "analyze_threeway_river", forbidden)
+    monkeypatch.setattr(_Tree, "value", forbidden)
+    result = evaluate_policy_book(book, s, trace=True)
+    assert ledger(result, "frozen_policy").contribution_sum_chips == 160
+    assert result.policy_hash_before == result.policy_hash_after == before
+    assert policy_book_hash(book) == before
+
+
+def test_fallback_paths_are_flagged_and_their_reach_matches_the_metric():
+    s = replace(fixture(), ranges=ranges({1: "ThTd", 2: "3c3d"}))
+    book = compile_policy_book(s)
+    world = replace(s, models=(model(1, check=1, bet=1, fold=1), s.models[1]))
+    result = evaluate_policy_book(book, world, trace=True)
+    outcome = metric(result)
+    item = ledger(result, "frozen_policy")
+    flagged = [p for p in item.paths if p.fallback_used]
+    assert flagged
+    assert sum((p.reach_probability for p in flagged), Fraction(0)) == (
+        outcome.probability_of_any_fallback)
+    assert item.fallback_reach_sum == outcome.probability_of_any_fallback
+    assert outcome.probability_of_any_fallback == Fraction(1, 2)
+
+
+def test_trace_budget_failure_is_blocked_without_a_partial_ledger():
+    s = hand_example()
+    book = compile_policy_book(s)
+    result = evaluate_policy_book(book, s, trace=True, trace_max_nodes=1)
+    assert result.status == "BLOCKED"
+    assert result.reasons == ("trace_node_budget_exceeded",)
+    assert result.metrics == () and result.path_ledgers == ()
+    for bad in (0, -1, 200001, True):
+        blocked = evaluate_policy_book(book, s, trace=True, trace_max_nodes=bad)
+        assert blocked.status == "BLOCKED"
+        assert blocked.reasons == ("invalid_explicit_trace_budget",)
+    assert evaluate_policy_book(book, s, trace="yes").status == "BLOCKED"
+
+
+@pytest.mark.parametrize("mutation", ["reach", "sum", "unreachable_ev",
+                                      "reachable_ev", "duplicate", "bad_status"])
+def test_ledger_refuses_inconsistent_paths_instead_of_returning_them(mutation):
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    item = ledger(result, "frozen_policy")
+    zero = next(p for p in item.paths if p.status == UNREACHABLE)
+    live = next(p for p in item.paths if p.status == REACHED)
+    corrupted = {
+        "reach": lambda: replace(zero, reach_probability=Fraction(1, 2)),
+        "sum": lambda: replace(item, paths=tuple(
+            p for p in item.paths if p is not live)),
+        "unreachable_ev": lambda: replace(
+            zero, conditional_terminal_net_ev_chips=Fraction(0)),
+        "reachable_ev": lambda: replace(live, contribution_chips=Fraction(999)),
+        "duplicate": lambda: replace(item, paths=(live, live)),
+        "bad_status": lambda: replace(zero, status=REACHED),
+    }[mutation]
+    with pytest.raises(ValueError):
+        corrupted()
+
+
+def test_path_comparison_rejects_untraced_or_unknown_policies():
+    s = hand_example()
+    book = compile_policy_book(s)
+    untraced = evaluate_policy_book(book, s)
+    with pytest.raises(ValueError, match="path_trace_not_collected"):
+        compare_policy_paths(untraced)
+    traced = evaluate_policy_book(book, s, trace=True)
+    with pytest.raises(ValueError, match="two_distinct_policy_names"):
+        compare_policy_paths(traced, "frozen_policy", "frozen_policy")
+    with pytest.raises(ValueError, match="path_trace_not_collected"):
+        compare_policy_paths(traced, "frozen_policy", "unnamed_policy")
+    blocked = evaluate_policy_book(book, s, trace=True, trace_max_nodes=1)
+    with pytest.raises(ValueError, match="requires_complete_evaluation"):
+        compare_policy_paths(blocked)
+
+
+def test_path_key_is_canonical_for_sized_and_unsized_actions():
+    assert path_key(()) == "root"
+    assert path_key((RiverAction(0, "check"),
+                     RiverAction(1, "bet", Decimal(100)))) == "0:check|1:bet:100"
+    with pytest.raises(ValueError, match="river_action_tuple"):
+        path_key([RiverAction(0, "check")])
+    with pytest.raises(ValueError, match="river_action_tuple"):
+        path_key((object(),))
+
+
+def test_ledger_and_path_dataclasses_are_self_verifying():
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    item = ledger(result, "frozen_policy")
+    with pytest.raises(ValueError):
+        replace(item, reconciled_policy_net_ev_chips=Fraction(1))
+    with pytest.raises(ValueError):
+        replace(item, reconciled_fallback_probability=Fraction(1, 3))
+    with pytest.raises(ValueError):
+        replace(item, completeness="PARTIAL")
+    with pytest.raises(ValueError):
+        replace(item, big_blind=Fraction(0))
+    with pytest.raises(ValueError):
+        TerminalPath((RiverAction(0, "check"),), "0:check", Fraction(0), False,
+                     None, Fraction(0), REACHED)
+    assert isinstance(item, PolicyPathLedger)
+
+
+def test_cross_book_reconciliation_requires_an_explicit_opt_in():
+    s = hand_example()
+    book = compile_policy_book(s)
+    other = compile_policy_book(s, policy_id="second-book-v1")
+    assert other.book_sha256 != book.book_sha256
+    left = ledger(evaluate_policy_book(book, s, trace=True), "frozen_policy")
+    right = ledger(evaluate_policy_book(other, s, trace=True), "frozen_policy")
+    total = (left.reconciled_policy_net_ev_chips
+             - right.reconciled_policy_net_ev_chips)
+    with pytest.raises(ValueError, match="different_books"):
+        reconcile_path_ledgers(left, right, total)
+    reconciliation = reconcile_path_ledgers(left, right, total,
+                                            allow_distinct_books=True)
+    assert reconciliation.distinct_books is True
+    assert reconciliation.right_policy_book_sha256 == other.book_sha256
+    assert reconciliation.policy_book_sha256 == book.book_sha256
+    assert reconciliation.total_ev_difference_chips == 0
+    assert reconciliation.contribution_difference_sum_chips == 0
+    for row in reconciliation.rows:
+        assert row.contribution_chips_difference == 0
+    with pytest.raises(ValueError, match="path_ledgers_describe_different_worlds"):
+        reconcile_path_ledgers(
+            left, replace(right, world_scenario_sha256="0" * 64),
+            total, allow_distinct_books=True)
+    with pytest.raises(ValueError, match="explicit_exact_ev_difference"):
+        reconcile_path_ledgers(left, right, 0.0, allow_distinct_books=True)
+    with pytest.raises(ValueError):
+        reconcile_path_ledgers(left, right, Fraction(1),
+                               allow_distinct_books=True)
+
+
+def test_reconciliation_dataclass_rejects_a_misstated_book_relation():
+    s = hand_example()
+    result = evaluate_policy_book(compile_policy_book(s), s, trace=True)
+    reconciliation = compare_policy_paths(result)
+    assert reconciliation.distinct_books is False
+    assert reconciliation.right_policy_book_sha256 is None
+    with pytest.raises(ValueError):
+        replace(reconciliation, distinct_books=True)
+    with pytest.raises(ValueError):
+        replace(reconciliation, right_policy_book_sha256="f" * 64)

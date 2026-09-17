@@ -2,6 +2,10 @@
 
 Shared-kernel validation: legal transitions, beliefs and settlement reuse V1.
 World evaluation never invokes its optimizing value/analyze entry points.
+
+Optional path tracing decomposes each fixed policy's conditional EV into exact
+per-terminal-path contributions. It re-uses the same kernel, is off by default,
+and changes nothing except the populated `path_ledgers` field.
 """
 
 from collections.abc import Mapping
@@ -171,9 +175,218 @@ class PolicyEvaluation:
     strategy_eligible: bool = False
     advice_emitted: bool = False
 
+    path_ledgers: tuple["PolicyPathLedger", ...] = ()
+
     def __post_init__(self):
         if self.strategy_eligible is not False or self.advice_emitted is not False:
             raise ValueError("evaluation_cannot_authorize_live_advice")
+
+
+REACHED = "REACHED"
+UNREACHABLE = "UNREACHABLE"
+LEDGER_COMPLETE = "COMPLETE_TERMINAL_PATH_LEDGER"
+PATH_RECONCILED = "RECONCILED_EXACT_PATH_CONTRIBUTIONS"
+TRACE_QUALIFICATION = (
+    "terminal_paths_are_mutually_exclusive_and_exhaustive_under_one_policy",
+    "reach_probability_is_exact_under_the_declared_world_not_an_estimate",
+    "conditional_terminal_EV_is_undefined_for_an_unreachable_path",
+    "weighted_contributions_sum_to_the_policy_conditional_net_EV_chips",
+    "only_terminal_paths_are_summed_so_ancestors_are_never_added_again",
+    "offline_conditional_expectation_only_no_best_action_or_profitability_claim",
+)
+
+
+def path_key(history):
+    """Canonical text key of one public action history."""
+    if (not isinstance(history, tuple)
+            or not all(isinstance(a, RiverAction) for a in history)):
+        raise ValueError("river_action_tuple_required")
+    return "|".join(
+        f"{action.actor}:{action.kind}"
+        + (f":{amount_text(action.target)}" if action.kind in ("bet", "raise") else "")
+        for action in history) or "root"
+
+
+@dataclass(frozen=True)
+class TerminalPath:
+    """One complete public terminal path below the evaluated Hero decision.
+
+    `conditional_terminal_net_ev_chips` is the settlement value conditional on
+    the path belief, and is `None` exactly when the path is unreachable: a zero
+    reach probability carries no conditional information. `contribution_chips`
+    is `reach_probability * conditional EV`, so summing contributions over the
+    mutually exclusive terminal paths reproduces the policy EV exactly.
+    """
+
+    history: tuple[RiverAction, ...]
+    history_key: str
+    reach_probability: Fraction
+    fallback_used: bool
+    conditional_terminal_net_ev_chips: Fraction | None
+    contribution_chips: Fraction
+    status: str
+
+    def __post_init__(self):
+        if (self.history_key != path_key(self.history)
+                or not isinstance(self.reach_probability, Fraction)
+                or not 0 <= self.reach_probability <= 1
+                or type(self.fallback_used) is not bool
+                or not isinstance(self.contribution_chips, Fraction)):
+            raise ValueError("invalid_terminal_path")
+        defined = self.conditional_terminal_net_ev_chips
+        if self.reach_probability:
+            if (self.status != REACHED or not isinstance(defined, Fraction)
+                    or self.contribution_chips
+                    != self.reach_probability * defined):
+                raise ValueError("reachable_terminal_path_requires_conditional_EV")
+        elif (self.status != UNREACHABLE or defined is not None
+              or self.contribution_chips != 0):
+            raise ValueError("unreachable_terminal_path_has_undefined_conditional_EV")
+
+
+@dataclass(frozen=True)
+class PolicyPathLedger:
+    """Exact terminal-path decomposition of one policy's conditional EV.
+
+    Every sum is recomputed from `paths`, and `__post_init__` requires it to
+    equal the independently computed policy metric, so a ledger cannot exist in
+    a partially reconciled state. A policy that fails the trace reconciliation
+    yields `PolicyEvaluation("BLOCKED", ...)` instead of a short ledger.
+    """
+
+    policy_name: str
+    policy_book_sha256: str
+    world_scenario_sha256: str
+    big_blind: Fraction
+    paths: tuple[TerminalPath, ...]
+    nodes_visited: int
+    trace_node_budget: int
+    reconciled_policy_net_ev_chips: Fraction
+    reconciled_fallback_probability: Fraction
+    completeness: str = LEDGER_COMPLETE
+    qualification: tuple[str, ...] = TRACE_QUALIFICATION
+
+    @property
+    def reach_probability_sum(self):
+        return sum((p.reach_probability for p in self.paths), Fraction(0))
+
+    @property
+    def contribution_sum_chips(self):
+        return sum((p.contribution_chips for p in self.paths), Fraction(0))
+
+    @property
+    def contribution_sum_bb(self):
+        return self.contribution_sum_chips / self.big_blind
+
+    @property
+    def fallback_reach_sum(self):
+        return sum((p.reach_probability for p in self.paths if p.fallback_used),
+                   Fraction(0))
+
+    @property
+    def reachable_paths(self):
+        return sum(1 for p in self.paths if p.reach_probability)
+
+    @property
+    def unreachable_paths(self):
+        return sum(1 for p in self.paths if not p.reach_probability)
+
+    def __post_init__(self):
+        if (not isinstance(self.policy_name, str) or not self.policy_name
+                or not isinstance(self.policy_book_sha256, str)
+                or not isinstance(self.world_scenario_sha256, str)
+                or not isinstance(self.big_blind, Fraction) or self.big_blind <= 0
+                or not isinstance(self.paths, tuple) or not self.paths
+                or not all(isinstance(p, TerminalPath) for p in self.paths)
+                or type(self.nodes_visited) is not int
+                or not 1 <= self.nodes_visited <= self.trace_node_budget
+                or self.completeness != LEDGER_COMPLETE):
+            raise ValueError("invalid_policy_path_ledger")
+        if len({p.history_key for p in self.paths}) != len(self.paths):
+            raise ValueError("duplicate_terminal_path_in_ledger")
+        if self.reach_probability_sum != 1:
+            raise ValueError("terminal_path_reach_does_not_sum_to_one")
+        if self.contribution_sum_chips != self.reconciled_policy_net_ev_chips:
+            raise ValueError("terminal_path_contributions_do_not_match_policy_EV")
+        if self.fallback_reach_sum != self.reconciled_fallback_probability:
+            raise ValueError("terminal_path_fallback_reach_does_not_match_metric")
+
+
+@dataclass(frozen=True)
+class PathContributionRow:
+    """One terminal path of the union, with each policy's own contribution."""
+
+    history: tuple[RiverAction, ...]
+    history_key: str
+    reach_probability_left: Fraction
+    reach_probability_right: Fraction
+    contribution_chips_left: Fraction
+    contribution_chips_right: Fraction
+    conditional_terminal_net_ev_chips_left: Fraction | None
+    conditional_terminal_net_ev_chips_right: Fraction | None
+
+    @property
+    def contribution_chips_difference(self):
+        return self.contribution_chips_left - self.contribution_chips_right
+
+    @property
+    def reach_status(self):
+        left = bool(self.reach_probability_left)
+        right = bool(self.reach_probability_right)
+        if left and right:
+            return "REACHED_BY_BOTH"
+        if left:
+            return "REACHED_BY_LEFT_ONLY"
+        if right:
+            return "REACHED_BY_RIGHT_ONLY"
+        return "UNREACHABLE_BY_BOTH"
+
+
+@dataclass(frozen=True)
+class PathReconciliation:
+    """Subtract two traced policies on the union of their terminal paths.
+
+    `distinct_books` is False when both ledgers come from one evaluation of one
+    frozen policy book, and True when two separately frozen books are compared
+    inside the same world; the latter is a difference between two frozen
+    policies, not between two policies of a single evaluation.
+    """
+
+    left_policy: str
+    right_policy: str
+    policy_book_sha256: str
+    world_scenario_sha256: str
+    rows: tuple[PathContributionRow, ...]
+    total_ev_difference_chips: Fraction
+    completeness: str = PATH_RECONCILED
+    distinct_books: bool = False
+    right_policy_book_sha256: str | None = None
+
+    @property
+    def contribution_difference_sum_chips(self):
+        return sum((row.contribution_chips_difference for row in self.rows),
+                   Fraction(0))
+
+    def reach_status_count(self, status):
+        return sum(1 for row in self.rows if row.reach_status == status)
+
+    def __post_init__(self):
+        if (not isinstance(self.rows, tuple) or not self.rows
+                or not all(isinstance(r, PathContributionRow) for r in self.rows)
+                or len({row.history_key for row in self.rows}) != len(self.rows)
+                or self.completeness != PATH_RECONCILED
+                or type(self.distinct_books) is not bool
+                or not isinstance(self.total_ev_difference_chips, Fraction)):
+            raise ValueError("invalid_path_reconciliation")
+        if self.distinct_books:
+            if (not isinstance(self.right_policy_book_sha256, str)
+                    or self.right_policy_book_sha256 == self.policy_book_sha256):
+                raise ValueError("distinct_books_require_two_different_book_hashes")
+        elif self.right_policy_book_sha256 not in (None, self.policy_book_sha256):
+            raise ValueError("same_book_reconciliation_carries_another_book_hash")
+        if (self.contribution_difference_sum_chips
+                != self.total_ev_difference_chips):
+            raise ValueError("path_contribution_differences_do_not_match_EV_delta")
 
 
 def _validate_book(book):
@@ -309,11 +522,145 @@ class _Evaluation:
         return ev, any_fallback, count
 
 
+class _PathTrace:
+    """Enumerate every terminal public path of one fixed policy exactly once.
+
+    The transition kernel and the declared world response branches are the only
+    inputs: the optimizing entry points are never called, so tracing a world
+    cannot re-plan Hero. Hero nodes are expanded over all legal actions, with
+    the policy's own action carrying the full mass, which makes the enumerated
+    path set identical for every policy and therefore comparable as a union.
+    """
+
+    def __init__(self, tree, choices, name, overrides, max_nodes):
+        self.tree, self.choices, self.name = tree, choices, name
+        self.overrides, self.max_nodes = overrides, max_nodes
+        self.nodes = 0
+        self.paths = []
+
+    def walk_all(self, node, belief):
+        self.walk(node, belief, Fraction(1))
+        return self
+
+    def walk(self, node, belief, reach, fallback_used=False):
+        self.nodes += 1
+        if self.nodes > self.max_nodes:
+            raise ValueError("trace_node_budget_exceeded")
+        legal = self.tree.legal(node)
+        if not legal:
+            self.record(node, belief, reach, fallback_used)
+            return
+        if node.pending[0] == self.tree.s.hero_seat:
+            chosen, fallback = _select(self.choices, node.history, legal, self.name)
+            for action in legal:
+                taken = action == chosen
+                self.walk(self.tree.advance(node, action), belief,
+                          reach if taken else Fraction(0),
+                          fallback_used or (taken and fallback))
+            return
+        for action, mass, posterior in _world_branches(
+                self.tree, node, belief, self.overrides):
+            self.walk(self.tree.advance(node, action), posterior, reach * mass,
+                      fallback_used)
+
+    def record(self, node, belief, reach, fallback_used):
+        # Only terminal paths are recorded, so no ancestor is summed again.
+        conditional = self.tree.terminal(node, belief) if reach else None
+        self.paths.append(TerminalPath(
+            tuple(node.history), path_key(node.history), reach, fallback_used,
+            conditional, reach * conditional if reach else Fraction(0),
+            REACHED if reach else UNREACHABLE))
+
+
+def _build_ledger(traced, metric, book_sha256, world_sha256, big_blind):
+    return PolicyPathLedger(
+        metric.name, book_sha256, world_sha256, big_blind,
+        tuple(sorted(traced.paths, key=lambda p: p.history_key)), traced.nodes,
+        traced.max_nodes, metric.net_ev_chips, metric.probability_of_any_fallback)
+
+
+def reconcile_path_ledgers(left_ledger, right_ledger, total_ev_difference_chips,
+                           *, allow_distinct_books=False):
+    """Reconcile two traced ledgers path by path on their union.
+
+    Contributions are subtracted for the same path, so the sum of those
+    differences must equal `total_ev_difference_chips`, which the caller takes
+    from the independently reported policy EVs. Both ledgers must describe the
+    same evaluation world; comparing two different frozen books is allowed only
+    with `allow_distinct_books=True`, and the result records that it is a
+    difference between two frozen policies rather than within one evaluation.
+    """
+    for ledger in (left_ledger, right_ledger):
+        if not isinstance(ledger, PolicyPathLedger):
+            raise ValueError("policy_path_ledger_required")
+    if not isinstance(total_ev_difference_chips, Fraction):
+        raise ValueError("explicit_exact_ev_difference_required")
+    if (left_ledger.world_scenario_sha256 != right_ledger.world_scenario_sha256
+            or left_ledger.big_blind != right_ledger.big_blind):
+        raise ValueError("path_ledgers_describe_different_worlds")
+    distinct = left_ledger.policy_book_sha256 != right_ledger.policy_book_sha256
+    if distinct and not allow_distinct_books:
+        raise ValueError("path_ledgers_belong_to_different_books")
+    if (not distinct and left_ledger.policy_name == right_ledger.policy_name):
+        raise ValueError("two_distinct_policy_names_required")
+    maps = [{p.history_key: p for p in ledger.paths}
+            for ledger in (left_ledger, right_ledger)]
+    rows = []
+    for key in sorted(set(maps[0]) | set(maps[1])):
+        first, second = maps[0].get(key), maps[1].get(key)
+        present = first if first is not None else second
+        rows.append(PathContributionRow(
+            present.history, key,
+            first.reach_probability if first else Fraction(0),
+            second.reach_probability if second else Fraction(0),
+            first.contribution_chips if first else Fraction(0),
+            second.contribution_chips if second else Fraction(0),
+            first.conditional_terminal_net_ev_chips if first else None,
+            second.conditional_terminal_net_ev_chips if second else None))
+    rows.sort(key=lambda row: (
+        -row.contribution_chips_left, -row.contribution_chips_right,
+        row.history_key))
+    return PathReconciliation(
+        left_ledger.policy_name, right_ledger.policy_name,
+        left_ledger.policy_book_sha256, left_ledger.world_scenario_sha256,
+        tuple(rows), total_ev_difference_chips,
+        distinct_books=distinct,
+        right_policy_book_sha256=(
+            right_ledger.policy_book_sha256 if distinct else None))
+
+
+def compare_policy_paths(evaluation, left="frozen_policy", right="check_fold"):
+    """Reconcile two traced policies of one evaluation on their path union.
+
+    This is the offline conditional expectation of one declared world: it is
+    not a proof that any action is optimal, and no live advice is produced.
+    """
+    if not isinstance(evaluation, PolicyEvaluation):
+        raise ValueError("policy_evaluation_required")
+    if evaluation.status != "COMPLETE_CONDITIONAL_FIXED_POLICY":
+        raise ValueError("path_diagnosis_requires_complete_evaluation")
+    if (not isinstance(left, str) or not isinstance(right, str) or left == right):
+        raise ValueError("two_distinct_policy_names_required")
+    ledgers = {item.policy_name: item for item in evaluation.path_ledgers}
+    metrics = {item.name: item for item in evaluation.metrics}
+    if not {left, right} <= set(ledgers) or not {left, right} <= set(metrics):
+        raise ValueError("path_trace_not_collected_for_named_policy")
+    return reconcile_path_ledgers(
+        ledgers[left], ledgers[right],
+        metrics[left].net_ev_chips - metrics[right].net_ev_chips)
+
+
 def evaluate_policy_book(book, world_scenario, *, world_overrides=(),
-                         max_joint_assignments=128, max_nodes=20000):
+                         max_joint_assignments=128, max_nodes=20000, trace=False,
+                         trace_max_nodes=None):
     evaluator = None
     try:
         _validate_book(book)
+        if not isinstance(trace, bool):
+            raise ValueError("trace_switch_must_be_boolean")
+        budget = max_nodes if trace_max_nodes is None else trace_max_nodes
+        if type(budget) is not int or not 1 <= budget <= 200000:
+            raise ValueError("invalid_explicit_trace_budget")
         before = policy_book_hash(book)
         if public_conditions_json(world_scenario) != book.public_conditions_json:
             raise ValueError("public_conditions_or_action_grid_mismatch")
@@ -350,6 +697,17 @@ def evaluate_policy_book(book, world_scenario, *, world_overrides=(),
         after = policy_book_hash(book)
         if before != after or after != book.book_sha256:
             raise ValueError("policy_changed_during_evaluation")
+        world_sha256 = _sha(_json({"scenario": s, "overrides": world_overrides}))
+        ledgers = ()
+        if trace:
+            # Second, independent traversal: the ledger must reproduce the walk.
+            ledgers = tuple(
+                _build_ledger(
+                    _PathTrace(tree, choices, name, overrides, budget).walk_all(
+                        node, belief),
+                    metric, after, world_sha256, Fraction(s.rules.big_blind))
+                for name, metric in zip(
+                    ("frozen_policy", "check_fold", "check_call"), metrics))
         delta_fold = metrics[0].net_ev_chips - metrics[1].net_ev_chips
         delta_call = metrics[0].net_ev_chips - metrics[2].net_ev_chips
         return PolicyEvaluation(
@@ -358,13 +716,13 @@ def evaluate_policy_book(book, world_scenario, *, world_overrides=(),
             delta_vs_check_fold_bb=delta_fold / Fraction(s.rules.big_blind),
             delta_vs_check_call_bb=delta_call / Fraction(s.rules.big_blind),
             policy_hash_before=before, policy_hash_after=after,
-            world_scenario_sha256=_sha(_json({
-                "scenario": s, "overrides": world_overrides})),
+            world_scenario_sha256=world_sha256,
             root_posterior=belief,
             history_likelihood=likelihood, nodes=evaluator.nodes,
             world_overrides=world_overrides,
             response_family="rank_history_extended" if world_overrides else (
                 "planning_family_parameters"),
+            path_ledgers=ledgers,
         )
     except (TypeError, ValueError, ArithmeticError, InvalidStateError) as exc:
         return PolicyEvaluation("BLOCKED", reasons=(str(exc),),
