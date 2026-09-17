@@ -112,6 +112,86 @@ def test_all_in_showdown_never_produces_an_ordinary_close():
     assert result["ordinary_river_pending"] is None
 
 
+def test_ordinary_terminal_is_a_one_shot_confirmation_event():
+    """The confirmation appears on the confirming row only, then is cleared."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    assert subject.observe(river_row(1, credited_at=1))["hand_phase"][
+        "ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(2, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"]["kind"] == "ORDINARY_RIVER_CLOSED"
+    for frame in (3, 4, 5):
+        later = subject.observe(river_row(frame, epoch="next"))["hand_phase"]
+        assert later["ordinary_terminal"] is None
+
+
+def test_last_ordinary_terminal_snapshot_never_leaks_as_the_current_hand():
+    """Crossing the second and third epoch, history stays labelled as history."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    subject.observe(river_row(2, epoch="second"))
+    for frame, epoch in ((3, "second"), (4, "second"), (5, "third"),
+                         (6, "third"), (7, "fourth")):
+        phase = subject.observe(river_row(frame, epoch=epoch))["hand_phase"]
+        snapshot = phase["last_ordinary_terminal"]
+        assert snapshot["epoch"] == "h"
+        assert snapshot["epoch"] != phase["epoch"]
+        assert snapshot["belongs_to_current_epoch"] is False
+        assert snapshot["confirmed_by_epoch_frame"] == 2
+        assert phase["ordinary_terminal"] is None
+
+    # And when the recording returns to that very epoch the flag flips, so the
+    # discrimination is real and not a constant.
+    phase = subject.observe(river_row(8, epoch="h"))["hand_phase"]
+    assert phase["last_ordinary_terminal"]["belongs_to_current_epoch"] is True
+    assert phase["last_ordinary_terminal"]["epoch"] == phase["epoch"]
+
+
+def test_last_ordinary_terminal_is_none_before_any_confirmation():
+    subject = AAObservationSemantics()
+    phase = subject.observe(river_row(0))["hand_phase"]
+    assert phase["last_ordinary_terminal"] is None
+    phase = subject.observe(river_row(1, credited_at=1))["hand_phase"]
+    assert phase["last_ordinary_terminal"] is None
+
+
+def test_the_confirmation_event_does_not_survive_a_blocked_next_row():
+    """The event is tied to the confirming observation, not to a state flag."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    assert subject.observe(river_row(2, epoch="next"))["hand_phase"][
+        "ordinary_terminal"] is not None
+    overlay = river_row(3, epoch="next")
+    overlay["special_modes"] = {"insurance": "VISIBLE"}
+    blocked = subject.observe(overlay)["hand_phase"]
+    assert blocked["ordinary_terminal"] is None
+    assert blocked["last_ordinary_terminal"]["epoch"] == "h"
+    assert blocked["last_ordinary_terminal"]["belongs_to_current_epoch"] is False
+
+
+def test_a_source_discontinuity_still_discards_the_old_river_fact():
+    """The sticky river must not cross a real session boundary.
+
+    ``observe()`` resets every cross-frame fact when the source identity changes
+    or the frame sequence jumps; the sticky river is a cross-frame fact and must
+    go with them, or a pre-reset river frame could settle a later credit.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    # A frame-sequence jump makes observe() reset.
+    subject.observe(river_row(9, credited_at=1, street=None, board=None))
+    # After the reset the board never shows a river again, but a credit is
+    # visible; the pre-reset river frame must not be reused to settle it.
+    for frame in (10, 11, 12):
+        phase = subject.observe(river_row(
+            frame, credited_at=1, street=None, board=None))["hand_phase"]
+        assert phase["ordinary_river_pending"] is None
+        assert phase["ordinary_terminal"] is None
+
+
 def test_a_blocked_frame_neither_confirms_nor_reports_a_pending_close():
     """An overlay must not be able to stand in for a next-hand boundary."""
     subject = AAObservationSemantics()
@@ -138,3 +218,182 @@ def test_preflop_fold_out_is_not_covered_by_this_terminal():
     assert result["ordinary_river_pending"] is None
     assert result["ordinary_terminal_semantics"].startswith(
         "ORDINARY_RIVER_CLOSED_ONLY")
+
+
+def test_a_transient_board_loss_after_the_river_never_withdraws_the_pending_close():
+    """The teardown animation empties the board; the river fact must survive it.
+
+    This is the real recording ``aa-live-20260917-0430``, epoch
+    ``observed_deal_14593``: the river first completed at f15033 and
+    ``ordinary_river_pending`` was reported for f15173-15185. Then the 5 board
+    cards vanished for f15186-15197 while the epoch, the participants and the
+    settlement credit all stayed put -- the hand was being torn down, not
+    un-dealt. Clearing ``river_frame`` across those 12 frames withdrew the
+    pending record, so the next hand boundary at f15198 confirmed nothing and
+    the recording produced zero ``ORDINARY_RIVER_CLOSED``.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    assert subject.observe(river_row(1, credited_at=1))["hand_phase"][
+        "ordinary_river_pending"] is not None
+
+    for frame in range(2, 6):
+        torn_down = river_row(frame, credited_at=1, street=None, board=None,
+                              hero=None, pot="0", actor=None)
+        phase = subject.observe(torn_down)["hand_phase"]
+        assert phase["epoch"] == "h"
+        assert phase["ordinary_terminal"] is None
+        assert phase["ordinary_river_pending"] is not None
+        assert phase["ordinary_river_pending"]["river_complete_frame"] == 0
+
+    confirmed = subject.observe(river_row(6, epoch="next"))["hand_phase"]
+    terminal = confirmed["ordinary_terminal"]
+    assert terminal["kind"] == "ORDINARY_RIVER_CLOSED"
+    assert terminal["epoch"] == "h"
+    assert terminal["river_complete_frame"] == 0
+    assert terminal["confirmed_by_epoch_frame"] == 6
+
+
+def test_a_transient_board_loss_never_moves_the_recorded_river_frame():
+    """Sticky is not the same as re-stamped: the first complete frame is kept."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    subject.observe(river_row(2, credited_at=1, street=None, board=None,
+                              hero=None, pot="0"))
+    back = subject.observe(river_row(3, credited_at=1))["hand_phase"]
+    assert back["ordinary_river_pending"]["river_complete_frame"] == 0
+    assert back["ordinary_river_pending"]["epoch"] == "h"
+
+
+def test_a_sticky_river_is_still_retracted_by_an_all_in_showdown():
+    """Stickiness must not let an all-in ending masquerade as an ordinary close."""
+    subject = AAObservationSemantics()
+    ledger = {"epoch": "h", "opening_evidence": {"debits": {"1": "2", "4": "2"}}}
+    subject.observe(river_row(0))
+    assert subject.observe(river_row(1, credited_at=1))["hand_phase"][
+        "ordinary_river_pending"] is not None
+    showdown = river_row(2, credited_at=1, states=((1, "all_in"), (4, "all_in")))
+    showdown["hand_ledger_v2"] = ledger
+    result = subject.observe(showdown)["hand_phase"]
+    assert result["ordinary_river_pending"] is None
+    assert result["ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(3, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"] is None
+
+
+# --------------------------------------------------------------------------
+# P0.1 ORDINARY_TERMINAL_FAIL_CLOSED_GUARD
+#
+# Sticky is the right direction -- a hand being torn down is not an un-deal --
+# but sticky made the river fact inheritable from a SINGLE row, and it left
+# C1's ``pending_actions == 0`` out of the latch. Both windows are closed here:
+# the fact is latched only on two consecutive agreeing observations, and the
+# action counter is consulted at latch time only. Everything below that a real
+# recording exercises (board teardown, epoch change, all-in retraction) is
+# deliberately unchanged, and the two "must stay green" cases pin that down.
+# --------------------------------------------------------------------------
+
+
+def test_a_single_frame_river_glitch_never_latches_a_river_fact():
+    """P0.1 G1: one self-contradictory row must not become a sticky river.
+
+    A lone row claiming ``street_candidate == "river"`` with five valid distinct
+    cards is reachable without this hand ever reaching a river -- the previous
+    hand's board read across an epoch flip, or a street/card misread. Sticky
+    turned that one row into a settlement window, so a payout plus a next hand
+    was enough to name an ending. Nothing here is evidence that THIS hand
+    finished, so the whole fixture must stay UNKNOWN.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    for frame in (1, 2, 3):
+        phase = subject.observe(river_row(
+            frame, credited_at=1, street=None, board=None, hero=None,
+            pot="0"))["hand_phase"]
+        assert phase["ordinary_river_pending"] is None
+        assert phase["ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(4, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"] is None
+    assert confirmed["last_ordinary_terminal"] is None
+
+
+def test_two_agreeing_river_rows_latch_on_the_first_of_them():
+    """P0.1 G1: the guard costs one row of evidence, not the river's frame.
+
+    Two consecutive complete-river observations are enough to latch, and the
+    recorded ``river_complete_frame`` is the FIRST row of that run -- a
+    stability guard must not quietly re-stamp the river later than it was
+    actually seen, or C2's window would move with it.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    assert subject.observe(river_row(1))["hand_phase"][
+        "ordinary_river_pending"] is None
+    settled = subject.observe(river_row(2, credited_at=2))["hand_phase"]
+    assert settled["ordinary_river_pending"]["river_complete_frame"] == 0
+    confirmed = subject.observe(river_row(3, epoch="next"))["hand_phase"]
+    terminal = confirmed["ordinary_terminal"]
+    assert terminal["kind"] == "ORDINARY_RIVER_CLOSED"
+    assert terminal["river_complete_frame"] == 0
+    assert terminal["confirmed_by_epoch_frame"] == 3
+
+
+def test_an_unresolved_action_count_never_latches_a_river_fact():
+    """P0.1 G2: C1's ``pending_actions == 0`` gates the latch, and only it.
+
+    A complete board with actions still owed is not a finished hand. A payout
+    and a next-hand boundary on top of that must not turn it into one.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0, pending=2))
+    for frame in (1, 2, 3):
+        phase = subject.observe(river_row(
+            frame, pending=2, credited_at=3))["hand_phase"]
+        assert phase["ordinary_river_pending"] is None
+        assert phase["ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(4, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"] is None
+    assert confirmed["last_ordinary_terminal"] is None
+
+
+def test_a_latched_river_is_not_revoked_by_a_later_action_count():
+    """P0.1 G2: the counter cannot un-latch history it already allowed.
+
+    This is the over-fix guard. Once two agreeing rows have established the
+    river, a later non-zero ``pending_actions`` is table noise on top of a fact
+    that already happened -- the same reason the board teardown cannot withdraw
+    it -- so the close must still be reported.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    noisy = subject.observe(river_row(2, pending=3, credited_at=1))["hand_phase"]
+    assert noisy["ordinary_river_pending"]["river_complete_frame"] == 0
+    confirmed = subject.observe(river_row(3, epoch="next"))["hand_phase"]
+    terminal = confirmed["ordinary_terminal"]
+    assert terminal["kind"] == "ORDINARY_RIVER_CLOSED"
+    assert terminal["river_complete_frame"] == 0
+
+
+def test_a_blocked_row_makes_the_stability_run_start_over():
+    """The guard counts consecutive OBSERVATIONS, not consecutive frames.
+
+    A blocked row (overlay, unsupported scene, block-state update) says nothing
+    about the board, so it cannot stand in as the second agreeing observation.
+    Fail-closed means the run restarts -- and the latched frame is then the
+    first row AFTER the interruption, not the pre-interruption one.
+    """
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    overlay = river_row(1)
+    overlay["special_modes"] = {"insurance": "VISIBLE"}
+    blocked = subject.observe(overlay)["hand_phase"]
+    assert blocked["phase"] == "SUSPENDED"
+    assert blocked["ordinary_river_pending"] is None
+    assert subject.observe(river_row(2))["hand_phase"][
+        "ordinary_river_pending"] is None
+    settled = subject.observe(river_row(3, credited_at=3))["hand_phase"]
+    assert settled["ordinary_river_pending"]["river_complete_frame"] == 2
+    confirmed = subject.observe(river_row(4, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"]["river_complete_frame"] == 2
