@@ -40,6 +40,12 @@ class AAObservationSemantics:
         self.terminal_frame = self.last_ledger = None
         self.clear_streak = 0
         self.waiting = False
+        # Ordinary (non all-in) river close: the frame the river first completed
+        # for this epoch, the settlement evidence that followed it, and the
+        # single confirmed outcome once the next hand boundary was observed.
+        self.river_frame = None
+        self.ordinary_river = None
+        self.ordinary_terminal = None
 
     def _interpret(self, action, row):
         result = deepcopy(action)
@@ -157,6 +163,30 @@ class AAObservationSemantics:
         epoch = state.get("observed_epoch")
         ledger = row.get("hand_ledger_v2") or {}
         if epoch != self.epoch:
+            # A new hand boundary is the ONLY thing that may confirm an ordinary
+            # river close. It must be a real, non-empty epoch observed strictly
+            # after the river completed: ``_new_epoch`` stamps its event with the
+            # frame it is created in, which is the frame ``observe`` is running,
+            # so the observed transition frame is the event frame. Losing the
+            # epoch (None, i.e. an unsupported scene or overlay) is a suspension,
+            # never a boundary, and must not confirm anything.
+            if (isinstance(epoch, str) and epoch
+                    and self.ordinary_river is not None
+                    and self.ordinary_river["epoch"] == self.epoch
+                    and row["frame"] > self.ordinary_river["river_complete_frame"]):
+                self.ordinary_terminal = {
+                    "kind": "ORDINARY_RIVER_CLOSED",
+                    "epoch": self.ordinary_river["epoch"],
+                    "river_complete_frame": self.ordinary_river[
+                        "river_complete_frame"],
+                    "confirmed_by_epoch_frame": row["frame"],
+                    "settlement": deepcopy(self.ordinary_river["settlement"]),
+                    "river_seats": list(self.ordinary_river["river_seats"]),
+                    "ledger_status": self.ordinary_river["ledger_status"],
+                    "card_showdown_verified": False, "rake_verified": False,
+                    "canonical_verified": False, "strategy_eligible": False}
+            self.river_frame = None
+            self.ordinary_river = None
             self.epoch = epoch
             self.terminal_frame = self.last_ledger = None
             self.clear_streak = 0
@@ -164,7 +194,13 @@ class AAObservationSemantics:
         base = {"epoch": epoch, "canonical_verified": False,
                 "strategy_eligible": False, "settlement_rules_verified": False,
                 "historical_ledger": deepcopy(self.last_ledger),
-                "current_ledger": deepcopy(ledger), "phase": "OBSERVING"}
+                "current_ledger": deepcopy(ledger), "phase": "OBSERVING",
+                "ordinary_terminal": (deepcopy(self.ordinary_terminal)
+                                      if self.ordinary_terminal else None),
+                "ordinary_river_pending": None,
+                "ordinary_terminal_semantics": (
+                    "ORDINARY_RIVER_CLOSED_ONLY; preflop/flop/turn fold-out "
+                    "endings are NOT covered")}
         if epoch is None or blocked(row):
             self.clear_streak = 0
             self.terminal_frame = None
@@ -196,6 +232,13 @@ class AAObservationSemantics:
         terminal = closed and full_river
         if terminal and self.terminal_frame is None:
             self.terminal_frame = row["frame"]
+        # C1: an ordinary hand closes on a COMPLETE river, never on a partial
+        # board and never while an all-in showdown already explains the end.
+        ordinary_river = full_river and not closed
+        if not ordinary_river:
+            self.river_frame = None
+        elif self.river_frame is None:
+            self.river_frame = row["frame"]
         credits = []
         for credit in state.get("unallocated_positive_cash", []):
             confirmed = credit.get("confirmed_frame")
@@ -204,6 +247,38 @@ class AAObservationSemantics:
                     and self.terminal_frame < confirmed <= row["frame"]
                     and amount(credit.get("amount")) not in (None, Decimal(0))):
                 credits.append(deepcopy(credit))
+        # C2: settlement must be POSITIVE evidence -- a visible balance increase
+        # inside this epoch, confirmed strictly after the river completed. A
+        # zero pot alone never settles anything, and an unread pot never blocks
+        # it either. Seats come from this epoch's own participants, never from
+        # the opening ledger, so a missing opening cannot silently disable this
+        # path (L2).
+        settlement = []
+        if self.river_frame is not None:
+            for credit in state.get("unallocated_positive_cash", []):
+                confirmed = credit.get("confirmed_frame")
+                if (credit.get("epoch") == epoch and type(confirmed) is int
+                        and self.river_frame < confirmed <= row["frame"]
+                        and amount(credit.get("amount")) not in (None, Decimal(0))):
+                    settlement.append(deepcopy(credit))
+        river_seats = sorted(
+            seat for seat, item in participants.items()
+            if item.get("epoch") == epoch
+            and item.get("state") in ("active", "all_in", "folded"))
+        ordinary_eligible = bool(settlement) and len(river_seats) >= 2
+        if ordinary_eligible:
+            if self.ordinary_river is None:
+                self.ordinary_river = {
+                    "epoch": epoch, "river_complete_frame": self.river_frame,
+                    "settlement": settlement, "river_seats": river_seats,
+                    "ledger_status": ledger.get("status")}
+            else:
+                self.ordinary_river["settlement"] = settlement
+                self.ordinary_river["river_seats"] = river_seats
+        else:
+            # A renewed action, a lost river or missing settlement evidence
+            # withdraws the pending record: nothing is claimed on a guess.
+            self.ordinary_river = None
         pot = amount(row.get("pot"))
         if pot is not None and pot > 0 and not self.waiting:
             self.last_ledger = deepcopy(ledger)
@@ -224,6 +299,12 @@ class AAObservationSemantics:
         base.update(terminal_observation_frame=self.terminal_frame,
                     visible_credits=credits,
                     credit_semantics="UNALLOCATED_NOT_RAKE_OR_PROFIT")
+        if self.ordinary_river is not None and self.ordinary_river["epoch"] == epoch:
+            # C1 and C2 hold but C3 has not: report the wait, never a result.
+            base["ordinary_river_pending"] = {
+                **deepcopy(self.ordinary_river),
+                "kind": "ORDINARY_RIVER_CLOSED",
+                "status": "AWAITING_NEXT_HAND_BOUNDARY"}
         return base
 
     def observe(self, row):

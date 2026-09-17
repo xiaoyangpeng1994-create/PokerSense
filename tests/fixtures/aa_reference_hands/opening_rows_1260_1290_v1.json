@@ -1,0 +1,3374 @@
+{
+ "schema_version": 1,
+ "role": "development",
+ "audit_sha256": "ce14fe204a2228ecc87698e14944ea41df0f7ee6b41eef0d647cba68424a7e61",
+ "source": "aa8_first_hand_entry_dense_v2 (1260-1262) + aa8_first_hand_full_v1 (1263-1290)",
+ "hand_id": "aa8_dev_56dd_001",
+ "reproduced_epoch_frame": 1264,
+ "duplicate_epoch_frame": 1278,
+ "expected_opening_status": "MULTI_POST_DEAL_CANDIDATE",
+ "expected_opening_debits": {
+  "0": "3",
+  "1": "4",
+  "2": "6",
+  "3": "2",
+  "4": "4",
+  "5": "2",
+  "7": "8"
+ },
+ "expected_excluded_na_slots": [
+  "6"
+ ],
+ "independent_holdout": false,
+ "full_visual_acceptance": false,
+ "strategy_eligible": false,
+ "note": "Pre-adapter rows captured verbatim from the frozen development recording so the desktop duplicate-epoch defect stays reproducible on CI without the private G: pools. These are observation inputs, not legal state.",
+ "rows": [
+  {
+   "frame": 1260,
+   "source_sha256": "6a5f1f75624eb1f3b2622d16b9f006c8399f8f1ee418ffd930789352684b50e5",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "258"
+    },
+    "1": {
+     "value": "294"
+    },
+    "2": {
+     "value": "528"
+    },
+    "3": {
+     "value": "340"
+    },
+    "4": {
+     "value": "200"
+    },
+    "5": {
+     "value": "286"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "256"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1260,
+    "candidate": null,
+    "center_deal": {
+     "visible": null,
+     "score": 0.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 5,
+   "empty_seats_v1": []
+  },
+  {
+   "frame": 1261,
+   "source_sha256": "3f4d72cfe7e8d4cdde4daa7e6771a71240e7cd8c5d7b2d8b73c2acb8cfc53c5f",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "258"
+    },
+    "1": {
+     "value": "294"
+    },
+    "2": {
+     "value": "528"
+    },
+    "3": {
+     "value": "340"
+    },
+    "4": {
+     "value": "200"
+    },
+    "5": {
+     "value": "286"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "256"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1261,
+    "candidate": null,
+    "center_deal": {
+     "visible": null,
+     "score": 0.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 5,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1262,
+   "source_sha256": "f1e6ba6e7bd9bdbd0f2c765d9d3e097cbebb596dbbe87e73502e864428a568b7",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "258"
+    },
+    "1": {
+     "value": "294"
+    },
+    "2": {
+     "value": "528"
+    },
+    "3": {
+     "value": "340"
+    },
+    "4": {
+     "value": "200"
+    },
+    "5": {
+     "value": "286"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "256"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1262,
+    "candidate": null,
+    "center_deal": {
+     "visible": null,
+     "score": 0.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 5,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1263,
+   "source_sha256": "dd58106a436694e6338d783f382bedcac9bcc05230f16c10045fa83179017940",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1263,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 5,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1264,
+   "source_sha256": "e2e61e092d7ae325587b984598abd94c7652db642a7f39d8e973b345a6be3339",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1264,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1265,
+   "source_sha256": "ad000afeab6790d5f9af9a4f207fcae67436cc7c992aaf0445358daf04d84390",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1265,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1266,
+   "source_sha256": "8e3c7a41062fa15266a4171a49e570654a8325d16d6e8fc055427c29671d98e4",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1266,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 6,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1267,
+   "source_sha256": "83f2ad4586fb4b1a66e735894f22f0ebad47f72ca5998cd897e06085c7fa5034",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1267,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1268,
+   "source_sha256": "e9d735034a459e865b92fb83625601b5c4d8647b9ee98f890c697f68cfd59df6",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1268,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1269,
+   "source_sha256": "fdb2ebfc88ed72aaa6f7d82750f4c2a478f5f96ec5bb5ea60c01804bc525db1c",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1269,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1270,
+   "source_sha256": "8d89c04baa99bfe9511dcc9eba714eddb7336c9a01813db0897645a4f2e22c9f",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1270,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1271,
+   "source_sha256": "df7e54399a65734213e0c71a4e79c1dc6c850795cc0904574d4f2515a5a3ce90",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1271,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1272,
+   "source_sha256": "c026ea0524b6ba5c29b05811bf2f503a75278ef9f0531fcfff2357fcc11471c6",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": null
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1272,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1273,
+   "source_sha256": "c06c21f135b36b1a2c5bfead13b82f9a84671327762fc8278ece7caff9e245ee",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": null
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1273,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1274,
+   "source_sha256": "67bdfc0134d4777451f6e40aa55f4b88c9f1755666cdbde03ee85c6bff6a563f",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": null
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1274,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1275,
+   "source_sha256": "40348ffbfa77e691fe62b3dc62afb3ab322b115617d014ff74af8b46be2cff2f",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": null
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1275,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1276,
+   "source_sha256": "a43b9aa7b066ec6c854eda6b0df5fae3d63bff9786b923b7f50c8483e2b22f17",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1276,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": null,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1277,
+   "source_sha256": "fb12c96088c0bc2ef30dd4c607be6454a5a2b7ee61b712a898db1e14896a6b8f",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1277,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1278,
+   "source_sha256": "5e1b358666bff8bd1574f5713285e5e8b5b9b35142feaa9185e82b48a1e1ee89",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1278,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1279,
+   "source_sha256": "0660b2a4c83e9db4bfa7e373d956dd81c90cff760cc04f621a5d08e589b8bb91",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1279,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1280,
+   "source_sha256": "5ef243dd8e969ec8c70b2b19e662baaff4c64079e38ee4365e0ddf2ce907f06a",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1280,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1281,
+   "source_sha256": "cfaf818d7e88d53630ba300b5bae7e4c1efe0527bc93f648fbb68532d3deab26",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1281,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1282,
+   "source_sha256": "77568d7555533587af64ad6328fc048c185b43bd4744a5a8c1af0eea28a5a5b2",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1282,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1283,
+   "source_sha256": "5c59cca0214bfce5ef215a238d0839b48cbb92c41a54a61d59d618a54b318ba8",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1283,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1284,
+   "source_sha256": "452d4820fff045b12a560020feda9a05f26a110342c2c3eb99c21094585c8d2d",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1284,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1285,
+   "source_sha256": "7605d57c13ce23fab340e4fa3d14c2b51616bd942edec2b9602d3013d13e2ae8",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1285,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1286,
+   "source_sha256": "da802288aeea33766c751ea9f1055b43a22e2262c70329764747bd3dee269413",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1286,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1287,
+   "source_sha256": "e53963e8b2406ef47acfebbe96fbdc18476af6f8ed770113d530c115f46df46c",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1287,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1288,
+   "source_sha256": "988a82f8a6ce1fa5383c6f788cb8be1c01d7560c3435b400c5cc624ad14635b9",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1288,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1289,
+   "source_sha256": "78c299332e1b1f1e58556a8cbf38d4da0b48f4a32817d910eea5c7e5edc79fa1",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1289,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  },
+  {
+   "frame": 1290,
+   "source_sha256": "bdecc56bed4336e1fdd4d96e35a42865f1eab36d0d28af00f19e4445330aa193",
+   "scene_supported": true,
+   "special_modes": {
+    "block_state_updates": false,
+    "blocking_overlay": "UNKNOWN",
+    "insurance": "UNKNOWN"
+   },
+   "board_count": 0,
+   "pot": {
+    "value": "0"
+   },
+   "stacks": {
+    "0": {
+     "value": "255"
+    },
+    "1": {
+     "value": "290"
+    },
+    "2": {
+     "value": "522"
+    },
+    "3": {
+     "value": "338"
+    },
+    "4": {
+     "value": "196"
+    },
+    "5": {
+     "value": "284"
+    },
+    "6": {
+     "value": null
+    },
+    "7": {
+     "value": "248"
+    }
+   },
+   "current_actor": null,
+   "glyph_transitions": [],
+   "continuous_context": {
+    "unmarked_action_candidate": {
+     "action": null,
+     "status": "UNKNOWN",
+     "strategy_eligible": false
+    }
+   },
+   "cards": {
+    "hero": null,
+    "board_slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   "participation": {
+    "slots": {
+     "0": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "1": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "2": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "3": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "4": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "5": {
+      "current": "UNKNOWN",
+      "conflict": false
+     },
+     "6": {
+      "current": "EMPTY_CANDIDATE",
+      "conflict": false
+     },
+     "7": {
+      "current": "UNKNOWN",
+      "conflict": false
+     }
+    }
+   },
+   "hand_transition": {
+    "frame": 1290,
+    "candidate": null,
+    "center_deal": {
+     "visible": true,
+     "score": 1.0,
+     "reason": "center_back_card_positive_only"
+    }
+   },
+   "live_dealer_candidate": 7,
+   "empty_seats_v1": [
+    6
+   ]
+  }
+ ]
+}
