@@ -5,7 +5,18 @@ facts document. Everything else proves the refusal: a PHH required field that no
 confirmed evidence supports must NOT be written as a zero, a False or a
 placeholder, because PokerKit (and any consumer downstream of it) would then
 read a fabricated value as a fact.
+
+The suite is deliberately split. CI installs ``.[dev,perceptual,desktop]`` and
+NOT the optional ``solver-tools`` extra, so PokerKit is absent there. A refusal
+has to be reachable WITHOUT the library -- otherwise CI could not tell a
+fail-closed gate from a missing dependency -- so the tests that assert a
+refusal are never skipped, and only the tests that actually drive PokerKit
+carry ``needs_poker_kit``.
 """
+
+import importlib.util
+
+import pytest
 
 from poker_engine.desktop.aa_phh_shadow import (
     FIELD_MAP,
@@ -15,6 +26,20 @@ from poker_engine.desktop.aa_phh_shadow import (
     shadow_ingest,
     shadow_round_trip,
 )
+
+
+def _poker_kit_available():
+    """Whether the optional ``solver-tools`` extra is installed."""
+    try:
+        return importlib.util.find_spec("pokerkit") is not None
+    except (ImportError, ValueError):
+        # A broken install is not an available one.
+        return False
+
+
+needs_poker_kit = pytest.mark.skipif(
+    not _poker_kit_available(),
+    reason="the solver-tools extra is not installed")
 
 
 def declared_rules(**overrides):
@@ -71,6 +96,7 @@ def confirmed_hand(**overrides):
     return facts
 
 
+@needs_poker_kit
 def test_a_full_confirmed_hand_exports_and_replays_through_poker_kit():
     report = shadow_export(confirmed_hand())
     assert report["status"] == "EXPORTED"
@@ -81,6 +107,7 @@ def test_a_full_confirmed_hand_exports_and_replays_through_poker_kit():
     assert report["poker_kit"]["hand_finished"] is True
 
 
+@needs_poker_kit
 def test_the_oracle_reproduces_the_payout_the_table_actually_paid():
     """The differential is the point: an independent engine must agree."""
     report = shadow_export(confirmed_hand())
@@ -134,6 +161,7 @@ def test_a_per_hand_straddle_is_not_written_from_the_table_rules():
     assert "phh" not in report
 
 
+@needs_poker_kit
 def test_a_mandatory_straddle_is_written_positionally():
     """``mandatory_utg`` IS a declaration, so it belongs in the PHH.
 
@@ -189,6 +217,7 @@ def test_the_shadow_never_claims_to_replace_the_production_state_machine():
     assert report["replaces_production_state_machine"] is False
 
 
+@needs_poker_kit
 def test_an_unmakeable_comparison_is_reported_as_not_comparable():
     """Silence is not agreement: a check that cannot run must say so."""
     report = shadow_export(confirmed_hand())
@@ -198,6 +227,7 @@ def test_an_unmakeable_comparison_is_reported_as_not_comparable():
     assert "declared table rules" in forced["reason"]
 
 
+@needs_poker_kit
 def test_a_wrong_positional_order_moves_the_payout_and_is_caught():
     """The differential is not vacuous: break the order and it must MISMATCH."""
     facts = confirmed_hand(seat_order=["1", "4", "7"])
@@ -216,9 +246,28 @@ def test_the_field_map_covers_every_required_phh_field():
         assert evidence and rule
 
 
+# --- what CI verifies without the extra ------------------------------------
+
+
+def test_a_missing_field_refuses_before_the_library_is_consulted():
+    """The refusal must come from the gate, not from PokerKit being absent.
+
+    CI has no PokerKit. If the order were reversed, every incomplete hand would
+    report ``POKERKIT_UNAVAILABLE`` there and the fail-closed evidence would be
+    vacuous: a missing dependency would read as a refusal. This pins the
+    precedence, so the gate tests above stay meaningful on a machine that never
+    installed the extra.
+    """
+    report = shadow_export(confirmed_hand(starting_stacks={}))
+    assert report["status"] == "NOT_EXPORTABLE"
+    assert report["reason"] == "unconfirmed_required_fields"
+    assert "POKERKIT_UNAVAILABLE" not in str(report)
+
+
 # --- the gate is anchored to the installed library, not to our belief ------
 
 
+@needs_poker_kit
 def test_our_gate_matches_the_fields_pokerkit_actually_requires():
     """``POKERKIT_NT_REQUIRED`` is checked against PokerKit itself.
 
@@ -236,6 +285,7 @@ def test_our_gate_matches_the_fields_pokerkit_actually_requires():
 # --- the PHH has to carry the physical seats -------------------------------
 
 
+@needs_poker_kit
 def test_the_phh_carries_the_physical_seats():
     """Without the optional ``seats`` header a PHH is only positionally indexed.
 
@@ -248,6 +298,7 @@ def test_the_phh_carries_the_physical_seats():
     assert "seats = ['4', '7', '1']" in report["phh"]
 
 
+@needs_poker_kit
 def test_a_phh_without_seats_cannot_restore_the_positional_order():
     """The reverse adapter says so rather than inventing seat numbers."""
     document = shadow_export(confirmed_hand())["phh"]
@@ -300,6 +351,7 @@ def side_pot_hand(**overrides):
     return facts
 
 
+@needs_poker_kit
 def test_a_side_pot_is_split_and_the_split_is_checked():
     report = shadow_export(side_pot_hand())
     assert report["status"] == "EXPORTED"
@@ -320,6 +372,7 @@ def test_a_side_pot_is_split_and_the_split_is_checked():
     assert checks["pot_commitment_conservation"]["status"] == "MATCH"
 
 
+@needs_poker_kit
 def test_the_side_pot_item_never_pretends_to_be_a_two_engine_comparison():
     """PokerSense records no pot levels, so this cannot be a PokerSense check."""
     split = {c["check"]: c for c in
@@ -328,6 +381,7 @@ def test_the_side_pot_item_never_pretends_to_be_a_two_engine_comparison():
     assert "no pot levels" in split["poker_sense"]["evidence"]
 
 
+@needs_poker_kit
 def test_a_plain_single_pot_hand_is_not_reported_as_a_side_pot_mismatch():
     """Regression: the first version of this check failed on its own fixture.
 
@@ -381,6 +435,7 @@ def call_then_fold_hand():
     return facts
 
 
+@needs_poker_kit
 def test_a_seat_that_calls_then_folds_paid_in_but_is_not_eligible():
     report = shadow_export(call_then_fold_hand())
     assert report["status"] == "EXPORTED"
@@ -397,6 +452,7 @@ def test_a_seat_that_calls_then_folds_paid_in_but_is_not_eligible():
 # --- reverse direction ----------------------------------------------------
 
 
+@needs_poker_kit
 def test_the_round_trip_restores_every_field_it_sent():
     result = shadow_round_trip(confirmed_hand())
     assert result["status"] == "ROUND_TRIP_MATCH"
@@ -413,6 +469,7 @@ def test_the_round_trip_refuses_when_the_forward_export_refuses():
     assert "phh" not in result
 
 
+@needs_poker_kit
 def test_the_reverse_adapter_can_never_satisfy_the_forward_gate():
     """A PHH we wrote must not become evidence that the gate accepts.
 
@@ -431,6 +488,7 @@ def test_the_reverse_adapter_can_never_satisfy_the_forward_gate():
     assert "phh" not in again
 
 
+@needs_poker_kit
 def test_an_illegal_action_list_is_a_named_refusal_not_a_traceback():
     """An illegal sequence must surface as ``POKERKIT_REJECTED``.
 

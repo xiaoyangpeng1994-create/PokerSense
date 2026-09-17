@@ -206,3 +206,35 @@ ledger_status: HAND_COMMITMENTS_UNKNOWN
 - 不因为「想让导出通过」而放宽任何一个字段的确认条件。
 - PokerKit 是**可选**依赖（`pyproject.toml` 的 `solver-tools` extra 已固定 `pokerkit==0.7.5`）；
   导入是惰性的，运行时装不到 PokerKit 时报告 `POKERKIT_UNAVAILABLE`，其余功能不受影响。
+  这一点在**测试**上有一个容易踩的后果，见 §9。
+
+## 9 测试的运行前置：可选依赖与 CI（本轮修掉的一个真实缺陷）
+
+**事实**：CI（`.github/workflows/ci.yml`）只装 `-e ".[dev,perceptual,desktop]"`，**不含 `solver-tools`** ——
+也就是说 **CI 上根本没有 PokerKit**。本模块第一版让 24 个用例**全部硬依赖**它，于是 CI 在
+macos / windows 两个 job 的 `pytest` 步**全红**（`ModuleNotFoundError: No module named 'pokerkit'`，
+15 failed），而本机因为装了 0.7.5 而全绿。`flake8` 步因 pytest 失败被跳过，
+**当轮 CI 实际上只验到了「我的模块坏了」这一件事**。
+
+**修法：按用例的真实依赖定向 skip，而不是整模块 skip。**
+
+| 类别 | 用例数 | 无 PokerKit 时 | 为什么 |
+|---|---|---|---|
+| 闸门拒绝类（`NOT_EXPORTABLE` / 字段映射 / 不替换生产机 / 反向不洗闸） | **10** | **照常执行** | 拒绝必须**不依赖库**就能到达；否则 CI 上「缺依赖」会被读成「闸门拒绝」，fail-closed 证据就成了空的 |
+| 真正驱动 PokerKit 类（导出/重放/差分/往返/库字段对照） | 15 | 按 `skipif` 跳过，理由写明 `the solver-tools extra is not installed` | 没有库就无从驱动，跳过是诚实回答；**不是**把它伪装成绿 |
+
+仓库里原本就有 5 个模块按同一前提处理可选依赖
+（`tests/state_engine/test_reviewed_replay.py`、`tests/state_engine/test_reviewed_completion.py`、
+`tests/tools/test_nlhe_rulebook.py`、`tests/tools/test_wpk_hand_trace.py`、
+`tests/equity/test_phevaluator_backend.py`）；本模块第一版**漏了这条约定**，是自查 CI 日志才发现的。
+
+**定位手段（可复用）**：把 path finder 换成拒绝定位 `pokerkit` 的版本，使 `import` 与
+`importlib.util.find_spec` 的行为与「从未安装该包」完全一致，从而**实测**出「到底哪几个用例依赖它」，
+而不是靠读代码猜。实测：修复前 **15 failed / 9 passed**，修复后 **15 skipped / 10 passed / 0 failed**。
+
+**新增用例** `test_a_missing_field_refuses_before_the_library_is_consulted` 把「闸门先于库」这一
+**顺序**钉住 —— 它是 CI 上那 10 个用例仍然有意义的前提。
+
+> **一个未决的策略问题（见回传「请你裁决」）**：是否让 CI 装上 `solver-tools`，好在 CI 上真正跑完这 15 个用例？
+> 本轮**没有**改 `ci.yml`：那是仓库级 CI 策略，会同时把 `phevaluator` 带进来并影响其它跳过项，
+> 超出本轮授权范围。
