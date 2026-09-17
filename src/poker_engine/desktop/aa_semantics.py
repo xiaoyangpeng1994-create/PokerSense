@@ -249,10 +249,17 @@ class AAObservationSemantics:
             self.terminal_frame = row["frame"]
         # C1: an ordinary hand closes on a COMPLETE river, never on a partial
         # board and never while an all-in showdown already explains the end.
-        ordinary_river = full_river and not closed
-        if not ordinary_river:
+        # Once THIS epoch has been seen holding a complete river, that fact is
+        # STICKY for the rest of the epoch. The table tears a finished hand down
+        # -- the 5 board cards disappear for a stretch of frames while the epoch,
+        # the participants and the settlement credit all stay put -- and that
+        # teardown is not an un-deal. Only an all-in showdown, which explains the
+        # ending by itself, retracts the fact here; a real epoch change retracts
+        # it above. A row whose board read momentarily regressed must not be able
+        # to withdraw a pending close that was already earned.
+        if closed:
             self.river_frame = None
-        elif self.river_frame is None:
+        elif full_river and self.river_frame is None:
             self.river_frame = row["frame"]
         credits = []
         for credit in state.get("unallocated_positive_cash", []):
