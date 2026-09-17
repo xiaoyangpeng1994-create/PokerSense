@@ -1,7 +1,12 @@
 # USABLE-001：开局边界重复 epoch 修复 + 普通河牌终局（ORDINARY_RIVER_CLOSED）
 
-状态：**已实现，未验收**（`REAL_HAND_ACCEPTANCE_PENDING` 与 `NOT_ASSESSED` 均未改变）。
-范围：桌面层边界缺陷 + 新的**并列**终局类型。未改内核、未改求解器、未改计算上限、未重标 ROI、未放宽任何 `UNKNOWN`。
+状态（三段分开记，不要混成一个）：
+- 桌面层重复 epoch 缺陷：**`FIX_ACCEPTED_WITH_SCOPE`**（审查已接受）；
+- 普通河牌终局语义：**`CODE_TESTS_PASS` / `REAL_REPLAY_NOT_YET_PROVEN`**（真实录像命中数 **0**，第一阻塞见第 4 节）；
+- 真实牌局验收：**`PENDING`**；策略强度：**`NOT_ASSESSED`**。
+
+范围：桌面层边界缺陷 + 新的**并列**终局类型。未改内核、未改求解器、未改计算上限、未重标 ROI、未放宽任何 `UNKNOWN`、
+**未为追求命中而改动任何规则**。
 
 ## 1 桌面层重复 epoch（已修，含回归）
 
@@ -106,7 +111,29 @@
 - **L2 不依赖 ledger**：如上，参与集合不取自开局账本。`ledger_status` 原样记入证据，供下游**分开**要求账本。
 - **L3 不弱化 all-in**：`ordinary_terminal` 一律 `canonical_verified = False`、`strategy_eligible = False`、`card_showdown_verified = False`、`rake_verified = False`；不设置 `settlement_rules_verified`；不占用 `terminal_observation_frame`；不与 `closed` 同时成立。
 
-### 3.4 反例测试（`tests/desktop/test_aa_ordinary_river_terminal.py`，8 项）
+### 3.5 生命周期契约（在任何下游消费者出现之前钉死）
+
+`ordinary_terminal` **是确认事件，不是状态**：
+
+| 字段 | 语义 | 存活范围 |
+|---|---|---|
+| `hand_phase.ordinary_terminal` | **确认事件**。只在**确认那一行**出现，之后立即清空 | 一行 |
+| `hand_phase.last_ordinary_terminal` | **最近一次确认的持久快照**，带自己的 `epoch` 与 `belongs_to_current_epoch` | 直到下一次确认 |
+| `hand_phase.ordinary_river_pending` | C1+C2 已成立、C3 未到，**只是等待**，不是结果 | 逐行判断 |
+
+清空发生在 `observe()` 里 `_phase()` 返回之后，因此**覆盖 `_phase` 的每一条 return 路径**（包含被遮挡/丢 epoch 的早退），事件不可能跨行残留。
+
+`last_ordinary_terminal.belongs_to_current_epoch` 每行重新计算（`epoch == hand_phase.epoch`），因此**旧手的终局不可能被误当成当前手**；消费者也可以直接比较 `last_ordinary_terminal.epoch` 与 `hand_phase.epoch`。
+
+守护测试（`tests/desktop/test_aa_ordinary_river_terminal.py`）：
+确认行之后连续三行 `ordinary_terminal is None`；跨第 2/3/4 个 epoch 时 `last_ordinary_terminal.epoch == "h"` 且 `belongs_to_current_epoch is False`；
+遮挡行既不带事件也不带 pending；未确认前两个字段都为空。
+
+### 3.5 已知局限（如实标注）
+
+C2 依赖「结算出现**可见的余额增加**」。§2.3 已测得**本次录像的筹码读数在开局前后不变**，因此该录像的支付是否可见**尚未验证**。第 4 节的真实回放给出了答案：**多数手上不可见**（3/5），但**至少一手成立过**（`observed_deal_14593`）——见 4.2 与 4.3。
+
+### 3.6 反例测试（`tests/desktop/test_aa_ordinary_river_terminal.py`，12 项）
 
 1. 确认只发生在下一手边界之后（边界前只有 `AWAITING_NEXT_HAND_BOUNDARY`）。
 2. `ordinary_terminal_semantics` 明示不覆盖范围。
@@ -116,21 +143,75 @@
 6. **两家人 all-in ⇒ 只走 all-in 终局，不产生普通终局**（互斥）。
 7. 遮挡帧（`insurance: VISIBLE`）⇒ `SUSPENDED`，既不确认也不显示 PENDING。
 8. 翻前弃牌结束 ⇒ 本终局不覆盖（不产生任何普通终局声明）。
+9. **确认事件一次性**：确认行之后连续三行 `ordinary_terminal is None`。
+10. **快照不泄漏**：跨第 2/3/4 个 epoch，`last_ordinary_terminal.epoch` 仍是 `"h"` 且 `belongs_to_current_epoch is False`；回到该 epoch 时该标志翻为 `True`（证明它是算出来的，不是常量）。
+11. 未确认前 `last_ordinary_terminal is None`。
+12. 确认事件不随「状态标志」存活：紧随其后的遮挡行不再带事件。
 
-反例先行：新测试拷到上一 head `064894b` 实跑 **全部失败**；本轮 **8 passed**。
+反例先行：新测试拷到上一 head `064894b` 实跑 **全部失败**；本轮 **12 passed**。
 
-### 3.5 已知局限（如实标注）
+## 4 真实录像连续回放（`aa-live-20260917-0430`，head `fbda7c52`）
 
-C2 依赖「结算出现**可见的余额增加**」。§2.3 已测得**本次录像的筹码读数在开局前后不变**，因此该录像的支付是否可见**尚未验证**；若支付同样不可见，则本终局在该录像上**只会停在 PENDING**，不会误报。这是 fail-closed 的预期行为，不是缺陷——但它意味着「本录像能否产出普通终局样本」仍是**未决**的。
+只读、**连续顺序**（`grab()` 逐帧、不 seek、不稀疏孤帧），整段 **0–27,287 帧**一次跑完。
 
-## 4 本轮未做
+### 4.1 命中统计
+
+| 指标 | 数量 |
+|---|---|
+| epoch（含 `None` 挂起段） | **25** |
+| 达到 **full river** 的 epoch | **6** |
+| 产生 `ordinary_river_pending` | **1**（`observed_deal_14593`） |
+| 产生 `ORDINARY_RIVER_CLOSED` | **0** |
+
+6 个 full-river epoch：`None`、`observed_deal_8622`、`observed_deal_11609`、`observed_deal_14593`、`observed_deal_17323`、`observed_deal_24560`。
+
+### 4.2 逐手第一阻塞
+
+| epoch | river 帧 | river 座位数 | `pending_actions` | 河牌**之后**确认的 credit | 结果 |
+|---|---|---|---|---|---|
+| `None`（挂起段） | 8397 | 6 | **非 0** | 119 | C1 不成立（epoch 为空，按设计永不确认） |
+| `observed_deal_8622` | 9512 | 4 | **非 0** | 0 | C1 与 C2 皆不成立 |
+| `observed_deal_11609` | 12325 | 5 | 0 | **0** | **C2 不成立** |
+| **`observed_deal_14593`** | 15033 | 5 | 0 | **1** | **pending 成立**（38 帧），确认时已无 pending |
+| `observed_deal_17323` | 18170 | 6 | 0 | **0** | **C2 不成立** |
+| `observed_deal_24560` | 25674 | 5 | 0 | **0** | **C2 不成立** |
+
+⇒ **第一阻塞是 `payout_credit_not_visible`（3/5 手）**：这些手在河牌帧与 epoch 结束之间，**没有任何该 epoch 的 credit 被确认**。
+
+> 注意区分：credit **通道本身很忙**（整段 26,980 帧有 `unallocated_positive_cash`，累计 **218,310** 条），但这些多为开局/退款类 credit（`_new_epoch` 的 `new_post_comparison` 与 `stable_visual_balance_increase`）。**"该 epoch 有 credit" ≠ "有河牌后的支付"**；C2 要求 `confirmed_frame > river_frame`，本表最后一列正是这个严格计数。所以不是通道静默，而是**缺"河牌后的支付"这一类**。
+
+### 4.3 第二阻塞：`observed_deal_14593` 为何成立却没被确认（帧级证据）
+
+C1+C2 在真实数据上**可以**成立——这手在 **f15033** 河牌完成（`rf=15033`），并且在 **f15173–f15185** 连续 38 行带着有效 pending（`settle=1, seats=5, pend_act=0, pending=True`）。随后：
+
+```
+f15186–f15197  complete=False → rf=None → settle=0 → pending=False   ← 12 帧河牌读数中断，pending 被撤回
+f15198         epoch 切到 observed_deal_15197（与上一 epoch 直接相邻，中间没有 None）
+```
+
+⇒ 到 f15198 发生 epoch 切换时，**`self.ordinary_river` 已经被清空**，C3 没有可确认的对象。
+
+成因（**我的实现缺陷，不是设计上的"丢 epoch"**）：`river_frame` 在**河牌完整性一旦中断**就被清零，而 hand 收尾动画会让 5 张公牌的读数短暂消失 12 帧。也就是说，「这手有完整河牌」是一个**已经成立的本手事实**，却被一次显示抖动撤销了。注意 epoch 序列显示这里是 **A→B 直接切换，中间没有 `None`**，因此这不是 3.4 第 4 条所覆盖的场景。
+
+**最小改法（本轮未执行，待授权）**：`river_frame` 只在 **epoch 变化**时清零，不再因公牌读数抖动而清零；`closed`（all-in）仍在 eligibility 层抑制。残余风险如实标注：若 adapter 长时间不切 epoch，pending 会挂在该 epoch 上；但 C3 要求 pending 的 epoch == 刚刚结束的 epoch，且 epoch 名唯一，因此不会跨手错误归属。
+
+### 4.4 结论
+
+`ORDINARY_RIVER_CLOSED` 当前状态应记为 **`REAL_REPLAY_NOT_YET_PROVEN`**：C1+C2 已在真实数据上成立过一次（`observed_deal_14593`），但**该手最终未被确认**，所以**命中数为 0**。第一个要修的缺口是 4.3（本实现缺陷），其后是 4.2 的 `payout_credit_not_visible`（证据缺口）。两者都**尚未授权修改**。
+
+## 5 本轮未做
 
 未改 else 分支的语义、未改 `closed`/`full_river`/`terminal`、未改座位门槛、未改 `_posting` 的比较锚点与 `expires`、未重标 ROI、未调阈值、未动 `LiveCausalWagers`、未改前端、未合并发布。翻前/翻牌/转牌弃牌结束**未实现**（后续单独做）。
 
-## 5 验证
+**已定位成因但本轮明确未改**：
+- 4.3 的 `river_frame` 过早清零（我这一轮实现内部的缺口；改法已在 4.3 写出）——本轮授权是「只做验证与一个生命周期守卫」，因此**只报告、不动手**；
+- 4.2 的 `payout_credit_not_visible`——**不为了让结果通过而放宽 C2**。
 
-- 全仓 `pytest -v`：**4120 passed / 1 skipped / 2 warnings / 407.27s**（上一基线 4109/1，本轮 +11 = 3 边界 + 8 普通终局）。
-- `tests/desktop` + `tests/tools`：**1726 passed**。
+## 6 验证
+
+- 全仓 `pytest -v`：**4124 passed / 1 skipped / 2 warnings / 414.33s**（上一基线 4120/1，本轮 +4 = 生命周期契约测试）。
+- `tests/desktop` 相关五个文件：**86 passed**。
 - `flake8 src tests tools`：0 项。
-- 旧 head 反例：两个新测试文件在 `064894b` 上 **8 failed / 2 passed** → 本轮 **11 passed**。
+- 旧 head 反例：两个新测试文件在 `064894b` 上 **8 failed / 2 passed** → 本轮 **15 passed**。
+- 真实回放：见第 4 节（连续 0–27,287 帧，命中 `ORDINARY_RIVER_CLOSED` = **0**）。
 - 端到端回放（真实池帧 1260–1330）：桌面链 epoch 由「1264 MULTI_POST + 1278 DEALER_ADVANCE」变为「**仅 1264 MULTI_POST**」，与纯 `AA8StateAdapterV2` 的历史行为一致。

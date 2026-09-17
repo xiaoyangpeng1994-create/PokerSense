@@ -45,7 +45,16 @@ class AAObservationSemantics:
         # single confirmed outcome once the next hand boundary was observed.
         self.river_frame = None
         self.ordinary_river = None
+        # Lifecycle contract, pinned BEFORE any consumer exists:
+        #   ordinary_terminal      = the CONFIRMATION EVENT, emitted on the
+        #                            confirming observation only, then cleared;
+        #   ordinary_terminal_event= its one-shot staging slot;
+        #   last_ordinary_terminal = the persisted SNAPSHOT of the most recent
+        #                            confirmed terminal, which carries its own
+        #                            epoch so it can never be mistaken for the
+        #                            current hand's terminal.
         self.ordinary_terminal = None
+        self.ordinary_terminal_event = None
 
     def _interpret(self, action, row):
         result = deepcopy(action)
@@ -185,6 +194,7 @@ class AAObservationSemantics:
                     "ledger_status": self.ordinary_river["ledger_status"],
                     "card_showdown_verified": False, "rake_verified": False,
                     "canonical_verified": False, "strategy_eligible": False}
+                self.ordinary_terminal_event = deepcopy(self.ordinary_terminal)
             self.river_frame = None
             self.ordinary_river = None
             self.epoch = epoch
@@ -195,8 +205,13 @@ class AAObservationSemantics:
                 "strategy_eligible": False, "settlement_rules_verified": False,
                 "historical_ledger": deepcopy(self.last_ledger),
                 "current_ledger": deepcopy(ledger), "phase": "OBSERVING",
-                "ordinary_terminal": (deepcopy(self.ordinary_terminal)
-                                      if self.ordinary_terminal else None),
+                "ordinary_terminal": (deepcopy(self.ordinary_terminal_event)
+                                      if self.ordinary_terminal_event else None),
+                "last_ordinary_terminal": (
+                    {**deepcopy(self.ordinary_terminal),
+                     "belongs_to_current_epoch": (
+                         self.ordinary_terminal["epoch"] == epoch)}
+                    if self.ordinary_terminal else None),
                 "ordinary_river_pending": None,
                 "ordinary_terminal_semantics": (
                     "ORDINARY_RIVER_CLOSED_ONLY; preflop/flop/turn fold-out "
@@ -334,6 +349,10 @@ class AAObservationSemantics:
                 new.append(deepcopy(self.actions[key]))
         while len(self.actions) > 256:
             self.actions.popitem(last=False)
+        hand_phase = self._phase(row)
+        # The confirmation is an EVENT: it is observable on this observation and
+        # on no later one. Clearing here covers every return path inside _phase.
+        self.ordinary_terminal_event = None
         return {"interpreted_actions": new,
                 "interpreted_action_history": deepcopy(list(self.actions.values())),
-                "hand_phase": self._phase(row)}
+                "hand_phase": hand_phase}

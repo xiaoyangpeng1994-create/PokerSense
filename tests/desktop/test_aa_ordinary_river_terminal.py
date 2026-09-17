@@ -112,6 +112,65 @@ def test_all_in_showdown_never_produces_an_ordinary_close():
     assert result["ordinary_river_pending"] is None
 
 
+def test_ordinary_terminal_is_a_one_shot_confirmation_event():
+    """The confirmation appears on the confirming row only, then is cleared."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    assert subject.observe(river_row(1, credited_at=1))["hand_phase"][
+        "ordinary_terminal"] is None
+    confirmed = subject.observe(river_row(2, epoch="next"))["hand_phase"]
+    assert confirmed["ordinary_terminal"]["kind"] == "ORDINARY_RIVER_CLOSED"
+    for frame in (3, 4, 5):
+        later = subject.observe(river_row(frame, epoch="next"))["hand_phase"]
+        assert later["ordinary_terminal"] is None
+
+
+def test_last_ordinary_terminal_snapshot_never_leaks_as_the_current_hand():
+    """Crossing the second and third epoch, history stays labelled as history."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    subject.observe(river_row(2, epoch="second"))
+    for frame, epoch in ((3, "second"), (4, "second"), (5, "third"),
+                         (6, "third"), (7, "fourth")):
+        phase = subject.observe(river_row(frame, epoch=epoch))["hand_phase"]
+        snapshot = phase["last_ordinary_terminal"]
+        assert snapshot["epoch"] == "h"
+        assert snapshot["epoch"] != phase["epoch"]
+        assert snapshot["belongs_to_current_epoch"] is False
+        assert snapshot["confirmed_by_epoch_frame"] == 2
+        assert phase["ordinary_terminal"] is None
+
+    # And when the recording returns to that very epoch the flag flips, so the
+    # discrimination is real and not a constant.
+    phase = subject.observe(river_row(8, epoch="h"))["hand_phase"]
+    assert phase["last_ordinary_terminal"]["belongs_to_current_epoch"] is True
+    assert phase["last_ordinary_terminal"]["epoch"] == phase["epoch"]
+
+
+def test_last_ordinary_terminal_is_none_before_any_confirmation():
+    subject = AAObservationSemantics()
+    phase = subject.observe(river_row(0))["hand_phase"]
+    assert phase["last_ordinary_terminal"] is None
+    phase = subject.observe(river_row(1, credited_at=1))["hand_phase"]
+    assert phase["last_ordinary_terminal"] is None
+
+
+def test_the_confirmation_event_does_not_survive_a_blocked_next_row():
+    """The event is tied to the confirming observation, not to a state flag."""
+    subject = AAObservationSemantics()
+    subject.observe(river_row(0))
+    subject.observe(river_row(1, credited_at=1))
+    assert subject.observe(river_row(2, epoch="next"))["hand_phase"][
+        "ordinary_terminal"] is not None
+    overlay = river_row(3, epoch="next")
+    overlay["special_modes"] = {"insurance": "VISIBLE"}
+    blocked = subject.observe(overlay)["hand_phase"]
+    assert blocked["ordinary_terminal"] is None
+    assert blocked["last_ordinary_terminal"]["epoch"] == "h"
+    assert blocked["last_ordinary_terminal"]["belongs_to_current_epoch"] is False
+
+
 def test_a_blocked_frame_neither_confirms_nor_reports_a_pending_close():
     """An overlay must not be able to stand in for a next-hand boundary."""
     subject = AAObservationSemantics()
