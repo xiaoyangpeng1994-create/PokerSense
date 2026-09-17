@@ -113,6 +113,25 @@ class LiveStateAdapter(AA8StateAdapterV2):
                 choices[json.dumps(posting, sort_keys=True)] = posting
         return next(iter(choices.values())) if len(choices) == 1 else None
 
+    def _anchored_opening(self):
+        """True when this hand already holds a ledger-qualifying opening event.
+
+        Mirrors ``AA8HandLedgerCandidate._reset`` exactly (one event for this
+        epoch, status ``MULTI_POST_DEAL_CANDIDATE``, at least three debits) so
+        that protecting the epoch here protects precisely the ledger that would
+        otherwise resolve, and nothing broader.
+        """
+        events = [event for event in self.epoch_events
+                  if event.get("epoch") == self.epoch]
+        if self.epoch is None or len(events) != 1:
+            return False
+        posting = events[0].get("posting_comparison") or {}
+        debits = posting.get("debits")
+        return (events[0].get("status") == "MULTI_POST_DEAL_CANDIDATE"
+                and isinstance(debits, dict) and len(debits) >= 3
+                and not any(action.get("epoch") == self.epoch
+                            for action in self.actions))
+
     def observe(self, row):
         frame = row["frame"]
         modes = row.get("special_modes") or {}
@@ -166,21 +185,35 @@ class LiveStateAdapter(AA8StateAdapterV2):
                                                     pair_window=self.window)
                 invalidated = True
             elif self.dealer_value != detected and row.get("board_count") == 0:
-                baselines = deepcopy(list(self.cleared))
-                posting = self._posting(row)
-                self.history.clear()
-                self.pending_hand = None
-                self._new_epoch(frame, frame - 1,
-                                "MULTI_POST_DEAL_CANDIDATE" if posting
-                                else "DEALER_ADVANCE_CONTEXT_CANDIDATE", posting)
-                self.dealer_value = detected
-                self.cleared.clear()
-                new_hand = True
-                self.pending_opening = None if posting or row.get(
-                    "glyph_transitions") else {
-                        "epoch": self.epoch, "first_frame": frame - 1,
-                        "expires": frame + 4, "baselines": baselines,
-                        "action_count": len(self.actions)}
+                if self._anchored_opening():
+                    # This hand already holds a qualified opening, so the
+                    # preflop cannot have ended: a dealer-seat reading change on
+                    # an empty board, at an unchanged zero pot, with no observed
+                    # action for this epoch is a reading change, not a new hand.
+                    # Re-anchoring here replaced the epoch 14 frames after the
+                    # opening resolved and made the ledger re-taint itself
+                    # (source frames 1264 -> 1278 of the development recording).
+                    # The deferred case -- a reading change after this epoch has
+                    # already recorded actions -- stays out of scope: it is not
+                    # proven, and a real preflop-to-preflop hand change needs
+                    # settlement evidence this guard deliberately does not claim.
+                    self.dealer_value = detected
+                else:
+                    baselines = deepcopy(list(self.cleared))
+                    posting = self._posting(row)
+                    self.history.clear()
+                    self.pending_hand = None
+                    self._new_epoch(frame, frame - 1,
+                                    "MULTI_POST_DEAL_CANDIDATE" if posting
+                                    else "DEALER_ADVANCE_CONTEXT_CANDIDATE", posting)
+                    self.dealer_value = detected
+                    self.cleared.clear()
+                    new_hand = True
+                    self.pending_opening = None if posting or row.get(
+                        "glyph_transitions") else {
+                            "epoch": self.epoch, "first_frame": frame - 1,
+                            "expires": frame + 4, "baselines": baselines,
+                            "action_count": len(self.actions)}
         if new_hand or invalidated:
             row = deepcopy(row)
             row["participation"] = {"slots": {str(s): {

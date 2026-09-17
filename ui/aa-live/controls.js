@@ -36,6 +36,14 @@ async function loadRules() {
 async function saveRules(reset) {
   if (!rulesRevision) return;
   if (typeof invalidateAnalysis === "function") invalidateAnalysis("正在保存本桌规则，旧分析已失效。");
+  // A verified hand receipt names the rules revision it was built against, so a
+  // rule save attempts to void it BEFORE the request: whichever way the save goes,
+  // an input verified against the old rules must never be computed as if it were
+  // verified against the new ones.
+  if (typeof handRulesChanged === "function") {
+    handRulesChanged(reset ? "本桌规则正在重置：上方输入的旧核对已失效，请重置后重新核对。"
+                           : "本桌规则正在保存为新版本：上方输入的旧核对已失效，保存后请重新核对。");
+  }
   const document = {};
   for (const [key, [, type]] of Object.entries(ruleFields)) {
     const value = reset ? (key === "table_label" ? "" : typeof type === "object" && !Array.isArray(type) ? "unknown" : "") : el(`rule-${key}`).value.trim();

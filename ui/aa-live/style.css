@@ -52,3 +52,6 @@ footer{padding:16px 0;font-size:11px}button:focus-visible,select:focus-visible{o
 @media(max-width:620px){.live-layout{grid-template-columns:1fr}.live-layout .preview-box{max-width:360px}.view-nav{padding:8px 12px}.view-nav button{flex:1;padding:7px 10px}.watch-toolbar{flex-wrap:wrap}.api-config-form{grid-template-columns:1fr}.review-picker select{min-width:0;width:100%}.watch-column .playing-card{width:43px;height:58px}.topbar{padding:12px}.mark-row #open-marked{flex:1}.watch-column .panel{padding:16px}}
 
 .river-bound-number{font-size:24px;font-weight:700;color:var(--green);margin:8px 0}.hero-line dl{flex-wrap:wrap;gap:14px}.strategy-entry .section-heading{flex-wrap:wrap}
+
+.hand-block{margin-top:16px}.hand-block-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.hand-block-head h3{font-size:14px;margin:0;color:var(--ink)}.hand-rows{display:flex;flex-direction:column;gap:4px}.hand-rows>.rules-grid{padding:10px 0;border-bottom:1px solid var(--line)}.hand-rows>.rules-grid label{font-size:12px}
+.hand-rows>.rules-grid input:disabled{background:#f1f4f2;color:var(--muted)}

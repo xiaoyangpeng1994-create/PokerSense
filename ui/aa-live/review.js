@@ -106,12 +106,14 @@ async function selectReview(issueId) {
   el("review-content").hidden=true; el("review-image").removeAttribute("src");
   el("human-note").value=""; el("ai-consent").checked=false;
   el("human-feedback").textContent=""; el("ai-result").replaceChildren(); reviewButtons();
+  if (typeof handSourceChanged === "function") handSourceChanged(issueId || null);
   if (!issueId) return;
   el("review-feedback").textContent="正在打开固定画面…";
   try {
     const result=await deskRequest(`/api/review/issues/${issueId}`);
     if(ticket!==reviewTicket) return;
     selectedReview=result; el("review-content").hidden=false;
+    if (typeof handSourceChanged === "function") handSourceChanged(issueId);
     if(!Array.from(el("review-select").options).some(option=>option.value===issueId)) {
       const option=document.createElement("option");option.value=issueId;
       option.textContent=`来源帧 ${text(result.issue.observation.source_frame)}`;el("review-select").append(option);
