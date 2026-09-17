@@ -5,6 +5,8 @@
 - **产品基线**：`xiaoyangpeng1994-create/PokerSense` PR #28 head `fbda7c52bd40c460bdca919b4e1a43547606de0d`（Draft，base `codex/strategy-001-research`）
 - **本轮性质**：**研究轮，零产品代码改动**。没有改任何生产文件、没有给产品加任何依赖、没有改求解器常量、没有重训视觉。
 - **报告去向**：Issue #27；ACK 见 `issuecomment-5712314341`。
+- **后续修订（2026-09-18，PHASE 5）**：本报告里「因 license / 无明确 license / AGPL 直接淘汰技术候选」的那部分结论，**已被 owner 决策 supersede**，见 §1.1 末尾的 **OWNER OVERRIDE（许可证不作为技术筛选门槛）**。
+  本次修订**只改结论口径**：原始实验数据、PokerKit PoC、PHH roundtrip、强制投入 `17`、边池、UNKNOWN 风险、所有 upstream metadata、原报告日期 `2026-09-17` 与 `run_id`、原研究上下文**一律未改动**。
 
 > **证据分级**（全文遵循，不混用）：
 > 【实测】本轮在本机真实运行得到的输出；【读码】直接读上游源码文件得到的结论（给路径+符号）；【规范】上游规范原文（给文件+行）；【仓库既有】本仓库既有文档（`docs/`、`AGENTS.md`）已记录的事实；【推断】无直接证据的推断。
@@ -31,18 +33,51 @@
 | `uoftcprg/pokerkit` | **MIT** | Python | 2026-08-22 | 498 | 否 | **采用**（格式 + 规则 oracle） |
 | `uoftcprg/phh-std` | **MIT** | Python(Sphinx) | 2025-05-08 | 19 | 否 | **采用**（规范文本） |
 | `google-deepmind/open_spiel` | **Apache-2.0** | C++ | 2026-08-31 | 5490 | 否 | 参照/评估框架（后期） |
-| `MatthewPDingle/GTOpen` | **无许可** | Rust | 2026-09-17 | 14 | 否 | **不可用**（无许可文件） |
-| `bupticybee/TexasSolver` | **AGPL-3.0** | C++ | 2026-08-26 | 2550 | 否 | 隔离进程参照（受限） |
+| `MatthewPDingle/GTOpen` | **无许可** | Rust | 2026-09-17 | 14 | 否 | **技术研究 / PoC / oracle 候选**：仓库无明确 license，**直接复制或分发代码时需单独评估，但不因许可状态淘汰其技术价值**（OWNER OVERRIDE，见本节末尾） |
+| `bupticybee/TexasSolver` | **AGPL-3.0** | C++ | 2026-08-26 | 2550 | 否 | **技术参考 / oracle 候选**（离线独立进程）；AGPL 继续记录为**直接代码复用与分发边界**，单独处理，**不因 AGPL 自动判为技术不可用** |
 | `bupticybee/TexasHoldemSolverJava` | **MIT** | Java | 2026-07-01 | 913 | 否 | 备选参照（需 JRE11，慢） |
 | `EricSteinberger/PokerRL` | **MIT** | Python | 2023-03-31 | 542 | 否 | 仅方法论 |
 | `EricSteinberger/Deep-CFR` | **MIT** | Python | 2020-05-06 | 332 | 否 | 仅方法论 |
 | `datamllab/rlcard` | **MIT** | Python | 2024-06-26 | 3548 | 否 | 无增量价值 |
-| `b-inary/postflop-solver` | **AGPL-3.0** | Rust | 2024-07-09 | 370 | 否 | **既有调研首选，本轮复核仍在** |
+| `b-inary/postflop-solver` | **AGPL-3.0** | Rust | 2024-07-09 | 370 | 否 | **既有调研首选，本轮复核仍在**；同上，AGPL 只界定**直接代码复用与分发边界**，不构成技术淘汰 |
 
 许可结论（三条硬事实）：
 - **PokerKit / PHH-std / OpenSpiel / PokerRL / Deep-CFR / rlcard 的许可都不阻塞自用集成**；PokerKit 是 MIT + 纯 Python，可以进产品依赖（本轮**没有**加，见 §10）。
-- **GTOpen 至今没有 LICENSE 文件**（【实测】`gh api …/license` 为空；本地 `.upstream/GTOpen/` 里也 `find` 不到 LICENSE）。这既有文档结论一致，本轮**没有改变**该结论。
+- **GTOpen 至今没有 LICENSE 文件**（【实测】`gh api …/license` 为空；本地 `.upstream/GTOpen/` 里也 `find` 不到 LICENSE）。这既有文档结论一致，**该事实在任何修订中都保留不变**；被撤回的只是「所以它技术上不可用」这一推论（见下方 OWNER OVERRIDE）。
 - **AGPL 组件的既有边界继续有效**（`docs/tech-stack-matrix.md` 附节）：源码/二进制不进仓库、只走独立进程、不静态链接。本轮未新增任何 AGPL 代码或资产。
+
+#### OWNER OVERRIDE · 后续项目决策（2026-09-18，Issue #27 `issuecomment-5712960433`）
+
+> **本小节 supersede 本报告中任何「因 license 直接淘汰技术候选」的旧结论。** 上述三条**事实**（含「GTOpen 当时确实没有 LICENSE 文件」）**全部保留**；被撤回的只是从中推出的**技术筛选结论**。
+
+**owner 决策原文要点**：PokerSense 当前为**非商用、本地研究/自用项目**，因此
+「**许可证不再作为技术候选的淘汰条件**」；仍记录 license / no-license，仅作为**事实备注与未来用途提醒**；
+技术上有价值的项目（含无明确 license、AGPL 等）都可进入**学习、架构借鉴、隔离 PoC、对照验证、接口复用候选**；
+调研结论不得再用「无许可 / AGPL」直接判定「技术不可用」，应改写为「**技术价值 + 集成方式 + 运行边界**」。
+
+**统一口径（全文适用）**：
+
+> **license status 是事实字段和「直接复用 / 分发」的边界，
+> 但不是本项目当前的技术候选淘汰条件。**
+
+**三类用法必须分开写**（owner 决策原文）：
+
+| 类别 | 用法 | license 是否构成阻塞 |
+| --- | --- | --- |
+| ① 借鉴算法 / 架构 | 读源码、学结构、抄思路，不搬运代码 | **否**，无阻塞 |
+| ② 本地隔离运行 | 独立进程 / 离线 PoC / oracle / cross-check | **否**，无阻塞（AGPL 走独立进程即可） |
+| ③ 直接复制或嵌入大量源码 | 把上游源码/二进制并进产品、静态链接 | **是**——这是**复用与分发边界**，需单独评估；若未来项目用途改变，再单独复核 |
+
+**据此被修订的具体条目**：
+
+| 项目 | 旧分类（已 supersede） | 新分类 |
+| --- | --- | --- |
+| `MatthewPDingle/GTOpen` | ~~不可用（无许可文件）~~ | **技术研究 / PoC / oracle 候选**；尤其 solver workflow、Rust engine、preflop lab、reports、player model/evidence 设计。无明确 license 只影响 ③ 类直接复制/分发，需单独评估 |
+| `bupticybee/TexasSolver` | ~~AGPL ⇒ 排除~~ | **技术参考 / oracle 候选 / 源码学习候选**；AGPL 继续记录为 ③ 类复用边界（不进产品、不静态链接），**不据 AGPL 判为技术不可用** |
+| `b-inary/postflop-solver` | （首选，但带 AGPL 顾虑） | **仍是首选**；AGPL 同上只界定 ③ 类边界，离线独立进程使用无阻塞 |
+
+**后续 GitHub 调研的第一筛选标准**（owner 决策）：**是否能减少 PokerSense 自研弯路、是否能提供可验证能力**，而非许可状态。
+本轮**不需要**重做整份调研，只修正 license gating 造成的排序偏差。
 
 ### 1.2 本轮亲自跑过的 PoC（这是本轮唯一的「新证据」）
 
@@ -245,7 +280,8 @@ hole_cards      ->  UNKNOWN OF UNKNOWNS (??)
 
 - **现状**：只有**河牌一棵手工小树**：`strategy/threeway_river_v1.py`（`RiverAction`、`aggression_targets`、`max_aggressions∈[1,3]`，288/293 行递归到 `nodes/terminal_nodes`）。**flop/turn 树不存在**；下注尺度是**人工声明**的网格，不是自动生成的 bet-size grid。
 - **上游依据**：TexasSolver（AGPL，C++，CLI/`console_solver`）、`b-inary/postflop-solver`（AGPL，Rust，`TreeConfig{starting_pot, effective_stack, flop/turn/river_bet_sizes}`，**有 bunching effect，官方称支持 6-max**）、GTOpen（**无许可**，README 明示 "postflop solving is heads-up only"）。**三者都是单挑翻后**（【仓库既有】`docs/research-open-source-solvers.md:15-17` 已三路取证）。
-- **判断**：`DEFER`。理由：① 没有多人翻后求解器，任何外部树都用不上我们的 3+ 人场景；② 我们的产品路径当前只需要河牌那棵树，且它已存在；③ 引入任何一个外部树都要先过许可（AGPL 独立进程 / 无许可不可用）。
+- **判断**：`DEFER`。理由：① 没有多人翻后求解器，任何外部树都用不上我们的 3+ 人场景；② 我们的产品路径当前只需要河牌那棵树，且它已存在；③ 引入任何一个外部树都要先确定**集成方式与运行边界**（离线独立进程 / 只借鉴其树构建思路）。**许可状态只界定「能否直接复制或分发源码」（③ 类复用边界），不再作为技术淘汰条件**（OWNER OVERRIDE，§1.1）。
+  - ⚠️ 本条理由 ③ 的**旧写法**是「都要先过许可（AGPL 独立进程 / 无许可不可用）」，该写法已被 owner 决策 supersede，**已更正为上面的口径**。
 - **触发条件（写死，避免无限 DEFER）**：当出现一个**已确认的**、**单挑**的 flop/turn 决策需求时，先用 `b-inary/postflop-solver` 的 `TreeConfig` 做**离线**参照（独立进程、不进仓库），再决定是否自研通用树。
 
 ### 15. CFR / CFR+ / DCFR / Deep CFR —— `DEFER`
@@ -266,7 +302,7 @@ hole_cards      ->  UNKNOWN OF UNKNOWNS (??)
 
 - **现状**：`ui/aa-live/{index.html,app.js,controls.js,analysis.js,review.js,study.js,hand_input.js,analysis_records.js}` + `ui/aa-replay/`；服务端 `desktop/aa_server.py::create_app`（FastAPI，30+ 路由，含 `/api/hand-input/*`、`/api/analysis/records*`、`/api/review/*`）；状态目录 `launch/u2-trial/state/`（`profile.json` + `records/`）。
 - **上游依据**：GTOpen 有自己的 HTTP 服务（:3737）与 session/report 模型，但它是**求解器 UI**；PHH/PokerKit 无 UI。
-- **判断**：产品 UX 是 IP。**可借鉴的只是文件/结构层面的具体做法**（例如 GTOpen 的 session 单例 + 报告快照的组织方式），不引入代码（无许可）。
+- **判断**：产品 UX 是 IP。**可借鉴的只是文件/结构层面的具体做法**（例如 GTOpen 的 session 单例 + 报告快照的组织方式）——这属于 **① 类架构借鉴，无阻塞**。GTOpen 无明确 license 这一**事实不变**，但它界定的是 **③ 类「直接复制源码进产品」的边界**（当前不做；若未来项目用途改变再单独复核），**不是**「能否借鉴其组织方式」。
 
 ---
 
@@ -289,8 +325,8 @@ hole_cards      ->  UNKNOWN OF UNKNOWNS (??)
 | `datamllab/rlcard` | 相对 OpenSpiel/PokerKit **没有增量价值**：它是 RL 训练脚手架 + 自己的牌型评估，我们要的规则/序列化/评估三件事它都不比 OpenSpiel/PokerKit 强，且（【推断】）维护节奏落后于两者。 |
 | `EricSteinberger/PokerRL` | 评估/BR/H2H **全部硬断言 2 人**（5 处），依赖 `gym==0.10.9`/`pycrayon`(Docker)/`ray 0.6.1`，仅 Linux，PyPI 停在 2019，且**只发 `.dll/.so` 无 C++ 源码**（不可审计不可重建）。 |
 | `EricSteinberger/Deep-CFR` | 同上：是 PokerRL 的插件而非独立库，官方仅支持 Linux；H2H 脚本自述单次导出 ~15GB，需 24 核；明确定位 "designed for Researchers"。 |
-| `MatthewPDingle/GTOpen` | **无许可文件**（本轮复核不变），且翻后仅单挑、多人翻前 solver 在本机 7/8 人实测 92-499 秒且未收敛（【仓库既有】）。 |
-| `bupticybee/TexasSolver`（作为代码依赖） | AGPL：可以当**独立进程**参照，但**不能**把源码/二进制并进产品，不能静态链接。既有边界继续有效。 |
+| ~~`MatthewPDingle/GTOpen`~~ | ⚠️ **本行已被 OWNER OVERRIDE 修订（§1.1），不再是「不要接」。** 重新分类为**重点研究 / 本地复用候选**（solver workflow、Rust engine、preflop lab、reports、player model/evidence 设计）。**保留的事实边界**：仓库无明确 license（③ 类直接复制源码需单独评估）、翻后仅单挑、多人翻前 solver 本机 7/8 人实测 92-499 秒且未收敛（【仓库既有】）——**这些是范围与复用边界，不是技术淘汰**。 |
+| `bupticybee/TexasSolver`（作为代码依赖） | AGPL：可以当**独立进程**参照，但**不能**把源码/二进制并进产品，不能静态链接。既有边界继续有效。**OWNER OVERRIDE**：AGPL 只界定 **③ 类「源码/二进制能否进产品、能否静态链接」** 的复用与分发边界，**不再**据此判定「技术上不可用」；作为**离线独立进程 oracle / 源码学习候选**是允许的。 |
 | 已归档/烂尾候选（`DEEPFOLD-SOLVER` 之类） | 既有调研已淘汰（"All rights reserved" 伪装开源），本轮不重开。 |
 
 ---
@@ -352,7 +388,7 @@ hole_cards      ->  UNKNOWN OF UNKNOWNS (??)
 | **未知信息语义** | 上游**静默误判**未知（判负 / `KeyError`） | 🔴 **最高风险** | 架构上禁止把未知喂给上游；oracle 闸口只接受「已确认」输入，未知走我们的 UNKNOWN 路径 |
 | **测试策略** | 需要三套新测试：PHH 往返、差分（我们的规则 vs 上游）、oracle 闸的 fail-closed | 🟡 工作量 | 全部用**已有**的帧级夹具（`opening_rows_1260_1290_v1.json` 这类「adapter 之前」的行），CI 不依赖 `G:` |
 
-**其他项目的风险（用于排除决策）**：OpenSpiel = C++ 核心 + 需构建（Apache-2.0，活跃）⇒ 只作为**后期**评估框架；TexasSolver = AGPL + 独立进程；GTOpen = **无许可** ⇒ 不可用；PokerRL/Deep-CFR = Linux + 老旧依赖 + 二进制不可审计 ⇒ 方法论。
+**其他项目的风险（用于「集成方式与运行边界」决策，不再用于技术淘汰；OWNER OVERRIDE，§1.1）**：OpenSpiel = C++ 核心 + 需构建（Apache-2.0，活跃）⇒ 只作为**后期**评估框架；TexasSolver = AGPL ⇒ **离线独立进程 oracle / 源码学习候选**（AGPL 只限 ③ 类复用）；GTOpen = **无明确 license** ⇒ **技术研究 / PoC / oracle 候选**，直接复制或分发源码需单独评估（**不是**「不可用」）；PokerRL/Deep-CFR = Linux + 老旧依赖 + 二进制不可审计 ⇒ 方法论。**第一筛选标准已改为「能否减少自研弯路 / 能否提供可验证能力」，不再是许可状态。**
 
 ---
 
@@ -405,7 +441,10 @@ hole_cards      ->  UNKNOWN OF UNKNOWNS (??)
 **方法论来自 PokerRL（MIT）的 `ValueFiller.py:21-101`，校准来自 OpenSpiel（Apache-2.0）的 `exploitability`**，实现自己写（河牌无后续街 ⇒ 不需要 CFR 遍历器）。**不用** PokerRL 作为依赖（5 处 HU 硬断言、Linux-only、仅二进制扩展、PyPI 停在 2019）。
 
 **Q6. 哪些开源项目虽然听起来相关但**不**合适？**
-`GTOpen`（**无许可文件** + 翻后仅 HU + 本机多人实测未收敛）、`PokerRL` / `Deep-CFR`（HU-only 断言 + Linux + 老依赖 + 无 C++ 源码；研究代码自述 "INEFFICIENT and SLOW"）、`rlcard`（相对 OpenSpiel/PokerKit 无增量）、`TexasSolver`（**作为代码依赖**不合适：AGPL；作为独立进程参照可用）、以及既有已淘汰的 `DEEPFOLD-SOLVER`（"All rights reserved"）之类。
+`PokerRL` / `Deep-CFR`（**技术原因**：HU-only 硬断言 + Linux-only + 老依赖 + 无 C++ 源码；研究代码自述 "INEFFICIENT and SLOW"——**不是**许可原因）、`rlcard`（**技术原因**：相对 OpenSpiel/PokerKit 无增量）、以及既有已淘汰的 `DEEPFOLD-SOLVER`（"All rights reserved" 伪装开源）之类。
+**以下两项按 OWNER OVERRIDE（§1.1）重新分类，不再是「不合适」**：
+- **`MatthewPDingle/GTOpen`** → **技术研究 / 本地复用候选**（solver workflow、Rust engine、preflop lab、reports、player model/evidence 设计）。保留事实边界：无明确 license（③ 类直接复制/分发需单独评估）、翻后仅 HU、本机多人实测未收敛（7/8 人 92-499 秒且两个 realization 相互矛盾）。
+- **`bupticybee/TexasSolver`** → **技术参考 / oracle 候选**（离线独立进程）。AGPL 只界定 ③ 类「源码/二进制不进产品、不静态链接」的复用边界；**不因 AGPL 判为技术不可用**。
 
 **Q7. 本轮之后优先级最高的 3 个工程任务？**
 见 §9。
@@ -478,7 +517,7 @@ hole_cards      ->  UNKNOWN OF UNKNOWNS (??)
 | --- | --- | --- |
 | `docs/tech-stack-matrix.md`（2026-08-19） | PokerKit 列为**候选**（MIT、纯 Python、99% 覆盖），用途候选「接管规则正确性」 | **本轮把候选变成结论**：给出可执行的接管路径、差分测试要求与风险（未知信息误判）。 |
 | `docs/research-open-source-solvers.md`（2026-09-06） | 不存在开源多人翻后求解器；首选 `b-inary/postflop-solver`（AGPL、有 bunching）；AGPL 隔离边界 | **本轮复核成立**，并把「被下一轮任务清单漏掉的首选」重新带回（Q4）。 |
-| `docs/research-multiplayer-preflop-assets.md`（2026-09-06） | GTOpen：**无 LICENSE**、Windows 可构建、7/8 人翻前实测 92-499s 且未收敛、翻后仅 HU | **本轮复核不变**（`gh api …/license` 仍为空）；结论纳入 §3「不要接」与 H2 的无效比较清单。 |
+| `docs/research-multiplayer-preflop-assets.md`（2026-09-06） | GTOpen：**无 LICENSE**、Windows 可构建、7/8 人翻前实测 92-499s 且未收敛、翻后仅 HU | **本轮复核不变**（`gh api …/license` 仍为空）——该**事实继续保留**；但自 2026-09-18 OWNER OVERRIDE（§1.1）起**不再**据此把它判为技术不可用：§3 中该行已改为「重点研究 / 本地复用候选」，H2 的无效比较清单（HU-only、多人翻前未收敛）**仍然成立**（那是范围边界，不是许可淘汰）。 |
 | `docs/AA-MULTIWAY-STRATEGY-RESEARCH-20260913.zh-CN.md` | 多人 GTO 的可行性与边界；「研究、数学模块与条件分析入口已交付，多人 GTO/学习后范围/一般下注策略/盈利验收没有被宣称完成」 | 本轮的 §5 Phase B/C 与该结论一致：**不宣称**任何多人 GTO 能力。 |
 
 **本轮新增（既有文档没有的）**：PHH/PHH-std 的评估与「采用为 canonical 手牌格式」的结论；PokerKit 对**未知信息的静默误判**这一硬风险；AA 桌强制投入结构在 PokerKit 上的**可执行复现**（17）。
