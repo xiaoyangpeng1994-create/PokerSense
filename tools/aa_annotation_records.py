@@ -16,6 +16,34 @@ This module is a **data governance record store**, nothing else:
 * ``assess_use`` derives eligibility read-only and fails closed. Clients cannot
   submit ``training_eligible=true``.
 
+Two identities, deliberately separate
+------------------------------------
+
+``source_key``
+    *Evidence identity*: bound to the audit manifest reference, the audit
+    digest, the media id, the media digest, the frame index and the frame
+    digest. It identifies "this annotation was made against this audit".
+
+``exposure_root_key``
+    *Long-term content / exposure identity*: bound to the canonical
+    ``media_sha256``, ``frame_index`` and ``frame_sha256`` only. Re-auditing
+    the same bytes, rebuilding a manifest or renaming a media alias must never
+    reset exposure history, so those provenance strings are excluded here.
+
+Digests are canonicalised to lowercase before either key is derived, so an
+upper/lower case spelling of the same digest cannot create two identities.
+
+Positive consumption permission is closed
+-----------------------------------------
+
+Current main exposes **no reviewed consumer registry and no global annotation /
+exposure store inventory**. This module therefore does not invent one: a
+positive ``ALLOWED_FOR_PURPOSE`` verdict is not derivable here and ``assess_use``
+resolves to ``BLOCKED`` with ``trusted_consumer_registry_unavailable`` and
+``global_history_inventory_unavailable``. The value delivered by P0 is the
+annotation revision history and the exposure history, not a pass for a training
+system. False negatives are acceptable; a false ``ALLOWED`` is not.
+
 Explicit non-goals of P0 (see ``docs/AA-FIELD-ANNOTATIONS-V1.zh-CN.md``):
 
 * No per-event hash chain (``previous_sha256`` / ``entry_sha256`` linkage) was
@@ -25,6 +53,10 @@ Explicit non-goals of P0 (see ``docs/AA-FIELD-ANNOTATIONS-V1.zh-CN.md``):
   generation, no model invocation.
 * No promotion bridge into gold, confirmed poker facts, PHH actions, acceptance
   or strategy eligibility. This store is not a second truth source.
+* No freeze adapter: ``exposure_projection`` emits a row view for a future
+  controlled adapter. It is not attached to
+  ``aa8_holdout_plan.validate_freeze`` and must not be described as bindable by
+  that validator.
 """
 
 import hashlib
@@ -36,7 +68,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from tools.aa_data_separation import assert_training_frames
+from tools.aa_data_separation import assert_training_frames, validate_reservations
 
 SCHEMA_VERSION = "aa-field-annotations-v1"
 
@@ -151,6 +183,11 @@ P1_FIELD_CANDIDATES = frozenset({
     "special_mode",
 })
 
+SHA_IDENTITY_FIELDS = (
+    "source_audit_sha256",
+    "media_sha256",
+    "frame_sha256",
+)
 TEXT_IDENTITY_FIELDS = (
     "source_audit_ref",
     "source_audit_sha256",
@@ -167,6 +204,9 @@ REQUIRED_IDENTITY_FIELDS = CORE_IDENTITY_FIELDS + (
 )
 OPTIONAL_IDENTITY_FIELDS = ("implementation_revision", "parent_frame_ref")
 IDENTITY_FIELDS = frozenset(REQUIRED_IDENTITY_FIELDS + OPTIONAL_IDENTITY_FIELDS)
+
+# Long-term exposure root: canonical content + frame, never provenance strings.
+EXPOSURE_ROOT_FIELDS = ("media_sha256", "frame_index", "frame_sha256")
 
 # Long-term identity may never be expressed as a mutable location or a UI row.
 FORBIDDEN_IDENTITY_KEYS = frozenset({
@@ -186,6 +226,22 @@ ANNOTATION_FILE = "annotations.jsonl"
 EXPOSURE_FILE = "exposures.jsonl"
 LOCK_FILE = ".aa-annotation-store.lock"
 LOCK_TIMEOUT_SECONDS = 5.0
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# The only reservation authority this module recognises. It is read from the
+# reviewed artifact in current main; a caller-supplied reservation mapping is
+# never used as authority.
+RESERVATION_ARTIFACT_RELATIVE = "configs/reproduction/aa_holdout_reservations_v1.json"
+
+# Conservative gates, not design shortcuts. Current main has no reviewed
+# consumer registry and no global store inventory, so a positive consumption
+# permission cannot be derived. Both stay False until a reviewed adapter
+# exists; assess_use fails closed on them until then.
+TRUSTED_CONSUMER_REGISTRY_AVAILABLE = False
+TRUSTED_HISTORY_INVENTORY_AVAILABLE = False
+
+EXPOSURE_ROLES = frozenset({"development", "calibration", "holdout"})
 
 
 class AnnotationError(Exception):
@@ -262,10 +318,31 @@ def _is_non_empty_str(value):
     return isinstance(value, str) and value.strip() != ""
 
 
+def _canonical_sha256(value):
+    """Return the canonical lowercase digest, or None when not a SHA-256."""
+    if not isinstance(value, str) or len(value) != 64:
+        return None
+    lowered = value.lower()
+    for char in lowered:
+        if char not in "0123456789abcdef":
+            return None
+    return lowered
+
+
 def _looks_like_sha256(value):
-    return isinstance(value, str) and len(value) == 64 and all(
-        char in "0123456789abcdef" for char in value.lower()
-    )
+    return _canonical_sha256(value) is not None
+
+
+def _canonical_identity_ref(ref):
+    """Lowercase every digest in a source reference / parent reference."""
+    out = dict(ref)
+    for name in SHA_IDENTITY_FIELDS:
+        value = out.get(name)
+        if isinstance(value, str):
+            canonical = _canonical_sha256(value)
+            if canonical is not None:
+                out[name] = canonical
+    return out
 
 
 class _StoreLock:
@@ -316,8 +393,11 @@ class AnnotationStore:
     def lock(self):
         return _StoreLock(self._lock_path)
 
-    def read_annotations(self):
-        return self._read(self._annotations, "annotation")
+    def read_annotations(self, *, validate=True):
+        rows = self._read(self._annotations, "annotation")
+        if validate:
+            validate_annotation_rows(rows)
+        return rows
 
     def read_exposures(self):
         return self._read(self._exposures, "exposure")
@@ -395,13 +475,52 @@ def _coerce_label(label):
     raise LabelValidationError("label_must_be_label_or_mapping")
 
 
+def _exposure_root_key(media_sha256, frame_index, frame_sha256):
+    """Long-term content identity; provenance strings are excluded on purpose."""
+    if media_sha256 is None or frame_sha256 is None:
+        return None
+    if not (_is_int(frame_index) and frame_index >= 0):
+        return None
+    return _fingerprint({
+        "media_sha256": media_sha256,
+        "frame_index": frame_index,
+        "frame_sha256": frame_sha256,
+    })
+
+
+def _parent_gaps(parent):
+    """Validate a parent frame reference fully; only one derivation level."""
+    gaps = []
+    if not isinstance(parent, dict) or not parent:
+        return ["parent_frame_ref_empty_or_not_mapping"]
+    unknown = sorted(set(parent) - set(IDENTITY_FIELDS))
+    if unknown:
+        gaps.append("unknown_parent_frame_ref_keys:" + ",".join(unknown))
+    if parent.get("parent_frame_ref") is not None:
+        gaps.append("nested_parent_not_supported")
+    for name in TEXT_IDENTITY_FIELDS:
+        if not _is_non_empty_str(parent.get(name)):
+            gaps.append("parent_missing:" + name)
+    for name in SHA_IDENTITY_FIELDS:
+        value = parent.get(name)
+        if value is not None and _canonical_sha256(value) is None:
+            gaps.append("parent_bad_sha256:" + name)
+    frame = parent.get("frame_index")
+    if not (_is_int(frame) and frame >= 0):
+        gaps.append("parent_bad_frame_index")
+    return gaps
+
+
 def _canonical_source_ref(source_ref, *, allow_incomplete):
-    """Validate a source reference and derive its stable identity key.
+    """Validate a source reference and derive its stable identity keys.
 
     Missing identity fields never raise when ``allow_incomplete`` is set; they
     are reported as gaps so that historical exposure facts stay recordable.
     Structural misuse (forbidden path/name/index keys, wrong key set) always
     raises, because those can never be a long-term identity.
+
+    Parent lineage is validated **before** the identity class is derived, so a
+    broken, reserved or nested parent can never yield ``COMPLETE``.
     """
     if source_ref is None or not isinstance(source_ref, dict):
         raise SourceIdentityError("source_ref_must_be_mapping")
@@ -414,23 +533,24 @@ def _canonical_source_ref(source_ref, *, allow_incomplete):
     if unknown:
         raise SourceIdentityError("unknown_source_ref_keys:" + ",".join(unknown))
 
+    ref = _canonical_identity_ref(source_ref)
     gaps = []
     for name in TEXT_IDENTITY_FIELDS:
-        if not _is_non_empty_str(source_ref.get(name)):
+        if not _is_non_empty_str(ref.get(name)):
             gaps.append("missing:" + name)
-    for name in ("source_audit_sha256", "media_sha256", "frame_sha256"):
-        value = source_ref.get(name)
-        if value is not None and not _looks_like_sha256(value):
+    for name in SHA_IDENTITY_FIELDS:
+        value = ref.get(name)
+        if value is not None and _canonical_sha256(value) is None:
             gaps.append("bad_sha256:" + name)
-    frame = source_ref.get("frame_index")
+    frame = ref.get("frame_index")
     if not (_is_int(frame) and frame >= 0):
         gaps.append("bad_frame_index")
     for name in ("layout_id", "observation_snapshot_digest"):
-        if not _is_non_empty_str(source_ref.get(name)):
+        if not _is_non_empty_str(ref.get(name)):
             gaps.append("missing:" + name)
 
-    slot_count = source_ref.get("slot_count")
-    slot_mapping = source_ref.get("slot_mapping")
+    slot_count = ref.get("slot_count")
+    slot_mapping = ref.get("slot_mapping")
     if slot_count is None:
         gaps.append("missing:slot_count")
     elif not _is_int(slot_count):
@@ -453,14 +573,31 @@ def _canonical_source_ref(source_ref, *, allow_incomplete):
             ) != [str(index) for index in range(SUPPORTED_SLOT_COUNT)]:
                 gaps.append("slot_mapping_not_bijective")
 
-    parent = source_ref.get("parent_frame_ref")
-    if parent is not None and not isinstance(parent, dict):
-        gaps.append("bad_parent_frame_ref")
-        parent = None
+    parent = ref.get("parent_frame_ref")
+    parent_source_key = None
+    parent_root_key = None
+    parent_frame_index = None
+    if parent is not None:
+        canonical_parent = (
+            _canonical_identity_ref(parent) if isinstance(parent, dict) else parent
+        )
+        parent_gaps = _parent_gaps(canonical_parent)
+        if parent_gaps:
+            gaps.extend(parent_gaps)
+        else:
+            parent_source_key = _fingerprint(
+                {name: canonical_parent.get(name) for name in CORE_IDENTITY_FIELDS}
+            )
+            parent_root_key = _exposure_root_key(
+                canonical_parent.get("media_sha256"),
+                canonical_parent.get("frame_index"),
+                canonical_parent.get("frame_sha256"),
+            )
+            parent_frame_index = canonical_parent.get("frame_index")
 
     core_missing = [
         name for name in TEXT_IDENTITY_FIELDS
-        if not _is_non_empty_str(source_ref.get(name))
+        if not _is_non_empty_str(ref.get(name))
     ]
     if not (_is_int(frame) and frame >= 0):
         core_missing.append("frame_index")
@@ -476,40 +613,32 @@ def _canonical_source_ref(source_ref, *, allow_incomplete):
             "source_identity_not_complete:" + ",".join(sorted(set(gaps)))
         )
 
-    key_material = {
-        name: source_ref.get(name) for name in CORE_IDENTITY_FIELDS
-    }
     source_key = None
     if not core_missing:
-        source_key = _fingerprint(key_material)
+        source_key = _fingerprint(
+            {name: ref.get(name) for name in CORE_IDENTITY_FIELDS}
+        )
+    root_key = None
+    if not core_missing:
+        root_key = _exposure_root_key(
+            ref.get("media_sha256"), frame, ref.get("frame_sha256")
+        )
 
-    parent_key = None
-    if isinstance(parent, dict):
-        parent_key_missing = [
-            name for name in TEXT_IDENTITY_FIELDS
-            if not _is_non_empty_str(parent.get(name))
-        ]
-        if not (_is_int(parent.get("frame_index"))
-                and parent["frame_index"] >= 0):
-            parent_key_missing.append("frame_index")
-        if not parent_key_missing:
-            parent_key = _fingerprint(
-                {name: parent.get(name) for name in CORE_IDENTITY_FIELDS}
-            )
-        else:
-            gaps.append("parent_frame_identity_incomplete")
-
-    normalised = {
-        name: source_ref.get(name) for name in REQUIRED_IDENTITY_FIELDS
-    }
-    normalised["implementation_revision"] = source_ref.get("implementation_revision")
-    normalised["parent_frame_ref"] = source_ref.get("parent_frame_ref")
+    normalised = {name: ref.get(name) for name in REQUIRED_IDENTITY_FIELDS}
+    normalised["implementation_revision"] = ref.get("implementation_revision")
+    normalised["parent_frame_ref"] = (
+        canonical_parent if parent is not None and isinstance(parent, dict)
+        else parent
+    )
     return {
         "source_key": source_key,
-        "parent_source_key": parent_key,
+        "exposure_root_key": root_key,
+        "parent_source_key": parent_source_key,
+        "parent_exposure_root_key": parent_root_key,
+        "parent_frame_index": parent_frame_index,
         "identity_class": identity_class,
         "identity_gaps": sorted(set(gaps)),
-        "frame_index": source_ref.get("frame_index"),
+        "frame_index": frame,
         "slot_count": slot_count,
         "slot_mapping": slot_mapping if isinstance(slot_mapping, dict) else {},
         "normalised": normalised,
@@ -595,6 +724,143 @@ def _group_key(source_key, field_id, seat):
     return source_key + "|" + field_id + "|" + ("null" if seat is None else str(seat))
 
 
+def _row_identity(row):
+    """Recompute the identity of one stored annotation row."""
+    ref = row.get("source_ref")
+    if not isinstance(ref, dict):
+        raise StoreIntegrityError("annotation:missing_source_ref")
+    try:
+        return _canonical_source_ref(ref, allow_incomplete=True)
+    except AnnotationError as exc:
+        raise StoreIntegrityError("annotation:unusable_source_ref:" + str(exc))
+
+
+def validate_annotation_rows(rows):
+    """Full semantic validation of a recovered annotation store.
+
+    Syntax alone is never enough: revision ids, group identity, label
+    semantics, supersedes lineage and the revision graph shape are all
+    re-derived from the stored ``source_ref``. A store that fails here is not
+    repaired and not partially trusted.
+    """
+    by_revision = {}
+    for row in rows:
+        revision_id = row.get("revision_id")
+        if not _is_non_empty_str(revision_id):
+            raise StoreIntegrityError("annotation:missing_revision_id")
+        if revision_id in by_revision:
+            raise StoreIntegrityError(
+                "annotation:duplicate_revision_id:" + revision_id
+            )
+        by_revision[revision_id] = row
+
+    for revision_id, row in by_revision.items():
+        identity = _row_identity(row)
+        if identity["source_key"] is None:
+            raise StoreIntegrityError(
+                "annotation:unbound_source_key:" + revision_id
+            )
+        if identity["source_key"] != row.get("source_key"):
+            raise StoreIntegrityError(
+                "annotation:source_key_mismatch:" + revision_id
+            )
+        field_id = row.get("field_id")
+        seat = row.get("seat")
+        expected_group = _group_key(identity["source_key"], field_id, seat)
+        if expected_group != row.get("group_key"):
+            raise StoreIntegrityError("annotation:forged_group_key:" + revision_id)
+        try:
+            _validate_field(field_id)
+        except AnnotationError as exc:
+            raise StoreIntegrityError(
+                "annotation:bad_field:" + revision_id + ":" + str(exc)
+            )
+        metadata = row.get("metadata")
+        metadata = metadata if isinstance(metadata, dict) else {}
+        try:
+            _validate_label_for_field(
+                field_id,
+                Label(
+                    status=row.get("status"),
+                    value=row.get("value"),
+                    unit=row.get("unit"),
+                    reason=row.get("reason"),
+                ),
+                amount_role=metadata.get("amount_role"),
+                full_actions=(
+                    [True] if metadata.get("full_actions_declared") else None
+                ),
+            )
+        except AnnotationError as exc:
+            raise StoreIntegrityError(
+                "annotation:label_violation:" + revision_id + ":" + str(exc)
+            )
+        try:
+            _validate_seat(seat, identity)
+        except AnnotationError as exc:
+            raise StoreIntegrityError(
+                "annotation:bad_seat:" + revision_id + ":" + str(exc)
+            )
+
+    for revision_id, row in by_revision.items():
+        supersedes = row.get("supersedes")
+        expected = row.get("expected_revision")
+        if supersedes is None:
+            if expected is not None:
+                raise StoreIntegrityError(
+                    "annotation:expected_revision_without_supersedes:" + revision_id
+                )
+            continue
+        if not _is_non_empty_str(supersedes):
+            raise StoreIntegrityError("annotation:bad_supersedes:" + revision_id)
+        target = by_revision.get(supersedes)
+        if target is None:
+            raise StoreIntegrityError("annotation:orphan_supersedes:" + revision_id)
+        if target.get("group_key") != row.get("group_key"):
+            raise StoreIntegrityError(
+                "annotation:cross_group_supersedes:" + revision_id
+            )
+        if expected != supersedes:
+            raise StoreIntegrityError(
+                "annotation:expected_revision_mismatch:" + revision_id
+            )
+
+    for revision_id in by_revision:
+        seen = set()
+        cursor = revision_id
+        while cursor is not None:
+            if cursor in seen:
+                raise StoreIntegrityError("annotation:revision_cycle:" + revision_id)
+            seen.add(cursor)
+            cursor = by_revision[cursor].get("supersedes")
+
+    groups = {}
+    for revision_id, row in by_revision.items():
+        groups.setdefault(row.get("group_key"), []).append(revision_id)
+    for group, revision_ids in groups.items():
+        roots = [
+            revision_id for revision_id in revision_ids
+            if by_revision[revision_id].get("supersedes") is None
+        ]
+        superseded = {
+            by_revision[revision_id].get("supersedes")
+            for revision_id in revision_ids
+            if by_revision[revision_id].get("supersedes") is not None
+        }
+        heads = [
+            revision_id for revision_id in revision_ids
+            if revision_id not in superseded
+        ]
+        if len(roots) != 1:
+            raise StoreIntegrityError(
+                "annotation:revision_root_not_unique:" + str(group)
+            )
+        if len(heads) != 1:
+            raise StoreIntegrityError(
+                "annotation:revision_head_not_unique:" + str(group)
+            )
+
+
 def _fold_annotations(records):
     """Return {group_key: [records in append order]} plus per-group head."""
     groups = {}
@@ -640,7 +906,9 @@ def get_annotations(store, source_ref=None, include_history=False, **filters):
     """Read current annotation values (and optionally the full revision chain).
 
     The winning value is folded through ``supersedes`` / revision identity,
-    never guessed from a timestamp.
+    never guessed from a timestamp. The whole store is semantically validated
+    first, so a syntactically valid but semantically broken store raises
+    instead of returning a value.
     """
     resolved = _coerce_store(store)
     source_identity = None
@@ -704,10 +972,14 @@ def append_annotation(
 
     Old revisions are never overwritten; ``expected_revision`` must match the
     durable head for the same (source, field, seat) or the append is refused.
+    The existing store is validated before the append, so a broken revision
+    graph can never be "repaired" by opening a new root.
     """
     resolved = _coerce_store(store)
     _validate_field(field_id)
     identity = _canonical_source_ref(source_ref, allow_incomplete=True)
+    if identity["source_key"] is None:
+        raise SourceIdentityError("annotation_requires_core_source_identity")
     _validate_seat(seat, identity)
     resolved_label = _coerce_label(label)
     _validate_label_for_field(
@@ -752,7 +1024,9 @@ def append_annotation(
             "recorded_at": recorded_at or utc_now(),
             "actor": actor,
             "source_key": identity["source_key"],
+            "exposure_root_key": identity["exposure_root_key"],
             "parent_source_key": identity["parent_source_key"],
+            "parent_exposure_root_key": identity["parent_exposure_root_key"],
             "identity_class": identity["identity_class"],
             "identity_gaps": identity["identity_gaps"],
             "source_ref": identity["normalised"],
@@ -784,12 +1058,88 @@ def append_annotation(
 
 
 def _query_keys(identity):
+    """Every key whose exposure history applies to this identity."""
     keys = set()
-    if identity["source_key"]:
-        keys.add(identity["source_key"])
-    if identity["parent_source_key"]:
-        keys.add(identity["parent_source_key"])
+    for name in (
+        "source_key",
+        "exposure_root_key",
+        "parent_source_key",
+        "parent_exposure_root_key",
+    ):
+        value = identity.get(name)
+        if _is_non_empty_str(value):
+            keys.add(value)
     return keys
+
+
+def _event_keys(row):
+    """Keys of one stored exposure event, recomputed when root keys are absent."""
+    keys = set()
+    for name in (
+        "source_key",
+        "exposure_root_key",
+        "parent_source_key",
+        "parent_exposure_root_key",
+    ):
+        value = row.get(name)
+        if _is_non_empty_str(value):
+            keys.add(value)
+    ref = row.get("source_ref")
+    if isinstance(ref, dict):
+        try:
+            identity = _canonical_source_ref(ref, allow_incomplete=True)
+        except AnnotationError:
+            return keys
+        keys |= _query_keys(identity)
+    return keys
+
+
+def _filter_events(events, keys):
+    if not keys:
+        return []
+    return [row for row in events if _event_keys(row) & keys]
+
+
+def _validate_consumer(consumer):
+    """Validate the minimal consumer identity; never a permission by itself."""
+    if consumer is None or not isinstance(consumer, dict):
+        raise ExposureError("consumer_identity_required")
+    consumer_id = consumer.get("consumer_id")
+    if not _is_non_empty_str(consumer_id):
+        raise ExposureError("consumer_id_required")
+    digest_value = consumer.get("digest", consumer.get("sha256"))
+    if not _is_non_empty_str(digest_value):
+        raise ExposureError("consumer_digest_required")
+    targets = consumer.get("required_targets")
+    if not isinstance(targets, (list, tuple)) or not targets:
+        raise ExposureError("consumer_required_targets_required")
+    for target in targets:
+        if not isinstance(target, dict):
+            raise ExposureError("consumer_target_must_be_mapping")
+        try:
+            _validate_field(target.get("field_id"))
+        except AnnotationError as exc:
+            raise ExposureError("consumer_target_field_unsupported:" + str(exc))
+        seat = target.get("seat")
+        if seat is not None and not (_is_int(seat) and seat >= 0):
+            raise ExposureError("consumer_target_seat_invalid:" + str(seat))
+    return consumer_id
+
+
+def _validate_run_ref(run_or_manifest_ref):
+    if run_or_manifest_ref is None or not isinstance(run_or_manifest_ref, dict):
+        raise ExposureError("run_or_manifest_ref_required")
+    if not run_or_manifest_ref:
+        raise ExposureError("run_or_manifest_ref_must_not_be_empty")
+    if not _is_non_empty_str(run_or_manifest_ref.get("kind")):
+        raise ExposureError("run_or_manifest_ref_kind_required")
+    identity_value = (
+        run_or_manifest_ref.get("digest")
+        or run_or_manifest_ref.get("sha256")
+        or run_or_manifest_ref.get("ref")
+    )
+    if not _is_non_empty_str(identity_value):
+        raise ExposureError("run_or_manifest_ref_digest_required")
 
 
 def record_exposure(
@@ -800,6 +1150,7 @@ def record_exposure(
     run_or_manifest_ref,
     evidence_kind,
     *,
+    consumer=None,
     policy_ref=None,
     artifact_ref=None,
     role=None,
@@ -811,12 +1162,20 @@ def record_exposure(
 
     Historical facts are always recorded, including ones that violated policy:
     refusing to store them would let past contamination disappear from history.
+
+    A recorded event is only bound when every consumed revision is proven to
+    belong to this source lineage, to the consumer's exact (field, seat)
+    targets and, for actual consumption, to a ``KNOWN`` label. Anything else is
+    refused before a byte is written, because an unbound event would otherwise
+    circulate as a trusted consumption fact.
     """
     resolved = _coerce_store(store)
     if purpose not in PURPOSES:
         raise ExposureError("unsupported_purpose:" + str(purpose))
     if evidence_kind not in EVIDENCE_KINDS:
         raise ExposureError("unsupported_evidence_kind:" + str(evidence_kind))
+    _validate_run_ref(run_or_manifest_ref)
+    _validate_consumer(consumer)
     identity = _canonical_source_ref(source_ref, allow_incomplete=True)
     if identity["source_key"] is None:
         raise SourceIdentityError("exposure_requires_core_source_identity")
@@ -825,14 +1184,69 @@ def record_exposure(
     for revision in annotation_revision_ids:
         if not _is_non_empty_str(revision):
             raise ExposureError("bad_annotation_revision_id")
-    if run_or_manifest_ref is None or not isinstance(run_or_manifest_ref, dict):
-        raise ExposureError("run_or_manifest_ref_required")
+    if evidence_kind != EVIDENCE_RELEASED and not annotation_revision_ids:
+        raise ExposureError("consumed_revision_set_required")
     if artifact_ref is not None and not isinstance(artifact_ref, dict):
         raise ExposureError("artifact_ref_must_be_mapping")
-    if role is not None and role not in ("development", "calibration", "holdout"):
+    if role is not None and role not in EXPOSURE_ROLES:
         raise ExposureError("unsupported_exposure_role:" + str(role))
     if policy_violation not in (True, False):
         raise ExposureError("policy_violation_must_be_bool")
+
+    lineage_keys = {
+        identity["source_key"],
+        identity["parent_source_key"],
+    }
+    lineage_keys.discard(None)
+    root_keys = {
+        identity["exposure_root_key"],
+        identity["parent_exposure_root_key"],
+    }
+    root_keys.discard(None)
+
+    rows = resolved.read_annotations()
+    by_revision = {row.get("revision_id"): row for row in rows}
+    targets = [
+        (target.get("field_id"), target.get("seat"))
+        for target in consumer.get("required_targets")
+    ]
+    seen_targets = set()
+    bound = []
+    for revision in annotation_revision_ids:
+        row = by_revision.get(revision)
+        if row is None:
+            raise ExposureError("consumed_revision_not_found:" + revision)
+        if row.get("source_key") not in lineage_keys:
+            raise ExposureError("consumed_revision_source_mismatch:" + revision)
+        row_root = row.get("exposure_root_key")
+        if row_root is None:
+            row_identity = _row_identity(row)
+            row_root = row_identity.get("exposure_root_key")
+        if row_root not in root_keys:
+            raise ExposureError("consumed_revision_content_mismatch:" + revision)
+        pair = (row.get("field_id"), row.get("seat"))
+        if pair not in targets:
+            raise ExposureError("consumed_revision_not_a_consumer_target:" + revision)
+        if evidence_kind == EVIDENCE_ACTUALLY_CONSUMED and (
+            row.get("status") != STATUS_KNOWN
+        ):
+            raise ExposureError("unknown_revision_cannot_be_consumed:" + revision)
+        seen_targets.add(pair)
+        bound.append({
+            "revision_id": revision,
+            "field_id": row.get("field_id"),
+            "seat": row.get("seat"),
+            "status": row.get("status"),
+        })
+    missing_targets = [
+        pair for pair in targets
+        if pair not in seen_targets and annotation_revision_ids
+    ]
+    if missing_targets:
+        raise ExposureError(
+            "consumer_target_not_consumed:"
+            + ",".join(f"{field}:{seat}" for field, seat in missing_targets)
+        )
 
     event_id = "exp-" + uuid.uuid4().hex
     row = {
@@ -842,17 +1256,28 @@ def record_exposure(
         "recorded_at": recorded_at or utc_now(),
         "actor": actor,
         "source_key": identity["source_key"],
+        "exposure_root_key": identity["exposure_root_key"],
         "parent_source_key": identity["parent_source_key"],
+        "parent_exposure_root_key": identity["parent_exposure_root_key"],
         "source_ref": identity["normalised"],
         "purpose": purpose,
         "evidence_kind": evidence_kind,
         "annotation_revision_ids": list(annotation_revision_ids),
+        "annotation_revision_refs": bound,
+        "consumer": {
+            "consumer_id": consumer.get("consumer_id"),
+            "digest": consumer.get("digest", consumer.get("sha256")),
+            "required_targets": [
+                {"field_id": field, "seat": seat} for field, seat in targets
+            ],
+        },
         "run_or_manifest_ref": dict(run_or_manifest_ref),
         "artifact_ref": dict(artifact_ref) if artifact_ref else None,
         "role": role,
         "policy_ref": policy_ref,
         "policy_violation": policy_violation,
         "identity_class": identity["identity_class"],
+        "binding_status": "BOUND",
     }
     try:
         with resolved.lock():
@@ -881,35 +1306,143 @@ def _fold_exposure_state(rows, *, coverage_complete=False):
     return STATE_UNKNOWN
 
 
-def _policy_bundle_view(policy_bundle):
-    if policy_bundle is None or not isinstance(policy_bundle, dict):
-        return None
-    return policy_bundle
+def load_trusted_reservations():
+    """Load the reviewed reservation artifact shipped by current main.
+
+    Returns ``(reservations, artifact_sha256, reasons)``. This mapping is the
+    only reservation authority recognised here; a caller-supplied reservation
+    mapping is compared against it and never replaces it.
+    """
+    path = REPO_ROOT / RESERVATION_ARTIFACT_RELATIVE
+    if not path.is_file():
+        return None, None, [
+            "trusted_reservation_artifact_missing:" + RESERVATION_ARTIFACT_RELATIVE
+        ]
+    try:
+        raw = path.read_bytes()
+        payload = json.loads(raw.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return None, None, [
+            "trusted_reservation_artifact_unreadable:" + str(exc)[:60]
+        ]
+    if not isinstance(payload, dict):
+        return None, None, ["trusted_reservation_artifact_not_object"]
+    try:
+        validate_reservations(payload)
+    except Exception as exc:
+        return None, None, [
+            "trusted_reservation_artifact_invalid:" + str(exc)[:60]
+        ]
+    return payload, _sha256_hex(raw), []
 
 
-def _read_declared_stores(policy_bundle, own_path):
+def _read_declared_stores(own_store, declared_paths):
+    """Common multi-store history reader used by assess and projection.
+
+    Every declared store is read, then duplicate event ids with identical
+    content are collapsed and conflicting ones are reported. Nothing here can
+    prove that an undeclared store does not exist, so coverage stays
+    ``UNKNOWN`` until a reviewed global inventory is wired in.
+    """
     reasons = []
-    rows = []
-    declared = policy_bundle.get("declared_store_paths")
-    if declared is None:
-        return rows, ["exposure_history_coverage_undeclared"]
-    if not isinstance(declared, (list, tuple)) or not declared:
-        return rows, ["exposure_history_coverage_undeclared"]
-    own = str(Path(own_path).resolve()).casefold()
-    paths = []
-    for entry in declared:
+    events = []
+    if declared_paths is None:
+        reasons.append("exposure_history_coverage_undeclared")
+        declared_paths = []
+    elif not isinstance(declared_paths, (list, tuple)) or not declared_paths:
+        reasons.append("exposure_history_coverage_undeclared")
+        declared_paths = []
+
+    own_key = str(Path(own_store.path).resolve()).casefold()
+    seen_paths = set()
+    for entry in declared_paths:
         target = Path(entry)
         if not target.exists():
             reasons.append("declared_store_missing:" + str(target))
             continue
-        paths.append(str(target.resolve()).casefold())
+        resolved = str(target.resolve()).casefold()
+        if resolved in seen_paths:
+            continue
+        seen_paths.add(resolved)
         try:
-            rows.extend(AnnotationStore(target).read_exposures())
-        except (StoreIntegrityError, OSError):
+            rows = AnnotationStore(target).read_exposures()
+        except (StoreIntegrityError, OSError, UnicodeDecodeError):
             reasons.append("declared_store_unreadable:" + str(target))
-    if own not in paths:
+            continue
+        events.extend(rows)
+    if own_key not in seen_paths:
         reasons.append("own_store_not_declared_in_history_coverage")
-    return rows, reasons
+        try:
+            events.extend(own_store.read_exposures())
+        except (StoreIntegrityError, OSError, UnicodeDecodeError):
+            reasons.append("declared_store_unreadable:" + own_key)
+    if not TRUSTED_HISTORY_INVENTORY_AVAILABLE:
+        reasons.append("global_history_inventory_unavailable")
+    by_id = {}
+    order = []
+    conflicts = []
+    for row in events:
+        event_id = row.get("event_id")
+        if not _is_non_empty_str(event_id):
+            conflicts.append("history_event_without_id")
+            continue
+        existing = by_id.get(event_id)
+        if existing is None:
+            by_id[event_id] = row
+            order.append(event_id)
+            continue
+        if _fingerprint(existing) == _fingerprint(row):
+            continue
+        conflicts.append("cross_store_event_id_conflict:" + event_id)
+    merged = [by_id[event_id] for event_id in order]
+    reasons.extend(conflicts)
+    return merged, reasons
+
+
+def _annotation_target_reasons(payload, required_fields):
+    """Report required-field coverage. Never a permission by itself."""
+    reasons = []
+    for field_id in sorted(set(required_fields)):
+        try:
+            _validate_field(field_id)
+        except AnnotationError:
+            reasons.append("required_field_unsupported:" + str(field_id))
+            continue
+        matches = [
+            row for row in payload["current"].values()
+            if row.get("field_id") == field_id
+        ]
+        if not matches:
+            reasons.append("required_annotation_missing:" + field_id)
+        elif not any(row.get("status") == STATUS_KNOWN for row in matches):
+            reasons.append("required_annotation_not_known:" + field_id)
+    if payload["conflicts"]:
+        reasons.append("annotation_history_conflict")
+    return reasons
+
+
+def _resolve_consumption_set(store, source_ref, consumer):
+    """Exact (field, seat) -> head revision set for the declared targets."""
+    payload = get_annotations(store, source_ref, include_history=False)
+    index = {
+        (row.get("field_id"), row.get("seat")): row
+        for row in payload["current"].values()
+    }
+    chosen = []
+    issues = []
+    for target in consumer.get("required_targets") or []:
+        field_id = target.get("field_id")
+        seat = target.get("seat")
+        row = index.get((field_id, seat))
+        label = f"{field_id}:{seat}"
+        if row is None:
+            issues.append("consumption_target_missing:" + label)
+            continue
+        if row.get("status") != STATUS_KNOWN:
+            issues.append("consumption_target_not_known:" + label)
+            continue
+        chosen.append(row.get("revision_id"))
+    return sorted(chosen), issues
 
 
 def assess_use(
@@ -924,17 +1457,23 @@ def assess_use(
 ):
     """Derive purpose eligibility read-only. Clients cannot supply the verdict.
 
-    Absence of a reservation hit is never sufficient: unknown role, unknown
-    history coverage, incomplete identity, missing policy binding and
-    consumption without a durable record all resolve to ``BLOCKED``.
+    Nothing supplied by the caller is an authority:
+
+    * reservations come from the reviewed repository artifact, never from a
+      caller mapping (a differing mapping is reported, not honoured);
+    * a development role must be provable from that artifact's development
+      intervals; "not reserved" is never a development proof;
+    * arbitrary ``development_evidence_ref`` strings carry no authority;
+    * positive consumption additionally needs a reviewed consumer identity and
+      a global history inventory, neither of which exists on current main, so
+      the verdict stays ``BLOCKED``.
     """
     resolved = _coerce_store(store)
-    bundle = _policy_bundle_view(policy_bundle)
+    bundle = policy_bundle if isinstance(policy_bundle, dict) else {}
     reasons = []
 
-    if bundle is None:
+    if policy_bundle is None or not isinstance(policy_bundle, dict):
         reasons.append("policy_bundle_missing")
-        bundle = {}
     policy_ref = bundle.get("policy_ref")
     if not _is_non_empty_str(policy_ref):
         reasons.append("policy_ref_missing")
@@ -947,65 +1486,85 @@ def assess_use(
             "source_identity_incomplete:" + ",".join(identity["identity_gaps"])
         )
 
-    reservations = bundle.get("reservations")
-    frame = identity["frame_index"]
+    reservations, artifact_sha, reservation_reasons = load_trusted_reservations()
+    reasons.extend(reservation_reasons)
+    caller_reservations = bundle.get("reservations")
+    if caller_reservations is not None:
+        if reservations is None:
+            reasons.append("caller_reservations_not_authoritative")
+        elif _fingerprint(caller_reservations) != _fingerprint(reservations):
+            reasons.append("caller_reservations_do_not_match_canonical_artifact")
+    declared_artifact_sha = bundle.get("reservation_artifact_sha256")
+    if declared_artifact_sha is not None and artifact_sha is not None:
+        if declared_artifact_sha != artifact_sha:
+            reasons.append("reservation_artifact_sha_mismatch")
+
+    declared_role = bundle.get("role")
+    if declared_role not in ("development", "calibration"):
+        reasons.append("role_unknown:" + str(declared_role))
+    if declared_role == "calibration":
+        reasons.append("calibration_role_has_no_trusted_interval_authority")
+
+    frames = [("child", identity["frame_index"])]
+    if identity["parent_frame_index"] is not None:
+        frames.append(("parent", identity["parent_frame_index"]))
     if reservations is None:
-        reasons.append("reservations_missing")
+        reasons.append("trusted_reservations_unavailable")
     else:
-        try:
-            assert_training_frames([frame], reservations)
-        except Exception:
-            reasons.append("frame_reserved_or_invalid")
-        declared_role = bundle.get("role")
-        if declared_role not in ("development", "calibration"):
-            reasons.append("role_unknown:" + str(declared_role))
-        else:
-            reserved = reservations.get("reserved_inclusive_intervals", [])
-            if any(
-                _is_int(frame) and start <= frame <= end
-                for start, end in reserved
-            ):
-                reasons.append("role_conflicts_reservation")
-        exposed_frames = reservations.get("known_exploration_frames", [])
-        if _is_int(frame) and frame in exposed_frames:
-            if not _is_non_empty_str(bundle.get("development_evidence_ref")):
-                reasons.append("exploration_not_development")
+        for label, frame in frames:
+            try:
+                assert_training_frames([frame], reservations)
+            except Exception:
+                reasons.append("frame_reserved_or_invalid:" + label)
+        development = reservations.get("known_development_inclusive_intervals") or []
+        exploration = reservations.get("known_exploration_frames") or []
+        for label, frame in frames:
+            if not _is_int(frame):
+                continue
+            in_development = any(
+                _is_int(start) and _is_int(end) and start <= frame <= end
+                for start, end in development
+            )
+            if not in_development:
+                reasons.append(
+                    "frame_not_in_trusted_development_intervals:" + label
+                )
+            if frame in exploration:
+                reasons.append(
+                    "exploration_frame_is_not_development_authority:" + label
+                )
 
-    annotations = get_annotations(resolved, source_ref, include_history=False)
+    consumer = bundle.get("consumer")
+    consumer_issues = []
+    if consumer is None:
+        reasons.append("consumer_identity_missing")
+    elif not isinstance(consumer, dict):
+        reasons.append("consumer_identity_malformed")
+    if not TRUSTED_CONSUMER_REGISTRY_AVAILABLE:
+        reasons.append("trusted_consumer_registry_unavailable")
+
+    annotations = {}
+    try:
+        annotations = get_annotations(resolved, source_ref, include_history=False)
+    except AnnotationError as exc:
+        reasons.append("annotation_store_integrity_error:" + str(exc)[:80])
     wanted = set(required_fields or bundle.get("required_fields") or [])
-    for field_id in sorted(wanted):
-        try:
-            _validate_field(field_id)
-        except AnnotationError:
-            reasons.append("required_field_unsupported:" + field_id)
-            continue
-        view = None
-        for key, row in annotations["current"].items():
-            if row.get("field_id") == field_id:
-                view = row
+    if annotations:
+        reasons.extend(_annotation_target_reasons(annotations, wanted))
+        allow_assisted = bundle.get("allow_model_assisted_labels") is True
+        for row in annotations["current"].values():
+            seen = row.get("model_output_seen")
+            if seen == MODEL_OUTPUT_SEEN_YES and not allow_assisted:
+                reasons.append("model_assisted_label_without_policy")
                 break
-        if view is None:
-            reasons.append("required_annotation_missing:" + field_id)
-        elif view.get("status") != STATUS_KNOWN:
-            reasons.append("required_annotation_not_known:" + field_id)
-    if annotations["conflicts"]:
-        reasons.append("annotation_history_conflict")
 
-    allow_assisted = bundle.get("allow_model_assisted_labels") is True
-    for row in annotations["current"].values():
-        if row.get("model_output_seen") == MODEL_OUTPUT_SEEN_YES and not allow_assisted:
-            reasons.append("model_assisted_label_without_policy")
-            break
-
-    coverage_rows, coverage_reasons = _read_declared_stores(bundle, resolved.path)
+    coverage_rows, coverage_reasons = _read_declared_stores(
+        resolved, bundle.get("declared_store_paths")
+    )
     reasons.extend(coverage_reasons)
     keys = _query_keys(identity)
-    own_rows = [
-        row for row in resolved.read_exposures()
-        if row.get("source_key") in keys or row.get("parent_source_key") in keys
-    ]
-    merged = coverage_rows + own_rows
-    coverage_ok = not coverage_reasons
+    merged = _filter_events(coverage_rows, keys)
+    coverage_ok = False
     state = _fold_exposure_state(merged, coverage_complete=coverage_ok)
     if state == STATE_ACTUALLY_CONSUMED:
         if bundle.get("allow_reuse_of_exposed_development") is not True:
@@ -1017,35 +1576,54 @@ def assess_use(
         reasons.append("exposure_history_unknown")
     if any(row.get("policy_violation") for row in merged):
         reasons.append("known_policy_violation_exposure")
+    for row in merged:
+        if row.get("role") == "holdout" and row.get("purpose") in PURPOSES:
+            reasons.append("holdout_training_history_cannot_be_redeveloped")
+            break
+    for row in merged:
+        if row.get("binding_status") not in (None, "BOUND"):
+            reasons.append("exposure_event_not_bound:" + str(row.get("event_id")))
+            break
 
-    allowed = not reasons
+    allowed = not reasons and not consumer_issues
     receipt = None
-    if allowed and reserve:
+    if allowed and reserve and isinstance(consumer, dict):
         try:
-            event = record_exposure(
-                resolved,
-                source_ref,
-                sorted(row["revision_id"] for row in annotations["current"].values()),
-                purpose,
-                {
-                    "kind": "consumption_reservation",
-                    "policy_ref": policy_ref,
-                    "actor": actor,
-                },
-                EVIDENCE_RESERVED,
-                policy_ref=policy_ref,
-                role=bundle.get("role"),
-                actor=actor,
+            chosen, consumer_issues = _resolve_consumption_set(
+                resolved, source_ref, consumer
             )
-            verify = [row for row in resolved.read_exposures()
-                      if row.get("event_id") == event["event_id"]]
-            if not verify:
-                raise StoreIntegrityError("reservation_not_visible_after_write")
-            receipt = {
-                "event_id": event["event_id"],
-                "evidence_kind": EVIDENCE_RESERVED,
-                "purpose": purpose,
-            }
+            if consumer_issues:
+                reasons.extend(consumer_issues)
+            else:
+                event = record_exposure(
+                    resolved,
+                    source_ref,
+                    chosen,
+                    purpose,
+                    {
+                        "kind": "consumption_reservation",
+                        "policy_ref": policy_ref,
+                        "actor": actor,
+                        "digest": policy_ref,
+                    },
+                    EVIDENCE_RESERVED,
+                    consumer=consumer,
+                    policy_ref=policy_ref,
+                    role=bundle.get("role"),
+                    actor=actor,
+                )
+                verify = [
+                    row for row in resolved.read_exposures()
+                    if row.get("event_id") == event["event_id"]
+                ]
+                if not verify:
+                    raise StoreIntegrityError("reservation_not_visible_after_write")
+                receipt = {
+                    "event_id": event["event_id"],
+                    "evidence_kind": EVIDENCE_RESERVED,
+                    "purpose": purpose,
+                    "annotation_revision_ids": chosen,
+                }
         except AnnotationError as exc:
             if "persistence" in str(exc) or "not_visible" in str(exc):
                 reasons.append("consumption_record_not_durable")
@@ -1055,10 +1633,13 @@ def assess_use(
             reasons.append("consumption_record_not_durable")
 
     verdict = VERDICT_ALLOWED_FOR_PURPOSE if not reasons else VERDICT_BLOCKED
-    coverage = COVERAGE_COMPLETE if not coverage_reasons else COVERAGE_INCOMPLETE
+    # No reviewed global inventory exists, so coverage is never proven here and
+    # an empty event set can never be reported as "no exposure recorded".
+    coverage = COVERAGE_UNKNOWN
     return {
         "schema_version": SCHEMA_VERSION,
         "source_key": identity["source_key"],
+        "exposure_root_key": identity["exposure_root_key"],
         "identity_class": identity["identity_class"],
         "purpose": purpose,
         "verdict": verdict,
@@ -1075,7 +1656,18 @@ def assess_use(
 
 
 def exposure_projection(store, scope):
-    """Read-only projection bindable by the existing freeze.exposures audit.
+    """Read-only row view for a future controlled freeze adapter.
+
+    The rows carry ``used_for`` / ``role`` / ``artifact_sha256`` so that they
+    are field compatible with ``aa8_holdout_plan.validate_freeze`` entries, but
+    this projection is **not attached** to that validator: no adapter calls it
+    and the validator does not inspect its integrity fields. A row may only be
+    handed to the freeze gate after a reviewed adapter has verified history
+    coverage, every ``unresolved`` entry, and the source / event / freeze-file
+    hash bindings.
+
+    ``freeze_bindable`` therefore expresses *projection-internal completeness
+    only*, never "accepted by validate_freeze".
 
     Missing history is never projected as clean: unresolved gaps are carried on
     every row and mark it non-bindable.
@@ -1085,27 +1677,25 @@ def exposure_projection(store, scope):
     identity_targets = []
     for ref in scope.get("sources") or []:
         identity_targets.append(_canonical_source_ref(ref, allow_incomplete=True))
-    declared = scope.get("declared_store_paths")
-    _, coverage_reasons = _read_declared_stores(
-        {"declared_store_paths": declared}, resolved.path
+    coverage_rows, coverage_reasons = _read_declared_stores(
+        resolved, scope.get("declared_store_paths")
     )
-    coverage = (
-        COVERAGE_COMPLETE if not coverage_reasons else COVERAGE_INCOMPLETE
-    )
-    coverage_ok = not coverage_reasons
+    coverage = COVERAGE_UNKNOWN
+    coverage_ok = False
     purposes = set(scope.get("purposes") or PURPOSES)
 
     rows = []
     unresolved_global = list(coverage_reasons)
-    matched_events = set()
     for identity in identity_targets:
         keys = _query_keys(identity)
         events = [
-            row for row in resolved.read_exposures()
-            if (row.get("source_key") in keys or row.get("parent_source_key") in keys)
-            and row.get("purpose") in purposes
+            row for row in _filter_events(coverage_rows, keys)
+            if row.get("purpose") in purposes
         ]
         state = _fold_exposure_state(events, coverage_complete=coverage_ok)
+        unresolved_global.append(
+            "exposure_history_coverage_unproven:" + str(identity["source_key"])
+        )
         if not events:
             unresolved_global.append(
                 "no_exposure_history_evidence:" + str(identity["source_key"])
@@ -1113,7 +1703,11 @@ def exposure_projection(store, scope):
             rows.append(
                 {
                     "source_key": identity["source_key"],
+                    "exposure_root_key": identity["exposure_root_key"],
                     "parent_source_key": identity["parent_source_key"],
+                    "parent_exposure_root_key": identity[
+                        "parent_exposure_root_key"
+                    ],
                     "used_for": None,
                     "role": "unknown",
                     "artifact_sha256": None,
@@ -1123,12 +1717,12 @@ def exposure_projection(store, scope):
                     "evidence_kind": None,
                     "policy_violation": False,
                     "freeze_bindable": False,
+                    "freeze_adapter_attached": False,
                     "unresolved": ["no_exposure_history_evidence"],
                 }
             )
             continue
         for event in events:
-            matched_events.add(event.get("event_id"))
             artifact = event.get("artifact_ref") or {}
             artifact_sha = artifact.get("sha256")
             row_unresolved = list(unresolved_global)
@@ -1138,13 +1732,19 @@ def exposure_projection(store, scope):
                 row_unresolved.append("exposure_role_unknown")
             if event.get("policy_violation"):
                 row_unresolved.append("policy_violation_recorded")
+            if event.get("binding_status") not in (None, "BOUND"):
+                row_unresolved.append("exposure_event_not_bound")
             if state == STATE_UNKNOWN:
                 row_unresolved.append("exposure_history_unknown")
             rows.append(
                 {
                     "event_id": event.get("event_id"),
                     "source_key": event.get("source_key"),
+                    "exposure_root_key": event.get("exposure_root_key"),
                     "parent_source_key": event.get("parent_source_key"),
+                    "parent_exposure_root_key": event.get(
+                        "parent_exposure_root_key"
+                    ),
                     "used_for": event.get("purpose"),
                     "role": event.get("role") or "unknown",
                     "artifact_sha256": artifact_sha,
@@ -1156,6 +1756,7 @@ def exposure_projection(store, scope):
                     "policy_violation": bool(event.get("policy_violation")),
                     "exposure_state": state,
                     "freeze_bindable": not row_unresolved,
+                    "freeze_adapter_attached": False,
                     "unresolved": sorted(set(row_unresolved)),
                 }
             )
@@ -1163,6 +1764,7 @@ def exposure_projection(store, scope):
         "schema_version": SCHEMA_VERSION,
         "generated_at": utc_now(),
         "history_coverage": coverage,
+        "freeze_adapter_attached": False,
         "rows": rows,
         "unresolved": sorted(set(unresolved_global)),
     }
