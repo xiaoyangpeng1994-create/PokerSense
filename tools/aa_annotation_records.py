@@ -57,6 +57,26 @@ Explicit non-goals of P0 (see ``docs/AA-FIELD-ANNOTATIONS-V1.zh-CN.md``):
   controlled adapter. It is not attached to
   ``aa8_holdout_plan.validate_freeze`` and must not be described as bindable by
   that validator.
+
+A persisted ``binding_status`` is never an authority
+---------------------------------------------------
+
+``binding_status`` on an exposure line is only the claim whoever wrote that
+line made at the time. Every path that can *conclude* something about binding -
+the new-write path ``record_exposure`` and every history recovery path
+(``assess_use`` / ``exposure_projection``) - re-derives the effective binding
+with the single shared validator ``_evaluate_exposure_binding`` from the same
+inputs: the event's own source reference, the annotation revisions it
+references, their parent lineage, the consumer targets and the run / manifest
+reference. A stored ``BOUND``, a stored ``UNRESOLVED`` and a missing
+``binding_status`` all go through the same re-derivation and all degrade to
+``UNRESOLVED`` when the referenced revisions disagree with the event.
+
+A mis-bound line is never deleted and never "cleaned": the contamination key
+set is the conservative union of the lineage the event claims and the lineage
+every referenced revision can prove, so a line that names source A while
+consuming a revision of source B pollutes **both** A and B instead of
+laundering the side it failed to name.
 """
 
 import hashlib
@@ -121,6 +141,13 @@ STATE_ACTUALLY_CONSUMED = "EXPOSED_ACTUALLY_CONSUMED"
 STATE_POSSIBLY_USED = "EXPOSED_POSSIBLY_USED"
 STATE_UNKNOWN = "EXPOSURE_UNKNOWN"
 STATE_NONE_UNDER_COVERAGE = "NO_EXPOSURE_RECORDED_UNDER_DECLARED_COVERAGE"
+
+# Exposure binding. ``BINDING_UNRESOLVED`` is the only safe reading of a line
+# whose binding cannot be re-derived from the annotation revisions it
+# references. Nothing in this module treats a persisted ``binding_status`` as
+# an authority: the value stored on a line is a historical claim only.
+BINDING_BOUND = "BOUND"
+BINDING_UNRESOLVED = "UNRESOLVED"
 
 IDENTITY_COMPLETE = "COMPLETE"
 IDENTITY_INCOMPLETE = "INCOMPLETE"
@@ -1094,10 +1121,26 @@ def _event_keys(row):
     return keys
 
 
-def _filter_events(events, keys):
+def _event_effective_keys(row, bindings=None):
+    """Claimed lineage + the lineage the referenced revisions can prove.
+
+    A mis-bound event is therefore visible from both sides: the one it claimed
+    and the one its revisions actually belong to.
+    """
+    keys = _event_keys(row)
+    if bindings:
+        entry = bindings.get(row.get("event_id"))
+        if entry:
+            keys |= set(entry.get("contamination_keys") or ())
+    return keys
+
+
+def _filter_events(events, keys, bindings=None):
     if not keys:
         return []
-    return [row for row in events if _event_keys(row) & keys]
+    return [
+        row for row in events if _event_effective_keys(row, bindings) & keys
+    ]
 
 
 def _validate_consumer(consumer):
@@ -1142,6 +1185,273 @@ def _validate_run_ref(run_or_manifest_ref):
         raise ExposureError("run_or_manifest_ref_digest_required")
 
 
+# --------------------------------------------------------------------------
+# Central exposure binding validation
+#
+# One validator, two callers: the new-write path (``record_exposure``) and
+# every history recovery path (``assess_use`` / ``exposure_projection``). A
+# persisted ``binding_status`` is a historical claim and is never read here;
+# the effective status is re-derived from the event's own source reference,
+# the annotation revisions it references, their parent lineage, the consumer
+# targets and the run / manifest reference.
+# --------------------------------------------------------------------------
+
+
+def _event_identity(row):
+    """Re-derive the lineage an exposure event *claims*, never trusting keys."""
+    ref = row.get("source_ref")
+    if isinstance(ref, dict):
+        try:
+            return _canonical_source_ref(ref, allow_incomplete=True)
+        except AnnotationError:
+            pass
+    return {
+        "source_key": row.get("source_key"),
+        "exposure_root_key": row.get("exposure_root_key"),
+        "parent_source_key": row.get("parent_source_key"),
+        "parent_exposure_root_key": row.get("parent_exposure_root_key"),
+        "identity_class": row.get("identity_class"),
+        "identity_gaps": list(row.get("identity_gaps") or []),
+    }
+
+
+def _revision_lineage(row):
+    """Re-derive everything one stored annotation revision can prove."""
+    identity = _row_identity(row)
+    parent_gaps = []
+    ref = row.get("source_ref")
+    if isinstance(ref, dict) and ref.get("parent_frame_ref") is not None:
+        parent = ref.get("parent_frame_ref")
+        canonical = (
+            _canonical_identity_ref(parent) if isinstance(parent, dict) else parent
+        )
+        parent_gaps = _parent_gaps(canonical)
+    return {
+        "revision_id": row.get("revision_id"),
+        "source_key": identity["source_key"],
+        "exposure_root_key": identity["exposure_root_key"],
+        "parent_source_key": identity["parent_source_key"],
+        "parent_exposure_root_key": identity["parent_exposure_root_key"],
+        "identity_class": identity["identity_class"],
+        "parent_gaps": sorted(set(parent_gaps)),
+        "field_id": row.get("field_id"),
+        "seat": row.get("seat"),
+        "status": row.get("status"),
+        "group_key": row.get("group_key"),
+    }
+
+
+def _index_from_rows(rows):
+    """Single-store revision index used by the new-write path."""
+    index = {}
+    for row in rows:
+        revision_id = row.get("revision_id")
+        if not _is_non_empty_str(revision_id):
+            continue
+        try:
+            index[revision_id] = _revision_lineage(row)
+        except (AnnotationError, StoreIntegrityError):
+            continue
+    return index
+
+
+def _build_revision_index(paths):
+    """revision id -> re-derived lineage, merged over every readable store.
+
+    A revision id seen twice with different derived facts is not silently
+    trusted: it is reported as ambiguous and can never yield ``BOUND``.
+    """
+    index = {}
+    conflicts = set()
+    for entry in paths:
+        try:
+            rows = AnnotationStore(entry).read_annotations()
+        except (StoreIntegrityError, OSError, UnicodeDecodeError):
+            continue
+        for row in rows:
+            revision_id = row.get("revision_id")
+            if not _is_non_empty_str(revision_id):
+                continue
+            try:
+                lineage = _revision_lineage(row)
+            except (AnnotationError, StoreIntegrityError):
+                continue
+            previous = index.get(revision_id)
+            if previous is None:
+                index[revision_id] = lineage
+            elif previous != lineage:
+                conflicts.add(revision_id)
+    return index, conflicts
+
+
+def _same_parent(claimed, proven):
+    """Compare canonical parent *exposure root* identity, never display names.
+
+    A re-audit, a manifest rebuild or a media alias rename changes the parent
+    ``source_key`` but never the parent ``exposure_root_key``. Comparing the
+    long-term root identity keeps those legal provenance aliases bindable
+    while a real re-parent onto another frame stays refused.
+    """
+    claimed_root = claimed.get("parent_exposure_root_key")
+    proven_root = proven.get("parent_exposure_root_key")
+    claimed_source = claimed.get("parent_source_key")
+    proven_source = proven.get("parent_source_key")
+    if claimed_root is None and proven_root is None:
+        if claimed_source is None and proven_source is None:
+            return True
+        return bool(
+            _is_non_empty_str(claimed_source)
+            and claimed_source == proven_source
+        )
+    if _is_non_empty_str(claimed_root) and claimed_root == proven_root:
+        return True
+    return bool(
+        _is_non_empty_str(claimed_source)
+        and claimed_source == proven_source
+    )
+
+
+def _event_targets(row):
+    """(field, seat) pairs the recorded consumer required, or None."""
+    consumer = row.get("consumer")
+    if not isinstance(consumer, dict):
+        return None
+    targets = consumer.get("required_targets")
+    if not isinstance(targets, (list, tuple)):
+        return None
+    pairs = set()
+    for target in targets:
+        if isinstance(target, dict):
+            pairs.add((target.get("field_id"), target.get("seat")))
+    return pairs
+
+
+def _evaluate_exposure_binding(row, revision_index, *, revision_conflicts=()):
+    """Re-derive the effective binding of one exposure event.
+
+    ``row["binding_status"]`` is deliberately never consulted: it is only the
+    historical claim of whoever wrote the line. Every conclusion below comes
+    from the event's own source reference and from the annotation revisions it
+    references, so a stored ``BOUND``, a stored ``UNRESOLVED`` and a missing
+    value all reach the same verdict for the same underlying facts.
+
+    ``contamination_keys`` is the conservative union of the lineage the event
+    claims and the lineage every referenced revision can prove, so a mis-bound
+    event pollutes both sides rather than laundering the one it failed to name.
+    """
+    reasons = []
+    contamination = set()
+    identity = _event_identity(row)
+    contamination |= _query_keys(identity)
+
+    if identity.get("identity_class") != IDENTITY_COMPLETE:
+        reasons.append("binding_event_identity_not_complete")
+
+    revision_ids = row.get("annotation_revision_ids")
+    if isinstance(revision_ids, (list, tuple)):
+        revision_ids = [item for item in revision_ids if _is_non_empty_str(item)]
+    else:
+        revision_ids = []
+
+    evidence_kind = row.get("evidence_kind")
+    targets = _event_targets(row)
+    if targets is None:
+        reasons.append("binding_consumer_targets_unreadable")
+
+    event_root = identity.get("exposure_root_key")
+    event_source = identity.get("source_key")
+    resolved = []
+    for revision_id in revision_ids:
+        lineage = revision_index.get(revision_id)
+        if lineage is None:
+            reasons.append("binding_revision_unresolvable:" + revision_id)
+            continue
+        if revision_id in revision_conflicts:
+            reasons.append("binding_revision_ambiguous:" + revision_id)
+        resolved.append(lineage)
+        contamination |= _query_keys(lineage)
+
+        revision_root = lineage.get("exposure_root_key")
+        revision_source = lineage.get("source_key")
+        if not (
+            (_is_non_empty_str(revision_root) and revision_root == event_root)
+            or (
+                _is_non_empty_str(revision_source)
+                and revision_source == event_source
+            )
+        ):
+            reasons.append("binding_revision_lineage_mismatch:" + revision_id)
+        if lineage.get("identity_class") != IDENTITY_COMPLETE:
+            reasons.append(
+                "binding_revision_identity_not_complete:" + revision_id
+            )
+        if lineage.get("parent_gaps"):
+            reasons.append("binding_revision_parent_incomplete:" + revision_id)
+        if not _same_parent(identity, lineage):
+            reasons.append("binding_parent_lineage_mismatch:" + revision_id)
+        if targets is not None:
+            pair = (lineage.get("field_id"), lineage.get("seat"))
+            if pair not in targets:
+                reasons.append(
+                    "binding_revision_target_mismatch:" + revision_id
+                )
+        if evidence_kind == EVIDENCE_ACTUALLY_CONSUMED and (
+            lineage.get("status") != STATUS_KNOWN
+        ):
+            reasons.append("binding_revision_not_known:" + revision_id)
+
+    if not revision_ids and evidence_kind != EVIDENCE_RELEASED:
+        reasons.append("binding_consumed_revision_set_missing")
+
+    if targets is not None and resolved:
+        covered = {(item.get("field_id"), item.get("seat")) for item in resolved}
+        for field_id, seat in sorted(
+            targets, key=lambda pair: (str(pair[0]), str(pair[1]))
+        ):
+            if (field_id, seat) not in covered:
+                reasons.append(
+                    "binding_consumer_target_not_covered:"
+                    + f"{field_id}:{seat}"
+                )
+
+    consumer = row.get("consumer")
+    if not isinstance(consumer, dict):
+        reasons.append("binding_consumer_identity_missing")
+    else:
+        try:
+            _validate_consumer(consumer)
+        except AnnotationError as exc:
+            reasons.append(
+                "binding_consumer_identity_invalid:" + str(exc)[:60]
+            )
+    try:
+        _validate_run_ref(row.get("run_or_manifest_ref"))
+    except AnnotationError as exc:
+        reasons.append("binding_run_ref_invalid:" + str(exc)[:60])
+
+    return {
+        "effective_binding_status": (
+            BINDING_BOUND if not reasons else BINDING_UNRESOLVED
+        ),
+        "claimed_binding_status": row.get("binding_status"),
+        "binding_reasons": sorted(set(reasons)),
+        "contamination_keys": sorted(contamination),
+    }
+
+
+def _derive_bindings(events, revision_index, *, revision_conflicts=()):
+    """Derived binding view per event id; stored claims are not read."""
+    bindings = {}
+    for row in events:
+        event_id = row.get("event_id")
+        if not _is_non_empty_str(event_id):
+            continue
+        bindings[event_id] = _evaluate_exposure_binding(
+            row, revision_index, revision_conflicts=revision_conflicts
+        )
+    return bindings
+
+
 def record_exposure(
     store,
     source_ref,
@@ -1168,6 +1478,12 @@ def record_exposure(
     targets and, for actual consumption, to a ``KNOWN`` label. Anything else is
     refused before a byte is written, because an unbound event would otherwise
     circulate as a trusted consumption fact.
+
+    The parent lineage of each consumed revision is part of that proof: a
+    caller may not re-parent an already annotated crop onto another frame and
+    still obtain a trusted ``BOUND``. Such an event is still stored - history is
+    never deleted - but as ``UNRESOLVED`` with ``policy_violation`` set and with
+    contamination aliases covering both the claimed and the proven lineage.
     """
     resolved = _coerce_store(store)
     if purpose not in PURPOSES:
@@ -1277,8 +1593,20 @@ def record_exposure(
         "policy_ref": policy_ref,
         "policy_violation": policy_violation,
         "identity_class": identity["identity_class"],
-        "binding_status": "BOUND",
     }
+    # ``rows`` came from read_annotations(), so the revision graph has already
+    # passed the B5 validation. What is still open is whether *this* event is
+    # bound to that graph: the shared validator re-checks the child and parent
+    # lineage, the consumer targets, the KNOWN status and the run reference.
+    claim = _evaluate_exposure_binding(row, _index_from_rows(rows))
+    row["binding_status"] = claim["effective_binding_status"]
+    row["binding_reasons"] = claim["binding_reasons"]
+    row["contamination_keys"] = claim["contamination_keys"]
+    if row["binding_status"] != BINDING_BOUND:
+        # A mis-bound fact is kept, never deleted, and never presented as a
+        # trusted consumption fact: it is stored as a policy violation whose
+        # contamination aliases cover both the claimed and the proven lineage.
+        row["policy_violation"] = True
     try:
         with resolved.lock():
             resolved.append_exposure(row)
@@ -1343,9 +1671,15 @@ def _read_declared_stores(own_store, declared_paths):
     content are collapsed and conflicting ones are reported. Nothing here can
     prove that an undeclared store does not exist, so coverage stays
     ``UNKNOWN`` until a reviewed global inventory is wired in.
+
+    The returned ``context`` carries the re-derived binding of every merged
+    event plus the annotation revision index it was derived from. Callers must
+    filter and conclude through that context: a persisted ``binding_status``
+    is a historical claim, never a binding authority.
     """
     reasons = []
     events = []
+    paths = []
     if declared_paths is None:
         reasons.append("exposure_history_coverage_undeclared")
         declared_paths = []
@@ -1364,6 +1698,7 @@ def _read_declared_stores(own_store, declared_paths):
         if resolved in seen_paths:
             continue
         seen_paths.add(resolved)
+        paths.append(target)
         try:
             rows = AnnotationStore(target).read_exposures()
         except (StoreIntegrityError, OSError, UnicodeDecodeError):
@@ -1372,6 +1707,7 @@ def _read_declared_stores(own_store, declared_paths):
         events.extend(rows)
     if own_key not in seen_paths:
         reasons.append("own_store_not_declared_in_history_coverage")
+        paths.append(Path(own_store.path))
         try:
             events.extend(own_store.read_exposures())
         except (StoreIntegrityError, OSError, UnicodeDecodeError):
@@ -1396,7 +1732,14 @@ def _read_declared_stores(own_store, declared_paths):
         conflicts.append("cross_store_event_id_conflict:" + event_id)
     merged = [by_id[event_id] for event_id in order]
     reasons.extend(conflicts)
-    return merged, reasons
+    revision_index, revision_conflicts = _build_revision_index(paths)
+    context = {
+        "revision_index": revision_index,
+        "bindings": _derive_bindings(
+            merged, revision_index, revision_conflicts=revision_conflicts
+        ),
+    }
+    return merged, reasons, context
 
 
 def _annotation_target_reasons(payload, required_fields):
@@ -1558,12 +1901,14 @@ def assess_use(
                 reasons.append("model_assisted_label_without_policy")
                 break
 
-    coverage_rows, coverage_reasons = _read_declared_stores(
+    coverage_rows, coverage_reasons, binding_context = _read_declared_stores(
         resolved, bundle.get("declared_store_paths")
     )
     reasons.extend(coverage_reasons)
     keys = _query_keys(identity)
-    merged = _filter_events(coverage_rows, keys)
+    merged = _filter_events(
+        coverage_rows, keys, binding_context["bindings"]
+    )
     coverage_ok = False
     state = _fold_exposure_state(merged, coverage_complete=coverage_ok)
     if state == STATE_ACTUALLY_CONSUMED:
@@ -1581,8 +1926,11 @@ def assess_use(
             reasons.append("holdout_training_history_cannot_be_redeveloped")
             break
     for row in merged:
-        if row.get("binding_status") not in (None, "BOUND"):
-            reasons.append("exposure_event_not_bound:" + str(row.get("event_id")))
+        entry = binding_context["bindings"].get(row.get("event_id")) or {}
+        if entry.get("effective_binding_status") != BINDING_BOUND:
+            reasons.append(
+                "exposure_event_not_bound:" + str(row.get("event_id"))
+            )
             break
 
     allowed = not reasons and not consumer_issues
@@ -1677,7 +2025,7 @@ def exposure_projection(store, scope):
     identity_targets = []
     for ref in scope.get("sources") or []:
         identity_targets.append(_canonical_source_ref(ref, allow_incomplete=True))
-    coverage_rows, coverage_reasons = _read_declared_stores(
+    coverage_rows, coverage_reasons, binding_context = _read_declared_stores(
         resolved, scope.get("declared_store_paths")
     )
     coverage = COVERAGE_UNKNOWN
@@ -1689,7 +2037,9 @@ def exposure_projection(store, scope):
     for identity in identity_targets:
         keys = _query_keys(identity)
         events = [
-            row for row in _filter_events(coverage_rows, keys)
+            row for row in _filter_events(
+                coverage_rows, keys, binding_context["bindings"]
+            )
             if row.get("purpose") in purposes
         ]
         state = _fold_exposure_state(events, coverage_complete=coverage_ok)
@@ -1732,8 +2082,11 @@ def exposure_projection(store, scope):
                 row_unresolved.append("exposure_role_unknown")
             if event.get("policy_violation"):
                 row_unresolved.append("policy_violation_recorded")
-            if event.get("binding_status") not in (None, "BOUND"):
+            binding = binding_context["bindings"].get(event.get("event_id")) or {}
+            if binding.get("effective_binding_status") != BINDING_BOUND:
                 row_unresolved.append("exposure_event_not_bound")
+                for reason in binding.get("binding_reasons") or ():
+                    row_unresolved.append("binding_reason:" + reason)
             if state == STATE_UNKNOWN:
                 row_unresolved.append("exposure_history_unknown")
             rows.append(
@@ -1755,6 +2108,10 @@ def exposure_projection(store, scope):
                     "evidence_kind": event.get("evidence_kind"),
                     "policy_violation": bool(event.get("policy_violation")),
                     "exposure_state": state,
+                    "binding_status": binding.get("effective_binding_status"),
+                    "claimed_binding_status": binding.get(
+                        "claimed_binding_status"
+                    ),
                     "freeze_bindable": not row_unresolved,
                     "freeze_adapter_attached": False,
                     "unresolved": sorted(set(row_unresolved)),

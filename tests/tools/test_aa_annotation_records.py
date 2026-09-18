@@ -10,6 +10,10 @@ adversarial counter-examples for blockers B1-B6: they assert that a caller can
 never be the authority for development role, reservations, consumption
 permission, identity aliasing, parent lineage, history coverage, revision graph
 integrity or consumer / revision binding.
+
+Sections 37 (R1) and 38 (R2) cover the two final P0 blockers: a new exposure
+may not re-parent an already annotated revision, and a recovered historical
+event may never be trusted because of its own stored ``binding_status``.
 """
 
 import hashlib
@@ -20,7 +24,8 @@ import pytest
 
 import tools.aa_annotation_records as module
 from tools.aa_annotation_records import (
-    COVERAGE_UNKNOWN, EVIDENCE_ACTUALLY_CONSUMED, EVIDENCE_RELEASED,
+    BINDING_BOUND, BINDING_UNRESOLVED, COVERAGE_UNKNOWN,
+    EVIDENCE_ACTUALLY_CONSUMED, EVIDENCE_RELEASED,
     EVIDENCE_RESERVED, FIELD_POT_DISPLAY, FIELD_VISIBLE_ACTION_GLYPH,
     AnnotationStore, AnnotationError, ExposureError, FieldSemanticsMismatch,
     ForbiddenTruthFieldError, Label, LabelValidationError, ObservationContext,
@@ -188,6 +193,74 @@ def raw_row(ref, field_id, seat, revision_id, supersedes=None, **overrides):
 def write_rows(store, rows):
     for row in rows:
         store.append_annotation(row)
+
+
+def crop_pair(parent_media="media-parent-A", crop_media="media-crop-core"):
+    """One complete parent frame and one crop whose parent is that frame."""
+    parent = source_ref(
+        frame=DEV_FRAME, media=parent_media, digest_seed=parent_media + "|bytes",
+    )
+    crop = source_ref(
+        frame=DEV_FRAME + 1, media=crop_media,
+        digest_seed=crop_media + "|bytes", parent=parent,
+    )
+    return parent, crop
+
+
+def raw_exposure(source_identity, revision_ids, *, event_id=None, **overrides):
+    """A syntactically valid historical exposure line, written directly.
+
+    Used to replay history that no current API would produce (a line claiming
+    source A while consuming a revision of source B) without first writing a
+    *correct* event for B, which would hide exactly the defect under test.
+    """
+    row = {
+        "schema_version": SCHEMA_VERSION,
+        "event_id": event_id or "exp-synth-history",
+        "event_type": "exposure",
+        "recorded_at": "2026-01-01T00:00:00Z",
+        "actor": ACTOR,
+        "source_key": source_identity["source_key"],
+        "exposure_root_key": source_identity["exposure_root_key"],
+        "parent_source_key": source_identity["parent_source_key"],
+        "parent_exposure_root_key": source_identity["parent_exposure_root_key"],
+        "source_ref": source_identity["normalised"],
+        "purpose": PURPOSE_TRAINING,
+        "evidence_kind": EVIDENCE_ACTUALLY_CONSUMED,
+        "annotation_revision_ids": list(revision_ids),
+        "annotation_revision_refs": [],
+        "consumer": consumer(),
+        "run_or_manifest_ref": run_ref("run-synth-history"),
+        "artifact_ref": {"sha256": digest("artifact-synth")},
+        "role": "development",
+        "policy_ref": POLICY_REF,
+        "policy_violation": False,
+        "identity_class": source_identity["identity_class"],
+    }
+    row.update(overrides)
+    return row
+
+
+def misbound_history(tmp_path, stored_status):
+    """A store whose only exposure line claims A but consumes a revision of B."""
+    store = AnnotationStore(tmp_path / "history")
+    source_a = source_ref(
+        media="media-hist-A", media_sha256=digest("media|hist-A"),
+        digest_seed="hist-A-bytes",
+    )
+    source_b = source_ref(
+        media="media-hist-B", media_sha256=digest("media|hist-B"),
+        digest_seed="hist-B-bytes",
+    )
+    revision_b = annotate_pot(store, source_b, chips=7)
+    annotate_pot(store, source_a, chips=11)
+    row = raw_exposure(
+        _canonical_source_ref(source_a, allow_incomplete=True), [revision_b],
+    )
+    if stored_status is not None:
+        row["binding_status"] = stored_status
+    store.append_exposure(row)
+    return store, source_a, source_b, revision_b
 
 
 @pytest.fixture()
@@ -1400,3 +1473,330 @@ def test_projection_does_not_claim_a_live_freeze_adapter(store):
     assert "not attached" in doc
     assert "not attached" in module_doc
     assert "validate_freeze" in doc
+
+
+# 37 P0-R1 -- a new exposure may not re-parent a consumed revision ---------
+def test_reparented_consumption_is_not_bound(store):
+    """R1: revision parent = A, caller parent = B must never yield BOUND."""
+    parent_a, crop = crop_pair()
+    parent_b = source_ref(
+        frame=DEV_FRAME + 2, media="media-parent-B",
+        digest_seed="media-parent-B|bytes",
+    )
+    revision = annotate_pot(store, crop)
+    rebounded = dict(crop, parent_frame_ref=parent_b)
+
+    event = consume(store, rebounded, [revision], run="run-reparent")
+    assert event["binding_status"] == BINDING_UNRESOLVED
+    assert event["binding_status"] != BINDING_BOUND
+    assert event["policy_violation"] is True
+    assert any(
+        reason.startswith("binding_parent_lineage_mismatch")
+        for reason in event["binding_reasons"]
+    )
+
+    # The historical fact is preserved, never deleted or rewritten.
+    stored = AnnotationStore(store.path).read_exposures()
+    assert len(stored) == 1 and stored[0]["event_id"] == event["event_id"]
+
+    declared = [str(store.path)]
+    # A -- the parent the revision really came from -- must not lose its
+    # contamination just because the caller named B.
+    decision = assess_use(store, parent_a, PURPOSE_TRAINING, policy(store.path))
+    assert decision["verdict"] == VERDICT_BLOCKED
+    assert any(
+        "exposure_event_not_bound" in reason for reason in decision["reasons"]
+    )
+    projection_a = exposure_projection(
+        store, {"sources": [parent_a], "declared_store_paths": declared},
+    )
+    assert projection_a["rows"], "A lost the mis-bound consumption"
+    assert all(
+        "exposure_event_not_bound" in row["unresolved"]
+        for row in projection_a["rows"]
+    )
+    assert all(row["freeze_bindable"] is False for row in projection_a["rows"])
+    # B is not laundered either: the wrong claim is not a trusted B binding.
+    projection_b = exposure_projection(
+        store, {"sources": [parent_b], "declared_store_paths": declared},
+    )
+    assert projection_b["rows"]
+    assert all(row["freeze_bindable"] is False for row in projection_b["rows"])
+
+
+def test_dropped_parent_is_not_bound(store):
+    """R1: revision parent = A, caller drops the parent must not be BOUND."""
+    _, crop = crop_pair("media-parent-C", "media-crop-C")
+    revision = annotate_pot(store, crop)
+    orphan = dict(crop, parent_frame_ref=None)
+
+    event = consume(store, orphan, [revision], run="run-dropped-parent")
+    assert event["binding_status"] == BINDING_UNRESOLVED
+    assert any(
+        reason.startswith("binding_parent_lineage_mismatch")
+        for reason in event["binding_reasons"]
+    )
+
+
+def test_empty_parent_is_not_bound(store):
+    """R1: revision parent = A, caller parent = {} must not be BOUND."""
+    _, crop = crop_pair("media-parent-D", "media-crop-D")
+    revision = annotate_pot(store, crop)
+    blanked = dict(crop, parent_frame_ref={})
+
+    event = consume(store, blanked, [revision], run="run-empty-parent")
+    assert event["binding_status"] == BINDING_UNRESOLVED
+    reasons = event["binding_reasons"]
+    assert any(
+        reason.startswith("binding_parent_lineage_mismatch") for reason in reasons
+    )
+    assert "binding_event_identity_not_complete" in reasons
+
+
+def test_incomplete_parent_revision_is_not_bound(store):
+    """R1: an INCOMPLETE parent lineage never yields a trusted binding."""
+    crop = source_ref(
+        frame=DEV_FRAME + 1, media="media-crop-E",
+        digest_seed="media-crop-E|bytes", parent={},
+    )
+    revision = annotate_pot(store, crop)
+
+    event = consume(store, crop, [revision], run="run-incomplete-parent")
+    assert event["binding_status"] == BINDING_UNRESOLVED
+    assert any(
+        reason.startswith("binding_revision_identity_not_complete")
+        for reason in event["binding_reasons"]
+    )
+
+    projection = exposure_projection(
+        store, {"sources": [crop], "declared_store_paths": [str(store.path)]},
+    )
+    assert all(row["freeze_bindable"] is False for row in projection["rows"])
+
+
+def test_parent_provenance_alias_keeps_binding(store):
+    """A legal re-audit / media rename of the parent stays bindable."""
+    parent_v1 = source_ref(
+        frame=DEV_FRAME, media="media-parent-alias",
+        digest_seed="media-parent-alias|bytes", audit="manifest-alias-v1",
+    )
+    crop = source_ref(
+        frame=DEV_FRAME + 1, media="media-crop-alias",
+        digest_seed="media-crop-alias|bytes", parent=parent_v1,
+    )
+    revision = annotate_pot(store, crop)
+
+    parent_v2 = dict(parent_v1)
+    parent_v2["source_audit_ref"] = "manifest-alias-v2"
+    parent_v2["source_audit_sha256"] = digest("audit|manifest-alias-v2")
+    parent_v2["media_id"] = "media-parent-alias-renamed"
+    aliased = dict(crop, parent_frame_ref=parent_v2)
+
+    event = consume(store, aliased, [revision], run="run-parent-alias")
+    assert event["binding_status"] == BINDING_BOUND
+    assert event["binding_reasons"] == []
+    assert event["policy_violation"] is False
+
+    declared = [str(store.path)]
+    for ref in (parent_v1, parent_v2):
+        projection = exposure_projection(
+            store, {"sources": [ref], "declared_store_paths": declared},
+        )
+        assert projection["rows"], "alias cleared the parent contamination"
+        assert all(
+            row["binding_status"] == BINDING_BOUND for row in projection["rows"]
+        )
+
+
+# 38 P0-R2 -- recovered history never trusts a stored binding_status -------
+@pytest.mark.parametrize("stored_status", ["BOUND", "UNRESOLVED", None])
+def test_historical_misbound_event_is_rederived(tmp_path, stored_status):
+    """R2: A-claiming/B-consuming history is re-derived for all three inputs."""
+    store, source_a, source_b, revision_b = misbound_history(
+        tmp_path, stored_status
+    )
+    declared = [str(store.path)]
+
+    stored = store.read_exposures()
+    assert len(stored) == 1
+    # The claim is kept verbatim; it is simply not an authority.
+    assert stored[0].get("binding_status") == stored_status
+
+    for ref in (source_a, source_b):
+        decision = assess_use(store, ref, PURPOSE_TRAINING, policy(store.path))
+        assert decision["verdict"] == VERDICT_BLOCKED
+        assert any(
+            "exposure_event_not_bound" in reason
+            for reason in decision["reasons"]
+        )
+        projection = exposure_projection(
+            store, {"sources": [ref], "declared_store_paths": declared},
+        )
+        assert projection["rows"], "event lost for " + str(ref["media_id"])
+        assert all(
+            row["binding_status"] == BINDING_UNRESOLVED
+            for row in projection["rows"]
+        )
+        assert all(
+            "exposure_event_not_bound" in row["unresolved"]
+            for row in projection["rows"]
+        )
+        assert all(row["freeze_bindable"] is False for row in projection["rows"])
+        assert all(
+            row["annotation_revision_ids"] == [revision_b]
+            for row in projection["rows"]
+        )
+
+    # B must not be washed into a clean-looking "no evidence" state.
+    projection_b = exposure_projection(
+        store, {"sources": [source_b], "declared_store_paths": declared},
+    )
+    assert "no_exposure_history_evidence" not in projection_b["unresolved"]
+    # B's contamination is recovered from the wrong revision only: no correct
+    # B exposure event exists anywhere in the store.
+    assert len(store.read_exposures()) == 1
+
+
+def test_historically_bound_event_stays_bound(tmp_path):
+    """Control: a genuinely bound line is not downgraded by the re-derivation."""
+    store = AnnotationStore(tmp_path / "legit")
+    ref = source_ref(
+        media="media-legit", media_sha256=digest("media|legit"),
+        digest_seed="legit-bytes",
+    )
+    revision = annotate_pot(store, ref)
+    row = raw_exposure(
+        _canonical_source_ref(ref, allow_incomplete=True), [revision],
+        event_id="exp-legit",
+    )
+    row["binding_status"] = "BOUND"
+    store.append_exposure(row)
+
+    projection = exposure_projection(
+        store, {"sources": [ref], "declared_store_paths": [str(store.path)]},
+    )
+    assert projection["rows"]
+    assert all(row["binding_status"] == BINDING_BOUND for row in projection["rows"])
+    assert all(
+        "exposure_event_not_bound" not in row["unresolved"]
+        for row in projection["rows"]
+    )
+    decision = assess_use(store, ref, PURPOSE_TRAINING, policy(store.path))
+    assert not any(
+        "exposure_event_not_bound" in reason for reason in decision["reasons"]
+    )
+
+
+def test_historical_consumer_targets_are_revalidated(tmp_path):
+    store = AnnotationStore(tmp_path / "meta")
+    ref = source_ref(
+        media="media-meta", media_sha256=digest("media|meta"),
+        digest_seed="meta-bytes",
+    )
+    revision = annotate_pot(store, ref, seat=0)
+    row = raw_exposure(
+        _canonical_source_ref(ref, allow_incomplete=True), [revision],
+        event_id="exp-meta-targets",
+    )
+    row["consumer"]["required_targets"] = [
+        {"field_id": FIELD_POT_DISPLAY, "seat": 3},
+    ]
+    row["binding_status"] = "BOUND"
+    store.append_exposure(row)
+
+    decision = assess_use(store, ref, PURPOSE_TRAINING, policy(store.path))
+    assert decision["verdict"] == VERDICT_BLOCKED
+    assert any(
+        "exposure_event_not_bound" in reason for reason in decision["reasons"]
+    )
+    projection = exposure_projection(
+        store, {"sources": [ref], "declared_store_paths": [str(store.path)]},
+    )
+    assert any(
+        item.startswith("binding_reason:binding_revision_target_mismatch")
+        for row in projection["rows"]
+        for item in row["unresolved"]
+    )
+
+
+def test_historical_run_ref_is_revalidated(tmp_path):
+    store = AnnotationStore(tmp_path / "runref")
+    ref = source_ref(
+        media="media-runref", media_sha256=digest("media|runref"),
+        digest_seed="runref-bytes",
+    )
+    revision = annotate_pot(store, ref)
+    row = raw_exposure(
+        _canonical_source_ref(ref, allow_incomplete=True), [revision],
+        event_id="exp-runref",
+    )
+    row["run_or_manifest_ref"] = {}
+    row["binding_status"] = "BOUND"
+    store.append_exposure(row)
+
+    projection = exposure_projection(
+        store, {"sources": [ref], "declared_store_paths": [str(store.path)]},
+    )
+    assert any(
+        item.startswith("binding_reason:binding_run_ref_invalid")
+        for row in projection["rows"]
+        for item in row["unresolved"]
+    )
+    assert all(
+        row["binding_status"] == BINDING_UNRESOLVED for row in projection["rows"]
+    )
+
+
+def test_historical_unknown_revision_is_revalidated(tmp_path):
+    store = AnnotationStore(tmp_path / "unknownrev")
+    ref = source_ref(
+        media="media-unknownrev", media_sha256=digest("media|unknownrev"),
+        digest_seed="unknownrev-bytes",
+    )
+    unknown = append_annotation(
+        store, ref, FIELD_POT_DISPLAY, 0,
+        Label(status=STATUS_UNKNOWN, reason="synth unreadable"), None, ACTOR,
+    )
+    row = raw_exposure(
+        _canonical_source_ref(ref, allow_incomplete=True), [unknown],
+        event_id="exp-unknown-rev",
+    )
+    row["binding_status"] = "BOUND"
+    store.append_exposure(row)
+
+    projection = exposure_projection(
+        store, {"sources": [ref], "declared_store_paths": [str(store.path)]},
+    )
+    assert any(
+        item.startswith("binding_reason:binding_revision_not_known")
+        for row in projection["rows"]
+        for item in row["unresolved"]
+    )
+
+
+def test_historical_unresolvable_revision_stays_unbound(tmp_path):
+    store = AnnotationStore(tmp_path / "ghost")
+    ref = source_ref(
+        media="media-ghost", media_sha256=digest("media|ghost"),
+        digest_seed="ghost-bytes",
+    )
+    annotate_pot(store, ref)
+    row = raw_exposure(
+        _canonical_source_ref(ref, allow_incomplete=True),
+        ["ann-never-existed"], event_id="exp-ghost",
+    )
+    row["binding_status"] = "BOUND"
+    store.append_exposure(row)
+
+    projection = exposure_projection(
+        store, {"sources": [ref], "declared_store_paths": [str(store.path)]},
+    )
+    assert projection["rows"]
+    assert any(
+        item.startswith("binding_reason:binding_revision_unresolvable")
+        for row in projection["rows"]
+        for item in row["unresolved"]
+    )
+    assert all(
+        row["binding_status"] == BINDING_UNRESOLVED for row in projection["rows"]
+    )

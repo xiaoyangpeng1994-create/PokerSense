@@ -142,7 +142,7 @@
 
 > 一旦某来源帧或其派生样本进入 **training / tuning / template_selection**，任何后续修订、撤回标签、replay 重建、改名换目录、crop 重建、模型变化、re-audit / media alias、新建 store，**都不能把这次使用从历史中抹掉，也不能据此恢复成 untouched holdout**。
 
-- exposure event 记：`purpose` / `evidence_kind` / `annotation_revision_ids` / `annotation_revision_refs` / `source_key` / `exposure_root_key` / `parent_source_key` / `parent_exposure_root_key` / `consumer` / `run_or_manifest_ref` / `artifact_ref` / `role` / `policy_ref` / `policy_violation` / `binding_status`
+- exposure event 记：`purpose` / `evidence_kind` / `annotation_revision_ids` / `annotation_revision_refs` / `source_key` / `exposure_root_key` / `parent_source_key` / `parent_exposure_root_key` / `consumer` / `run_or_manifest_ref` / `artifact_ref` / `role` / `policy_ref` / `policy_violation` / `binding_status` / `binding_reasons` / `contamination_keys`
 - `evidence_kind` 四态严格区分：`RESERVED` / `RELEASED` / `POSSIBLY_USED` / `ACTUALLY_CONSUMED`
 - **状态单调**：`RESERVED → RELEASED` 仍是 `EXPOSED_POSSIBLY_USED`；出现过 `ACTUALLY_CONSUMED` 则永久 `EXPOSED_ACTUALLY_CONSUMED`
 - **没有记录 ≠ never_trained**：历史覆盖无法证明时状态为 `EXPOSURE_UNKNOWN` 且 **BLOCKED**
@@ -171,6 +171,64 @@
 - consumer 声明的每个 target 都必须被实际消费 ⇒ 不允许「某 seat 有一个 KNOWN 就算整组满足」；
 - receipt 只记录这个**精确集合**，不会把其它 seat 的 UNKNOWN revision 顺带写进去；
 - `run_or_manifest_ref` 必须是非空映射且带稳定 `kind` + `digest`/`sha256`/`ref`；空 dict 拒绝。
+
+### 6.3 统一 binding validator：持久化 `binding_status` 不是权威
+
+**一条 exposure 行上的 `binding_status` 只是写它的人在当时的声明，从不是权威。**
+新写入路径（`record_exposure`）与全部历史恢复路径（`assess_use` / `exposure_projection`）
+共用**同一个**内部校验器 `_evaluate_exposure_binding`，从同一批输入重新派生有效绑定：
+
+- 事件自己的 `source_ref`；
+- 它引用的每个 annotation revision 重新解析出的 `source_key` / `exposure_root_key`；
+- 该 revision 的 **canonical parent exposure identity**（长期 root 身份，不是 provenance 显示名）；
+- revision 的 `field_id` / `seat` / `status` / `identity_class`；
+- consumer 的 `required_targets` 与 `run_or_manifest_ref`。
+
+派生结果 = `effective_binding_status`：`BOUND` 仅当**全部**条件满足，否则 `UNRESOLVED`。
+存储的 `BOUND`、存储的 `UNRESOLVED`、`binding_status` 缺失（旧格式）三者走**同一条**重新派生路径：
+只要底层事实不满足契约，三者都得到 `UNRESOLVED`。存储值只在派生结果里保留为
+`claimed_binding_status`（历史声明），不参与判定。
+
+**R1 — 新事件不得 re-parent 已标注的 revision。** caller 不能在 `record_exposure` 里
+把一个 `parent_frame_ref = A` 的 crop revision 用 `parent_frame_ref = B` / 删除 parent /
+`parent_frame_ref={}` 的方式消费后仍然得到可信 `BOUND`：
+
+1. revision parent=A，caller parent=B ⇒ **非 BOUND**；
+2. revision parent=A，caller 删除 parent ⇒ **非 BOUND**；
+3. revision parent=A，caller parent={} ⇒ **非 BOUND**；
+4. revision 自身 parent lineage **INCOMPLETE** ⇒ **非 BOUND**（可保留历史事实，但
+   trusted binding=NO、`freeze_bindable`=NO、independent clean claim=NO）；
+5. **合法 provenance 别名**（re-audit / manifest rebuild / media_id 改名，canonical parent
+   exposure root 未变）⇒ 绑定正常，不因改名误拒、也不因改名清除污染。
+
+错绑的新事件**不写成可信 BOUND**：它照常落盘（历史事实不删除），但为
+`binding_status="UNRESOLVED"` + `policy_violation=True` + `binding_reasons`，
+并把 **revision 已知 lineage ∪ caller 声明 lineage** 一起写进 `contamination_keys`——
+不会因为调用方说 B 就丢掉 revision 已知的 A。
+
+**R2 — 历史恢复必须重新验证。** `_read_declared_stores` 在合并事件后建立
+annotation revision 索引（`revision_id` → 重新派生的 source/root/parent/field/seat/status），
+逐条解析 `annotation_revision_ids`，再派生出每个事件的 `effective_binding_status` 与
+**effective contamination keys**（事件声明的 lineage ∪ 被引用 revision 能证明的 lineage）。
+`_filter_events` / `assess_use` / `exposure_projection` 一律使用这套 effective keys：
+
+- 错误历史**保留、不删除**；
+- event 自报 A、revision 实际属于 B ⇒ **A 与 B 都至少保守污染**，B 不会被洗白；
+- 无法解析的 revision ⇒ 不猜 clean，保持 `UNRESOLVED` / 非可信；
+- 历史 consumer targets / field / seat / revision 列表 / `run_or_manifest_ref` 任一不再满足
+  真实 binding 契约 ⇒ 有效绑定降级；
+- 跨 store 同名 revision 派生产物不一致 ⇒ `binding_revision_ambiguous:*`，永不 BOUND。
+
+`binding_reasons` 前缀：`binding_event_identity_not_complete` ·
+`binding_revision_unresolvable:*` · `binding_revision_ambiguous:*` ·
+`binding_revision_lineage_mismatch:*` · `binding_revision_identity_not_complete:*` ·
+`binding_revision_parent_incomplete:*` · `binding_parent_lineage_mismatch:*` ·
+`binding_revision_target_mismatch:*` · `binding_revision_not_known:*` ·
+`binding_consumed_revision_set_missing` · `binding_consumer_target_not_covered:*` ·
+`binding_consumer_targets_unreadable` · `binding_consumer_identity_missing` ·
+`binding_consumer_identity_invalid:*` · `binding_run_ref_invalid:*`。
+在 `exposure_projection` 行里以 `binding_reason:<token>` 出现在 `unresolved`，并使
+`freeze_bindable=False`。
 
 ---
 
