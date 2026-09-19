@@ -1241,25 +1241,71 @@ def _revision_lineage(row):
     }
 
 
+def _candidate_key(lineage):
+    """Stable identity of everything one revision candidate can prove.
+
+    Two candidates are the same fact only when their whole derived lineage
+    agrees. A copy of one store is therefore a duplicate, while the same
+    revision id pointing at another source, parent, field, seat or label is a
+    genuinely different candidate.
+    """
+    return (
+        lineage.get("revision_id"),
+        lineage.get("source_key"),
+        lineage.get("exposure_root_key"),
+        lineage.get("parent_source_key"),
+        lineage.get("parent_exposure_root_key"),
+        lineage.get("identity_class"),
+        tuple(lineage.get("parent_gaps") or ()),
+        lineage.get("field_id"),
+        lineage.get("seat"),
+        lineage.get("status"),
+        lineage.get("group_key"),
+    )
+
+
+def _add_revision_candidate(index, lineage):
+    """Register one derived lineage under its revision id, keeping every one.
+
+    Identical derived content collapses into a single entry; anything that
+    really differs is retained side by side so that no candidate can silently
+    replace another.
+    """
+    bucket = index.setdefault(lineage.get("revision_id"), {})
+    bucket[_candidate_key(lineage)] = lineage
+
+
+def _revision_candidates(index, revision_id):
+    """Every distinct lineage one revision id resolved to, in read order."""
+    bucket = index.get(revision_id)
+    if not bucket:
+        return []
+    return list(bucket.values())
+
+
 def _index_from_rows(rows):
-    """Single-store revision index used by the new-write path."""
+    """Single-store revision candidate index used by the new-write path."""
     index = {}
     for row in rows:
         revision_id = row.get("revision_id")
         if not _is_non_empty_str(revision_id):
             continue
         try:
-            index[revision_id] = _revision_lineage(row)
+            _add_revision_candidate(index, _revision_lineage(row))
         except (AnnotationError, StoreIntegrityError):
             continue
     return index
 
 
 def _build_revision_index(paths):
-    """revision id -> re-derived lineage, merged over every readable store.
+    """revision id -> every re-derived lineage, merged over every store.
 
-    A revision id seen twice with different derived facts is not silently
-    trusted: it is reported as ambiguous and can never yield ``BOUND``.
+    A revision id that resolves to more than one *different* derived lineage is
+    ambiguous. Every candidate is kept: the effective binding can never select
+    one of them as the truth, and the conservative contamination union has to
+    cover all of them, because there is no way to tell which one the wrong
+    event actually consumed. Dropping the later candidate would make the result
+    depend on the declared store order.
     """
     index = {}
     conflicts = set()
@@ -1273,14 +1319,12 @@ def _build_revision_index(paths):
             if not _is_non_empty_str(revision_id):
                 continue
             try:
-                lineage = _revision_lineage(row)
+                _add_revision_candidate(index, _revision_lineage(row))
             except (AnnotationError, StoreIntegrityError):
                 continue
-            previous = index.get(revision_id)
-            if previous is None:
-                index[revision_id] = lineage
-            elif previous != lineage:
-                conflicts.add(revision_id)
+    for revision_id, bucket in index.items():
+        if len(bucket) > 1:
+            conflicts.add(revision_id)
     return index, conflicts
 
 
@@ -1336,8 +1380,11 @@ def _evaluate_exposure_binding(row, revision_index, *, revision_conflicts=()):
     value all reach the same verdict for the same underlying facts.
 
     ``contamination_keys`` is the conservative union of the lineage the event
-    claims and the lineage every referenced revision can prove, so a mis-bound
-    event pollutes both sides rather than laundering the one it failed to name.
+    claims and the lineage every referenced revision can prove -- every
+    candidate of an ambiguous revision included -- so a mis-bound event pollutes
+    both sides rather than laundering the one it failed to name. Which
+    candidate keeps that association can never depend on the order in which
+    the stores happened to be read.
     """
     reasons = []
     contamination = set()
@@ -1362,43 +1409,47 @@ def _evaluate_exposure_binding(row, revision_index, *, revision_conflicts=()):
     event_source = identity.get("source_key")
     resolved = []
     for revision_id in revision_ids:
-        lineage = revision_index.get(revision_id)
-        if lineage is None:
+        candidates = _revision_candidates(revision_index, revision_id)
+        if not candidates:
             reasons.append("binding_revision_unresolvable:" + revision_id)
             continue
-        if revision_id in revision_conflicts:
+        # An ambiguous revision is never bound, but every candidate it can
+        # prove still belongs to the conservative contamination union: the
+        # wrong event may have consumed any of them.
+        if len(candidates) > 1 or revision_id in revision_conflicts:
             reasons.append("binding_revision_ambiguous:" + revision_id)
-        resolved.append(lineage)
-        contamination |= _query_keys(lineage)
+        for lineage in candidates:
+            resolved.append(lineage)
+            contamination |= _query_keys(lineage)
 
-        revision_root = lineage.get("exposure_root_key")
-        revision_source = lineage.get("source_key")
-        if not (
-            (_is_non_empty_str(revision_root) and revision_root == event_root)
-            or (
-                _is_non_empty_str(revision_source)
-                and revision_source == event_source
-            )
-        ):
-            reasons.append("binding_revision_lineage_mismatch:" + revision_id)
-        if lineage.get("identity_class") != IDENTITY_COMPLETE:
-            reasons.append(
-                "binding_revision_identity_not_complete:" + revision_id
-            )
-        if lineage.get("parent_gaps"):
-            reasons.append("binding_revision_parent_incomplete:" + revision_id)
-        if not _same_parent(identity, lineage):
-            reasons.append("binding_parent_lineage_mismatch:" + revision_id)
-        if targets is not None:
-            pair = (lineage.get("field_id"), lineage.get("seat"))
-            if pair not in targets:
-                reasons.append(
-                    "binding_revision_target_mismatch:" + revision_id
+            revision_root = lineage.get("exposure_root_key")
+            revision_source = lineage.get("source_key")
+            if not (
+                (_is_non_empty_str(revision_root) and revision_root == event_root)
+                or (
+                    _is_non_empty_str(revision_source)
+                    and revision_source == event_source
                 )
-        if evidence_kind == EVIDENCE_ACTUALLY_CONSUMED and (
-            lineage.get("status") != STATUS_KNOWN
-        ):
-            reasons.append("binding_revision_not_known:" + revision_id)
+            ):
+                reasons.append("binding_revision_lineage_mismatch:" + revision_id)
+            if lineage.get("identity_class") != IDENTITY_COMPLETE:
+                reasons.append(
+                    "binding_revision_identity_not_complete:" + revision_id
+                )
+            if lineage.get("parent_gaps"):
+                reasons.append("binding_revision_parent_incomplete:" + revision_id)
+            if not _same_parent(identity, lineage):
+                reasons.append("binding_parent_lineage_mismatch:" + revision_id)
+            if targets is not None:
+                pair = (lineage.get("field_id"), lineage.get("seat"))
+                if pair not in targets:
+                    reasons.append(
+                        "binding_revision_target_mismatch:" + revision_id
+                    )
+            if evidence_kind == EVIDENCE_ACTUALLY_CONSUMED and (
+                lineage.get("status") != STATUS_KNOWN
+            ):
+                reasons.append("binding_revision_not_known:" + revision_id)
 
     if not revision_ids and evidence_kind != EVIDENCE_RELEASED:
         reasons.append("binding_consumed_revision_set_missing")

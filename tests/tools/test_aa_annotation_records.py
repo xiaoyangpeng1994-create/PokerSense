@@ -14,6 +14,10 @@ integrity or consumer / revision binding.
 Sections 37 (R1) and 38 (R2) cover the two final P0 blockers: a new exposure
 may not re-parent an already annotated revision, and a recovered historical
 event may never be trusted because of its own stored ``binding_status``.
+
+Section 39 closes the last R2 P0: when the same revision id resolves to
+different lineages in different stores, *every* candidate stays associated
+with the event, so no read order can drop one side of the contamination.
 """
 
 import hashlib
@@ -1800,3 +1804,269 @@ def test_historical_unresolvable_revision_stays_unbound(tmp_path):
     assert all(
         row["binding_status"] == BINDING_UNRESOLVED for row in projection["rows"]
     )
+
+
+# 39 P0-R2 -- an ambiguous revision id keeps every candidate lineage -------
+AMBIGUOUS_REVISION = "ann-synthetic-shared-id"
+
+
+def ambiguous_candidates(tmp_path, *, with_parents=False):
+    """The same revision id in two stores, each proving a different source.
+
+    The only exposure line lives in its own store: it claims source X and
+    consumes the shared revision id. Neither candidate has any correct
+    exposure of its own, so whatever A or B recovers can only come from the
+    annotation revision that the wrong event referenced.
+    """
+    store_a = AnnotationStore(tmp_path / "candidate-A")
+    store_b = AnnotationStore(tmp_path / "candidate-B")
+    store_e = AnnotationStore(tmp_path / "events")
+    if with_parents:
+        parent_a = source_ref(
+            media="media-parent-A", digest_seed="parent-A|bytes",
+        )
+        parent_b = source_ref(
+            media="media-parent-B", digest_seed="parent-B|bytes",
+        )
+        source_a = source_ref(
+            media="media-cand-A", digest_seed="cand-A|bytes", parent=parent_a,
+        )
+        source_b = source_ref(
+            media="media-cand-B", digest_seed="cand-B|bytes", parent=parent_b,
+        )
+    else:
+        parent_a = parent_b = None
+        source_a = source_ref(media="media-cand-A", digest_seed="cand-A|bytes")
+        source_b = source_ref(media="media-cand-B", digest_seed="cand-B|bytes")
+    source_x = source_ref(media="media-claim-X", digest_seed="claim-X|bytes")
+    write_rows(
+        store_a, [raw_row(source_a, FIELD_POT_DISPLAY, 0, AMBIGUOUS_REVISION)]
+    )
+    write_rows(
+        store_b, [raw_row(source_b, FIELD_POT_DISPLAY, 0, AMBIGUOUS_REVISION)]
+    )
+    row = raw_exposure(
+        _canonical_source_ref(source_x, allow_incomplete=True),
+        [AMBIGUOUS_REVISION],
+        event_id="exp-ambiguous-history",
+        binding_status="BOUND",
+    )
+    store_e.append_exposure(row)
+    return {
+        "event_store": store_e,
+        "store_a": store_a,
+        "store_b": store_b,
+        "source_a": source_a,
+        "source_b": source_b,
+        "source_x": source_x,
+        "parent_a": parent_a,
+        "parent_b": parent_b,
+    }
+
+
+def _declared(data, order):
+    stores = {
+        "E": data["event_store"],
+        "A": data["store_a"],
+        "B": data["store_b"],
+    }
+    return [str(stores[key].path) for key in order.split(",")]
+
+
+def _binding_snapshot(projection):
+    """Binding-relevant view of a projection, free of query-local noise."""
+    return sorted(
+        (
+            row["event_id"],
+            row["binding_status"],
+            row["claimed_binding_status"],
+            row["exposure_state"],
+            row["freeze_bindable"],
+            tuple(row["annotation_revision_ids"]),
+            tuple(
+                item for item in row["unresolved"]
+                if item.startswith("binding_reason:")
+            ),
+        )
+        for row in projection["rows"]
+    )
+
+
+@pytest.mark.parametrize("order", ["E,A,B", "E,B,A"])
+def test_ambiguous_revision_contaminates_every_candidate(tmp_path, order):
+    """R2-P0: both candidate lineages stay associated with the wrong event."""
+    data = ambiguous_candidates(tmp_path)
+    declared = _declared(data, order)
+    ambiguity = (
+        "binding_reason:binding_revision_ambiguous:" + AMBIGUOUS_REVISION
+    )
+    # The stored claim is BOUND; it is recorded but never becomes the verdict.
+    stored = data["event_store"].read_exposures()
+    assert [row["binding_status"] for row in stored] == ["BOUND"]
+
+    for name in ("source_a", "source_b"):
+        projection = exposure_projection(
+            data["event_store"],
+            {"sources": [data[name]], "declared_store_paths": declared},
+        )
+        assert projection["rows"], "event lost for " + name
+        assert all(
+            row["event_id"] == "exp-ambiguous-history"
+            for row in projection["rows"]
+        )
+        assert all(
+            row["claimed_binding_status"] == "BOUND"
+            for row in projection["rows"]
+        )
+        assert all(
+            row["binding_status"] == BINDING_UNRESOLVED
+            for row in projection["rows"]
+        ), "stored BOUND must not survive an ambiguous revision"
+        assert all(
+            ambiguity in row["unresolved"] for row in projection["rows"]
+        )
+        assert all(row["freeze_bindable"] is False for row in projection["rows"])
+        assert all(
+            row["annotation_revision_ids"] == [AMBIGUOUS_REVISION]
+            for row in projection["rows"]
+        )
+        assert "no_exposure_history_evidence" not in projection["unresolved"]
+
+
+def test_ambiguous_revision_result_is_store_order_invariant(tmp_path):
+    """Both declared orders, both sides: byte-identical binding verdicts."""
+    data = ambiguous_candidates(tmp_path)
+    snapshots = {}
+    for order in ("E,A,B", "E,B,A"):
+        declared = _declared(data, order)
+        for name in ("source_a", "source_b"):
+            projection = exposure_projection(
+                data["event_store"],
+                {"sources": [data[name]], "declared_store_paths": declared},
+            )
+            snapshots[(order, name)] = _binding_snapshot(projection)
+    assert snapshots[("E,A,B", "source_a")] == snapshots[("E,B,A", "source_a")]
+    assert snapshots[("E,A,B", "source_b")] == snapshots[("E,B,A", "source_b")]
+    assert snapshots[("E,A,B", "source_a")] == snapshots[("E,B,A", "source_b")]
+    assert snapshots[("E,B,A", "source_a")] == snapshots[("E,A,B", "source_b")]
+
+
+def test_ambiguous_revision_does_not_contaminate_unrelated_source(tmp_path):
+    """An unrelated source D is never pulled in by an ambiguous revision."""
+    data = ambiguous_candidates(tmp_path)
+    unrelated = source_ref(
+        media="media-unrelated-D", digest_seed="unrelated-D|bytes",
+    )
+    for order in ("E,A,B", "E,B,A"):
+        projection = exposure_projection(
+            data["event_store"],
+            {"sources": [unrelated], "declared_store_paths": _declared(
+                data, order
+            )},
+        )
+        assert not any(
+            row.get("event_id") == "exp-ambiguous-history"
+            for row in projection["rows"]
+        )
+        assert all(
+            row["exposure_state"] == STATE_UNKNOWN
+            for row in projection["rows"]
+        )
+        assert all(
+            "no_exposure_history_evidence" in row["unresolved"]
+            for row in projection["rows"]
+        )
+
+
+def test_ambiguous_revision_keeps_every_candidate_parent(tmp_path):
+    """PA / PB stay conservatively associated; an unrelated PD does not."""
+    data = ambiguous_candidates(tmp_path, with_parents=True)
+    ambiguity = (
+        "binding_reason:binding_revision_ambiguous:" + AMBIGUOUS_REVISION
+    )
+    unrelated_parent = source_ref(
+        media="media-parent-D", digest_seed="parent-D|bytes",
+    )
+    for order in ("E,A,B", "E,B,A"):
+        declared = _declared(data, order)
+        for name in ("parent_a", "parent_b"):
+            projection = exposure_projection(
+                data["event_store"],
+                {"sources": [data[name]], "declared_store_paths": declared},
+            )
+            assert any(
+                row["event_id"] == "exp-ambiguous-history"
+                for row in projection["rows"]
+            ), "parent lineage lost for " + name
+            assert any(
+                ambiguity in row["unresolved"] for row in projection["rows"]
+            )
+            assert all(
+                row["binding_status"] == BINDING_UNRESOLVED
+                for row in projection["rows"]
+            )
+        projection = exposure_projection(
+            data["event_store"],
+            {"sources": [unrelated_parent], "declared_store_paths": declared},
+        )
+        assert not any(
+            row.get("event_id") == "exp-ambiguous-history"
+            for row in projection["rows"]
+        )
+
+
+def test_same_revision_content_in_two_stores_is_not_ambiguous(tmp_path):
+    """A backup copy of one revision is a duplicate, never a conflict."""
+    store_one = AnnotationStore(tmp_path / "copy-one")
+    store_two = AnnotationStore(tmp_path / "copy-two")
+    store_e = AnnotationStore(tmp_path / "events")
+    ref = source_ref(media="media-duplicate", digest_seed="duplicate|bytes")
+    for target in (store_one, store_two):
+        write_rows(
+            target, [raw_row(ref, FIELD_POT_DISPLAY, 0, AMBIGUOUS_REVISION)]
+        )
+    row = raw_exposure(
+        _canonical_source_ref(ref, allow_incomplete=True),
+        [AMBIGUOUS_REVISION],
+        event_id="exp-duplicate-history",
+        binding_status="BOUND",
+    )
+    store_e.append_exposure(row)
+
+    projection = exposure_projection(
+        store_e,
+        {
+            "sources": [ref],
+            "declared_store_paths": [
+                str(store_e.path), str(store_one.path), str(store_two.path),
+            ],
+        },
+    )
+    assert projection["rows"]
+    assert all(
+        row["binding_status"] == BINDING_BOUND for row in projection["rows"]
+    )
+    assert not any(
+        item.startswith("binding_reason:binding_revision_ambiguous")
+        for row in projection["rows"]
+        for item in row["unresolved"]
+    )
+
+
+def test_ambiguous_revision_blocks_assessment_for_every_candidate(tmp_path):
+    """No candidate becomes bindable and positive permission stays closed."""
+    data = ambiguous_candidates(tmp_path)
+    for order in ("E,A,B", "E,B,A"):
+        declared = _declared(data, order)
+        for name in ("source_a", "source_b"):
+            decision = assess_use(
+                data["event_store"],
+                data[name],
+                PURPOSE_TRAINING,
+                policy(data["event_store"].path, declared_store_paths=declared),
+            )
+            assert decision["verdict"] == VERDICT_BLOCKED
+            assert any(
+                "exposure_event_not_bound" in reason
+                for reason in decision["reasons"]
+            )

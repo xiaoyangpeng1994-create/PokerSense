@@ -207,9 +207,9 @@
 不会因为调用方说 B 就丢掉 revision 已知的 A。
 
 **R2 — 历史恢复必须重新验证。** `_read_declared_stores` 在合并事件后建立
-annotation revision 索引（`revision_id` → 重新派生的 source/root/parent/field/seat/status），
-逐条解析 `annotation_revision_ids`，再派生出每个事件的 `effective_binding_status` 与
-**effective contamination keys**（事件声明的 lineage ∪ 被引用 revision 能证明的 lineage）。
+annotation revision 索引，逐条解析 `annotation_revision_ids`，再派生出每个事件的
+`effective_binding_status` 与 **effective contamination keys**（事件声明的 lineage ∪
+被引用 revision 能证明的 lineage）。
 `_filter_events` / `assess_use` / `exposure_projection` 一律使用这套 effective keys：
 
 - 错误历史**保留、不删除**；
@@ -218,6 +218,27 @@ annotation revision 索引（`revision_id` → 重新派生的 source/root/paren
 - 历史 consumer targets / field / seat / revision 列表 / `run_or_manifest_ref` 任一不再满足
   真实 binding 契约 ⇒ 有效绑定降级；
 - 跨 store 同名 revision 派生产物不一致 ⇒ `binding_revision_ambiguous:*`，永不 BOUND。
+
+#### 6.3.1 同名 revision 的多候选：`revision_id` → **全部**候选 lineage
+
+索引不是 `revision_id → 单个 lineage`，而是 `revision_id → 全部候选 lineage`
+（`_add_revision_candidate` / `_revision_candidates`）。判定规则：
+
+- **候选去重**：两个 store 里同一 `revision_id` 的**完整派生产物完全相同**
+  （source/root/parent/identity_class/parent_gaps/field/seat/status/group_key 全等）
+  ⇒ 视为同一事实的副本（备份 / 复制的 store），**去重为一个候选，不报冲突、
+  不降级**；
+- **真歧义**：同一 `revision_id` 的派生产物**任一环不同** ⇒ 全部候选**并列保留**，
+  有效绑定 `UNRESOLVED`，**不挑选任何一方成为可信事实**；
+- **污染并集**：`contamination_keys` = 事件声明的 lineage ∪ **每一个**候选的
+  child source / child exposure root / parent source / parent exposure root。
+  无法确定错误事件到底消费了哪个候选时，**全部保守污染**；
+- **顺序无关**：declared store 的读取顺序只影响候选进入索引的先后，污染并集、
+  `binding_reasons`（`sorted(set(...))`）与有效绑定都是集合运算 ⇒
+  `[E, A, B]` 与 `[E, B, A]` 的结果**完全一致**。不得出现「先读到的一方才被污染、
+  后读到的一方从曝光查询里消失」；
+- **无关来源隔离**：与事件及各候选都没有证据关系的来源（D / PD）**不被污染**，
+  仍为 `EXPOSURE_UNKNOWN` + `no_exposure_history_evidence`。
 
 `binding_reasons` 前缀：`binding_event_identity_not_complete` ·
 `binding_revision_unresolvable:*` · `binding_revision_ambiguous:*` ·
