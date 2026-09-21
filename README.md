@@ -4,7 +4,8 @@
 
 Critical board, participation, ALL-IN and river-first-actor candidates now carry
 source and temporal evidence. Snapshot prefill rejects missing, stale or conflicting
-critical evidence; older raw-only records retain their candidates but may require
+critical evidence; older raw-only records or cached projections without causal
+evidence retain their candidates but may require
 manual input. The current native card crop must also support a temporal board
 candidate. These checks do not establish visual accuracy or real-hand acceptance.
 See the [five-field verification contract](docs/AA-CRITICAL-PERCEPTION-VERIFICATION.zh-CN.md).

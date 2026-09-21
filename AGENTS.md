@@ -33,6 +33,22 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-22 PR #33 CACHED CAUSAL SEMANTICS REPAIR:** independent review of
+  0d76342 proved cached first-actor and board-CONFLICT conclusions could bypass
+  production consumers even though scorer replay rejected them. Repaired the
+  shared production check to reconstruct the entire projection from a separate,
+  digest-bound raw evidence sidecar: at most four board progression/first-conflict
+  witnesses and 256 contiguous transition rows, with source/epoch/order/current-end
+  validation. Old caches without evidence abstain. Long stable TURN histories can
+  start a fresh transition window without erasing earlier board contradictions.
+  Merged board/transition witness chronology also enforces the same source-frame
+  offset and bounded source-time continuity. Final focused 126 passed; manual/UI
+  compatibility 39 passed. Independent original 45/45 and expanded 65/65 probes
+  passed on source 0724dcfe29bfec884959308655803cfb5ee82bca317ab38583f4348cfe18494a.
+  Full lint/diff passed. Original 0d76342 must not serve as the merge head.
+  Final-base integration and post-merge CI are tracked in Issue #27. No media,
+  training, gold/freeze, product solver run or real-hand confirmation;
+  REAL_HAND_ACCEPTANCE_PENDING / NOT_ASSESSED remain.
 - **2026-09-22 CRITICAL PERCEPTION BOUNDARY:** runtime now uses versioned
   native-current board rejection and terminal-participation guards while frozen
   readers remain unchanged. Five source-bound candidate fields, a causal river

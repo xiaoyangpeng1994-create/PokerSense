@@ -70,6 +70,42 @@ window 都不能过。所有 window witness 必须属于登记来源且绑定完
 `producer_sha256` 必须匹配冻结的候选模块。显式人工修正标记会被拒绝；完整伪造
 原始输入的真实性仍不是哈希或结构检查能证明的事。
 
+### 缓存语义修复：原始因果证据与缓存结论分开
+
+原 PR #33 head `0d76342` 的 `checked_view` 只核对当前字段和缓存中的 window，
+没有重导河牌首位 actor 与跨帧 board conflict。只改缓存结论即可让冷启动河牌或
+已经 CHECK 的手得到错误候选；把缓存 board 的 CONFLICT 改为 KNOWN 也能绕过。
+该 head 不具备这项安全保证，旧的通过记录不能代替修复 head 的独立复核。
+
+修复后，每个 runtime row 在缓存之外保留 `critical_perception_evidence_v1`：
+
+```text
+schema_version: 1
+board_witnesses: 原始关键字段输入的稀疏 board 变化证据，最多 4 行
+transition_rows: 原始关键字段输入的连续 TURN/河牌转换窗口，1 到 256 行
+```
+
+证据行只包含 reducer 消费的原始输入字段，不嵌入缓存投影、first-actor 结论或
+board-conflict 标志。`board_witnesses` 保存 3/4/5 张牌的实际变化及第一次矛盾，
+矛盾出现后不会为了较新的读数删除这个证据。`transition_rows` 保留相邻源帧、
+处理帧、PTS、行动列表、筹码及 actor/dealer 原始候选；当前尾行必须与当前输入
+完全一致。所有证据都核对来源、epoch、顺序和绑定，重叠帧必须具有相同原始内容。
+
+每次新稳定 TURN 读数可替换更早的同街窗口，因此长手不会因超过 256 帧而永远
+无法识别之后的河牌；独立 board 变化证据同时保留。转换窗口超过 256 行会丢失
+首位 actor 的资格并拒识，不把后来河牌重新当作起点。缺证据、错序、跨来源、
+跨 epoch、尾行不符或超限均拒绝；源码中的常量明确限定这两个上限。
+
+`CriticalPerceptionBoundary.observe` 只追加这份证据 sidecar，不修改原始输入字段。
+生产端 `checked_view` 与评分器都从外部证据重放同一个 reducer，并完整比较缓存
+的字段、UNKNOWN/CONFLICT、原因、window 和摘要；摘要覆盖原始字段及整份证据。
+因此，重新计算摘要也不能把缺少 TURN、存在 CHECK 或保留的 board 矛盾变成通过。
+旧快照缺少这份证据时保持 UNKNOWN，不能仅靠旧缓存补齐自动 prefill。
+
+这是机器候选的一致性与因果验证，不是原始记录真实性认证或新的确认权限。
+完整伪造原始来源数据仍须由外部来源核验发现；候选通过不会授予真实手牌确认、
+gold、独立视觉验收或策略资格。
+
 reviews.rows 每行是 `{binding, fields}`，来源与 predictions/sources 一一对应。
 `method` 只接受 `source_only`；审核者 ID 必填，不接受 `independent=true` 或
 `predictions_used_for_labels` 等自封权限/泄漏元数据。源图审核和预测隔离必须由实际

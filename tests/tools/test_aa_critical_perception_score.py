@@ -308,7 +308,7 @@ def test_temporal_known_cannot_be_suppressed_in_cached_projection(bundle):
         view["fields"]["river_first_actor"].update(
             status="UNKNOWN", value=None, reasons=["hide required machine result"])
     edit(bundle, "predictions", change)
-    with pytest.raises(ValueError, match="projection_replay"):
+    with pytest.raises(ValueError, match="invalid_machine_candidate_projection"):
         score.evaluate_files(bundle)
 
 

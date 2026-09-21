@@ -5,6 +5,7 @@ from copy import deepcopy
 import pytest
 
 from poker_engine.desktop.aa_critical_perception import (
+    CAUSAL_EVIDENCE_KEY, MAX_BOARD_WITNESSES, MAX_TRANSITION_ROWS,
     CriticalPerceptionBoundary, checked_view, target_s_candidate_screen,
 )
 from poker_engine.desktop.aa_live_context_v3 import LiveStateAdapterV3
@@ -328,3 +329,165 @@ def test_later_paired_call_cannot_resurrect_terminal_state(terminal):
         value = adapter.observe(row)
     assert value["participants"]["4"]["state"] == terminal
     assert value["critical_status_conflicts"] == ["4"]
+
+
+def forged_first_actor(row, window):
+    result = deepcopy(row)
+    result["critical_perception_v1"]["fields"]["river_first_actor"] = {
+        "status": "KNOWN", "value": 4, "reasons": []}
+    result["critical_perception_v1"]["window"] = deepcopy(window)
+    return result
+
+
+def assert_all_consumers_reject(row):
+    from poker_engine.desktop.aa_hand_input import (
+        facts_from_snapshot, river_start_evidence,
+    )
+    assert checked_view(row) is None
+    assert target_s_candidate_screen(row)["status"] == "SCREEN_BLOCKED"
+    assert river_start_evidence(row)[0] is False
+    facts, _ = facts_from_snapshot(row)
+    assert all(facts[key]["provenance"] == "unknown"
+               for key in ("board_cards", "seats", "action_order"))
+    fields = normalize_fields(row)
+    assert fields["board_cards"]["status"] == "UNKNOWN"
+    assert fields["participation"]["status"] == "UNKNOWN"
+
+
+@pytest.mark.parametrize("history", ["cold_river", "intervening_check"])
+def test_cached_actor_forgery_cannot_replace_raw_temporal_evidence(history):
+    boundary, rows = CriticalPerceptionBoundary(), []
+    for frame in range(4):
+        row = observation(frame, "turn" if history == "intervening_check"
+                          and frame == 0 else "river")
+        row.update(hero_seat=4, action_order=[4, 5, 7], hand_ledger_v2={
+            "status": "OBSERVED_HAND_COMMITMENTS_CANDIDATE", "epoch": "synthetic-hand",
+            "taint_reasons": [], "hand_commitments": {str(s): "20" for s in range(8)}})
+        if history == "intervening_check" and frame == 2:
+            row["glyph_transitions"] = [{"frame": 2, "slot": 4, "glyph": "check"}]
+        qualify(boundary, row)
+        rows.append(row)
+    assert rows[-1]["critical_perception_v1"]["fields"][
+        "river_first_actor"]["status"] == "UNKNOWN"
+    forged = forged_first_actor(rows[-1], [
+        r["critical_perception_v1"]["binding"] for r in rows[-3:]])
+    assert_all_consumers_reject(forged)
+
+
+@pytest.mark.parametrize("slot", [3, 4])
+def test_cached_board_cannot_erase_an_actual_earlier_card_conflict(slot):
+    boundary = CriticalPerceptionBoundary()
+    qualify(boundary, observation(0, "turn"))
+    qualify(boundary, observation(1))
+    for frame in (2, 3):
+        row = observation(frame)
+        row["cards"]["board_slots"][slot] = "9c"
+        row["observed_state_v2"]["board_candidate"][slot] = "9c"
+        qualify(boundary, row)
+    assert row["critical_perception_v1"]["fields"]["board"]["status"] == "CONFLICT"
+    row["critical_perception_v1"]["fields"]["board"] = {
+        "status": "KNOWN", "value": row["cards"]["board_slots"], "reasons": []}
+    assert_all_consumers_reject(row)
+
+
+@pytest.mark.parametrize("mutation", [
+    "missing_envelope", "missing_turn", "missing_board", "reorder", "cross_source",
+    "cross_epoch", "wrong_current_end", "witness_ref", "overflow", "cached_reason"])
+def test_causal_evidence_or_cached_conclusion_mutation_is_rejected(mutation):
+    boundary = CriticalPerceptionBoundary()
+    qualify(boundary, observation(0, "turn"))
+    qualify(boundary, observation(1))
+    row = observation(2)
+    qualify(boundary, row)
+    assert target_s_candidate_screen(row)["status"] == "SCREEN_ELIGIBLE"
+    evidence = row[CAUSAL_EVIDENCE_KEY]
+    if mutation == "missing_envelope":
+        row.pop(CAUSAL_EVIDENCE_KEY)
+    elif mutation == "missing_turn":
+        evidence["transition_rows"].pop(0)
+    elif mutation == "missing_board":
+        evidence["board_witnesses"].pop(0)
+    elif mutation == "reorder":
+        evidence["transition_rows"].reverse()
+    elif mutation == "cross_source":
+        evidence["transition_rows"][0]["source_id"] = "other-source"
+    elif mutation == "cross_epoch":
+        evidence["transition_rows"][0]["observed_state_v2"]["observed_epoch"] = "other"
+    elif mutation == "wrong_current_end":
+        evidence["transition_rows"].pop()
+    elif mutation == "witness_ref":
+        evidence["board_witnesses"][0]["source_frame"] += 10000
+    elif mutation == "overflow":
+        evidence["transition_rows"] *= MAX_TRANSITION_ROWS
+    else:
+        row["critical_perception_v1"]["fields"]["river_first_actor"]["reasons"] = ["x"]
+    # A new checksum is not evidence of causal correctness. Re-hash deliberately
+    # to ensure rejection comes from semantic replay/structure, not stale bytes.
+    from poker_engine.desktop.aa_critical_perception import _digest
+    row["critical_perception_v1"]["raw_evidence_digest"] = _digest(row)
+    assert_all_consumers_reject(row)
+
+
+def test_long_turn_history_is_bounded_and_still_allows_real_river_transition():
+    boundary = CriticalPerceptionBoundary()
+    for frame in range(MAX_TRANSITION_ROWS + 20):
+        row = observation(frame, "turn")
+        original = deepcopy(row)
+        qualify(boundary, row)
+        assert {k: row[k] for k in original} == original
+        assert len(row[CAUSAL_EVIDENCE_KEY]["transition_rows"]) == 1
+        assert len(row[CAUSAL_EVIDENCE_KEY]["board_witnesses"]) == 1
+    for frame in (MAX_TRANSITION_ROWS + 20, MAX_TRANSITION_ROWS + 21):
+        row = observation(frame)
+        qualify(boundary, row)
+    assert target_s_candidate_screen(row)["status"] == "SCREEN_ELIGIBLE"
+    assert len(row[CAUSAL_EVIDENCE_KEY]["transition_rows"]) == 3
+
+
+def test_transition_overflow_abstains_without_dropping_earlier_board_conflict():
+    boundary = CriticalPerceptionBoundary()
+    qualify(boundary, observation(0, "turn"))
+    for frame in range(1, MAX_TRANSITION_ROWS + 3):
+        row = observation(frame)
+        qualify(boundary, row)
+    actor = row["critical_perception_v1"]["fields"]["river_first_actor"]
+    assert actor["status"] == "UNKNOWN"
+    assert len(row[CAUSAL_EVIDENCE_KEY]["transition_rows"]) <= MAX_TRANSITION_ROWS
+    row = observation(MAX_TRANSITION_ROWS + 3)
+    row["cards"]["board_slots"][4] = "9c"
+    row["observed_state_v2"]["board_candidate"][4] = "9c"
+    qualify(boundary, row)
+    for frame in range(MAX_TRANSITION_ROWS + 4, MAX_TRANSITION_ROWS * 2 + 4):
+        row = observation(frame)
+        qualify(boundary, row)
+    assert row["critical_perception_v1"]["fields"]["board"]["status"] == "CONFLICT"
+    assert checked_view(row) is not None
+    assert len(row[CAUSAL_EVIDENCE_KEY]["board_witnesses"]) <= MAX_BOARD_WITNESSES
+
+
+@pytest.mark.parametrize("coordinate", [
+    "source_frame", "pts_seconds", "both", "source_gap"])
+def test_merged_board_and_transition_witness_chronology_cannot_be_inverted(coordinate):
+    import json
+    from poker_engine.desktop.aa_critical_perception import _digest
+
+    boundary = CriticalPerceptionBoundary()
+    for frame in range(4):
+        qualify(boundary, observation(frame, "turn"))
+    for frame in range(4, 7):
+        row = observation(frame)
+        if frame < 6:
+            row["cards"]["board_slots"][4] = None
+        qualify(boundary, row)
+    assert target_s_candidate_screen(row)["status"] == "SCREEN_ELIGIBLE"
+    row = json.loads(json.dumps(row))  # Actual persisted copies have no aliases.
+    evidence = row[CAUSAL_EVIDENCE_KEY]
+    witness = evidence["board_witnesses"][0]
+    later = evidence["transition_rows"][1]
+    for key in ("source_frame", "pts_seconds"):
+        if coordinate in (key, "both"):
+            witness[key] = later[key]
+    if coordinate == "source_gap":
+        witness["source_frame"] -= 1
+    row["critical_perception_v1"]["raw_evidence_digest"] = _digest(row)
+    assert_all_consumers_reject(row)
