@@ -33,6 +33,29 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-22 INDEPENDENT INTEGRATION REVIEW, PR #32:** fresh reviewers verified
+  the requested 25168a8 baseline with 90 evidence/recovery and 168 domain probes;
+  no scoped acceptance P0 remained. A non-P0 Unicode audit-text persistence issue
+  was reproduced and fixed using physical JSONL line splitting only, preserving
+  canonical seals. Final focused 151 passed; independent rerun 90/90 plus 4/4
+  Unicode and 10/10 physical-line/revision checks passed. No media, real-hand
+  confirmation, training, gold/freeze or product strategy work. Integration and
+  post-merge CI are tracked in Issue #27; real acceptance and strategy assessment
+  remain pending.
+- **2026-09-22 TARGET-S CONFIRMATION V2 (PR #32):** repaired the six acceptance
+  blocker groups from Issue #27 comment 5762748242. Source-bound stable windows,
+  explicit opening/river interval seals, complete semantic recovery validation,
+  evidence/revision-bound current receipts, full seat partitions, no-ALL_IN scope
+  and lossless monetary identity/assertions now fail closed. Independent review
+  additionally tightened clockwise order and malformed UTF-8 recovery. V1 stores
+  remain untouched and cannot inherit V2 acceptance. Final focused 147 passed;
+  the full run preceding the last two narrow fixes was 4392 passed/22 skipped,
+  final independent probes passed 15/15 (root) and 36/36 (separate reviewer).
+  Full lint and
+  diff checks passed; exact-head CI is reported on the PR. All test receipts are
+  synthetic. No real confirmation, capture, product strategy run, PHH bridge or
+  training permission was created; REAL_HAND_ACCEPTANCE_PENDING and NOT_ASSESSED
+  remain. This is a factual contract, not an executable solver adapter.
 - **2026-09-16 GITHUB-001 (Issue #25) STANDARD GIT SYNC:** Added tools/git_sync.py, a thin
   verified wrapper around standard git/gh. Root cause of the observed push hang: the
   user-level config installs a Git Credential Manager helper, and `-c credential.helper=X`
