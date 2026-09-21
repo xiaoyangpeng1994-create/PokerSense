@@ -33,6 +33,18 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-22 SEQUENTIAL PR #32 -> #33 INTEGRATION:** PR32 merged as
+  a578d330879e542a56bd8c2c85ccdbfdd27f77bf after independent review and scoped
+  repairs. Its main CI 35633329108 and desktop build 35633329102 succeeded;
+  release skipped without a tag. PR33 was then retargeted to that exact main
+  and synchronized with a merge commit; product/test files are unchanged from
+  the reviewed 0bb9cdb tree (local full 4508 passed/22 skipped). Original PR33
+  0d76342 was blocked by a demonstrated cache P0; the repaired causal module
+  remains 0724dcfe29bfec884959308655803cfb5ee82bca317ab38583f4348cfe18494a.
+  Final-head rechecks, merge identities and both post-main CI results are
+  recorded in Issue #27. Branches/history are retained. No historical media,
+  training, real gold/freeze, product strategy or real-hand acceptance work;
+  REAL_HAND_ACCEPTANCE_PENDING=YES and NOT_ASSESSED=YES remain.
 - **2026-09-22 PR #33 CACHED CAUSAL SEMANTICS REPAIR:** independent review of
   0d76342 proved cached first-actor and board-CONFLICT conclusions could bypass
   production consumers even though scorer replay rejected them. Repaired the
