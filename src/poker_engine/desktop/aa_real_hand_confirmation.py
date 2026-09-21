@@ -293,6 +293,14 @@ def _unique_json_object(pairs):
     return value
 
 
+def _jsonl_lines(text):
+    """Split physical JSONL records, preserving legal Unicode inside strings."""
+    lines = text.split("\n")
+    if lines[-1] == "":
+        lines.pop()
+    return lines
+
+
 class _StoreLock:
     """Best-effort exclusive lock; enough for single-user local tooling."""
 
@@ -347,7 +355,7 @@ class ConfirmationStore:
             raw_text = self._confirmations.read_text(encoding="utf-8")
         except UnicodeError as exc:
             raise StoreIntegrityError("confirmation:invalid_utf8") from exc
-        for lineno, raw in enumerate(raw_text.splitlines(), start=1):
+        for lineno, raw in enumerate(_jsonl_lines(raw_text), start=1):
             if raw.strip() == "":
                 raise StoreIntegrityError(f"confirmation:blank_line:{lineno}")
             try:
@@ -404,7 +412,7 @@ class ConfirmationStore:
         tail = None
         if not self._confirmations.exists():
             return None
-        for raw in self._confirmations.read_text(encoding="utf-8").splitlines():
+        for raw in _jsonl_lines(self._confirmations.read_text(encoding="utf-8")):
             if raw.strip() == "":
                 continue
             tail = json.loads(raw).get("record_digest")
