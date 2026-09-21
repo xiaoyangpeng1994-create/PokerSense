@@ -33,6 +33,24 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-22 CRITICAL PERCEPTION BOUNDARY:** runtime now uses versioned
+  native-current board rejection and terminal-participation guards while frozen
+  readers remain unchanged. Five source-bound candidate fields, a causal river
+  transition window, shared snapshot/evaluation checks and a candidate-only
+  TARGET-S screen prevent stale or contradictory automatic prefill. Perception
+  validation disables the river study sidecar explicitly. The scoped scorer
+  pins declared source rows/artifacts, replays candidate projection, requires
+  nonzero polarity coverage and safe first-actor abstention; it cannot award
+  real-hand, independent-vision or strategy acceptance. Final focused 89 passed;
+  independent actual adapter+wager+boundary probes 10/10 passed after fixing
+  initialization latency and an omitted cache dependency. Full lint/diff passed;
+  full integration and exact-head CI results are recorded on the PR. Existing
+  28 exposed hands remain CLASS X; single-frame diagnostics matched 26/28 boards
+  and exposed a preprocessing-sensitive false card, not a temporal accuracy
+  result. Sparse existing images cannot establish continuous first-actor truth.
+  No new capture, training, real confirmation or product strategy run occurred.
+  REAL_HAND_ACCEPTANCE_PENDING / NOT_ASSESSED remain; new source validation and
+  owner signoff are required before phase completion.
 - **2026-09-22 TARGET-S CONFIRMATION V2 (PR #32):** repaired the six acceptance
   blocker groups from Issue #27 comment 5762748242. Source-bound stable windows,
   explicit opening/river interval seals, complete semantic recovery validation,

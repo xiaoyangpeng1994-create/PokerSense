@@ -1,5 +1,15 @@
 # PokerSense
 
+关键公牌、参与状态、ALL-IN 与河牌首位行动者候选现在携带来源和时序证据。
+快照预填遇到缺失、过期或冲突的关键证据会拒绝带入；旧记录保留原候选，但可能需要
+人工补录。当前未预处理牌面也必须支持跨帧公牌候选。这些检查不代表视觉准确率或
+真实手牌已经验收，详见[五字段专项验证合同](docs/AA-CRITICAL-PERCEPTION-VERIFICATION.zh-CN.md)。
+仅验证感知时显式关闭河牌分析旁路。
+
+[TARGET-S 确认合同](docs/AA-REAL-HAND-CONFIRMATION-V1.zh-CN.md)使用独立的证据绑定确认历史，
+旧确认记录不会自动升级。事实确认及当前有效 receipt 不代表 PHH 就绪、策略资格、
+独立视觉验收或盈利成立。
+
 **简体中文** | [English](README.md)
 
 ## AA 八座开发工具

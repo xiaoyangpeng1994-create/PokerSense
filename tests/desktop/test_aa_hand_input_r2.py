@@ -129,13 +129,12 @@ def assumptions(**overrides):
 
 # --- river-start evidence -------------------------------------------------
 
-def test_a_payload_with_full_river_start_evidence_yields_observed_seats():
+def test_legacy_ledger_evidence_without_critical_projection_keeps_raw_candidates():
     from_snapshot, gaps = module.facts_from_snapshot(payload(), source="rec-A")
-    assert from_snapshot["seats"]["provenance"] == "observed"
-    states = {row["seat_id"]: row["status"] for row in from_snapshot["seats"]["value"]}
-    assert states == {0: "ACTIVE", 1: "ACTIVE", 2: "ACTIVE",
-                      3: "FOLDED", 4: "FOLDED", 5: "FOLDED"}
+    assert from_snapshot["seats"]["provenance"] == "unknown"
+    assert from_snapshot["seats"]["value"] is None
     assert from_snapshot["seats"]["candidate"] is not None
+    assert any("关键字段" in gap for gap in gaps)
 
 
 @pytest.mark.parametrize("label,mutate", [

@@ -131,17 +131,13 @@ def test_snapshot_never_guesses_hero_action_order_or_seat_status():
 
 
 def test_snapshot_preserves_folded_and_ambiguous_participant_states():
-    """R1-B / R2: statuses come from evidence only; ambiguity stays a gap.
-
-    The fixture now carries the real ledger status and the river-start evidence,
-    so "observed" is earned. Without that evidence the same snapshot yields no
-    seats at all (see the R2 negatives).
-    """
+    """Legacy raw state remains a candidate, never qualified current facts."""
     clear, gaps = module.facts_from_snapshot(snapshot(), source="rec-1")
-    states = {row["seat_id"]: row["status"] for row in clear["seats"]["value"]}
-    assert states[3] == "FOLDED" and states[4] == "FOLDED"
-    assert states[0] == "ACTIVE"
-    assert clear["seats"]["provenance"] == "observed"
+    assert clear["seats"]["value"] is None
+    assert clear["seats"]["provenance"] == "unknown"
+    states = clear["seats"]["candidate"]["participants"]
+    assert states[3]["state"] == "folded"
+    assert states[0]["state"] == "active"
     assert clear["hero_seat"]["provenance"] == "unknown"
     assert clear["action_order"]["provenance"] == "unknown"
 
@@ -160,7 +156,7 @@ def test_snapshot_preserves_folded_and_ambiguous_participant_states():
         "4": {"state": "folded"}, "5": {"state": "folded"}}}
     fuzzy, fuzzy_gaps = module.facts_from_snapshot(ambiguous, source="rec-2")
     assert fuzzy["seats"]["provenance"] == "unknown"
-    assert any("不明确" in gap for gap in fuzzy_gaps)
+    assert any("关键字段" in gap for gap in fuzzy_gaps)
 
 
 def test_unknown_history_is_not_the_same_as_no_history():

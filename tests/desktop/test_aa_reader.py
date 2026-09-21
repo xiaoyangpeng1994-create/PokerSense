@@ -120,6 +120,19 @@ def test_target_identity_hash_and_temporal_events(profile, image):
     assert first["complete_legal_state"] is False
 
 
+def test_perception_validation_disables_strategy_sidecar(profile, image, monkeypatch):
+    from poker_engine.desktop import aa_river_strategy
+
+    def forbidden(row):
+        raise AssertionError("perception validation must not execute strategy")
+
+    monkeypatch.setattr(aa_river_strategy, "current_river_study", forbidden)
+    reader = AA8Reader(profile, factory=Candidate, analysis_enabled=False)
+    row = reader.read(image, 0, {"pts_seconds": 0, "source_id": "test"})
+    assert row["river_strategy_v1"]["status"] == "ANALYSIS_DISABLED"
+    assert row["critical_perception_v1"]["candidate_only"] is True
+
+
 @pytest.mark.parametrize("next_frame,next_pts,next_source", [
     (2, .1, "session"), (1, 1.1, "session"), (0, 0, "new-session"),
 ])
