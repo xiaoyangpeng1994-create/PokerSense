@@ -74,6 +74,8 @@ Descriptor 的**精确 schema**如下；不得增加未知键或省略键：
 每条 immutable row 另存 confirmation ID、source digest、结构化 value、reviewer、
 带时区 timestamp、revision、supersedes、`provenance=human_confirmed` 和 audit_note。
 自由文本只允许在 audit_note 中；它永远不是事实值。
+JSONL 只按物理换行分隔记录；审计字符串内合法的 U+2028、U+2029、U+0085
+会原样保存、参与摘要并可继续修订，不被当成额外记录。空白物理记录仍拒绝。
 
 ## 3. Marker 角色、时间和 stack-delta 区间
 

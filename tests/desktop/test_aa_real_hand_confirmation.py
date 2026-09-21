@@ -993,3 +993,22 @@ def test_utf8_corruption_is_typed_not_ready_and_never_rewritten(tmp_path):
     with pytest.raises(module.StoreIntegrityError, match="invalid_utf8"):
         confirm(target, "hero_seat", HERO)
     assert path.read_bytes() == b"\xff"
+
+
+@pytest.mark.parametrize("separator", ["\u2028", "\u2029", "\u0085", "\n"])
+def test_unicode_audit_text_round_trips_and_allows_later_revision(
+        tmp_path, separator):
+    target = store(tmp_path)
+    rows = confirm_all(target)
+    first_receipt = target_s_acceptance(target, HAND)
+    note = "reviewed" + separator + "against evidence"
+    revision = confirm(target, "hero_seat", HERO, audit_note=note,
+                       supersedes=rows["hero_seat"]["confirmation_id"])
+    assert target.read_confirmations()[-1]["audit_note"] == note
+    assert target_s_acceptance(target, HAND)["status"] == ACCEPTED
+    assert not validate_target_s_receipt(target, HAND, first_receipt)
+    confirm(target, "hero_seat", HERO, audit_note="later review",
+            supersedes=revision["confirmation_id"])
+    current = target_s_acceptance(target, HAND)
+    assert current["status"] == ACCEPTED
+    assert validate_target_s_receipt(target, HAND, current)
