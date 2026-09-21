@@ -33,6 +33,52 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-22 SEQUENTIAL PR #32 -> #33 INTEGRATION:** PR32 merged as
+  a578d330879e542a56bd8c2c85ccdbfdd27f77bf after independent review and scoped
+  repairs. Its main CI 35633329108 and desktop build 35633329102 succeeded;
+  release skipped without a tag. PR33 was then retargeted to that exact main
+  and synchronized with a merge commit; product/test files are unchanged from
+  the reviewed 0bb9cdb tree (local full 4508 passed/22 skipped). Original PR33
+  0d76342 was blocked by a demonstrated cache P0; the repaired causal module
+  remains 0724dcfe29bfec884959308655803cfb5ee82bca317ab38583f4348cfe18494a.
+  Final-head rechecks, merge identities and both post-main CI results are
+  recorded in Issue #27. Branches/history are retained. No historical media,
+  training, real gold/freeze, product strategy or real-hand acceptance work;
+  REAL_HAND_ACCEPTANCE_PENDING=YES and NOT_ASSESSED=YES remain.
+- **2026-09-22 PR #33 CACHED CAUSAL SEMANTICS REPAIR:** independent review of
+  0d76342 proved cached first-actor and board-CONFLICT conclusions could bypass
+  production consumers even though scorer replay rejected them. Repaired the
+  shared production check to reconstruct the entire projection from a separate,
+  digest-bound raw evidence sidecar: at most four board progression/first-conflict
+  witnesses and 256 contiguous transition rows, with source/epoch/order/current-end
+  validation. Old caches without evidence abstain. Long stable TURN histories can
+  start a fresh transition window without erasing earlier board contradictions.
+  Merged board/transition witness chronology also enforces the same source-frame
+  offset and bounded source-time continuity. Final focused 126 passed; manual/UI
+  compatibility 39 passed. Independent original 45/45 and expanded 65/65 probes
+  passed on source 0724dcfe29bfec884959308655803cfb5ee82bca317ab38583f4348cfe18494a.
+  Full lint/diff passed. Original 0d76342 must not serve as the merge head.
+  Final-base integration and post-merge CI are tracked in Issue #27. No media,
+  training, gold/freeze, product solver run or real-hand confirmation;
+  REAL_HAND_ACCEPTANCE_PENDING / NOT_ASSESSED remain.
+- **2026-09-22 CRITICAL PERCEPTION BOUNDARY:** runtime now uses versioned
+  native-current board rejection and terminal-participation guards while frozen
+  readers remain unchanged. Five source-bound candidate fields, a causal river
+  transition window, shared snapshot/evaluation checks and a candidate-only
+  TARGET-S screen prevent stale or contradictory automatic prefill. Perception
+  validation disables the river study sidecar explicitly. The scoped scorer
+  pins declared source rows/artifacts, replays candidate projection, requires
+  nonzero polarity coverage and safe first-actor abstention; it cannot award
+  real-hand, independent-vision or strategy acceptance. Final focused 89 passed;
+  independent actual adapter+wager+boundary probes 10/10 passed after fixing
+  initialization latency and an omitted cache dependency. Full lint/diff passed;
+  full integration and exact-head CI results are recorded on the PR. Existing
+  28 exposed hands remain CLASS X; single-frame diagnostics matched 26/28 boards
+  and exposed a preprocessing-sensitive false card, not a temporal accuracy
+  result. Sparse existing images cannot establish continuous first-actor truth.
+  No new capture, training, real confirmation or product strategy run occurred.
+  REAL_HAND_ACCEPTANCE_PENDING / NOT_ASSESSED remain; new source validation and
+  owner signoff are required before phase completion.
 - **2026-09-22 INDEPENDENT INTEGRATION REVIEW, PR #32:** fresh reviewers verified
   the requested 25168a8 baseline with 90 evidence/recovery and 168 domain probes;
   no scoped acceptance P0 remained. A non-P0 Unicode audit-text persistence issue

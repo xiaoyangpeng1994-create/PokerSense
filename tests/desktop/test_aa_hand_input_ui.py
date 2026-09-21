@@ -161,6 +161,8 @@ def mid_street_payload():
         **wagers, "wagers": {**wagers["wagers"], "1": "20"}, "street_price": "20"}
     payload["action_history_candidate"] = [
         {"actor": 1, "kind": "bet", "target": "20", "reading": "未确认候选"}]
+    from poker_engine.desktop.aa_critical_perception import CriticalPerceptionBoundary
+    payload["critical_perception_v1"] = CriticalPerceptionBoundary().observe(payload)
     return payload
 
 
@@ -170,7 +172,7 @@ def river_start_payload(cards, board, pot, commitments, stacks="200"):
     participants = {seat: {"state": state, "epoch": RECORD_A} for seat, state in (
         (0, "active"), (1, "active"), (2, "active"),
         (3, "folded"), (4, "folded"), (5, "folded"))}
-    return {
+    payload = {
         "frame": 1500,
         "cards": {"hero": list(cards), "board_slots": list(board)},
         "pot": {"value": pot},
@@ -196,6 +198,38 @@ def river_start_payload(cards, board, pot, commitments, stacks="200"):
         "stacks": {str(seat): {"value": stacks} for seat in range(6)},
         "current_actor": 0,
     }
+    # A synthetic, contiguous source window now accompanies automatic prefill.
+    # Old raw-only snapshots intentionally no longer fill critical facts.
+    from copy import deepcopy
+    from poker_engine.desktop.aa_critical_perception import CriticalPerceptionBoundary
+    boundary = CriticalPerceptionBoundary()
+    for frame in (1498, 1499, 1500):
+        current = deepcopy(payload)
+        count = 4 if frame == 1498 else 5
+        current.update(frame=frame, source_frame=frame, pts_seconds=frame / 30,
+                       source_id="synthetic-ui", source_sha256="a" * 64,
+                       scene_supported=True, board_count=count, dealer_seat=7,
+                       observed_actions_v2=[], glyph_transitions=[],
+                       action_history_candidate=[])
+        current["cards"]["board_slots"] = list(board[:count]) + [None] * (5 - count)
+        current["dealer_evidence_v2"] = {
+            "frame": frame, "epoch": RECORD_A, "dealer_seat": 7}
+        current["dealer_observation_v2"] = {"dealer_seat": 7}
+        current["actor_evidence"] = {
+            "actor": 0, "reason": "unique_bright_ring_candidate",
+            "timer_suffix_verified": True}
+        state = current["observed_state_v2"]
+        state["participants"] = {
+            str(s): item for s, item in state["participants"].items()}
+        state.update(street_candidate="turn" if count == 4 else "river",
+                     board_candidate=list(board[:count]),
+                     positive_board_geometry={"last_frame": frame, "streak": 2})
+        state["participants"].update({str(s): {"state": "empty", "epoch": RECORD_A}
+                                      for s in (6, 7)})
+        for item in state["participants"].values():
+            item["evidence_frame"] = frame
+        current["critical_perception_v1"] = boundary.observe(current)
+    return current
 
 
 def post_rules(base):

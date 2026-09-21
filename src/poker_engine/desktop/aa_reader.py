@@ -137,12 +137,15 @@ def _create_candidate(spec):
     # Explicit module, imported only after user starts a configured session.
     from tools.aa8_candidate_v2 import create_candidate
     from .aa_live_context import (
-        LiveFrameEvidence, LiveStateAdapter, LiveHandLedger, LiveCausalWagers,
+        LiveFrameEvidence, LiveHandLedger, LiveCausalWagers,
     )
+    from .aa_live_context_v3 import LiveStateAdapterV3
+    from tools.aa8_cards_v2 import AA8CardReaderV2
     state = create_candidate(spec)
+    state.cards = AA8CardReaderV2(spec["heads_path"], preprocessing="gaussian_050")
     state.frame_enricher = LiveFrameEvidence(
         state.cache.bank, state.profile, state.seats.empty)
-    state.adapter = LiveStateAdapter()
+    state.adapter = LiveStateAdapterV3()
     state.hand_ledger = LiveHandLedger()
     state.causal_wagers = LiveCausalWagers()
     return state
@@ -170,7 +173,11 @@ class AA8Reader:
     establish complete action coverage.
     """
 
-    def __init__(self, profile_path, *, factory=None, bundle_sha256=None):
+    def __init__(self, profile_path, *, factory=None, bundle_sha256=None,
+                 analysis_enabled=True):
+        if type(analysis_enabled) is not bool:
+            raise ValueError("analysis_enabled_must_be_boolean")
+        self._analysis_enabled = analysis_enabled
         self.preflight = preflight_profile(profile_path, bundle_sha256=bundle_sha256)
         if not self.preflight["ready"]:
             raise ValueError("; ".join(self.preflight["errors"]))
@@ -198,6 +205,8 @@ class AA8Reader:
         self._last = None
         self._invalidated = False
         self._semantics = AAObservationSemantics()
+        from .aa_critical_perception import CriticalPerceptionBoundary
+        self._critical = CriticalPerceptionBoundary()
 
     def read(self, image, frame, sample):
         try:
@@ -223,6 +232,7 @@ class AA8Reader:
             if reset:
                 self._state = _copy_candidate(self._initial)
                 self._semantics.reset()
+                self._critical.reset()
             self._state.audit = source
             current_hash = hashlib.sha256(image.tobytes()).hexdigest()
             row = self._state.read(image, frame, {
@@ -248,8 +258,18 @@ class AA8Reader:
                 getattr(self._state.adapter, "actions", [])[-256:]) if hasattr(
                     self._state, "adapter") else []
             row.update(self._semantics.observe(row))
-            from .aa_river_strategy import current_river_study
-            row["river_strategy_v1"] = current_river_study(row)
+            row["critical_perception_v1"] = self._critical.observe(row)
+            from .aa_critical_perception import target_s_candidate_screen
+            row["target_s_candidate_screen"] = target_s_candidate_screen(row)
+            from tools.aa8_critical_fields_v3 import normalize_fields
+            row["evaluation_fields"] = normalize_fields(row)
+            if self._analysis_enabled:
+                from .aa_river_strategy import current_river_study
+                row["river_strategy_v1"] = current_river_study(row)
+            else:
+                row["river_strategy_v1"] = {
+                    "status": "ANALYSIS_DISABLED", "strategy_eligible": False,
+                    "advice_emitted": False}
             self._last = (frame, pts, source)
             self._invalidated = False
             return row

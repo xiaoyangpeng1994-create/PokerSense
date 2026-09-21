@@ -691,6 +691,13 @@ def river_start_evidence(payload):
 
     Returns ``(ok, reason)``; ``reason`` is the Chinese gap when ``ok`` is False.
     """
+    from .aa_critical_perception import checked_view
+    view = checked_view(payload)
+    required = ("board", "participation", "river_first_actor")
+    if view is None or any(view["fields"][key]["status"] != "KNOWN"
+                           for key in required):
+        return False, ("河牌起点证据：缺少同源、当前、无冲突的关键字段与首个行动者候选，"
+                       "需要人工核对")
     state = payload.get("observed_state_v2") or {}
     epoch = state.get("observed_epoch")
     if not isinstance(epoch, str) or not epoch.strip():
@@ -749,6 +756,9 @@ def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
     facts["source"] = source
     facts["source_kind"] = source_kind
     gaps = []
+    from .aa_critical_perception import checked_view
+    critical = checked_view(payload)
+    critical_fields = critical["fields"] if critical else {}
     cards = payload.get("cards") or {}
     hero = cards.get("hero")
     if isinstance(hero, list) and len(hero) == 2 and all(hero):
@@ -756,11 +766,13 @@ def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
                                     candidate=dict(cards))
     else:
         gaps.append("Hero 手牌：快照里没有可用候选，需要人工补录")
-    board = cards.get("board_slots")
+    board_field = critical_fields.get("board") or {}
+    board = board_field.get("value") if board_field.get("status") == "KNOWN" else None
     if isinstance(board, list) and len([value for value in board if value]) == 5:
         facts["board_cards"] = field([str(value) for value in board], "observed",
                                      candidate=dict(cards))
     else:
+        facts["board_cards"] = field(None, "unknown", candidate=dict(cards))
         gaps.append("公共牌：快照里不足 5 张，需要人工补录")
     pot = payload.get("pot") or {}
     if pot.get("value") is not None:
@@ -778,8 +790,10 @@ def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
         gaps.append("Hero 座位：快照没有明确标注 Hero（不按当前行动者或座位号推断），"
                     "需要人工确认")
     declared_order = payload.get("action_order")
+    first = critical_fields.get("river_first_actor") or {}
     if (isinstance(declared_order, list) and len(declared_order) == 3
-            and all(type(value) is int for value in declared_order)):
+            and all(type(value) is int for value in declared_order)
+            and first.get("status") == "KNOWN" and declared_order[0] == first["value"]):
         facts["action_order"] = field(list(declared_order), "observed",
                                       candidate=list(declared_order))
     else:
@@ -790,11 +804,10 @@ def facts_from_snapshot(payload, *, source=None, source_kind="saved_record"):
     ledger = payload.get("hand_ledger_v2") or {}
     commitments = ledger.get("hand_commitments")
     participants = (payload.get("observed_state_v2") or {}).get("participants") or {}
-    states = {}
-    if isinstance(participants, dict):
-        for seat, item in participants.items():
-            if isinstance(item, dict):
-                states[int(seat)] = str(item.get("state", "")).lower()
+    qualified = critical_fields.get("participation") or {}
+    states = ({int(seat): value.lower() for seat, value in qualified["value"].items()
+               if value in ("ACTIVE", "FOLDED", "ALL_IN")}
+              if qualified.get("status") == "KNOWN" else {})
     unambiguous = bool(states) and set(states.values()) <= set(SEAT_STATE_MAP)
     start_ok, start_reason = river_start_evidence(payload)
     if not isinstance(commitments, dict) or not commitments:

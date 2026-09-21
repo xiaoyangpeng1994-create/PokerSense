@@ -2,6 +2,20 @@
 
 ## AA eight-seat development monitor
 
+Critical board, participation, ALL-IN and river-first-actor candidates now carry
+source and temporal evidence. Snapshot prefill rejects missing, stale or conflicting
+critical evidence; older raw-only records or cached projections without causal
+evidence retain their candidates but may require
+manual input. The current native card crop must also support a temporal board
+candidate. These checks do not establish visual accuracy or real-hand acceptance.
+See the [five-field verification contract](docs/AA-CRITICAL-PERCEPTION-VERIFICATION.zh-CN.md).
+Perception-only validation explicitly disables the river analysis sidecar.
+
+The [TARGET-S confirmation contract](docs/AA-REAL-HAND-CONFIRMATION-V1.zh-CN.md)
+uses a separate evidence-bound confirmation history. Legacy confirmation records
+are not automatically upgraded. Confirmed facts and current receipts do not imply
+PHH readiness, strategy eligibility, independent vision acceptance or profitability.
+
 [V5 offline review and conditional river bounds](docs/AA-STRATEGY-ENTRY-V5.zh-CN.md) adds saved-frame candidate inputs and a plain form that calculates and preserves conservative payoff bounds without an API key. Unknown fees do not produce a net-payoff guarantee. Opening/commitment continuity and call-price observations improve; a strong full-street policy and profitability remain unvalidated.
 
 Saved frames can seed a source-labelled manual river-analysis draft; missing ranges, fees and commitments remain unfilled. This does not emit live advice. The observation page polls every 250ms; end-to-end capture/display latency remains to be measured.
