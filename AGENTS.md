@@ -33,6 +33,20 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-22 TARGET-S CONFIRMATION V2 (PR #32):** repaired the six acceptance
+  blocker groups from Issue #27 comment 5762748242. Source-bound stable windows,
+  explicit opening/river interval seals, complete semantic recovery validation,
+  evidence/revision-bound current receipts, full seat partitions, no-ALL_IN scope
+  and lossless monetary identity/assertions now fail closed. Independent review
+  additionally tightened clockwise order and malformed UTF-8 recovery. V1 stores
+  remain untouched and cannot inherit V2 acceptance. Final focused 147 passed;
+  the full run preceding the last two narrow fixes was 4392 passed/22 skipped,
+  final independent probes passed 15/15 (root) and 36/36 (separate reviewer).
+  Full lint and
+  diff checks passed; exact-head CI is reported on the PR. All test receipts are
+  synthetic. No real confirmation, capture, product strategy run, PHH bridge or
+  training permission was created; REAL_HAND_ACCEPTANCE_PENDING and NOT_ASSESSED
+  remain. This is a factual contract, not an executable solver adapter.
 - **2026-09-16 GITHUB-001 (Issue #25) STANDARD GIT SYNC:** Added tools/git_sync.py, a thin
   verified wrapper around standard git/gh. Root cause of the observed push hang: the
   user-level config installs a Git Credential Manager helper, and `-c credential.helper=X`

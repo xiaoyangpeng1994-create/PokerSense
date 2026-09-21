@@ -52,8 +52,9 @@ import re
 import time
 import uuid
 
-SCHEMA_VERSION = "aa-real-hand-confirmation-v1"
-IMPLEMENTATION_VERSION = "aa-real-hand-confirmation-p0-target-s-v1"
+SCHEMA_VERSION = "aa-real-hand-confirmation-v2"
+EVIDENCE_SCHEMA_VERSION = "aa-real-hand-evidence-v2"
+IMPLEMENTATION_VERSION = "aa-real-hand-confirmation-p0-target-s-v2"
 
 #: The only acceptance target implemented here.
 TARGET = "TARGET_S"
@@ -111,9 +112,12 @@ STACK_DELTA_ASSERTIONS = (
     "no_chip_return",
     "no_payout_before_river",
     "no_jackpot_or_cashout",
+    "no_insurance",
     "no_chip_side_fee_or_rake",
     "same_integer_precision",
 )
+STACK_DELTA_BINDINGS = ("hand_start_evidence_digest",
+                        "river_start_evidence_digest")
 
 FACT_KEYS = (
     "ended_hand_confirmed", "hero_seat", "hero_cards", "board_cards",
@@ -128,12 +132,33 @@ FACT_KEYS = (
 #: confirmed directly, so they are absent here on purpose.
 TARGET_S_REQUIRED_FACTS = (
     "ended_hand_confirmed", "hero_seat", "hero_cards", "board_cards",
-    "seat_set", "active_seats", "all_in_seats", "action_order",
+    "seat_set", "active_seats", "all_in_seats", "folded_seats", "action_order",
     "dealer_button_seat", "river_start_stacks", "opening_stacks",
     "stack_delta_assertions", "street_wagers_zero", "pot_display",
     "hero_is_first_river_actor", "table_rules", "other_fees",
     "straddle_posted_this_hand", "no_side_pot", "no_pending_action",
 )
+
+HAND_START_FACTS = frozenset(("opening_stacks", "seat_set",
+                              "dealer_button_seat", "table_rules"))
+PAYOUT_FACTS = frozenset(("ended_hand_confirmed", "other_fees"))
+FACT_MARKERS = {
+    key: (MARKER_HAND_START if key in HAND_START_FACTS else
+          MARKER_PAYOUT if key in PAYOUT_FACTS else MARKER_RIVER_START)
+    for key in FACT_KEYS
+}
+EVIDENCE_KEYS = frozenset((
+    "schema_version", "hand_id", "observed_epoch", "capture_session_id",
+    "source_ref", "marker", "window_start_frame", "window_end_frame",
+    "frames", "stable", "boundary_continuity",
+))
+RECORD_KEYS = frozenset((
+    "schema_version", "confirmation_id", "hand_id", "observed_epoch",
+    "capture_session_id", "source_ref", "source_digest", "marker",
+    "source_frame", "evidence_descriptor", "evidence_digest",
+    "snapshot_digest", "fact_key", "value", "reviewer", "recorded_at",
+    "revision", "supersedes", "provenance", "audit_note",
+))
 
 
 class RealHandConfirmationError(ValueError):
@@ -167,7 +192,7 @@ class StoreLockError(RealHandConfirmationError):
 def canonical(value):
     """Stable serialisation; the digest of a value must not depend on order."""
     return json.dumps(value, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False)
+                      ensure_ascii=False, allow_nan=False)
 
 
 def digest(value):
@@ -194,6 +219,8 @@ def _source_identity(ref):
     """Canonical source identity; a recording must be nameable to be evidence."""
     if not isinstance(ref, dict) or not ref:
         raise EvidenceBindingError("source_ref_must_be_a_non_empty_object")
+    if set(ref) - {"media_sha256", "recording_id"}:
+        raise EvidenceBindingError("source_ref_unknown_fields")
     media = ref.get("media_sha256")
     recording = ref.get("recording_id")
     if not (_is_non_empty_str(media) or _is_non_empty_str(recording)):
@@ -201,14 +228,69 @@ def _source_identity(ref):
             "source_ref_needs_media_sha256_or_recording_id")
     if media is not None and not (isinstance(media, str) and HEX64.match(media)):
         raise EvidenceBindingError("source_ref_media_sha256_invalid")
-    cleaned = {}
-    for key in sorted(ref):
-        item = ref[key]
-        if item is None or isinstance(item, (str, int, float, bool)):
-            cleaned[key] = item
-    if not cleaned:
-        raise EvidenceBindingError("source_ref_has_no_identity_field")
+    if "recording_id" in ref and not _is_non_empty_str(recording):
+        raise EvidenceBindingError("source_ref_recording_id_invalid")
+    if "media_sha256" in ref and media is None:
+        raise EvidenceBindingError("source_ref_media_sha256_invalid")
+    cleaned = dict(ref)
     return cleaned, digest(cleaned)
+
+
+def _is_digest(value):
+    return isinstance(value, str) and HEX64.fullmatch(value) is not None
+
+
+def _validate_evidence(descriptor):
+    """Validate a human-attested source/window binding, not image truth.
+
+    Content hashes identify the reviewed local evidence. They are not proof
+    that a reviewer read it, or authentication against a malicious operator.
+    An inter-hand opening window explicitly belongs to the upcoming hand.
+    """
+    if not isinstance(descriptor, dict) or set(descriptor) != EVIDENCE_KEYS:
+        raise EvidenceBindingError("evidence_descriptor_exact_schema_required")
+    if descriptor["schema_version"] != EVIDENCE_SCHEMA_VERSION:
+        raise EvidenceBindingError("unsupported_evidence_schema")
+    for key in ("hand_id", "observed_epoch", "capture_session_id"):
+        if not _is_non_empty_str(descriptor[key]):
+            raise EvidenceBindingError("evidence_identity_required:" + key)
+    _source_identity(descriptor["source_ref"])
+    if descriptor["marker"] not in MARKERS:
+        raise EvidenceBindingError("evidence_marker_invalid")
+    start, end = (descriptor["window_start_frame"],
+                  descriptor["window_end_frame"])
+    if not (_is_int(start) and _is_int(end) and 0 <= start <= end):
+        raise EvidenceBindingError("evidence_window_invalid")
+    if (descriptor["stable"] is not True
+            or descriptor["boundary_continuity"] is not True):
+        raise EvidenceBindingError("evidence_stability_or_continuity_unconfirmed")
+    frames = descriptor["frames"]
+    if not isinstance(frames, list) or not frames:
+        raise EvidenceBindingError("evidence_frames_required")
+    indices = []
+    for frame in frames:
+        if not isinstance(frame, dict) or set(frame) != {
+                "source_frame", "content_sha256"}:
+            raise EvidenceBindingError("evidence_frame_schema_invalid")
+        number = frame["source_frame"]
+        if not _is_int(number) or not start <= number <= end:
+            raise EvidenceBindingError("evidence_frame_outside_window")
+        if not _is_digest(frame["content_sha256"]):
+            raise EvidenceBindingError("evidence_content_digest_required")
+        indices.append(number)
+    if (indices != sorted(set(indices))
+            or indices[0] != start or indices[-1] != end):
+        raise EvidenceBindingError("evidence_frames_must_order_and_bound_window")
+    return deepcopy(descriptor)
+
+
+def _unique_json_object(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise StoreIntegrityError("confirmation:duplicate_json_key:" + key)
+        value[key] = item
+    return value
 
 
 class _StoreLock:
@@ -261,16 +343,20 @@ class ConfirmationStore:
         rows = []
         seen = set()
         previous = None
-        raw_text = self._confirmations.read_text(encoding="utf-8")
+        try:
+            raw_text = self._confirmations.read_text(encoding="utf-8")
+        except UnicodeError as exc:
+            raise StoreIntegrityError("confirmation:invalid_utf8") from exc
         for lineno, raw in enumerate(raw_text.splitlines(), start=1):
             if raw.strip() == "":
                 raise StoreIntegrityError(f"confirmation:blank_line:{lineno}")
             try:
-                envelope = json.loads(raw)
-            except json.JSONDecodeError as exc:
+                envelope = json.loads(raw, object_pairs_hook=_unique_json_object)
+            except (json.JSONDecodeError, ValueError) as exc:
                 raise StoreIntegrityError(
                     f"confirmation:malformed_json:{lineno}") from exc
-            if not isinstance(envelope, dict):
+            if not isinstance(envelope, dict) or set(envelope) != {
+                    "record", "record_digest", "prev_digest"}:
                 raise StoreIntegrityError(f"confirmation:not_object:{lineno}")
             row = envelope.get("record")
             if not isinstance(row, dict):
@@ -286,7 +372,13 @@ class ConfirmationStore:
                 raise StoreIntegrityError(
                     f"confirmation:duplicate_confirmation_id:{lineno}")
             seen.add(identifier)
-            if digest(row) != envelope.get("record_digest"):
+            try:
+                _validate_record(row)
+                seal = digest(row)
+            except (RealHandConfirmationError, TypeError, ValueError) as exc:
+                raise StoreIntegrityError(
+                    f"confirmation:invalid_record:{lineno}:{exc}") from exc
+            if seal != envelope.get("record_digest"):
                 raise StoreIntegrityError(
                     f"confirmation:record_digest_mismatch:{lineno}")
             if envelope.get("prev_digest") != previous:
@@ -294,6 +386,7 @@ class ConfirmationStore:
                     f"confirmation:chain_break:{lineno}")
             previous = envelope.get("record_digest")
             rows.append(row)
+        _validate_histories(rows)
         return rows
 
     def _append(self, row):
@@ -347,12 +440,12 @@ def _validate_stack_map(value, label):
         raise FactValueError(f"{label}_must_be_a_non_empty_seat_to_stack_map")
     cleaned = {}
     for seat, stack in value.items():
-        try:
-            key = int(seat)
-        except (TypeError, ValueError) as exc:
-            raise FactValueError(f"{label}_has_a_non_integer_seat:{seat}") from exc
-        if not _is_seat(key):
-            raise FactValueError(f"{label}_has_an_out_of_range_seat:{seat}")
+        if not (_is_seat(seat) or isinstance(seat, str) and seat in "01234567"
+                and len(seat) == 1):
+            raise FactValueError(f"{label}_has_a_noncanonical_seat:{seat}")
+        key = str(seat)
+        if key in cleaned:
+            raise FactValueError(f"{label}_has_a_duplicate_seat:{key}")
         if not _is_int(stack) or stack < 0:
             raise FactValueError(
                 f"{label}_seat_{key}_stack_must_be_a_non_negative_integer")
@@ -366,17 +459,25 @@ def _validate_rules(value):
     missing = [key for key in RULE_KEYS if key not in value]
     if missing:
         raise FactValueError("table_rules_missing:" + ",".join(sorted(missing)))
-    if not _is_int(value["table_size"]) or value["table_size"] < 2:
+    if set(value) != set(RULE_KEYS):
+        raise FactValueError("table_rules_unknown_fields")
+    if not _is_int(value["table_size"]) or not 6 <= value["table_size"] <= 8:
         raise FactValueError("table_rules_table_size_invalid")
     for key in ("small_blind", "big_blind", "ante", "straddle_amount"):
         if not _is_int(value[key]) or value[key] < 0:
             raise FactValueError(f"table_rules_{key}_must_be_a_non_negative_int")
-    if value["small_blind"] > value["big_blind"]:
-        raise FactValueError("table_rules_small_blind_exceeds_big_blind")
+    if not 0 < value["small_blind"] <= value["big_blind"]:
+        raise FactValueError("table_rules_positive_ordered_blinds_required")
     if value["ante_mode"] not in ANTE_MODES:
         raise FactValueError("table_rules_ante_mode_unknown")
     if value["straddle_mode"] not in STRADDLE_MODES:
         raise FactValueError("table_rules_straddle_mode_unknown")
+    if value["ante_mode"] == "none" and value["ante"] != 0:
+        raise FactValueError("table_rules_none_ante_must_be_zero")
+    if ((value["straddle_mode"] == "none" and value["straddle_amount"] != 0)
+            or (value["straddle_mode"] != "none"
+                and value["straddle_amount"] <= value["big_blind"])):
+        raise FactValueError("table_rules_straddle_amount_mode_mismatch")
     if not _is_non_empty_str(value["revision"]):
         raise FactValueError("table_rules_revision_required")
     return dict(value)
@@ -420,14 +521,18 @@ def _validate_fact_value(fact_key, value):
     if fact_key == "stack_delta_assertions":
         if not isinstance(value, dict):
             raise FactValueError("stack_delta_assertions_must_be_an_object")
+        if set(value) != set(STACK_DELTA_ASSERTIONS + STACK_DELTA_BINDINGS):
+            raise FactValueError("stack_delta_assertions_exact_schema_required")
         missing = [key for key in STACK_DELTA_ASSERTIONS
                    if value.get(key) is not True]
         if missing:
             raise FactValueError(
                 "stack_delta_assertions_not_confirmed:" + ",".join(missing))
-        return {key: True for key in STACK_DELTA_ASSERTIONS}
+        if not all(_is_digest(value[key]) for key in STACK_DELTA_BINDINGS):
+            raise FactValueError("stack_delta_interval_bindings_required")
+        return dict(value)
     if fact_key == "pot_display":
-        if not isinstance(value, dict):
+        if not isinstance(value, dict) or set(value) != {"raw", "value"}:
             raise FactValueError("pot_display_must_be_an_object")
         if not _is_non_empty_str(value.get("raw")):
             raise FactValueError("pot_display_raw_string_required")
@@ -437,7 +542,7 @@ def _validate_fact_value(fact_key, value):
     if fact_key == "table_rules":
         return _validate_rules(value)
     if fact_key == "other_fees":
-        if not isinstance(value, dict):
+        if not isinstance(value, dict) or set(value) != {"value", "confirmed"}:
             raise FactValueError("other_fees_must_be_an_object")
         if value.get("confirmed") is not True:
             raise FactValueError(
@@ -453,10 +558,80 @@ def _validate_fact_value(fact_key, value):
     raise FactValueError("unknown_fact_key:" + str(fact_key))
 
 
+def _validate_record(row):
+    """The immutable semantic contract shared by append and recovery."""
+    if not isinstance(row, dict) or set(row) != RECORD_KEYS:
+        raise StoreIntegrityError("confirmation_record_exact_schema_required")
+    if row["schema_version"] != SCHEMA_VERSION:
+        raise StoreIntegrityError("unsupported_confirmation_schema")
+    for key in ("confirmation_id", "hand_id", "observed_epoch",
+                "capture_session_id", "reviewer"):
+        if not _is_non_empty_str(row[key]):
+            raise EvidenceBindingError("confirmation_identity_required:" + key)
+    if row["provenance"] != PROV_HUMAN:
+        raise FactValueError("confirmation_provenance_must_be_human_confirmed")
+    if (row["audit_note"] is not None
+            and not isinstance(row["audit_note"], str)):
+        raise FactValueError("audit_note_must_be_a_string_or_absent")
+    try:
+        stamp = datetime.fromisoformat(row["recorded_at"])
+        if stamp.tzinfo is None or stamp.utcoffset() is None:
+            raise ValueError("timezone_required")
+    except (TypeError, ValueError) as exc:
+        raise EvidenceBindingError("recorded_at_timezone_timestamp_required") from exc
+    if not _is_int(row["revision"]) or row["revision"] < 1:
+        raise RevisionError("positive_integer_revision_required")
+    if row["supersedes"] is not None and not _is_non_empty_str(row["supersedes"]):
+        raise RevisionError("supersedes_must_be_a_confirmation_id")
+    identity, source_digest = _source_identity(row["source_ref"])
+    if source_digest != row["source_digest"]:
+        raise IdentityMismatchError("source_digest_does_not_match_source_ref")
+    descriptor = _validate_evidence(row["evidence_descriptor"])
+    for key in ("hand_id", "observed_epoch", "capture_session_id", "marker"):
+        if row[key] != descriptor[key]:
+            raise IdentityMismatchError("evidence_identity_mismatch:" + key)
+    if identity != descriptor["source_ref"]:
+        raise IdentityMismatchError("evidence_identity_mismatch:source_ref")
+    seal = digest(descriptor)
+    if row["evidence_digest"] != seal or row["snapshot_digest"] != seal:
+        raise EvidenceBindingError("evidence_descriptor_digest_mismatch")
+    if (not _is_int(row["source_frame"]) or row["source_frame"] not in
+            [frame["source_frame"] for frame in descriptor["frames"]]):
+        raise EvidenceBindingError("confirmation_frame_not_bound_by_evidence")
+    key = row["fact_key"]
+    if not isinstance(key, str) or key not in FACT_KEYS:
+        raise FactValueError("unknown_fact_key:" + str(key))
+    if row["marker"] != FACT_MARKERS[key]:
+        raise EvidenceBindingError("fact_marker_role_mismatch:" + key)
+    cleaned = _validate_fact_value(key, row["value"])
+    if canonical(cleaned) != canonical(row["value"]):
+        raise FactValueError("stored_fact_value_is_not_canonical:" + key)
+    return row
+
+
+def _validate_histories(rows):
+    identities = {}
+    groups = {}
+    for row in rows:
+        hand = row["hand_id"]
+        identity = tuple(row[key] for key in (
+            "observed_epoch", "capture_session_id", "source_digest"))
+        if hand in identities and identities[hand] != identity:
+            raise StoreIntegrityError("confirmation:inconsistent_hand_identity")
+        identities[hand] = identity
+        groups.setdefault((hand, row["fact_key"]), []).append(row)
+    for (hand, key), history in groups.items():
+        resolved = resolve_fact(history)
+        if resolved["status"] != STATUS_CONFIRMED:
+            raise StoreIntegrityError(
+                f"confirmation:invalid_history:{hand}:{key}:"
+                + resolved["reason"])
+
+
 def confirm_fact(store, *, hand_id, observed_epoch, capture_session_id,
                  source_ref, marker, source_frame, evidence_digest, fact_key,
-                 value, reviewer, snapshot_digest=None, supersedes=None,
-                 audit_note=None, recorded_at=None):
+                 value, reviewer, evidence_descriptor, snapshot_digest=None,
+                 supersedes=None, audit_note=None, recorded_at=None):
     """Append one human confirmation. Refuse anything not bound to evidence.
 
     The stored row keeps the reviewer's own words in ``audit_note`` and nowhere
@@ -530,17 +705,21 @@ def confirm_fact(store, *, hand_id, observed_epoch, capture_session_id,
             "source_digest": source_digest,
             "marker": marker,
             "source_frame": source_frame,
+            "evidence_descriptor": deepcopy(evidence_descriptor),
             "evidence_digest": evidence_digest,
-            "snapshot_digest": snapshot_digest,
+            "snapshot_digest": (evidence_digest if snapshot_digest is None
+                                else snapshot_digest),
             "fact_key": fact_key,
             "value": cleaned_value,
             "reviewer": reviewer,
-            "recorded_at": recorded_at or now(),
+            "recorded_at": now() if recorded_at is None else recorded_at,
             "revision": revision,
             "supersedes": supersedes,
             "provenance": PROV_HUMAN,
             "audit_note": audit_note,
         }
+        _validate_record(row)
+        _validate_histories(rows + [row])
         store._append(row)
     return deepcopy(row)
 
@@ -565,52 +744,69 @@ def resolve_fact(rows):
         return {"status": STATUS_UNCONFIRMED, "value": None,
                 "reason": "no_confirmation_recorded", "confirmation_id": None,
                 "conflicts": []}
-    identifiers = {row.get("confirmation_id") for row in rows}
-    revisions = [row.get("revision") for row in rows]
-    if len(set(revisions)) != len(revisions):
-        return {"status": STATUS_CONFLICT, "value": None,
-                "reason": "duplicate_revision", "confirmation_id": None,
+    identifiers = [row.get("confirmation_id") if isinstance(row, dict)
+                   else None for row in rows]
+
+    def conflict(reason):
+        return {"status": STATUS_CONFLICT, "value": None, "reason": reason,
+                "confirmation_id": None,
                 "conflicts": sorted(str(item) for item in identifiers)}
-    parents = {}
+
+    try:
+        for row in rows:
+            _validate_record(row)
+    except (RealHandConfirmationError, TypeError, ValueError) as exc:
+        return conflict("invalid_record:" + str(exc))
+    if len(set(identifiers)) != len(rows):
+        return conflict("duplicate_confirmation_id")
+    if len({tuple(row[key] for key in (
+            "hand_id", "observed_epoch", "capture_session_id", "source_digest",
+            "fact_key")) for row in rows}) != 1:
+        return conflict("mixed_fact_or_hand_identity")
+    if len({row["revision"] for row in rows}) != len(rows):
+        return conflict("duplicate_revision")
+    indexed = {row["confirmation_id"]: row for row in rows}
+    positions = {identifier: index for index, identifier in enumerate(identifiers)}
+    roots = [row for row in rows if row["supersedes"] is None]
+    if len(roots) != 1:
+        return conflict("one_revision_one_root_required")
+    if roots[0]["revision"] != 1:
+        return conflict("root_revision_must_be_one")
+    children = {}
     for row in rows:
-        parent = row.get("supersedes")
+        parent = row["supersedes"]
         if parent is None:
             continue
-        if parent not in identifiers:
-            return {"status": STATUS_CONFLICT, "value": None,
-                    "reason": "supersedes_unknown_confirmation",
-                    "confirmation_id": None,
-                    "conflicts": sorted(str(item) for item in identifiers)}
-        if parent in parents:
-            return {"status": STATUS_CONFLICT, "value": None,
-                    "reason": "two_revisions_supersede_the_same_parent",
-                    "confirmation_id": None,
-                    "conflicts": sorted(str(item) for item in identifiers)}
-        parents[parent] = row.get("confirmation_id")
-    heads = _heads(rows)
-    if not heads:
-        return {"status": STATUS_CONFLICT, "value": None,
-                "reason": "no_live_head", "confirmation_id": None,
-                "conflicts": sorted(str(item) for item in identifiers)}
-    if len(heads) > 1:
-        return {"status": STATUS_CONFLICT, "value": None,
-                "reason": "multiple_live_heads", "confirmation_id": None,
-                "conflicts": sorted(str(item) for item in
-                                    (row.get("confirmation_id")
-                                     for row in heads))}
-    head = heads[0]
-    if head.get("revision") != max(revisions):
-        return {"status": STATUS_CONFLICT, "value": None,
-                "reason": "head_is_not_the_highest_revision",
-                "confirmation_id": head.get("confirmation_id"),
-                "conflicts": sorted(str(item) for item in identifiers)}
+        if parent not in indexed:
+            return conflict("supersedes_unknown_confirmation")
+        if parent in children:
+            return conflict("two_revisions_supersede_the_same_parent")
+        if row["revision"] != indexed[parent]["revision"] + 1:
+            return conflict("revision_must_increment_parent_by_one")
+        if positions[parent] >= positions[row["confirmation_id"]]:
+            return conflict("parent_must_precede_child")
+        children[parent] = row["confirmation_id"]
+    visited = set()
+    head = roots[0]
+    while True:
+        identifier = head["confirmation_id"]
+        if identifier in visited:
+            return conflict("revision_cycle")
+        visited.add(identifier)
+        if identifier not in children:
+            break
+        head = indexed[children[identifier]]
+    if len(visited) != len(rows):
+        return conflict("disconnected_revision_history")
     return {"status": STATUS_CONFIRMED, "value": head.get("value"),
             "reason": None, "confirmation_id": head.get("confirmation_id"),
             "conflicts": []}
 
 
 def derive_hand_committed_by_stack_delta(*, opening_stacks, river_start_stacks,
-                                         assertions, pot_display, seats=None):
+                                         assertions, pot_display, seats=None,
+                                         opening_evidence_digest=None,
+                                         river_evidence_digest=None):
     """Per-seat river-start commitment as ``opening - river_start``.
 
     Allowed only as a CONFIRMED DERIVATION, and only when every condition
@@ -629,6 +825,14 @@ def derive_hand_committed_by_stack_delta(*, opening_stacks, river_start_stacks,
     for key in STACK_DELTA_ASSERTIONS:
         if assertions.get(key) is not True:
             reasons.append("stack_delta_assertion_not_confirmed:" + key)
+    try:
+        _validate_fact_value("stack_delta_assertions", assertions)
+    except FactValueError as exc:
+        reasons.append("stack_delta_assertions_invalid:" + str(exc))
+    for key, expected in zip(STACK_DELTA_BINDINGS, (
+            opening_evidence_digest, river_evidence_digest)):
+        if not _is_digest(expected) or assertions.get(key) != expected:
+            reasons.append("stack_delta_interval_binding_mismatch:" + key)
     opening = _stack_map_or_none(opening_stacks, "opening_stacks", reasons)
     river = _stack_map_or_none(river_start_stacks, "river_start_stacks",
                                reasons)
@@ -637,7 +841,12 @@ def derive_hand_committed_by_stack_delta(*, opening_stacks, river_start_stacks,
             reasons.append("stack_delta_seat_identity_mismatch")
         else:
             if seats is not None:
-                wanted = {int(seat) for seat in seats}
+                try:
+                    wanted = {str(seat) for seat in
+                              _validate_seat_list(seats, "seats")}
+                except FactValueError as exc:
+                    wanted = None
+                    reasons.append("stack_delta_seats_invalid:" + str(exc))
                 if set(opening) != wanted:
                     reasons.append(
                         "stack_delta_seats_do_not_match_the_confirmed_seat_set")
@@ -671,9 +880,7 @@ def _unconfirmed(reasons, opening_stacks, river_start_stacks):
     return {"status": STATUS_UNCONFIRMED, "per_seat": None, "total": None,
             "provenance": PROV_DERIVED, "derivation": DERIVATION_STACK_DELTA,
             "reasons": sorted(set(reasons)),
-            "digest": digest({"opening": opening_stacks,
-                              "river": river_start_stacks,
-                              "reasons": sorted(set(reasons))})}
+            "digest": None}
 
 
 def _stack_map_or_none(value, label, reasons):
@@ -715,10 +922,43 @@ def _structural_checks(facts):
     checks["all_in_not_counted_as_active"] = not (set(all_in) & set(active))
     if not checks["all_in_not_counted_as_active"]:
         blocking.append("an_all_in_seat_was_counted_as_active")
+    checks["no_all_in_seats"] = not all_in
+    if not checks["no_all_in_seats"]:
+        blocking.append("any_all_in_seat_is_outside_target_s_scope")
+    checks["participant_states_are_complete_and_disjoint"] = (
+        set(active) | set(all_in) | set(folded)) == set(seat_set) and not (
+            set(active) & set(folded) or set(all_in) & set(folded)
+            or set(active) & set(all_in))
+    if not checks["participant_states_are_complete_and_disjoint"]:
+        blocking.append("participant_states_must_partition_the_seat_set")
+    checks["hero_is_not_folded_or_all_in"] = (
+        hero not in folded and hero not in all_in)
+    if not checks["hero_is_not_folded_or_all_in"]:
+        blocking.append("hero_has_a_confirmed_folded_or_all_in_status")
+    checks["active_stacks_are_positive"] = bool(active) and all(
+        _is_int(river.get(str(seat))) and river[str(seat)] > 0
+        for seat in active)
+    if not checks["active_stacks_are_positive"]:
+        blocking.append("every_active_seat_requires_positive_remaining_stack")
+    rules = facts.get("table_rules") or {}
+    checks["complete_dealt_seat_set"] = (
+        len(seat_set) in (6, 7, 8) and len(seat_set) == rules.get("table_size"))
+    if not checks["complete_dealt_seat_set"]:
+        blocking.append("seat_set_must_cover_all_six_to_eight_dealt_seats")
+    checks["dealer_is_in_seat_set"] = facts.get("dealer_button_seat") in seat_set
+    if not checks["dealer_is_in_seat_set"]:
+        blocking.append("dealer_button_seat_must_belong_to_the_seat_set")
     checks["action_order_matches_active"] = (
         sorted(order) == sorted(active) and len(order) == len(active))
     if not checks["action_order_matches_active"]:
         blocking.append("action_order_is_not_a_permutation_of_the_active_set")
+    dealer = facts.get("dealer_button_seat")
+    clockwise = (sorted(active, key=lambda seat: (seat - dealer) % 8 or 8)
+                 if _is_seat(dealer) else None)
+    checks["action_order_matches_clockwise_dealer"] = (
+        bool(active) and order == clockwise)
+    if not checks["action_order_matches_clockwise_dealer"]:
+        blocking.append("action_order_disagrees_with_dealer_and_clockwise_active_seats")
     checks["hero_acts_first"] = bool(order) and order[0] == hero
     if not checks["hero_acts_first"]:
         blocking.append("hero_is_not_first_in_the_action_order")
@@ -752,7 +992,33 @@ def _straddle_check(facts):
             return False, ("optional_straddle_was_not_observed_for_this_hand:"
                            "the_amount_is_declared_but_the_posting_is_not")
         return True, None
+    posted = facts.get("straddle_posted_this_hand")
+    if mode == "none" and posted is not False:
+        return False, "straddle_posted_conflicts_with_none_rule"
+    if mode == "mandatory_utg" and posted is not True:
+        return False, "straddle_not_posted_conflicts_with_mandatory_rule"
     return True, None
+
+
+def _marker_checks(evidence_refs):
+    windows = {}
+    blocking = []
+    for marker in MARKERS:
+        refs = [ref for ref in evidence_refs.values()
+                if ref["marker"] == marker]
+        if not refs:
+            continue
+        if len({ref["evidence_digest"] for ref in refs}) != 1:
+            blocking.append("incompatible_evidence_windows:" + marker)
+        else:
+            windows[marker] = refs[0]["evidence_descriptor"]
+    for left, right in ((MARKER_HAND_START, MARKER_RIVER_START),
+                        (MARKER_RIVER_START, MARKER_PAYOUT)):
+        if left in windows and right in windows and not (
+                windows[left]["window_end_frame"]
+                < windows[right]["window_start_frame"]):
+            blocking.append("marker_chronology_invalid:" + left + ":" + right)
+    return blocking
 
 
 def confirmed_view(store, hand_id):
@@ -766,13 +1032,19 @@ def confirmed_view(store, hand_id):
         raise RealHandConfirmationError("confirmation_store_required")
     if not _is_non_empty_str(hand_id):
         raise IdentityMismatchError("hand_id_required")
-    rows = [row for row in store.read_confirmations()
-            if row.get("hand_id") == hand_id]
+    store_error = None
+    try:
+        rows = [row for row in store.read_confirmations()
+                if row.get("hand_id") == hand_id]
+    except StoreIntegrityError as exc:
+        rows = []
+        store_error = str(exc)
     identity = rows[0] if rows else None
     confirmed = {}
     unconfirmed = {}
     evidence_refs = {}
-    conflicts = []
+    conflicts = ([{"fact_key": None, "reason": store_error,
+                   "confirmation_ids": []}] if store_error else [])
     for key in TARGET_S_REQUIRED_FACTS:
         resolved = resolve_fact([row for row in rows
                                  if row.get("fact_key") == key])
@@ -789,15 +1061,25 @@ def confirmed_view(store, hand_id):
                                   "reason": resolved["reason"],
                                   "confirmation_ids": resolved["conflicts"]})
 
+    checks, blocking = _structural_checks(confirmed)
+    marker_blocking = _marker_checks(evidence_refs)
+    blocking.extend(marker_blocking)
+    if store_error:
+        blocking.append("store_integrity_error:" + store_error)
     derivations = {}
     derived = {}
-    if "opening_stacks" in confirmed and "river_start_stacks" in confirmed:
+    if marker_blocking:
+        unconfirmed["hand_committed"] = ",".join(marker_blocking)
+    elif "opening_stacks" in confirmed and "river_start_stacks" in confirmed:
         commitment = derive_hand_committed_by_stack_delta(
             opening_stacks=confirmed["opening_stacks"],
             river_start_stacks=confirmed["river_start_stacks"],
             assertions=confirmed.get("stack_delta_assertions"),
             pot_display=confirmed.get("pot_display"),
-            seats=confirmed.get("seat_set"))
+            seats=confirmed.get("seat_set"),
+            opening_evidence_digest=evidence_refs["opening_stacks"]["evidence_digest"],
+            river_evidence_digest=(
+                evidence_refs["river_start_stacks"]["evidence_digest"]))
         derivations["hand_committed"] = commitment
         if commitment["status"] == STATUS_CONFIRMED:
             derived["hand_committed"] = commitment["per_seat"]
@@ -809,14 +1091,15 @@ def confirmed_view(store, hand_id):
 
     # The empty river history is a legal TARGET-S P0 design, but only because
     # Hero is confirmed first-to-act -- not because a caller wrote [].
-    if confirmed.get("hero_is_first_river_actor") is True:
+    if (confirmed.get("hero_is_first_river_actor") is True and not blocking
+            and confirmed.get("no_pending_action") is True
+            and confirmed.get("street_wagers_zero") is True):
         derived["history"] = []
         derived["history_empty_because"] = "hero_is_first_river_actor"
     else:
         unconfirmed["history"] = ("river_history_is_only_empty_when_hero_is_"
                                   "confirmed_first_river_actor")
 
-    checks, blocking = _structural_checks(confirmed)
     straddle_ok, straddle_reason = _straddle_check(confirmed)
     if not straddle_ok:
         blocking.append(straddle_reason)
@@ -864,10 +1147,7 @@ def confirmed_view(store, hand_id):
         "derivations": derivations,
         "evidence_refs": evidence_refs,
     }
-    bundle["bundle_digest"] = digest(
-        {key: bundle[key] for key in (
-            "hand_id", "observed_epoch", "capture_session_id", "source_digest",
-            "confirmed", "derived", "unconfirmed", "conflicts", "blocking")})
+    bundle["bundle_digest"] = digest(bundle)
     return bundle
 
 
@@ -875,13 +1155,23 @@ def _evidence_ref(rows, confirmation_id):
     for row in rows:
         if row.get("confirmation_id") == confirmation_id:
             return {"confirmation_id": row.get("confirmation_id"),
+                    "schema_version": row["schema_version"],
+                    "hand_id": row["hand_id"],
+                    "observed_epoch": row["observed_epoch"],
+                    "capture_session_id": row["capture_session_id"],
+                    "source_ref": deepcopy(row["source_ref"]),
+                    "source_digest": row["source_digest"],
                     "marker": row.get("marker"),
                     "source_frame": row.get("source_frame"),
+                    "evidence_descriptor": deepcopy(row["evidence_descriptor"]),
                     "evidence_digest": row.get("evidence_digest"),
                     "snapshot_digest": row.get("snapshot_digest"),
                     "reviewer": row.get("reviewer"),
                     "recorded_at": row.get("recorded_at"),
                     "revision": row.get("revision"),
+                    "supersedes": row["supersedes"],
+                    "record_digest": digest(row),
+                    "ancestry_digests": [digest(item) for item in rows],
                     "provenance": row.get("provenance"),
                     "audit_note": row.get("audit_note")}
     return None
@@ -924,22 +1214,28 @@ def target_s_acceptance(store, hand_id):
         receipt["missing"] = sorted(view["unconfirmed"])
         receipt["blocking"] = view["blocking"]
         receipt["conflicts"] = view["conflicts"]
-    receipt["receipt_digest"] = digest(
-        {key: receipt[key] for key in (
-            "hand_id", "observed_epoch", "capture_session_id", "source_digest",
-            "confirmation_bundle_digest", "river_start_snapshot_digest",
-            "derived_commitment_digest", "rules_digest", "facts_digest",
-            "status")})
+    receipt["receipt_digest"] = digest(receipt)
     return receipt
 
 
 def _snapshot_digest(view):
-    confirmed = view["confirmed"]
-    return digest({
-        "hero_seat": confirmed.get("hero_seat"),
-        "hero_cards": confirmed.get("hero_cards"),
-        "board_cards": confirmed.get("board_cards"),
-        "active_seats": confirmed.get("active_seats"),
-        "river_start_stacks": confirmed.get("river_start_stacks"),
-        "pot_display": confirmed.get("pot_display"),
-    })
+    seals = {ref["evidence_digest"] for ref in view["evidence_refs"].values()
+             if ref["marker"] == MARKER_RIVER_START}
+    return next(iter(seals)) if len(seals) == 1 else None
+
+
+def validate_target_s_receipt(store, hand_id, receipt):
+    """A receipt authorizes no fact without matching the current valid history.
+
+    Never validate only the self-reported digest or stored status. V1 receipts,
+    changed flags, evidence-only revisions and malformed stores all return False.
+    This is a point-in-time check; consumers must revalidate at consumption.
+    """
+    if not isinstance(receipt, dict) or receipt.get("schema") != SCHEMA_VERSION:
+        return False
+    try:
+        current = target_s_acceptance(store, hand_id)
+        return (current["status"] == ACCEPTED
+                and canonical(current) == canonical(receipt))
+    except (RealHandConfirmationError, TypeError, ValueError):
+        return False
