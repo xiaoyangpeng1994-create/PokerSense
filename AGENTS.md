@@ -33,6 +33,26 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-23 STRATEGY EVALUATION FOUNDATION V1 (DRAFT):** on a clean
+  `d98084aba96eac6ff3bc0cf07dad99b00e36ff31` base in isolated
+  `codex/strategy-evaluation-foundation`, frozen six AA manual threeway-river
+  public-history policy books before changing strategy behavior. Source/input/
+  protocol hashes and 30 synthetic conditional-world results are committed as
+  BASELINE V1; 30/30 complete, 12 cases below at least one simple policy, six
+  capacity/scope probes BLOCKED. PokerKit 0.7.5 plus independent settlement
+  math passed 11 focused oracle tests, including mismatch and refusal probes;
+  this does not validate ranges or
+  action-tree EV independently. A paired-report comparator retains candidate
+  failures in its denominator. Jev: conditional shadow-test candidate only,
+  no paid call; next target is opponent river-range posterior calibration, not
+  started. See docs/STRATEGY-EVALUATION-FOUNDATION-V1.zh-CN.md. Independent
+  review caught and verified fixes for result-tamper acceptance and artifact
+  overwrite. Local full pytest exited 0 (existing httpx deprecation warning),
+  20 focused evaluation/oracle tests passed with PokerKit 0.7.5, full flake8,
+  diff and staged filename hygiene passed. No strategy/perception behavior,
+  real media, capture, real-hand
+  acceptance or profitability claim changed; REAL_HAND_ACCEPTANCE_PENDING=YES
+  and empirical strategy NOT_ASSESSED remain.
 - **2026-09-22 SEQUENTIAL PR #32 -> #33 INTEGRATION:** PR32 merged as
   a578d330879e542a56bd8c2c85ccdbfdd27f77bf after independent review and scoped
   repairs. Its main CI 35633329108 and desktop build 35633329102 succeeded;
