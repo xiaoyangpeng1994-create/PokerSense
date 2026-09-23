@@ -1,0 +1,172 @@
+{
+  "baseline": {
+    "call_cost": "60/1",
+    "call_gross_ev": "260/1",
+    "call_net_ev": "256/1",
+    "call_pots": [
+      [
+        "110/1",
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      [
+        "130/1",
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      [
+        "80/1",
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "call_refunds": [],
+    "fold_ev": "0/1",
+    "fold_pots": [
+      [
+        "110/1",
+        [
+          1,
+          2,
+          3
+        ]
+      ],
+      [
+        "110/1",
+        [
+          1,
+          2
+        ]
+      ]
+    ],
+    "fold_refunds": [
+      [
+        1,
+        "40/1"
+      ]
+    ],
+    "hero_gross_return_by_pot": [
+      "110/1",
+      "130/1",
+      "80/1"
+    ],
+    "hero_net_return_by_pot": [
+      "869/8",
+      "1027/8",
+      "79/1"
+    ],
+    "hero_share_by_pot": [
+      "1/1",
+      "1/1",
+      "1/1"
+    ],
+    "joint_assignments": 1,
+    "net_call_minus_fold": "256/1",
+    "rake_by_pot": [
+      "11/8",
+      "13/8",
+      "1/1"
+    ],
+    "recommendation": "CALL"
+  },
+  "input_sha256": "808dde81c2c2eb5793691d8cfa14f7080c5373ac4034d048d6057fc66e758327",
+  "mismatches": [],
+  "oracle_kind": "POKERKIT_SHOWDOWN_PLUS_INDEPENDENT_EXACT_SETTLEMENT",
+  "pokerkit_version": "0.7.5",
+  "qualification": [
+    "manual_conditional_river_inputs_only",
+    "pokerkit_independent_showdown_ordering",
+    "pot_refund_rake_math_independently_implemented_not_pokerkit_state",
+    "does_not_validate_ranges_rules_history_or_profitability",
+    "never_live_advice"
+  ],
+  "reference": {
+    "call_cost": "60/1",
+    "call_gross_ev": "260/1",
+    "call_net_ev": "256/1",
+    "call_pots": [
+      [
+        "110/1",
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      [
+        "130/1",
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      [
+        "80/1",
+        [
+          0,
+          1
+        ]
+      ]
+    ],
+    "call_refunds": [],
+    "fold_ev": "0/1",
+    "fold_pots": [
+      [
+        "110/1",
+        [
+          1,
+          2,
+          3
+        ]
+      ],
+      [
+        "110/1",
+        [
+          1,
+          2
+        ]
+      ]
+    ],
+    "fold_refunds": [
+      [
+        1,
+        "40/1"
+      ]
+    ],
+    "hero_gross_return_by_pot": [
+      "110/1",
+      "130/1",
+      "80/1"
+    ],
+    "hero_net_return_by_pot": [
+      "869/8",
+      "1027/8",
+      "79/1"
+    ],
+    "hero_share_by_pot": [
+      "1/1",
+      "1/1",
+      "1/1"
+    ],
+    "joint_assignments": 1,
+    "net_call_minus_fold": "256/1",
+    "rake_by_pot": [
+      "11/8",
+      "13/8",
+      "1/1"
+    ],
+    "recommendation": "CALL"
+  },
+  "status": "MATCH"
+}

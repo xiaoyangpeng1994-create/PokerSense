@@ -1,0 +1,1599 @@
+{
+  "advice_emitted": false,
+  "base_commit": "d98084aba96eac6ff3bc0cf07dad99b00e36ff31",
+  "baseline_file_sha256": "3b9983b46c054a40499286467164c68e2e1ea7039df0a5c2470859ebd702eab4",
+  "baseline_id": "BASELINE_V1",
+  "blocked_count": 0,
+  "capacity_probes": [
+    {
+      "advice_emitted": false,
+      "best_action": null,
+      "probe": "node_budget_1",
+      "reasons": [
+        "global_node_budget_exceeded_no_partial_EV"
+      ],
+      "status": "BLOCKED",
+      "strategy_eligible": false
+    },
+    {
+      "advice_emitted": false,
+      "best_action": null,
+      "probe": "joint_budget_1",
+      "reasons": [
+        "joint_assignment_budget_exceeded"
+      ],
+      "status": "BLOCKED",
+      "strategy_eligible": false
+    },
+    {
+      "advice_emitted": false,
+      "best_action": null,
+      "probe": "default_joint_budget_128",
+      "reasons": [
+        "joint_assignment_budget_exceeded"
+      ],
+      "status": "BLOCKED",
+      "strategy_eligible": false
+    },
+    {
+      "advice_emitted": false,
+      "best_action": null,
+      "probe": "unknown_fees",
+      "reasons": [
+        "manual_river_start_and_known_zero_extra_fees_required"
+      ],
+      "status": "BLOCKED",
+      "strategy_eligible": false
+    },
+    {
+      "advice_emitted": false,
+      "best_action": null,
+      "probe": "four_active",
+      "reasons": [
+        "three_active_and_explicit_unique_action_order_required"
+      ],
+      "status": "BLOCKED",
+      "strategy_eligible": false
+    },
+    {
+      "advice_emitted": false,
+      "best_action": null,
+      "probe": "one_all_in",
+      "reasons": [
+        "six_to_eight_unique_dealt_seats_required"
+      ],
+      "status": "BLOCKED",
+      "strategy_eligible": false
+    }
+  ],
+  "case_count": 30,
+  "cases": [
+    {
+      "case_id": "n6-facing_bet/reference_control",
+      "declared_world_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "543196/15151",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "15151/180320",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "271598/15151",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "543196/15151",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "271598/15151",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "543196/15151",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 34,
+      "world_scenario_sha256": "1b45ef6b5bdb7ab5f852e3cc2cbd30feb0839ca00b168017faa460850c627f9c"
+    },
+    {
+      "case_id": "n6-facing_bet/value_heavy",
+      "declared_world_sha256": "15ed628a42ad233db6b6a9f6ecf2d2248872376139aaf11ffd91379ce8c4af42",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "-20",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "25/161",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "-10",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-20",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "-10",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-20",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "20",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "fold",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 18,
+      "world_scenario_sha256": "15ed628a42ad233db6b6a9f6ecf2d2248872376139aaf11ffd91379ce8c4af42"
+    },
+    {
+      "case_id": "n6-facing_bet/weak_callers",
+      "declared_world_sha256": "55d7b146980137f32cb4aaaa25ef589b90564d130d9f9cb07e740719d9da6b82",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "126",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "1/12",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "63",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "126",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "63",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "126",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "184320/2023",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 34,
+      "world_scenario_sha256": "55d7b146980137f32cb4aaaa25ef589b90564d130d9f9cb07e740719d9da6b82"
+    },
+    {
+      "case_id": "n6-facing_bet/rank_aware",
+      "declared_world_sha256": "cea505ae0c5028b0454527387c4bb42304f1bc2275cd5d7b4bef3318c4ca48b0",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "913/31",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "31/588",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "913/62",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "913/31",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "913/62",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "913/31",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 6,
+      "policy_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "cea505ae0c5028b0454527387c4bb42304f1bc2275cd5d7b4bef3318c4ca48b0"
+    },
+    {
+      "case_id": "n6-facing_bet/check_trap",
+      "declared_world_sha256": "c41b8be2399375e067ae1752a33ff66bfe88edd787c015ae7557ddce1abf6e3e",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "497/8",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "6/169",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "497/16",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "497/8",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "497/16",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "497/8",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 6,
+      "policy_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "c41b8be2399375e067ae1752a33ff66bfe88edd787c015ae7557ddce1abf6e3e"
+    },
+    {
+      "case_id": "n6-unopened/reference_control",
+      "declared_world_sha256": "5aaba649b88a4680b2179e4aaa942b57822220668c4950e7b0dbb224a8af0cf6",
+      "delta_vs_check_call_chips": "969211504826797/32334311609600",
+      "delta_vs_check_fold_chips": "3756148/66787",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "1659403599688603/64668623219200",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1659403599688603/32334311609600",
+          "nodes": 122
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "39285/3136",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "39285/1568",
+          "nodes": 102
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "3545759/87232",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "3545759/43616",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 232,
+      "policy_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 786,
+      "world_scenario_sha256": "5aaba649b88a4680b2179e4aaa942b57822220668c4950e7b0dbb224a8af0cf6"
+    },
+    {
+      "case_id": "n6-unopened/value_heavy",
+      "declared_world_sha256": "b1865f0dac5df7216768e52a32bda88919832d0ab584bf6b4acaee1b5fe4148a",
+      "delta_vs_check_call_chips": "-767015/22218",
+      "delta_vs_check_fold_chips": "-80",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "-1010425/44436",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-1010425/22218",
+          "nodes": 88
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 74
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "-40",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-80",
+          "nodes": 4
+        }
+      },
+      "model_knowledge_regret_chips": "80",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 166,
+      "policy_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "check",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 424,
+      "world_scenario_sha256": "b1865f0dac5df7216768e52a32bda88919832d0ab584bf6b4acaee1b5fe4148a"
+    },
+    {
+      "case_id": "n6-unopened/weak_callers",
+      "declared_world_sha256": "280ebd21eff79d0f7e77143bad733091c091c8ac3d8d388cac0fc6082710068a",
+      "delta_vs_check_call_chips": "13609699123/252470400",
+      "delta_vs_check_fold_chips": "2048763/11560",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "2155614781/29702400",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "2155614781/14851200",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "873/80",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "873/40",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "115053/1156",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "115053/578",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 244,
+      "policy_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 838,
+      "world_scenario_sha256": "280ebd21eff79d0f7e77143bad733091c091c8ac3d8d388cac0fc6082710068a"
+    },
+    {
+      "case_id": "n6-unopened/rank_aware",
+      "declared_world_sha256": "74407ad3674989aa6ebd63ee5500a261038bb42fec399c0b2c18cd15c3ecc774",
+      "delta_vs_check_call_chips": "-132451764881443535295374359/69554285747937598747098960",
+      "delta_vs_check_fold_chips": "2880439681/167996478",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "56014850486890675505681651/4796847292961213706696480",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "56014850486890675505681651/2398423646480606853348240",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "1455/676",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1455/338",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "10661597/994062",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "10661597/497031",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 244,
+      "policy_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "74407ad3674989aa6ebd63ee5500a261038bb42fec399c0b2c18cd15c3ecc774"
+    },
+    {
+      "case_id": "n6-unopened/check_trap",
+      "declared_world_sha256": "c01dce2a619ce9754604cb2da13b0c542e83a7d13c3e86f2035c42ccef862053",
+      "delta_vs_check_call_chips": "-206953470123559/41832845889120",
+      "delta_vs_check_fold_chips": "42019932623/424582560",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "161004225034357/3098729325120",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "161004225034357/1549364662560",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "7857/10483520",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "7857/5241760",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "16033/324",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "16033/162",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 244,
+      "policy_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "c01dce2a619ce9754604cb2da13b0c542e83a7d13c3e86f2035c42ccef862053"
+    },
+    {
+      "case_id": "n7-facing_bet/reference_control",
+      "declared_world_sha256": "2abae7c0ec63a8fe0d1b9921145d5cece6ebf3eb1eaa5ef1ee77589b447921a3",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "601156/15151",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "15151/180320",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "300578/15151",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "601156/15151",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "300578/15151",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "601156/15151",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 34,
+      "world_scenario_sha256": "2abae7c0ec63a8fe0d1b9921145d5cece6ebf3eb1eaa5ef1ee77589b447921a3"
+    },
+    {
+      "case_id": "n7-facing_bet/value_heavy",
+      "declared_world_sha256": "52ce037cbe877a85b125ba1aa94bb3a897bcb558dedf12e8a074e25e22a87f65",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "-20",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "25/161",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "-10",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-20",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "-10",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-20",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "20",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "fold",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 18,
+      "world_scenario_sha256": "52ce037cbe877a85b125ba1aa94bb3a897bcb558dedf12e8a074e25e22a87f65"
+    },
+    {
+      "case_id": "n7-facing_bet/weak_callers",
+      "declared_world_sha256": "c84075dcf83d3a3cc5e2c58b1eb066d92a70a706e07508d2f3b7c02b3d8642af",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "136",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "1/12",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "68",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "136",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "68",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "136",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "184320/2023",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 34,
+      "world_scenario_sha256": "c84075dcf83d3a3cc5e2c58b1eb066d92a70a706e07508d2f3b7c02b3d8642af"
+    },
+    {
+      "case_id": "n7-facing_bet/rank_aware",
+      "declared_world_sha256": "db57e2426461efbbcfe2886cd862c67c02e50f7e62d9c02cf9648b7c6bf11781",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "1018/31",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "31/588",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "509/31",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1018/31",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "509/31",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1018/31",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 6,
+      "policy_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "db57e2426461efbbcfe2886cd862c67c02e50f7e62d9c02cf9648b7c6bf11781"
+    },
+    {
+      "case_id": "n7-facing_bet/check_trap",
+      "declared_world_sha256": "074d1d844d7f059b3da98110a6b5d036a0cd3cecf9ecca2280dcff8c2b808948",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "271/4",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "6/169",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "271/8",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "271/4",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "271/8",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "271/4",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 6,
+      "policy_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "074d1d844d7f059b3da98110a6b5d036a0cd3cecf9ecca2280dcff8c2b808948"
+    },
+    {
+      "case_id": "n7-unopened/reference_control",
+      "declared_world_sha256": "8f226d6ed5affd1c5c3b93fc9c7d181fce683ea4003647b65bef89ba65173d30",
+      "delta_vs_check_call_chips": "34726169715283/1154796843200",
+      "delta_vs_check_fold_chips": "3945283/66787",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "65637950441017/2309593686400",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "65637950441017/1154796843200",
+          "nodes": 122
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "21825/1568",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "21825/784",
+          "nodes": 102
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "1895347/43616",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1895347/21808",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 232,
+      "policy_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 786,
+      "world_scenario_sha256": "8f226d6ed5affd1c5c3b93fc9c7d181fce683ea4003647b65bef89ba65173d30"
+    },
+    {
+      "case_id": "n7-unopened/value_heavy",
+      "declared_world_sha256": "0d833b9a8bf2179b5eb25438c203089d852b7b76d4756f145f073a7cf2bccc57",
+      "delta_vs_check_call_chips": "-767015/22218",
+      "delta_vs_check_fold_chips": "-80",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "-1010425/44436",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-1010425/22218",
+          "nodes": 88
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 74
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "-40",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-80",
+          "nodes": 4
+        }
+      },
+      "model_knowledge_regret_chips": "80",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 166,
+      "policy_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "check",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 424,
+      "world_scenario_sha256": "0d833b9a8bf2179b5eb25438c203089d852b7b76d4756f145f073a7cf2bccc57"
+    },
+    {
+      "case_id": "n7-unopened/weak_callers",
+      "declared_world_sha256": "3b0495bdaafaaf384d55a20083dc9970d49b7adb5b842fc507ad5bb4fe318824",
+      "delta_vs_check_call_chips": "908836627/16831360",
+      "delta_vs_check_fold_chips": "213603/1156",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "153493149/1980160",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "153493149/990080",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "97/8",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "97/4",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "60409/578",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "60409/289",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 244,
+      "policy_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 838,
+      "world_scenario_sha256": "3b0495bdaafaaf384d55a20083dc9970d49b7adb5b842fc507ad5bb4fe318824"
+    },
+    {
+      "case_id": "n7-unopened/rank_aware",
+      "declared_world_sha256": "c11af32487c5e7629511d36349d354ce03e8db8d6fa04ef9d7b04b99fbada0fd",
+      "delta_vs_check_call_chips": "-31527715103662850126737159/17388571436984399686774740",
+      "delta_vs_check_fold_chips": "1686857293/83998239",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "15996419298658840618147691/1199211823240303426674120",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "15996419298658840618147691/599605911620151713337060",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "2425/1014",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "2425/507",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "2059787/165677",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "4119574/165677",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 244,
+      "policy_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "c11af32487c5e7629511d36349d354ce03e8db8d6fa04ef9d7b04b99fbada0fd"
+    },
+    {
+      "case_id": "n7-unopened/check_trap",
+      "declared_world_sha256": "38624913922692a7dfdde9afb9f51b74a7a77f6e22e1a3eb86aa2eae92a0389a",
+      "delta_vs_check_call_chips": "-1650001412951/464809398768",
+      "delta_vs_check_fold_chips": "503725279/4717584",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "17093772034541/309872932512",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "17093772034541/154936466256",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "873/1048352",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "873/524176",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "961/18",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "961/9",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 244,
+      "policy_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "38624913922692a7dfdde9afb9f51b74a7a77f6e22e1a3eb86aa2eae92a0389a"
+    },
+    {
+      "case_id": "n8-facing_bet/reference_control",
+      "declared_world_sha256": "38ac5849007111d715560205bd285931a93ca82bec06090f1372094d4015fd52",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "659116/15151",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "15151/180320",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "329558/15151",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "659116/15151",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "329558/15151",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "659116/15151",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 34,
+      "world_scenario_sha256": "38ac5849007111d715560205bd285931a93ca82bec06090f1372094d4015fd52"
+    },
+    {
+      "case_id": "n8-facing_bet/value_heavy",
+      "declared_world_sha256": "9b51affe4b0080d4cd9c4c183ea723302c97a0abc86e147b9dddfefaddac512f",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "-20",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "25/161",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "-10",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-20",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "-10",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-20",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "20",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "fold",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 18,
+      "world_scenario_sha256": "9b51affe4b0080d4cd9c4c183ea723302c97a0abc86e147b9dddfefaddac512f"
+    },
+    {
+      "case_id": "n8-facing_bet/weak_callers",
+      "declared_world_sha256": "4c4b0bce7e7afb1e1a34281d698bb7cba5872966bad46b8aa25d60d901bdec45",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "146",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "1/12",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "73",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "146",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "73",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "146",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": "184320/2023",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 6,
+      "policy_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 34,
+      "world_scenario_sha256": "4c4b0bce7e7afb1e1a34281d698bb7cba5872966bad46b8aa25d60d901bdec45"
+    },
+    {
+      "case_id": "n8-facing_bet/rank_aware",
+      "declared_world_sha256": "2cb8a0e62b1fee134de16c03bbabffe1e15f0630a4ffa8e7b99f054cbb7c4011",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "1123/31",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "31/588",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "1123/62",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1123/31",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "1123/62",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1123/31",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 6,
+      "policy_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "2cb8a0e62b1fee134de16c03bbabffe1e15f0630a4ffa8e7b99f054cbb7c4011"
+    },
+    {
+      "case_id": "n8-facing_bet/check_trap",
+      "declared_world_sha256": "b7bca4b653bc5aae2fd73c05790fa92380c5aeeadc171cca6d75b61b92e2268d",
+      "delta_vs_check_call_chips": "0",
+      "delta_vs_check_fold_chips": "587/8",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "history_likelihood": "6/169",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "587/16",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "587/8",
+          "nodes": 2
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 2
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "587/16",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "587/8",
+          "nodes": 2
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 6,
+      "policy_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "b7bca4b653bc5aae2fd73c05790fa92380c5aeeadc171cca6d75b61b92e2268d"
+    },
+    {
+      "case_id": "n8-unopened/reference_control",
+      "declared_world_sha256": "edb1e94faac789dcec64d2efd8de4870a03a6c28c0368c69e274d460396b4cdc",
+      "delta_vs_check_call_chips": "121885491605291/4041788951200",
+      "delta_vs_check_fold_chips": "4134418/66787",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "3938850959756/126305904725",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "7877701919512/126305904725",
+          "nodes": 122
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "48015/3136",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "48015/1568",
+          "nodes": 102
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "4035629/87232",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "4035629/43616",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 232,
+      "policy_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 786,
+      "world_scenario_sha256": "edb1e94faac789dcec64d2efd8de4870a03a6c28c0368c69e274d460396b4cdc"
+    },
+    {
+      "case_id": "n8-unopened/value_heavy",
+      "declared_world_sha256": "a76a5faf5d7ae08323cf3a02538ec8f5918ca1d0392273621e1294688be4f434",
+      "delta_vs_check_call_chips": "-767015/22218",
+      "delta_vs_check_fold_chips": "-80",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "-1010425/44436",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-1010425/22218",
+          "nodes": 88
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "0",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "0",
+          "nodes": 74
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "-40",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "-80",
+          "nodes": 4
+        }
+      },
+      "model_knowledge_regret_chips": "80",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 166,
+      "policy_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "check",
+        "target": "0"
+      },
+      "world_model_planning_nodes": 424,
+      "world_scenario_sha256": "a76a5faf5d7ae08323cf3a02538ec8f5918ca1d0392273621e1294688be4f434"
+    },
+    {
+      "case_id": "n8-unopened/weak_callers",
+      "declared_world_sha256": "22bfd0db2842fdb92a91748fb824b86ee038d4af99328df7f5b1f900446ebacd",
+      "delta_vs_check_call_chips": "4538592641/84156800",
+      "delta_vs_check_fold_chips": "2223297/11560",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 1,
+      "legal_joint_assignments": 1,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "48068831/582400",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "48068831/291200",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "1067/80",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "1067/40",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "126583/1156",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "126583/578",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": "0",
+      "model_knowledge_regret_scope": "SAME_KERNEL_WITH_WORLD_MODEL_KNOWN_IN_ADVANCE",
+      "nodes": 244,
+      "policy_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "world_model_planning_nodes": 838,
+      "world_scenario_sha256": "22bfd0db2842fdb92a91748fb824b86ee038d4af99328df7f5b1f900446ebacd"
+    },
+    {
+      "case_id": "n8-unopened/rank_aware",
+      "declared_world_sha256": "3b7d29f14f49c96cd8991aacebe4fa846fb085f641bfbaa239dd5ee8c73613f3",
+      "delta_vs_check_call_chips": "-30342922801049534676631723/17388571436984399686774740",
+      "delta_vs_check_fold_chips": "1288996497/55998826",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "18002934038149657816668107/1199211823240303426674120",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "18002934038149657816668107/599605911620151713337060",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "5335/2028",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "5335/1014",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "14055847/994062",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "14055847/497031",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 244,
+      "policy_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "3b7d29f14f49c96cd8991aacebe4fa846fb085f641bfbaa239dd5ee8c73613f3"
+    },
+    {
+      "case_id": "n8-unopened/check_trap",
+      "declared_world_sha256": "d5e3f0069901f986ba3160515d198b8b33f35fa3a7172ab43aaf03b14da235ba",
+      "delta_vs_check_call_chips": "-80925505993001/41832845889120",
+      "delta_vs_check_fold_chips": "48650617597/424582560",
+      "frozen_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "history_likelihood": "1",
+      "joint_range_product": 4,
+      "legal_joint_assignments": 4,
+      "metrics": {
+        "check_call": {
+          "conditional_net_ev_bb": "60177796845801/1032909775040",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "60177796845801/516454887520",
+          "nodes": 130
+        },
+        "check_fold": {
+          "conditional_net_ev_bb": "9603/10483520",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "9603/5241760",
+          "nodes": 106
+        },
+        "frozen_policy": {
+          "conditional_net_ev_bb": "18563/324",
+          "expected_fallback_count": "0",
+          "fallback_probability": "0",
+          "net_ev_chips": "18563/162",
+          "nodes": 8
+        }
+      },
+      "model_knowledge_regret_chips": null,
+      "model_knowledge_regret_scope": "NOT_COMPUTED_FOR_OUT_OF_FAMILY_OVERRIDE",
+      "nodes": 244,
+      "policy_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "reasons": [],
+      "status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "world_model_best_action": null,
+      "world_scenario_sha256": "d5e3f0069901f986ba3160515d198b8b33f35fa3a7172ab43aaf03b14da235ba"
+    }
+  ],
+  "complete_count": 30,
+  "deterministic_sha256": "c1a725f3f95a76261fb041af200e45bae02b6836202b36ec56578f0afd680aae",
+  "negative_vs_simple_policy_case_ids": [
+    "n6-facing_bet/value_heavy",
+    "n6-unopened/value_heavy",
+    "n6-unopened/rank_aware",
+    "n6-unopened/check_trap",
+    "n7-facing_bet/value_heavy",
+    "n7-unopened/value_heavy",
+    "n7-unopened/rank_aware",
+    "n7-unopened/check_trap",
+    "n8-facing_bet/value_heavy",
+    "n8-unopened/value_heavy",
+    "n8-unopened/rank_aware",
+    "n8-unopened/check_trap"
+  ],
+  "qualification": [
+    "manual_synthetic_worlds_not_empirical_opponent_population",
+    "conditional_river_chip_EV_not_full_hand_bb_per_100_or_profit",
+    "model_knowledge_regret_reuses_planner_kernel_not_independent_oracle",
+    "no_real_hand_visual_or_strategy_acceptance"
+  ],
+  "real_hand_acceptance_pending": true,
+  "runtime": {
+    "case_elapsed_ms": {
+      "n6-facing_bet/check_trap": 1.723,
+      "n6-facing_bet/rank_aware": 2.105,
+      "n6-facing_bet/reference_control": 1.947,
+      "n6-facing_bet/value_heavy": 1.24,
+      "n6-facing_bet/weak_callers": 1.107,
+      "n6-unopened/check_trap": 17.783,
+      "n6-unopened/rank_aware": 18.749,
+      "n6-unopened/reference_control": 16.433,
+      "n6-unopened/value_heavy": 10.76,
+      "n6-unopened/weak_callers": 16.162,
+      "n7-facing_bet/check_trap": 1.85,
+      "n7-facing_bet/rank_aware": 1.888,
+      "n7-facing_bet/reference_control": 1.962,
+      "n7-facing_bet/value_heavy": 1.29,
+      "n7-facing_bet/weak_callers": 1.136,
+      "n7-unopened/check_trap": 18.273,
+      "n7-unopened/rank_aware": 19.573,
+      "n7-unopened/reference_control": 16.849,
+      "n7-unopened/value_heavy": 11.126,
+      "n7-unopened/weak_callers": 14.823,
+      "n8-facing_bet/check_trap": 1.781,
+      "n8-facing_bet/rank_aware": 1.935,
+      "n8-facing_bet/reference_control": 2.115,
+      "n8-facing_bet/value_heavy": 1.293,
+      "n8-facing_bet/weak_callers": 1.156,
+      "n8-unopened/check_trap": 19.176,
+      "n8-unopened/rank_aware": 19.021,
+      "n8-unopened/reference_control": 18.062,
+      "n8-unopened/value_heavy": 11.279,
+      "n8-unopened/weak_callers": 14.766
+    },
+    "max_case_elapsed_ms": 19.573,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.10",
+    "total_case_elapsed_ms": 267.363
+  },
+  "schema_version": 1,
+  "scope": "SYNTHETIC_CONDITIONAL_RIVER_POLICY_EVALUATION",
+  "strategy_eligible": false,
+  "worst_model_knowledge_regret": [
+    {
+      "case_id": "n8-facing_bet/weak_callers",
+      "chips": "184320/2023"
+    },
+    {
+      "case_id": "n7-facing_bet/weak_callers",
+      "chips": "184320/2023"
+    },
+    {
+      "case_id": "n6-facing_bet/weak_callers",
+      "chips": "184320/2023"
+    },
+    {
+      "case_id": "n8-unopened/value_heavy",
+      "chips": "80"
+    },
+    {
+      "case_id": "n7-unopened/value_heavy",
+      "chips": "80"
+    }
+  ]
+}
