@@ -33,6 +33,30 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-23 INDEPENDENT PR #34 EVALUATION GATE:** independently audited
+  original head `4f59d723f20fab760b50c0f2de1ec88a5b9b1b8f` against exact main
+  `d98084aba96eac6ff3bc0cf07dad99b00e36ff31`. Recompiled all six V1 books from
+  that base: byte-identical artifact `3b9983b46c054a40499286467164c68e2e1ea7039df0a5c2470859ebd702eab4`;
+  deterministic 30-world result remains `c1a725f3f95a76261fb041af200e45bae02b6836202b36ec56578f0afd680aae`
+  on Python 3.11/3.12. Two P1s prevented approval of the original head:
+  per-world candidate reoptimization was accepted (9 positive/0 negative),
+  and a self-rehashed different policy could be relabeled BASELINE_V1.
+  Scoped repairs pin canonical V1 bytes, require one candidate book per public
+  group across all worlds, replay changed-book reports from supplied books
+  using the frozen kernel, and reject metric/identity/partial-result drift.
+  Original baseline/results/oracle artifacts and all production source stay
+  unchanged. Original-head full suite 4587 passed/2 skipped with pinned
+  PokerKit; repaired evaluation/reference 46 passed, math/reference 128 passed,
+  full lint and hygiene passed. Independent repair probes: 25 negatives
+  rejected plus fixed-book/budget positive controls; separate 12-probe review
+  passed. Independent terminal reference: committed artifact byte-identical,
+  400 additional synthetic cases MATCH, 16 injected errors detected.
+  STRATEGY_EVALUATION_READY and BASELINE_V1_FROZEN apply only to exposed
+  synthetic conditional worlds, not independent action-tree or empirical
+  strategy acceptance. Exact integrated head and post-main CI are recorded in
+  Issue #27. Jev remains non-authoritative; no strategy optimization started.
+  Next mission remains OPPONENT_RIVER_RANGE_POSTERIOR_CALIBRATION;
+  REAL_HAND_ACCEPTANCE_PENDING=YES and empirical NOT_ASSESSED remain.
 - **2026-09-23 STRATEGY EVALUATION FOUNDATION V1 (DRAFT):** on a clean
   `d98084aba96eac6ff3bc0cf07dad99b00e36ff31` base in isolated
   `codex/strategy-evaluation-foundation`, frozen six AA manual threeway-river

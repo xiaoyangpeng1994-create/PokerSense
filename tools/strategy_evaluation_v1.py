@@ -63,6 +63,8 @@ DEFAULT_PROTOCOL = Path(
     "configs/strategy/examples/threeway-validation-protocol-v1.json")
 DEFAULT_BASELINE = Path("configs/strategy/evaluation/baseline-v1.json")
 DEFAULT_RESULTS = Path("configs/strategy/evaluation/baseline-v1-results.json")
+FROZEN_BASELINE_SHA256 = (
+    "3b9983b46c054a40499286467164c68e2e1ea7039df0a5c2470859ebd702eab4")
 MODEL_SCOPE = "SYNTHETIC_CONDITIONAL_RIVER_POLICY_EVALUATION"
 
 
@@ -90,6 +92,17 @@ def write_json(path, value):
 
 def source_hashes(root=Path(".")):
     return {name: digest((root / name).read_bytes()) for name in SOURCE_PATHS}
+
+
+def load_frozen_baseline(baseline_path=DEFAULT_BASELINE):
+    """Bind V1 to the independently reproduced artifact, not its own claims."""
+    raw = Path(baseline_path).read_bytes()
+    if digest(raw) != FROZEN_BASELINE_SHA256:
+        raise ValueError("canonical_baseline_artifact_required")
+    frozen = json.loads(raw, object_pairs_hook=unique_object)
+    if frozen["source_sha256"] != source_hashes():
+        raise ValueError("baseline_source_drift")
+    return frozen
 
 
 def require_base_sources():
@@ -193,6 +206,10 @@ def freeze_baseline(input_path=DEFAULT_INPUT, protocol_path=DEFAULT_PROTOCOL,
         "real_hand_acceptance_pending": True, "strategy_eligible": False,
         "advice_emitted": False,
     }
+    encoded = (json.dumps(frozen, sort_keys=True, ensure_ascii=False,
+                          indent=2) + "\n").encode("utf-8")
+    if digest(encoded) != FROZEN_BASELINE_SHA256:
+        raise ValueError("freeze_does_not_reproduce_canonical_baseline")
     write_json(output, frozen)
     return frozen
 
@@ -297,7 +314,7 @@ def capacity_probes(plan):
 def run_benchmark(baseline_path=DEFAULT_BASELINE,
                   input_path=DEFAULT_INPUT, protocol_path=DEFAULT_PROTOCOL,
                   output=None):
-    frozen = read_json(baseline_path)
+    frozen = load_frozen_baseline(baseline_path)
     if (frozen.get("schema_version") != 1
             or frozen.get("baseline_id") != "BASELINE_V1"
             or frozen.get("base_commit") != BASE_COMMIT

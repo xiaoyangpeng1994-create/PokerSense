@@ -8,9 +8,12 @@ import json
 
 import pytest
 
+from poker_engine.strategy.threeway_policy_evaluation_v1 import policy_book_hash
+from poker_engine.strategy.threeway_river_v1 import RiverAction
+from tools import strategy_evaluation_v1 as evaluation
 from tools.strategy_evaluation_v1 import (
-    DEFAULT_BASELINE, DEFAULT_RESULTS, _case, book_from_data,
-    planning_scenarios, read_json, run_benchmark, source_hashes,
+    DEFAULT_BASELINE, DEFAULT_RESULTS, _case, book_data, book_from_data,
+    load_frozen_baseline, planning_scenarios, read_json, run_benchmark, source_hashes,
     verify_published_results, write_json,
 )
 
@@ -82,8 +85,61 @@ def test_published_results_and_safety_claim_tampering_rejected(tmp_path):
     baseline["advice_emitted"] = True
     altered_path = tmp_path / "baseline.json"
     altered_path.write_text(json.dumps(baseline), encoding="utf-8")
-    with pytest.raises(ValueError, match="invalid_or_drifted_baseline"):
+    with pytest.raises(ValueError, match="canonical_baseline_artifact_required"):
         run_benchmark(baseline_path=altered_path)
+
+
+def test_self_consistent_rehashed_policy_cannot_be_relabeled_baseline_v1(tmp_path):
+    frozen = read_json(DEFAULT_BASELINE)
+    plans, _, _, _ = planning_scenarios(
+        evaluation.DEFAULT_INPUT, evaluation.DEFAULT_PROTOCOL)
+    group = "n6-facing_bet"
+    book = book_from_data(frozen["books"][group])
+    altered = replace(book, decisions=tuple(
+        replace(item, action=RiverAction(0, "fold"))
+        if item.history == plans[group].history else item
+        for item in book.decisions))
+    altered = replace(altered, book_sha256=policy_book_hash(altered))
+    frozen["books"][group] = book_data(altered)
+    # This is a valid, self-consistent policy, but is not the frozen V1 policy.
+    assert book_from_data(frozen["books"][group]) == altered
+    changed = tmp_path / "relabeled-baseline.json"
+    write_json(changed, frozen)
+    with pytest.raises(ValueError, match="canonical_baseline_artifact_required"):
+        run_benchmark(baseline_path=changed)
+
+
+def test_canonical_baseline_guard_rejects_source_drift(monkeypatch):
+    changed = source_hashes()
+    changed["src/poker_engine/strategy/threeway_river_v1.py"] = "0" * 64
+    monkeypatch.setattr(evaluation, "source_hashes", lambda: changed)
+    with pytest.raises(ValueError, match="baseline_source_drift"):
+        load_frozen_baseline()
+
+
+def test_freeze_cannot_assign_v1_identity_to_changed_input(tmp_path, monkeypatch):
+    original_run = evaluation.subprocess.run
+
+    def exact_base_head(command, **kwargs):
+        if command == ["git", "rev-parse", "HEAD"]:
+            return evaluation.subprocess.CompletedProcess(
+                command, 0, stdout=evaluation.BASE_COMMIT + "\n")
+        return original_run(command, **kwargs)
+
+    # Isolate the input-identity gate from git history (CI may use depth 1).
+    # Policy compilation still runs; the source gate has its own drift test.
+    monkeypatch.setattr(evaluation.subprocess, "run", exact_base_head)
+    monkeypatch.setattr(evaluation, "require_base_sources", lambda: (
+        read_json(DEFAULT_BASELINE)["source_sha256"]))
+    changed_input = tmp_path / "changed-input.json"
+    changed_input.write_text(
+        evaluation.DEFAULT_INPUT.read_text(encoding="utf-8") + "\n",
+        encoding="utf-8")
+    output = tmp_path / "not-v1.json"
+    with pytest.raises(ValueError,
+                       match="freeze_does_not_reproduce_canonical_baseline"):
+        evaluation.freeze_baseline(input_path=changed_input, output=output)
+    assert not output.exists()
 
 
 def test_frozen_artifact_cannot_be_overwritten(tmp_path):
