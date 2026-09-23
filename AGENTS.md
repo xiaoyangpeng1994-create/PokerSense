@@ -33,6 +33,31 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-23 OPPONENT ACTION LIKELIHOOD V1: INSUFFICIENT_DATA.** PR #35 was
+  closed unmerged as rejected research; its branch and history remain. New
+  isolated `codex/opponent-action-likelihood-v1` starts from main `af67b4b`.
+  Historical structured audit was committed first at `bda4bbb` (manifest SHA
+  `d761e420...`): 30 reviewed visible actions, 32 actor episodes and 120089
+  seven-pool frames are different candidate units, not a verified all-action-
+  opportunity denominator. Four private structured receipt hashes match, but
+  eligible real training/validation opportunities are 0/0; stable identity,
+  predecision legal menu/state, same-rule second session and offline strength
+  labels remain unavailable. Thus no empirical player, population or hand-
+  strength-conditional likelihood was fit. Prospective synthetic protocol and
+  384 opportunity fixture were frozen at `dc0bd69` before model implementation.
+  Synthetic alpha-1 pooled/player controls were scored on 96 stable and 96
+  drifting held-out opportunities each; player log loss 0.7510 stable and
+  1.2959 drift, pooled 0.9038/0.8200. Frozen BASELINE V1 evaluator paired 8/8
+  synthetic cases, 4 positive/0 negative/4 equal, no fallback; those cases
+  extrapolate beyond observed prices/action sizes and do not certify model
+  quality. Independent review found and verified repair of action-size bridge
+  duplication; inference API now accepts public snapshot, not actual action.
+  Result digest `1cb28a511c080d06ac1a7815fec4b5a1fc726ace87569eb26b5d21f8e7f1f0a5`.
+  See docs/OPPONENT-ACTION-LIKELIHOOD-DATA-AUDIT-V1.zh-CN.md and
+  docs/OPPONENT-ACTION-LIKELIHOOD-V1.zh-CN.md. Production strategy, perception,
+  truth and BASELINE V1 unchanged; REAL_HAND_ACCEPTANCE_PENDING and empirical
+  NOT_ASSESSED remain. Next move is audited same-rule all-opportunity data;
+  RANGE_POSTERIOR_V2 is not started.
 - **2026-09-23 INDEPENDENT PR #34 EVALUATION GATE:** independently audited
   original head `4f59d723f20fab760b50c0f2de1ec88a5b9b1b8f` against exact main
   `d98084aba96eac6ff3bc0cf07dad99b00e36ff31`. Recompiled all six V1 books from
