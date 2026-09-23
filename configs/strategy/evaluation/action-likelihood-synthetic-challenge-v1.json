@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "challenge_id": "ACTION_LIKELIHOOD_SYNTHETIC_CONTROL_V1",
+  "historical_audit_sha256": "d761e42050cb7d67ac9efd3eab1057bf9ed151ffe26ec033197bcd5c46eb3291",
+  "base_main_sha": "af67b4bb3ba56da2d4fdb70e0731583afc7aaf40",
+  "source_kind": "synthetic_action_opportunities_not_historical_calibration",
+  "rule_fingerprint": "e7d995cd7f874e739feb338e4dfa7ee35f607f6dfc727813ef55f0d213fb9a4a",
+  "board": ["2c", "4d", "7h", "9s", "Jc"],
+  "table_size": 6,
+  "active_seats": [0, 1, 2],
+  "contexts": [
+    {"id": "unopened", "pot": "100", "to_call": "0", "legal_actions": ["check", "bet:20"]},
+    {"id": "facing_bet", "pot": "120", "to_call": "20", "legal_actions": ["fold", "call", "raise:40"]}
+  ],
+  "opponents": ["synthetic-A", "synthetic-B"],
+  "generator_truth_weights_evaluator_only": {
+    "stable": {
+      "synthetic-A": {"fold": 2, "check": 8, "call": 8, "bet": 2, "raise": 1},
+      "synthetic-B": {"fold": 1, "check": 4, "call": 3, "bet": 6, "raise": 5}
+    },
+    "drift": {
+      "synthetic-A": {"fold": 1, "check": 4, "call": 3, "bet": 6, "raise": 5},
+      "synthetic-B": {"fold": 2, "check": 8, "call": 8, "bet": 2, "raise": 1}
+    }
+  },
+  "partitions": [
+    {"id": "train", "session_ids": ["syn-train-01", "syn-train-02", "syn-train-03", "syn-train-04"], "seed": 173, "regime": "stable"},
+    {"id": "heldout_stable", "session_ids": ["syn-stable-01", "syn-stable-02"], "seed": 277, "regime": "stable"},
+    {"id": "heldout_drift", "session_ids": ["syn-drift-01", "syn-drift-02"], "seed": 379, "regime": "drift"}
+  ],
+  "opportunities_per_session": 48,
+  "synthetic_feature_boundary": "Only public state and actual action from train may enter fitting. Later strength/reveal fields belong to an offline-only sidecar and may not enter any decision-time feature.",
+  "candidate_models_predeclared": [
+    {"id": "pooled_dirichlet_v1", "scope": "legal-menu context", "alpha_per_legal_action": 1},
+    {"id": "player_dirichlet_v1", "scope": "stable synthetic opponent identity plus legal-menu context", "alpha_per_legal_action": 1}
+  ],
+  "calibration": {
+    "score_both_models_on_both_heldout_partitions": true,
+    "metrics": ["multiclass_log_loss", "multiclass_brier", "five_bin_top_action_ece", "zero_probability_count", "refusal_count"],
+    "selection": "none_after_heldout_observation",
+    "split_unit": "whole_synthetic_session"
+  },
+  "strategy_impact": {
+    "frozen_baseline_groups": ["n6-facing_bet", "n6-unopened"],
+    "worlds": ["stable", "drift"],
+    "fixed_book_rule": "one candidate book per group and model, compiled from train only then reused over both worlds",
+    "evaluator": "unchanged threeway_policy_evaluation_v1.evaluate_policy_book with BASELINE_V1 budgets",
+    "metrics": ["paired_conditional_ev_delta", "root_disagreement", "model_knowledge_regret_when_available", "fallback", "blocked"],
+    "range_update_claim": false
+  },
+  "qualification": "Synthetic all-opportunity code control only. Its player identities, rules, action probabilities and held-out sessions are generated, not historical A-poker behavior. No empirical promotion regardless of scores."
+}
