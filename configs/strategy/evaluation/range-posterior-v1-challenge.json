@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "challenge_id": "RANGE_POSTERIOR_V1_PROSPECTIVE_SYNTHETIC",
+  "base_main_sha256": "af67b4bb3ba56da2d4fdb70e0731583afc7aaf40",
+  "baseline_file_sha256": "3b9983b46c054a40499286467164c68e2e1ea7039df0a5c2470859ebd702eab4",
+  "source_kind": "prospectively_declared_synthetic_stress_not_real_hands",
+  "public_state_source": "the six BASELINE_V1 public conditions and the same pre-observation manual combo support",
+  "observation_time": "turn_before_river_start",
+  "observation_definition": "A public turn pressure/passive action by each of the two active opponents, recorded before Hero's river decision. Strength buckets use only the four board cards public at that turn and each possible private combo; actual private cards are evaluator-only latent truth.",
+  "groups": ["n6-facing_bet", "n6-unopened", "n7-facing_bet", "n7-unopened", "n8-facing_bet", "n8-unopened"],
+  "observation_patterns": [
+    {"id": "both_pressure", "seat_1": "pressure", "seat_2": "pressure"},
+    {"id": "split", "seat_1": "pressure", "seat_2": "passive"},
+    {"id": "both_passive", "seat_1": "passive", "seat_2": "passive"}
+  ],
+  "truth_regimes": [
+    {"id": "aligned", "p_pressure_strong": "4/5", "p_pressure_weak": "1/5"},
+    {"id": "uninformative", "p_pressure_strong": "1/2", "p_pressure_weak": "1/2"},
+    {"id": "inverted", "p_pressure_strong": "1/5", "p_pressure_weak": "4/5"}
+  ],
+  "truth_construction": "For each seat, multiply its pre-observation manual combo weight by the regime's probability of its recorded public action conditional on that combo's pre-action strength bucket; normalize and pass the resulting two ranges to the unchanged fixed-policy evaluator. River history is conditioned only by the evaluator, once. No hidden holding is supplied to the candidate.",
+  "candidate_visibility": "Candidate may read public observation, pre-observation manual ranges and a separately declared likelihood model. It may not read truth_regimes, regime id, future actions, showdown, or evaluator outcomes when constructing a posterior or policy book.",
+  "evaluation": {
+    "paired_cases": 54,
+    "policy_books": "one per group and public observation pattern, reused over all three truth regimes",
+    "kernel": "threeway_policy_evaluation_v1.evaluate_policy_book pinned by BASELINE_V1 source hashes",
+    "budgets": "BASELINE_V1 max_joint_assignments=128 and max_nodes=20000",
+    "metrics": ["paired conditional EV delta", "model-knowledge regret when same-family replan completes", "root-action disagreement", "opponent combo Brier and log loss", "strong-bucket calibration", "fallback", "blocked rows", "aligned/neutral/inverted regressions"],
+    "blocked_policy": "retain every blocked row in the denominator; no partial EV or selective case removal",
+    "promotion_gate": "No empirical promotion without independent same-rule audited decision-point data and held-out calibration; synthetic positive EV alone cannot pass. Any prospective negative deltas or material miscalibration must be disclosed."
+  },
+  "scope": "offline synthetic threeway river only; not independent real hands, GTO regret, full-hand bb/100 or profit"
+}
