@@ -131,7 +131,7 @@ def run_challenge(path=CHALLENGE):
             observations = tuple(PublicTurnObservation(
                 seat, actions[seat], plan.board_cards[:4], "manual_synthetic",
                 hashlib.sha256((group + "/" + pattern["id"] + "/" + str(seat))
-                               .encode()).hexdigest(), 1, 2) for seat in (1, 2))
+                               .encode()).hexdigest(), seat, 3) for seat in (1, 2))
             candidate = posterior_ranges(plan, observations, PROFILE,
                                          prior_binding=PRIOR_BINDING)
             planning = replace(plan, ranges=candidate.ranges)

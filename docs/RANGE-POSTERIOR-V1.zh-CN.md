@@ -46,6 +46,6 @@ python tools/evaluate_range_posterior_v1.py --output <new-path.json>
 python -m pytest -q tests/strategy/test_range_posterior_v1.py tests/tools/test_evaluate_range_posterior_v1.py
 ```
 
-当前逐项结果在 `configs/strategy/evaluation/range-posterior-v1-results.json`，规范字节 SHA256 `ba8bd7cbc86746b5bf96c9e3727884ca6af04e86e5c9f67087a7d8dc11d78a53`，排除运行计时的摘要 `af9239c750e08db3643bdf80139d35ca162d01fe08400fc54cc6507ff1137820`，候选模块源码 SHA256 `ed54b9cd84d6694b7427e7b9db4722b22dd73f065945ecba781a0dc8e48cb5bf`。输出用新路径，不覆盖已有文件。
+当前逐项结果在 `configs/strategy/evaluation/range-posterior-v1-results.json`，规范字节 SHA256 `ca03820c4885520b2b1329b99c891457fb601d9a355da5d3bc9758d3c9d2fecc`，排除运行计时的摘要 `09e1687cf406cc21b9d3864c09c41403e703ee95208413214319e37428e157a4`，候选模块源码 SHA256 `ccec1c6c6468af40e6829fe57a2686f8dd162f5f4cdacabe139f4a611b220810`。输出用新路径，不覆盖已有文件。
 
 **建议下一步**：先在同规则、全机会分母的已授权结构化决策记录上核对每条决策前公开行动、玩家/session 身份和缺失率；只有满足样本与真值审计后，再预登记按 session/对手分开的似然校准和后验检验。该建议不是自动启动下一个优化目标，不要求访问新私有媒体或采集。

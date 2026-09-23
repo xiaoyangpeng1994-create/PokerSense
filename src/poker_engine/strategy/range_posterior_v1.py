@@ -126,6 +126,9 @@ def posterior_ranges(scenario: ThreewayRiverScenario,
                 or type(o.river_decision_ordinal) is not int
                 or not 0 <= o.event_ordinal < o.river_decision_ordinal):
             raise ValueError("future_or_unbound_public_observation")
+    if (len({o.event_ordinal for o in observations}) != len(observations)
+            or len({o.river_decision_ordinal for o in observations}) != 1):
+        raise ValueError("ambiguous_public_action_order")
     buckets = strength_buckets(scenario.ranges, turn_board)
     output = []
     for distribution in scenario.ranges:

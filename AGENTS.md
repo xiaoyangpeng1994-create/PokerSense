@@ -43,7 +43,7 @@ changing desktop capture, recognition, packaging, or project documentation.
   semantics changed. Frozen BASELINE V1 check remains exact. On 54 paired
   synthetic worlds, 7 EV gains, 14 losses, 33 ties, no blocks or fallback;
   mean conditional delta -5.6824 chips, and overall log loss/Brier worsened.
-  Results digest `af9239c750e08db3643bdf80139d35ca162d01fe08400fc54cc6507ff1137820`.
+  Results digest `09e1687cf406cc21b9d3864c09c41403e703ee95208413214319e37428e157a4`.
   See `docs/RANGE-POSTERIOR-V1.zh-CN.md`. The 54 worlds reuse baseline public
   states and tiny manual combo support; no empirical calibration, real-hand
   acceptance, live advice, GTO or profitability claim. Next step is audited

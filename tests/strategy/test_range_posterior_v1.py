@@ -20,7 +20,7 @@ def _inputs():
     plan = plans["n6-facing_bet"]
     observations = tuple(PublicTurnObservation(
         seat, action, plan.board_cards[:4], "manual_synthetic",
-        hashlib.sha256(f"test-event-{seat}".encode()).hexdigest(), 1, 2)
+        hashlib.sha256(f"test-event-{seat}".encode()).hexdigest(), seat, 3)
         for seat, action in ((1, "pressure"), (2, "passive")))
     profile = ActionLikelihoodProfile(Fraction(3, 4), Fraction(1, 4),
                                       "manual_unvalidated", "a" * 64)
@@ -48,7 +48,7 @@ def test_turn_action_updates_only_pre_action_manual_prior():
     lambda o: replace(o, board_cards=o.board_cards[:3]),
     lambda o: replace(o, source_kind="revealed_holding"),
     lambda o: replace(o, source_sha256="not-a-hash"),
-    lambda o: replace(o, event_ordinal=2),
+    lambda o: replace(o, event_ordinal=3),
     lambda o: replace(o, event_ordinal=-1),
 ])
 def test_unavailable_or_unbound_event_rejected(change):
@@ -64,6 +64,15 @@ def test_missing_or_duplicate_opponent_event_rejected():
                     (observations[0], observations[0])):
         with pytest.raises(ValueError, match="one_turn_observation"):
             posterior_ranges(plan, invalid, profile, prior_binding=binding)
+
+
+def test_action_order_must_be_unique_and_share_one_decision_boundary():
+    plan, observations, profile, binding = _inputs()
+    for invalid in (replace(observations[0], event_ordinal=2),
+                    replace(observations[0], river_decision_ordinal=4)):
+        with pytest.raises(ValueError, match="ambiguous_public_action_order"):
+            posterior_ranges(plan, (invalid, observations[1]), profile,
+                             prior_binding=binding)
 
 
 def test_unvalidated_likelihood_and_prior_boundaries():
