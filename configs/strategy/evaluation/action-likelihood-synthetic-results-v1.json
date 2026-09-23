@@ -1,0 +1,354 @@
+{
+  "advice_emitted": false,
+  "candidate_source_sha256": "3bc8cfd384f3e360980edf25f68a803fe759a5ef91405d8c77f7890c4c2ae3de",
+  "challenge_commit": "dc0bd69775eedcd88eed3c3a9fee6cb94bd14f68",
+  "deterministic_sha256": "1cb28a511c080d06ac1a7815fec4b5a1fc726ace87569eb26b5d21f8e7f1f0a5",
+  "empirical_model_fit_executed": false,
+  "empirical_strategy": "NOT_ASSESSED",
+  "historical_audit_sha256": "d761e42050cb7d67ac9efd3eab1057bf9ed151ffe26ec033197bcd5c46eb3291",
+  "historical_audit_status": "NO_EMPIRICAL_MODEL_FIT_PERMITTED",
+  "historical_eligible_training": 0,
+  "historical_eligible_validation": 0,
+  "model_training_sha256": {
+    "player": "70388985653c3f3da558a4eb24c6f4babe97a8a19904b9715a0ac4786e89d897",
+    "pooled": "70388985653c3f3da558a4eb24c6f4babe97a8a19904b9715a0ac4786e89d897"
+  },
+  "prospective_challenge_sha256": "61e21217fa7dfb41837538731fa9628f4f6abb45266679ebfc98a5c9177031dc",
+  "qualification": "synthetic code-path control only; historical A-poker has no verified action-opportunity denominator, held-out session or revealed-strength labels; no empirical calibration, profitability or GTO claim",
+  "range_update_supported": false,
+  "real_hand_acceptance_pending": true,
+  "schema_version": 1,
+  "strategy_cases": [
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "497/8",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "1921/40",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "b53200972b1b8da788d5d5657c8124a86f3c924f852d94b4b1cd1467cf826c2b",
+      "candidate_ev_chips": "2203/20",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/pooled/stable",
+      "delta_ev_chips": "1921/40",
+      "group": "n6-facing_bet",
+      "model": "pooled_dirichlet_v1",
+      "world": "stable",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "ed371e3c75077dd5224bc1a35f6edf0cdb5bfa8064b3ca411ca8b7115567670f"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "497/8",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "1921/40",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "b53200972b1b8da788d5d5657c8124a86f3c924f852d94b4b1cd1467cf826c2b",
+      "candidate_ev_chips": "2203/20",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/pooled/drift",
+      "delta_ev_chips": "1921/40",
+      "group": "n6-facing_bet",
+      "model": "pooled_dirichlet_v1",
+      "world": "drift",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "2fec3e73cc2926805c51d19421fcde3b5aa4b1922829ba9205536ee41ba8afa7"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "497/8",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "1921/40",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "36af140e621ba3ca2911e1048b9ec33ee3762cac7320b8831514fa7e3d5e6ce8",
+      "candidate_ev_chips": "2203/20",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/player/stable",
+      "delta_ev_chips": "1921/40",
+      "group": "n6-facing_bet",
+      "model": "player_dirichlet_v1",
+      "world": "stable",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "ed371e3c75077dd5224bc1a35f6edf0cdb5bfa8064b3ca411ca8b7115567670f"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "497/8",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "1921/40",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "36af140e621ba3ca2911e1048b9ec33ee3762cac7320b8831514fa7e3d5e6ce8",
+      "candidate_ev_chips": "2203/20",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/player/drift",
+      "delta_ev_chips": "1921/40",
+      "group": "n6-facing_bet",
+      "model": "player_dirichlet_v1",
+      "world": "drift",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "2fec3e73cc2926805c51d19421fcde3b5aa4b1922829ba9205536ee41ba8afa7"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "20593/200",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "484559/1094400",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "c3619a984d82b44d0137ae752bb3df0d088969b223515ad4d1357f4b9774c9b7",
+      "candidate_ev_chips": "20593/200",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "484559/1094400",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/pooled/stable",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "model": "pooled_dirichlet_v1",
+      "world": "stable",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "c9bc0263dfe8370dcc1f2d932e9d6f207a4bd6da05d37e5f8d2157862836d2f6"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "20593/200",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4056903/3203200",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "c3619a984d82b44d0137ae752bb3df0d088969b223515ad4d1357f4b9774c9b7",
+      "candidate_ev_chips": "20593/200",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "4056903/3203200",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/pooled/drift",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "model": "pooled_dirichlet_v1",
+      "world": "drift",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "dc5813f09ece8d2068bda381ea3a618629e3464e6e007ad4bde91ebe7914eb85"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "20593/200",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "484559/1094400",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "22f26de183f533c506dba6a1a1659a260e89ff41f7d4d5eccfae01528cdbcfa5",
+      "candidate_ev_chips": "20593/200",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "484559/1094400",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/player/stable",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "model": "player_dirichlet_v1",
+      "world": "stable",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "c9bc0263dfe8370dcc1f2d932e9d6f207a4bd6da05d37e5f8d2157862836d2f6"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "20593/200",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4056903/3203200",
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "22f26de183f533c506dba6a1a1659a260e89ff41f7d4d5eccfae01528cdbcfa5",
+      "candidate_ev_chips": "20593/200",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "4056903/3203200",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/player/drift",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "model": "player_dirichlet_v1",
+      "world": "drift",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "dc5813f09ece8d2068bda381ea3a618629e3464e6e007ad4bde91ebe7914eb85"
+    }
+  ],
+  "strategy_eligible": false,
+  "strategy_summary": {
+    "blocked_count": 0,
+    "case_count": 8,
+    "equal_delta_count": 4,
+    "negative_delta_count": 0,
+    "paired_count": 8,
+    "positive_delta_count": 4,
+    "root_disagreement_count": 4
+  },
+  "synthetic_calibration": {
+    "player": {
+      "heldout_drift": {
+        "advice_emitted": false,
+        "mean_brier": "2382841/2890000",
+        "mean_log_loss": 1.295917092,
+        "opportunities": 96,
+        "refusal_count": 0,
+        "sessions": [
+          "syn-drift-01",
+          "syn-drift-02"
+        ],
+        "status": "SYNTHETIC_HELDOUT_ONLY",
+        "strategy_eligible": false,
+        "top_action_ece_5bin": 0.432720588,
+        "unseen_context_fallback_count": 0,
+        "zero_probability_count": 0
+      },
+      "heldout_stable": {
+        "advice_emitted": false,
+        "mean_brier": "5937497/13005000",
+        "mean_log_loss": 0.750964963,
+        "opportunities": 96,
+        "refusal_count": 0,
+        "sessions": [
+          "syn-stable-01",
+          "syn-stable-02"
+        ],
+        "status": "SYNTHETIC_HELDOUT_ONLY",
+        "strategy_eligible": false,
+        "top_action_ece_5bin": 0.045294118,
+        "unseen_context_fallback_count": 0,
+        "zero_probability_count": 0
+      }
+    },
+    "pooled": {
+      "heldout_drift": {
+        "advice_emitted": false,
+        "mean_brier": "25481591/47064402",
+        "mean_log_loss": 0.82001209,
+        "opportunities": 96,
+        "refusal_count": 0,
+        "sessions": [
+          "syn-drift-01",
+          "syn-drift-02"
+        ],
+        "status": "SYNTHETIC_HELDOUT_ONLY",
+        "strategy_eligible": false,
+        "top_action_ece_5bin": 0.077638631,
+        "unseen_context_fallback_count": 0,
+        "zero_probability_count": 0
+      },
+      "heldout_stable": {
+        "advice_emitted": false,
+        "mean_brier": "27163271/47064402",
+        "mean_log_loss": 0.903792871,
+        "opportunities": 96,
+        "refusal_count": 0,
+        "sessions": [
+          "syn-stable-01",
+          "syn-stable-02"
+        ],
+        "status": "SYNTHETIC_HELDOUT_ONLY",
+        "strategy_eligible": false,
+        "top_action_ece_5bin": 0.077638631,
+        "unseen_context_fallback_count": 0,
+        "zero_probability_count": 0
+      }
+    }
+  },
+  "synthetic_labels_sha256": "27d15e98825a1d816b0b966d404e40e7eb9b026f529473322d6f7d39913ca64b",
+  "synthetic_opportunities_sha256": "7cbbc108f8a801f5f4a56f57a7dea7325557f9bddd15850b8427515715ecac45",
+  "verdict": "INSUFFICIENT_DATA"
+}

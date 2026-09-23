@@ -1,0 +1,1927 @@
+{
+  "challenge_sha256": "61e21217fa7dfb41837538731fa9628f4f6abb45266679ebfc98a5c9177031dc",
+  "labels": [
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-01-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-02-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-03-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-train-04-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-01-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-stable-02-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-01-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-000-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-001-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-002-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-003-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-004-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-005-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-006-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-007-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-008-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-009-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-010-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-011-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-012-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-013-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-014-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-015-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-016-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-017-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-018-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-019-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-020-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-021-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-022-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-023-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-024-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-025-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-026-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-027-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-028-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-029-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-030-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-031-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-032-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-033-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-034-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-035-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-036-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-037-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-038-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-039-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-040-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-041-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-042-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-043-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-044-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-045-seat-1",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-046-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    },
+    {
+      "later_revealed_strength": null,
+      "opportunity_id": "syn-drift-02-hand-047-seat-2",
+      "status": "LATER_STRENGTH_NOT_AVAILABLE"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "offline_only_not_a_decision_feature"
+}

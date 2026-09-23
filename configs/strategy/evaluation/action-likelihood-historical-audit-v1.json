@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "audit_id": "ACTION_LIKELIHOOD_HISTORICAL_AUDIT_V1",
+  "base_main_sha": "af67b4bb3ba56da2d4fdb70e0731583afc7aaf40",
+  "scope": "existing structured historical A-poker evidence; no media decoding",
+  "unit": "one independently enumerated action opportunity, including UNKNOWN and refused rows",
+  "source_receipts": [
+    {
+      "role": "aa8_decision_readiness",
+      "relative_private_path": "aa8_decision_opportunities_v1_20260914_v10/readiness.json",
+      "sha256": "e10be9812b7beb24cd8da4792166fbc94903493831192f2ddc799a2f474cec10"
+    },
+    {
+      "role": "visible_action_review",
+      "relative_private_path": "aa8_action_truth_review_20260914_v1/result-v4.json",
+      "sha256": "264be3050dc1fd7834caaff8358dd1cd1938b00073503a8a21065eed52850e73"
+    },
+    {
+      "role": "actor_episode_census",
+      "relative_private_path": "aa8_actor_episode_census_20260914_v6/episodes.json",
+      "sha256": "1bb9cfda2a12ed49fb167ffdf8f243c7a7b6e20644fb0fce875979e1a2cfd9b8"
+    },
+    {
+      "role": "seven_pool_continuous_benchmark",
+      "relative_private_path": "historical-benchmark-20260922/continuous-aggregate.json",
+      "sha256": "349d9895dd07962a8d2d3b8fce6fdf0b2f6b11d7e38913d95a7dae14f29f5461"
+    }
+  ],
+  "distinct_evidence_units": {
+    "reviewed_visible_action_candidates": 36,
+    "matched_visible_actions": 30,
+    "matched_opponent_actions": 25,
+    "matched_hero_actions": 5,
+    "matched_river_actions_all_actors": 2,
+    "actor_episode_candidates": 32,
+    "episode_action_union_review_queue": 34,
+    "same_rule_gameplay_sessions_with_candidate_actions": 1,
+    "seven_pool_benchmark_frames": 120089,
+    "seven_pool_river_retrieval_fragments": 57,
+    "seven_pool_complete_legal_state_rows": 0
+  },
+  "opportunity_corpus": {
+    "complete_denominator_verified": false,
+    "eligible_opportunities": [],
+    "eligible_training_count": 0,
+    "eligible_validation_count": 0,
+    "all_actual_opportunities_reviewed": false,
+    "later_revealed_strength_labels_usable": 0,
+    "missing_or_unverified": [
+      "stable_opponent_and_cross_session_identity",
+      "second_same_rule_gameplay_session",
+      "decision_time_board_and_actor_and_action_order",
+      "decision_time_pot_stacks_to_call_and_public_history",
+      "complete_legal_action_menu_and_amount_semantics",
+      "reviewed_room_rule_fingerprint_and_special_mode_exclusion",
+      "action_onset_predecision_evidence",
+      "all_opportunity_denominator_including_unmatched_and_unknown",
+      "provenance_bound_offline_only_revealed_strength_labels"
+    ]
+  },
+  "model_support": {
+    "player_specific": "INSUFFICIENT_DATA",
+    "population_or_archetype": "INSUFFICIENT_DATA",
+    "hand_strength_conditioned": "INSUFFICIENT_DATA"
+  },
+  "audit_status": "NO_EMPIRICAL_MODEL_FIT_PERMITTED",
+  "strategy_eligible": false,
+  "advice_emitted": false,
+  "real_hand_acceptance_pending": true,
+  "empirical_strategy": "NOT_ASSESSED"
+}
