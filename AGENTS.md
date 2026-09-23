@@ -33,6 +33,21 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+
+- **2026-09-23 RANGE_POSTERIOR_V1: REJECT for strategy decisions.** Isolated
+  `codex/range-posterior-v1` starts from merged main `af67b4b`. Prospective
+  synthetic challenge was committed first at `1c23d0b` (SHA256 `073676f6...`),
+  before candidate implementation or evaluation. The candidate filters a
+  manually bound pre-turn range by public turn action with fixed, unvalidated
+  3/4 versus 1/4 likelihoods; no production strategy path, perception or truth
+  semantics changed. Frozen BASELINE V1 check remains exact. On 54 paired
+  synthetic worlds, 7 EV gains, 14 losses, 33 ties, no blocks or fallback;
+  mean conditional delta -5.6824 chips, and overall log loss/Brier worsened.
+  Results digest `be72083a89ce1b8526ed30cae75bd1481a18c8bc893386f6e965f9e00411793e`.
+  See `docs/RANGE-POSTERIOR-V1.zh-CN.md`. The 54 worlds reuse baseline public
+  states and tiny manual combo support; no empirical calibration, real-hand
+  acceptance, live advice, GTO or profitability claim. Next step is audited
+  same-rule decision-point data, not another optimization target.
 - **2026-09-23 INDEPENDENT PR #34 EVALUATION GATE:** independently audited
   original head `4f59d723f20fab760b50c0f2de1ec88a5b9b1b8f` against exact main
   `d98084aba96eac6ff3bc0cf07dad99b00e36ff31`. Recompiled all six V1 books from

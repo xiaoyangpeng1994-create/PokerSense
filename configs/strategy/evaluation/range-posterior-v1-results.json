@@ -1,0 +1,3781 @@
+{
+  "advice_emitted": false,
+  "baseline_file_sha256": "3b9983b46c054a40499286467164c68e2e1ea7039df0a5c2470859ebd702eab4",
+  "baseline_result_sha256": "c1a725f3f95a76261fb041af200e45bae02b6836202b36ec56578f0afd680aae",
+  "candidate_id": "RANGE_POSTERIOR_V1",
+  "cases": [
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "-2381/349",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "2381/349",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "873f240eb4d935bc8d5b9d29bce7a60ec956696c1b4b52ae35c7b46d3eefbec7",
+      "candidate_ev_chips": "0",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "2d70c9364efdd65a67808dfbf9bb04de6f813a0070aef324c363e964eb96ce0c",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "fold",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/both_pressure/aligned",
+      "delta_ev_chips": "2381/349",
+      "group": "n6-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "96e56a4d92ac1fd88012d6566a645bd6d805ad50f501f963fbfed4c4fcbef0b8"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "543196/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "873f240eb4d935bc8d5b9d29bce7a60ec956696c1b4b52ae35c7b46d3eefbec7",
+      "candidate_ev_chips": "0",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "543196/15151",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "2d70c9364efdd65a67808dfbf9bb04de6f813a0070aef324c363e964eb96ce0c",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "fold",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/both_pressure/uninformative",
+      "delta_ev_chips": "-543196/15151",
+      "group": "n6-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "e69b99459b31285a25620cf396f2501858b4ebc9e3509cc6a5ce725de33ba148"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "5520668/62453",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4778436732/85123439",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "873f240eb4d935bc8d5b9d29bce7a60ec956696c1b4b52ae35c7b46d3eefbec7",
+      "candidate_ev_chips": "0",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "12303107216/85123439",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "2d70c9364efdd65a67808dfbf9bb04de6f813a0070aef324c363e964eb96ce0c",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "fold",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/both_pressure/inverted",
+      "delta_ev_chips": "-5520668/62453",
+      "group": "n6-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "1f75a6c267fa90b534534cc2152863dbd9fd220890cad7193e1e27cb669d08f2"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "865084/125989",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "97296df4466b19ab9e247492b9bbda821ed8de83212fb9fba50fe933e88bb9a3",
+      "candidate_ev_chips": "865084/125989",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "62068807df438cd7957a931b1ab48fc5798b8fd1a11a6b780b90815a13c5e5d7",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/split/aligned",
+      "delta_ev_chips": "0",
+      "group": "n6-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "79635baf603ac2da6b48d26a1a3a8012dc41269055d3072951748e407e93f2d1"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "543196/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "97296df4466b19ab9e247492b9bbda821ed8de83212fb9fba50fe933e88bb9a3",
+      "candidate_ev_chips": "543196/15151",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "62068807df438cd7957a931b1ab48fc5798b8fd1a11a6b780b90815a13c5e5d7",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/split/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n6-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "e69b99459b31285a25620cf396f2501858b4ebc9e3509cc6a5ce725de33ba148"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "5738/173",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "97296df4466b19ab9e247492b9bbda821ed8de83212fb9fba50fe933e88bb9a3",
+      "candidate_ev_chips": "5738/173",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "62068807df438cd7957a931b1ab48fc5798b8fd1a11a6b780b90815a13c5e5d7",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/split/inverted",
+      "delta_ev_chips": "0",
+      "group": "n6-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "3718ae86ab1ec40f7b1934b88748568e2b3d2c1717480f5f7c1531eebd362397"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "5520668/62453",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4778436732/85123439",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a07e73289eeeb894150424a2c4b236ebc394f1da1c242676cb15e683c9ac168c",
+      "candidate_ev_chips": "12303107216/85123439",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "a81d391636b8591a9b9564bb6ad462ced0aa35504fb5abceaf334dfd25f25d88",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/both_passive/aligned",
+      "delta_ev_chips": "4778436732/85123439",
+      "group": "n6-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "1f75a6c267fa90b534534cc2152863dbd9fd220890cad7193e1e27cb669d08f2"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "543196/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a07e73289eeeb894150424a2c4b236ebc394f1da1c242676cb15e683c9ac168c",
+      "candidate_ev_chips": "737057752/20650813",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "30444/189457",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "a81d391636b8591a9b9564bb6ad462ced0aa35504fb5abceaf334dfd25f25d88",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/both_passive/uninformative",
+      "delta_ev_chips": "-30444/189457",
+      "group": "n6-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "e69b99459b31285a25620cf396f2501858b4ebc9e3509cc6a5ce725de33ba148"
+    },
+    {
+      "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
+      "baseline_ev_chips": "-2381/349",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "2381/349",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a07e73289eeeb894150424a2c4b236ebc394f1da1c242676cb15e683c9ac168c",
+      "candidate_ev_chips": "-25070597/475687",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "25070597/475687",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "a81d391636b8591a9b9564bb6ad462ced0aa35504fb5abceaf334dfd25f25d88",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-facing_bet/both_passive/inverted",
+      "delta_ev_chips": "-21825294/475687",
+      "group": "n6-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "96e56a4d92ac1fd88012d6566a645bd6d805ad50f501f963fbfed4c4fcbef0b8"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "-3650881/133574",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "75385802832383/2077422992400",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a1facdcf677c3d366124642295ffda96f55fd91fedc88d976e5a1ca7655751b0",
+      "candidate_ev_chips": "123049/17150",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "3699873569519/2077422992400",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "50728bf2b56e615cb2321cab313cfa6b3150545abdadd304f181c5839fc1cae6",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/both_pressure/aligned",
+      "delta_ev_chips": "403309981/11687725",
+      "group": "n6-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f4ca12cc18fd2a02a8caed91925d99e893063f62a3b90835e18dbf1dd1f9326a"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "3545759/43616",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a1facdcf677c3d366124642295ffda96f55fd91fedc88d976e5a1ca7655751b0",
+      "candidate_ev_chips": "713593631/13686400",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "11572191601/396905600",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "50728bf2b56e615cb2321cab313cfa6b3150545abdadd304f181c5839fc1cae6",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/both_pressure/uninformative",
+      "delta_ev_chips": "-11572191601/396905600",
+      "group": "n6-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "54d1ab5588f157e7d2dffd3a2d22e7a98bc6e5600c2cd75e2a4e1c81d04945a8"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "37852552/230347",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a1facdcf677c3d366124642295ffda96f55fd91fedc88d976e5a1ca7655751b0",
+      "candidate_ev_chips": "12529356221/144562600",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "325565115991/4192315400",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "50728bf2b56e615cb2321cab313cfa6b3150545abdadd304f181c5839fc1cae6",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/both_pressure/inverted",
+      "delta_ev_chips": "-325565115991/4192315400",
+      "group": "n6-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "08558af41dfc83552c2940fa863b5a9bb38d753dc6e9f12b70ee909d415da0ca"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "4147438/124033",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "106254142431/91858839800",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "cc9d9fd79b8f7f990896c4bae9dbaa751ab696561d48f3b8a5e0617f9af44d18",
+      "candidate_ev_chips": "4147438/124033",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "106254142431/91858839800",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "04b80557e28a28ccae203f3bbe4ee3481f2443f9e82e86c36f11fa4c502d61bc",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/split/aligned",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "3df4912507d4527770736dcf02c91f12572cb424e882f5bd4926aa9828322e7d"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "3545759/43616",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "cc9d9fd79b8f7f990896c4bae9dbaa751ab696561d48f3b8a5e0617f9af44d18",
+      "candidate_ev_chips": "3545759/43616",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "04b80557e28a28ccae203f3bbe4ee3481f2443f9e82e86c36f11fa4c502d61bc",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/split/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "54d1ab5588f157e7d2dffd3a2d22e7a98bc6e5600c2cd75e2a4e1c81d04945a8"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "4147438/124033",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "429510293/161242900",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "cc9d9fd79b8f7f990896c4bae9dbaa751ab696561d48f3b8a5e0617f9af44d18",
+      "candidate_ev_chips": "4147438/124033",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "429510293/161242900",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "04b80557e28a28ccae203f3bbe4ee3481f2443f9e82e86c36f11fa4c502d61bc",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/split/inverted",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "b40455ad77565da0073c23a88cb9fe2dd9275bb8d69976f6179533b2d24cf061"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "37852552/230347",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "f20e1d6bd3fb892c48ff6a8c17420f130e4d31afde01f4a2f227d896129af9ec",
+      "candidate_ev_chips": "37852552/230347",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "90cb95497a2fcae0067223b7bb106d3d93a3ec3088b5b325b54e3f1faa26b7f4",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/both_passive/aligned",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "08558af41dfc83552c2940fa863b5a9bb38d753dc6e9f12b70ee909d415da0ca"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "3545759/43616",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "f20e1d6bd3fb892c48ff6a8c17420f130e4d31afde01f4a2f227d896129af9ec",
+      "candidate_ev_chips": "3545759/43616",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "90cb95497a2fcae0067223b7bb106d3d93a3ec3088b5b325b54e3f1faa26b7f4",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/both_passive/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "54d1ab5588f157e7d2dffd3a2d22e7a98bc6e5600c2cd75e2a4e1c81d04945a8"
+    },
+    {
+      "baseline_book_sha256": "0d042581a9cbfa83682027a99732c995c7416ba685598cd63539b56b225a1618",
+      "baseline_ev_chips": "-3650881/133574",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "75385802832383/2077422992400",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "f20e1d6bd3fb892c48ff6a8c17420f130e4d31afde01f4a2f227d896129af9ec",
+      "candidate_ev_chips": "-3650881/133574",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "75385802832383/2077422992400",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "90cb95497a2fcae0067223b7bb106d3d93a3ec3088b5b325b54e3f1faa26b7f4",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n6-unopened/both_passive/inverted",
+      "delta_ev_chips": "0",
+      "group": "n6-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f4ca12cc18fd2a02a8caed91925d99e893063f62a3b90835e18dbf1dd1f9326a"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "-2066/349",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "2066/349",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "407ab11f48ebb501d14fb338c579c4884b717144cf0f8237781ca6b895ac155b",
+      "candidate_ev_chips": "-2066/349",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "2066/349",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "36bb72b9ad84ad66fd560c84f3fc2e6bd3dd76aff727ea7846a63418c59b9cc6",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/both_pressure/aligned",
+      "delta_ev_chips": "0",
+      "group": "n7-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "6b39bf0b113eeddef18094f6565a7a22f924c68efd90776e087d3f004bf06ae8"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "601156/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "407ab11f48ebb501d14fb338c579c4884b717144cf0f8237781ca6b895ac155b",
+      "candidate_ev_chips": "601156/15151",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "36bb72b9ad84ad66fd560c84f3fc2e6bd3dd76aff727ea7846a63418c59b9cc6",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/both_pressure/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n7-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "32e671433352637ace42c856e85d962336582f2f479de4211374c0013a2ab2a2"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "5984348/62453",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4778436732/85123439",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "407ab11f48ebb501d14fb338c579c4884b717144cf0f8237781ca6b895ac155b",
+      "candidate_ev_chips": "5984348/62453",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "4778436732/85123439",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "36bb72b9ad84ad66fd560c84f3fc2e6bd3dd76aff727ea7846a63418c59b9cc6",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/both_pressure/inverted",
+      "delta_ev_chips": "0",
+      "group": "n7-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "17d40ccb0ef8fb8a1acef7f9067bdd0bc86246e2198a8abd5fce33a78dcdf632"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "1096924/125989",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "9138dd1fd4b3ba8c6e98ccb70cacc63b1a19cfa1d44def3c0260748fc4e13bf0",
+      "candidate_ev_chips": "1096924/125989",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "acb978c1d18a36d8eeed8f9a1b5b15d196aa269872d86ab13816638470a547db",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/split/aligned",
+      "delta_ev_chips": "0",
+      "group": "n7-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "6a86d05bdc307a93243606901e9d4677106a9f6d1a099ddbe1123dce7032d243"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "601156/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "9138dd1fd4b3ba8c6e98ccb70cacc63b1a19cfa1d44def3c0260748fc4e13bf0",
+      "candidate_ev_chips": "601156/15151",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "acb978c1d18a36d8eeed8f9a1b5b15d196aa269872d86ab13816638470a547db",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/split/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n7-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "32e671433352637ace42c856e85d962336582f2f479de4211374c0013a2ab2a2"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "6368/173",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "9138dd1fd4b3ba8c6e98ccb70cacc63b1a19cfa1d44def3c0260748fc4e13bf0",
+      "candidate_ev_chips": "6368/173",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "acb978c1d18a36d8eeed8f9a1b5b15d196aa269872d86ab13816638470a547db",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/split/inverted",
+      "delta_ev_chips": "0",
+      "group": "n7-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "02560e793ae3d70e9b0ea221357662e2ab204940382edee7f48b2b7eb1f2cabd"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "5984348/62453",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4778436732/85123439",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "9169664f231da44ae57d9b5c58801911b99f31e54eec19764b1c8c091471f4dd",
+      "candidate_ev_chips": "12935103056/85123439",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "cfaf783cdcb187d26d74b1e0c9a09b078b88e2d0c9b3d1571ac5b23ab2162d15",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/both_passive/aligned",
+      "delta_ev_chips": "4778436732/85123439",
+      "group": "n7-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "17d40ccb0ef8fb8a1acef7f9067bdd0bc86246e2198a8abd5fce33a78dcdf632"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "601156/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "9169664f231da44ae57d9b5c58801911b99f31e54eec19764b1c8c091471f4dd",
+      "candidate_ev_chips": "816057232/20650813",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "30444/189457",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "cfaf783cdcb187d26d74b1e0c9a09b078b88e2d0c9b3d1571ac5b23ab2162d15",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/both_passive/uninformative",
+      "delta_ev_chips": "-30444/189457",
+      "group": "n7-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "32e671433352637ace42c856e85d962336582f2f479de4211374c0013a2ab2a2"
+    },
+    {
+      "baseline_book_sha256": "6060d85471418b7702258d52a12c45da75e972b1c3898662402bd84d370fb76d",
+      "baseline_ev_chips": "-2066/349",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "2066/349",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "9169664f231da44ae57d9b5c58801911b99f31e54eec19764b1c8c091471f4dd",
+      "candidate_ev_chips": "-24641252/475687",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "24641252/475687",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "cfaf783cdcb187d26d74b1e0c9a09b078b88e2d0c9b3d1571ac5b23ab2162d15",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-facing_bet/both_passive/inverted",
+      "delta_ev_chips": "-21825294/475687",
+      "group": "n7-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "6b39bf0b113eeddef18094f6565a7a22f924c68efd90776e087d3f004bf06ae8"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "-1702973/66787",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "240937485878477/6751624725300",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a45751f7c782ed0c83d8f7ef4cb169e8e028129ddbe629f98afffe34de949ef0",
+      "candidate_ev_chips": "46487164/5239325",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "8875304694161/6751624725300",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "09c2506dfd3a24e09c9c55959a5fa85842acad98944e4ba1be8643e98e580668",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/both_pressure/aligned",
+      "delta_ev_chips": "5222391331/151940425",
+      "group": "n7-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "04a2b0b04bd3b13135f81341ef5abca8a594dfaec678ecb0b6b106050bb1c2aa"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "1895347/21808",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a45751f7c782ed0c83d8f7ef4cb169e8e028129ddbe629f98afffe34de949ef0",
+      "candidate_ev_chips": "784759187/13686400",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "11737298977/396905600",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "09c2506dfd3a24e09c9c55959a5fa85842acad98944e4ba1be8643e98e580668",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/both_pressure/uninformative",
+      "delta_ev_chips": "-11737298977/396905600",
+      "group": "n7-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "93f5598b9ed5ed71972ff2252d4b6a75d64751b78f10f1d7a32431429f26398e"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "3062464/17719",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "a45751f7c782ed0c83d8f7ef4cb169e8e028129ddbe629f98afffe34de949ef0",
+      "candidate_ev_chips": "1051385009/11120200",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "25246679539/322485800",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "09c2506dfd3a24e09c9c55959a5fa85842acad98944e4ba1be8643e98e580668",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/both_pressure/inverted",
+      "delta_ev_chips": "-25246679539/322485800",
+      "group": "n7-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "a1528eb4d8e1a51c18a0bdc627baf35f85cc1d1e74800ffce31bcc4832f5da74"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "356716/9541",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "339545111289/643011878600",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "c5077a4eed726cd75848238410cc6a03a5d9ad7651ef65bf5e6c489aac994e7f",
+      "candidate_ev_chips": "356716/9541",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "339545111289/643011878600",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "c36e1736f0acce649b73b55edd16ed56162b8d8a52f364c18a57a4c00ddaca38",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/split/aligned",
+      "delta_ev_chips": "0",
+      "group": "n7-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "5d646c573878f70518414c9514fb0159fd311157aca11e1fa9a0ba18ea822564"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "1895347/21808",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "c5077a4eed726cd75848238410cc6a03a5d9ad7651ef65bf5e6c489aac994e7f",
+      "candidate_ev_chips": "1895347/21808",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "c36e1736f0acce649b73b55edd16ed56162b8d8a52f364c18a57a4c00ddaca38",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/split/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n7-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "93f5598b9ed5ed71972ff2252d4b6a75d64751b78f10f1d7a32431429f26398e"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "356716/9541",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "415825973/161242900",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "c5077a4eed726cd75848238410cc6a03a5d9ad7651ef65bf5e6c489aac994e7f",
+      "candidate_ev_chips": "356716/9541",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "415825973/161242900",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "c36e1736f0acce649b73b55edd16ed56162b8d8a52f364c18a57a4c00ddaca38",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/split/inverted",
+      "delta_ev_chips": "0",
+      "group": "n7-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "7f9d1a86f194cf391c80e8e9625a47bc37eb3df7d346489d4d748a4dd741bd39"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "3062464/17719",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "95a5c32fe000b68bc9693a903fb288a4c62fb0c4135c3a15d954346a95f22b08",
+      "candidate_ev_chips": "3062464/17719",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "0358ecf450a26d470c0e8a67de9e8607c28ba1670275ae5b4d924d95c34061e9",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/both_passive/aligned",
+      "delta_ev_chips": "0",
+      "group": "n7-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "a1528eb4d8e1a51c18a0bdc627baf35f85cc1d1e74800ffce31bcc4832f5da74"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "1895347/21808",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "95a5c32fe000b68bc9693a903fb288a4c62fb0c4135c3a15d954346a95f22b08",
+      "candidate_ev_chips": "1895347/21808",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "0358ecf450a26d470c0e8a67de9e8607c28ba1670275ae5b4d924d95c34061e9",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/both_passive/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n7-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "93f5598b9ed5ed71972ff2252d4b6a75d64751b78f10f1d7a32431429f26398e"
+    },
+    {
+      "baseline_book_sha256": "7998863781829777ea8c8c9eae2aabdde232ccafd75fd244d27c18f358495e90",
+      "baseline_ev_chips": "-1702973/66787",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "240937485878477/6751624725300",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "95a5c32fe000b68bc9693a903fb288a4c62fb0c4135c3a15d954346a95f22b08",
+      "candidate_ev_chips": "-1702973/66787",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "240937485878477/6751624725300",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "0358ecf450a26d470c0e8a67de9e8607c28ba1670275ae5b4d924d95c34061e9",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n7-unopened/both_passive/inverted",
+      "delta_ev_chips": "0",
+      "group": "n7-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "04a2b0b04bd3b13135f81341ef5abca8a594dfaec678ecb0b6b106050bb1c2aa"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "-1751/349",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "1751/349",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "1880313ccc29c13c634f6b1b34e8a544543ac6fcd3415f339c565ce3df635ee4",
+      "candidate_ev_chips": "-1751/349",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "1751/349",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "f35ba4b35f436931f9e99402202f933d4f9b7f26909090bc439f8db98a14a206",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/both_pressure/aligned",
+      "delta_ev_chips": "0",
+      "group": "n8-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "105de902523855a16005f8f2e487714abadd996e16594d89e36685c65099b178"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "659116/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "1880313ccc29c13c634f6b1b34e8a544543ac6fcd3415f339c565ce3df635ee4",
+      "candidate_ev_chips": "659116/15151",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "f35ba4b35f436931f9e99402202f933d4f9b7f26909090bc439f8db98a14a206",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/both_pressure/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n8-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "bddaa2aec4af3763e7cfdd0c07a68fbcdbe1602361a702f9fc27df7866b0d358"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "6448028/62453",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4778436732/85123439",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "1880313ccc29c13c634f6b1b34e8a544543ac6fcd3415f339c565ce3df635ee4",
+      "candidate_ev_chips": "6448028/62453",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "4778436732/85123439",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "f35ba4b35f436931f9e99402202f933d4f9b7f26909090bc439f8db98a14a206",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/both_pressure/inverted",
+      "delta_ev_chips": "0",
+      "group": "n8-facing_bet",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f625fcbc8d8181b681593c965d4881f4dd3acc3f8e01828f430cef8a0e42087a"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "1328764/125989",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "e921f530ed294552d774504341602ce6b6587a2d1c8229d864bd66fe7fa47cbd",
+      "candidate_ev_chips": "1328764/125989",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "8aa7eead48d5753423da4463d8c3cd46d65c76399fb36a202b6c5df13975eea5",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/split/aligned",
+      "delta_ev_chips": "0",
+      "group": "n8-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "6313a930d7b517966277b14e677b326987c818ac04ea87bd0e4107fccc0540bc"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "659116/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "e921f530ed294552d774504341602ce6b6587a2d1c8229d864bd66fe7fa47cbd",
+      "candidate_ev_chips": "659116/15151",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "8aa7eead48d5753423da4463d8c3cd46d65c76399fb36a202b6c5df13975eea5",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/split/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n8-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "bddaa2aec4af3763e7cfdd0c07a68fbcdbe1602361a702f9fc27df7866b0d358"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "6998/173",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "e921f530ed294552d774504341602ce6b6587a2d1c8229d864bd66fe7fa47cbd",
+      "candidate_ev_chips": "6998/173",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 6,
+      "candidate_observations_sha256": "8aa7eead48d5753423da4463d8c3cd46d65c76399fb36a202b6c5df13975eea5",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/split/inverted",
+      "delta_ev_chips": "0",
+      "group": "n8-facing_bet",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "59351823a8dd25214c014a7abe99d13a349cfef478003a4e7e4ce695e8ba2d87"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "6448028/62453",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "4778436732/85123439",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "61b5258b222fddced1d85951699f47a934ddcf842eadf2e3b87a68899485cf40",
+      "candidate_ev_chips": "13567098896/85123439",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "ee88140e2558e450de4807c97d61cb88c76eb10ec5433965b0dee287482236c4",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/both_passive/aligned",
+      "delta_ev_chips": "4778436732/85123439",
+      "group": "n8-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f625fcbc8d8181b681593c965d4881f4dd3acc3f8e01828f430cef8a0e42087a"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "659116/15151",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "61b5258b222fddced1d85951699f47a934ddcf842eadf2e3b87a68899485cf40",
+      "candidate_ev_chips": "895056712/20650813",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "30444/189457",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "ee88140e2558e450de4807c97d61cb88c76eb10ec5433965b0dee287482236c4",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/both_passive/uninformative",
+      "delta_ev_chips": "-30444/189457",
+      "group": "n8-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "bddaa2aec4af3763e7cfdd0c07a68fbcdbe1602361a702f9fc27df7866b0d358"
+    },
+    {
+      "baseline_book_sha256": "3dfb0b9747c39a14d0c3e6795dbe6ce85fc186aff272fbd96b56f9b67e68b92d",
+      "baseline_ev_chips": "-1751/349",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "1751/349",
+      "baseline_nodes": 6,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "call",
+        "target": "0"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "61b5258b222fddced1d85951699f47a934ddcf842eadf2e3b87a68899485cf40",
+      "candidate_ev_chips": "-24211907/475687",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "24211907/475687",
+      "candidate_nodes": 12,
+      "candidate_observations_sha256": "ee88140e2558e450de4807c97d61cb88c76eb10ec5433965b0dee287482236c4",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "raise",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-facing_bet/both_passive/inverted",
+      "delta_ev_chips": "-21825294/475687",
+      "group": "n8-facing_bet",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "105de902523855a16005f8f2e487714abadd996e16594d89e36685c65099b178"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "-451573/19082",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "59231041476701/1687906181325",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "7948573d630053de6be822ec030808d41e396dcf493522e26543fbabc3e03269",
+      "candidate_ev_chips": "11168747/1047865",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "2592583953007/3375812362650",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "565214025c59bb27e98a19c4029407ed3f1e19989e280edeadd1ea2ea9c37300",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/both_pressure/aligned",
+      "delta_ev_chips": "2086047331/60776170",
+      "group": "n8-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f1e18cd7600c41a5b494de909e64934685d3eb3029d3844da870e14f6969a996"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "4035629/43616",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "7948573d630053de6be822ec030808d41e396dcf493522e26543fbabc3e03269",
+      "candidate_ev_chips": "171922351/2737280",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "2359096601/79381120",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "565214025c59bb27e98a19c4029407ed3f1e19989e280edeadd1ea2ea9c37300",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/both_pressure/uninformative",
+      "delta_ev_chips": "-2359096601/79381120",
+      "group": "n8-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f2a39008e380c89f335edd579e0d83dc6e7d6245209b03f282daef9ae93755c4"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "41771512/230347",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "7948573d630053de6be822ec030808d41e396dcf493522e26543fbabc3e03269",
+      "candidate_ev_chips": "2973129241/28912520",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "65827555691/838463080",
+      "candidate_nodes": 283,
+      "candidate_observations_sha256": "565214025c59bb27e98a19c4029407ed3f1e19989e280edeadd1ea2ea9c37300",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "10"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/both_pressure/inverted",
+      "delta_ev_chips": "-65827555691/838463080",
+      "group": "n8-unopened",
+      "pattern": "both_pressure",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "a8593b9ce4518ce7ec834bd445b4de69b4562de7730b6b93a0e7fabdc8492392"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "732454/17719",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "9994856/35349405",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "1c6e5bc13c0e2c85c9a477088161e395ed7f127f546a6a3f2f06d3c7b1b26178",
+      "candidate_ev_chips": "732454/17719",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "9994856/35349405",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "9222df81b8d205d703c726696ade1065f7dc9a32338f794a4586315a1dd54a83",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/split/aligned",
+      "delta_ev_chips": "0",
+      "group": "n8-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.071428571,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "7191fa0d3786c0bcdbeefd8677040beadd634263f0d18c3ccd526125e9e088ec"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "4035629/43616",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "1c6e5bc13c0e2c85c9a477088161e395ed7f127f546a6a3f2f06d3c7b1b26178",
+      "candidate_ev_chips": "4035629/43616",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "9222df81b8d205d703c726696ade1065f7dc9a32338f794a4586315a1dd54a83",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/split/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n8-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.25,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f2a39008e380c89f335edd579e0d83dc6e7d6245209b03f282daef9ae93755c4"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "732454/17719",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "572041/222404",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "1c6e5bc13c0e2c85c9a477088161e395ed7f127f546a6a3f2f06d3c7b1b26178",
+      "candidate_ev_chips": "732454/17719",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "572041/222404",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "9222df81b8d205d703c726696ade1065f7dc9a32338f794a4586315a1dd54a83",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/split/inverted",
+      "delta_ev_chips": "0",
+      "group": "n8-unopened",
+      "pattern": "split",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.5,
+            "log_loss": 0.693147181,
+            "strong_calibration_absolute_error": 0.423076923,
+            "strong_probability": "1/2"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "713a58d90393f8d2809d4018a6ebc04a7691513024fcef90058d6694feb8cc0b"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "41771512/230347",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "d06800ae60855ed41505695637159dcc69f9c7452bc28c8efc5acea0bb08b438",
+      "candidate_ev_chips": "41771512/230347",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "621bcb3651c56de06ff6285608b6e948efc6f0664aee837cdef19ce9355e626c",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/both_passive/aligned",
+      "delta_ev_chips": "0",
+      "group": "n8-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.201923077,
+            "log_loss": 0.37219071,
+            "strong_calibration_absolute_error": 0.173076923,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.143076923,
+            "log_loss": 0.274377791,
+            "strong_calibration_absolute_error": 0.023076923,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/13"
+        }
+      },
+      "truth_regime": "aligned",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "a8593b9ce4518ce7ec834bd445b4de69b4562de7730b6b93a0e7fabdc8492392"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "4035629/43616",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "0",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "d06800ae60855ed41505695637159dcc69f9c7452bc28c8efc5acea0bb08b438",
+      "candidate_ev_chips": "4035629/43616",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "0",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "621bcb3651c56de06ff6285608b6e948efc6f0664aee837cdef19ce9355e626c",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/both_passive/uninformative",
+      "delta_ev_chips": "0",
+      "group": "n8-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.375,
+            "log_loss": 0.562335145,
+            "strong_calibration_absolute_error": 0.0,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.42,
+            "log_loss": 0.65466666,
+            "strong_calibration_absolute_error": 0.15,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "1/4"
+        }
+      },
+      "truth_regime": "uninformative",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f2a39008e380c89f335edd579e0d83dc6e7d6245209b03f282daef9ae93755c4"
+    },
+    {
+      "baseline_book_sha256": "6209491d684845db941753bc926c25975325c977b1ba82679a5545de5aaf69cf",
+      "baseline_ev_chips": "-451573/19082",
+      "baseline_fallback_probability": "0",
+      "baseline_model_knowledge_regret_chips": "59231041476701/1687906181325",
+      "baseline_nodes": 232,
+      "baseline_reasons": [],
+      "baseline_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "baseline_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "candidate_book_sha256": "d06800ae60855ed41505695637159dcc69f9c7452bc28c8efc5acea0bb08b438",
+      "candidate_ev_chips": "-451573/19082",
+      "candidate_fallback_probability": "0",
+      "candidate_model_knowledge_regret_chips": "59231041476701/1687906181325",
+      "candidate_nodes": 232,
+      "candidate_observations_sha256": "621bcb3651c56de06ff6285608b6e948efc6f0664aee837cdef19ce9355e626c",
+      "candidate_prior_sha256": "7e62c2c7a7846bb8360bdcd210072bc67f9809ac54e9d57ba9e2aa90a9c62fb6",
+      "candidate_profile_sha256": "4fef38c52b5dd849f7712611179cf12909d2bc0e83e87797f175456e32212125",
+      "candidate_reasons": [],
+      "candidate_root_action": {
+        "actor": 0,
+        "kind": "bet",
+        "target": "80"
+      },
+      "candidate_status": "COMPLETE_CONDITIONAL_FIXED_POLICY",
+      "case_id": "n8-unopened/both_passive/inverted",
+      "delta_ev_chips": "0",
+      "group": "n8-unopened",
+      "pattern": "both_passive",
+      "seat_scores": {
+        "1": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        },
+        "2": {
+          "baseline": {
+            "brier": 0.696428571,
+            "log_loss": 0.915460523,
+            "strong_calibration_absolute_error": 0.321428571,
+            "strong_probability": "1/4"
+          },
+          "candidate": {
+            "brier": 0.934285714,
+            "log_loss": 1.360917417,
+            "strong_calibration_absolute_error": 0.471428571,
+            "strong_probability": "1/10"
+          },
+          "truth_strong_probability": "4/7"
+        }
+      },
+      "truth_regime": "inverted",
+      "world_replan_status": "COMPLETE_CONDITIONAL_ABSTRACTION",
+      "world_sha256": "f1e18cd7600c41a5b494de909e64934685d3eb3029d3844da870e14f6969a996"
+    }
+  ],
+  "challenge_commit": "1c23d0b50e008910c02ef1f9f1ab34a576d4ca2d",
+  "challenge_sha256": "073676f61d9f230c060ba0de4f147cb6f7a80387a86cb670acf9f12605f99904",
+  "deterministic_sha256": "be72083a89ce1b8526ed30cae75bd1481a18c8bc893386f6e965f9e00411793e",
+  "prior_binding": {
+    "source_kind": "manual_synthetic",
+    "source_sha256": "f5da405da85d207c49df6478d277cebe93586b02457402ad152d601b467f321c",
+    "stage": "before_turn_observation"
+  },
+  "profile": {
+    "p_pressure_strong": "3/4",
+    "p_pressure_weak": "1/4",
+    "source_kind": "manual_unvalidated",
+    "source_sha256": "20eb95b0f43f36fd8c49782ab21b7bc07a01975b0b876d1e2ca172c54bc7cb46"
+  },
+  "qualification": "prospective synthetic stress on baseline public conditions and combo support; no real calibration or independent opponent population",
+  "real_hand_acceptance_pending": true,
+  "schema_version": 1,
+  "strategy_eligible": false,
+  "summary": {
+    "blocked_count": 0,
+    "by_regime": {
+      "aligned": {
+        "baseline_brier": 0.449175824,
+        "baseline_log_loss": 0.643825617,
+        "baseline_model_knowledge_regret_chips": "34752895031415449597263/2119090570851415019040",
+        "baseline_strong_calibration_error": 0.247252747,
+        "candidate_brier": 0.321538462,
+        "candidate_log_loss": 0.483762486,
+        "candidate_model_knowledge_regret_chips": "230985720775247593/247957053526879200",
+        "candidate_strong_calibration_error": 0.047252747,
+        "case_count": 18,
+        "mean_delta_chips": "1844160414108269681/119221496694764100",
+        "negative": 0,
+        "positive": 7
+      },
+      "inverted": {
+        "baseline_brier": 0.449175824,
+        "baseline_log_loss": 0.643825617,
+        "baseline_model_knowledge_regret_chips": "767894171598282932333437/45913629035113992079200",
+        "baseline_strong_calibration_error": 0.247252747,
+        "candidate_brier": 0.717142857,
+        "candidate_log_loss": 1.027032299,
+        "candidate_model_knowledge_regret_chips": "561169720574291051327963/13263937276810708822880",
+        "candidate_strong_calibration_error": 0.447252747,
+        "case_count": 18,
+        "mean_delta_chips": "-42078439420506867541/1644770036033888400",
+        "negative": 7,
+        "positive": 0
+      },
+      "uninformative": {
+        "baseline_brier": 0.375,
+        "baseline_log_loss": 0.562335145,
+        "baseline_model_knowledge_regret_chips": "0",
+        "baseline_strong_calibration_error": 0.0,
+        "candidate_brier": 0.46,
+        "candidate_log_loss": 0.67390692,
+        "candidate_model_knowledge_regret_chips": "750371939799233/108243301420800",
+        "candidate_strong_calibration_error": 0.2,
+        "case_count": 18,
+        "mean_delta_chips": "-750371939799233/108243301420800",
+        "negative": 7,
+        "positive": 0
+      }
+    },
+    "equal_delta_count": 33,
+    "mean_delta_chips": "-111017535276297278899459843/19537210079704363428345600",
+    "negative_case_ids": [
+      "n6-facing_bet/both_pressure/uninformative",
+      "n6-facing_bet/both_pressure/inverted",
+      "n6-facing_bet/both_passive/uninformative",
+      "n6-facing_bet/both_passive/inverted",
+      "n6-unopened/both_pressure/uninformative",
+      "n6-unopened/both_pressure/inverted",
+      "n7-facing_bet/both_passive/uninformative",
+      "n7-facing_bet/both_passive/inverted",
+      "n7-unopened/both_pressure/uninformative",
+      "n7-unopened/both_pressure/inverted",
+      "n8-facing_bet/both_passive/uninformative",
+      "n8-facing_bet/both_passive/inverted",
+      "n8-unopened/both_pressure/uninformative",
+      "n8-unopened/both_pressure/inverted"
+    ],
+    "negative_delta_count": 14,
+    "paired_count": 54,
+    "positive_delta_count": 7,
+    "root_disagreement_count": 21,
+    "scores": {
+      "baseline_brier": 0.424450549,
+      "baseline_log_loss": 0.616662126,
+      "baseline_model_knowledge_regret_chips": "2281310345918426510411203/206611330658012964356400",
+      "baseline_strong_calibration_error": 0.164835165,
+      "candidate_brier": 0.49956044,
+      "candidate_log_loss": 0.728233902,
+      "candidate_model_knowledge_regret_chips": "6240241302443126685503866253/373132722250032848124053760",
+      "candidate_strong_calibration_error": 0.231501831,
+      "case_count": 54,
+      "mean_delta_chips": "-111017535276297278899459843/19537210079704363428345600"
+    },
+    "worst_delta_chips": "-5520668/62453",
+    "zero_fallback_cases": 54
+  }
+}
