@@ -3,6 +3,7 @@
   "baseline_file_sha256": "3b9983b46c054a40499286467164c68e2e1ea7039df0a5c2470859ebd702eab4",
   "baseline_result_sha256": "c1a725f3f95a76261fb041af200e45bae02b6836202b36ec56578f0afd680aae",
   "candidate_id": "RANGE_POSTERIOR_V1",
+  "candidate_source_sha256": "ed54b9cd84d6694b7427e7b9db4722b22dd73f065945ecba781a0dc8e48cb5bf",
   "cases": [
     {
       "baseline_book_sha256": "894e50bc57a8505fe3bfcd9e225106ec78c8ea3d4b07930f8f2ac9d97b10ef49",
@@ -3679,7 +3680,7 @@
   ],
   "challenge_commit": "1c23d0b50e008910c02ef1f9f1ab34a576d4ca2d",
   "challenge_sha256": "073676f61d9f230c060ba0de4f147cb6f7a80387a86cb670acf9f12605f99904",
-  "deterministic_sha256": "be72083a89ce1b8526ed30cae75bd1481a18c8bc893386f6e965f9e00411793e",
+  "deterministic_sha256": "af9239c750e08db3643bdf80139d35ca162d01fe08400fc54cc6507ff1137820",
   "prior_binding": {
     "source_kind": "manual_synthetic",
     "source_sha256": "f5da405da85d207c49df6478d277cebe93586b02457402ad152d601b467f321c",

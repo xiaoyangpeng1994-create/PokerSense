@@ -53,6 +53,12 @@ class RangePosterior:
     strategy_eligible: bool = False
     advice_emitted: bool = False
 
+    def __post_init__(self):
+        if (self.status != "SHADOW_ONLY_MANUAL_LIKELIHOOD"
+                or self.strategy_eligible is not False
+                or self.advice_emitted is not False):
+            raise ValueError("range_posterior_cannot_authorize_strategy_or_advice")
+
 
 def _sha(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"),

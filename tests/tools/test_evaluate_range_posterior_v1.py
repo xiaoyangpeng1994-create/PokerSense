@@ -3,9 +3,9 @@
 from pathlib import Path
 
 from tools.evaluate_range_posterior_v1 import (
-    CHALLENGE, CHALLENGE_SHA256, run_challenge,
+    CHALLENGE, CHALLENGE_SHA256, RESULT, run_challenge,
 )
-from tools.strategy_evaluation_v1 import digest
+from tools.strategy_evaluation_v1 import digest, read_json
 
 
 def test_precommitted_challenge_replays_every_world():
@@ -29,3 +29,9 @@ def test_precommitted_challenge_replays_every_world():
     assert report["summary"]["negative_delta_count"] > 0
     assert report["strategy_eligible"] is False
     assert report["advice_emitted"] is False
+    published = read_json(RESULT)
+    assert published["candidate_source_sha256"] == digest(Path(
+        "src/poker_engine/strategy/range_posterior_v1.py").read_bytes())
+    assert published["summary"]["paired_count"] == report["summary"]["paired_count"]
+    assert published["summary"]["negative_case_ids"] == report[
+        "summary"]["negative_case_ids"]

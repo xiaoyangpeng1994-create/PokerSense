@@ -8,7 +8,7 @@ import pytest
 
 from poker_engine.strategy.range_posterior_v1 import (
     ActionLikelihoodProfile, PreActionRangeBinding, PublicTurnObservation,
-    posterior_ranges,
+    RangePosterior, posterior_ranges,
 )
 from tools.strategy_evaluation_v1 import (
     DEFAULT_INPUT, DEFAULT_PROTOCOL, planning_scenarios,
@@ -102,3 +102,13 @@ def test_public_observation_variation_changes_posterior_not_hidden_input():
     assert pressure.observations_sha256 != passive.observations_sha256
     with pytest.raises(TypeError):
         PublicTurnObservation(**{**observations[0].__dict__, "showdown_cards": "JhJd"})
+
+
+def test_posterior_payload_cannot_be_promoted_to_advice():
+    plan, observations, profile, binding = _inputs()
+    result = posterior_ranges(plan, observations, profile, prior_binding=binding)
+    assert isinstance(result, RangePosterior)
+    with pytest.raises(ValueError, match="cannot_authorize"):
+        replace(result, strategy_eligible=True)
+    with pytest.raises(ValueError, match="cannot_authorize"):
+        replace(result, advice_emitted=True)

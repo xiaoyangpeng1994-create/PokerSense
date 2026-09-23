@@ -262,6 +262,8 @@ def run_challenge(path=CHALLENGE):
                    for name in (
                        "aligned", "uninformative", "inverted")}}
     stable = {"schema_version": 1, "candidate_id": "RANGE_POSTERIOR_V1",
+              "candidate_source_sha256": digest(Path(
+                  "src/poker_engine/strategy/range_posterior_v1.py").read_bytes()),
               "challenge_sha256": CHALLENGE_SHA256,
               "challenge_commit": "1c23d0b50e008910c02ef1f9f1ab34a576d4ca2d",
               "baseline_file_sha256": challenge["baseline_file_sha256"],
