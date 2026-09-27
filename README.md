@@ -1,5 +1,22 @@
 # PokerSense
 
+The current increment is **AA engineering preview 0.2.0.dev1**. Windows packaging
+now uses the dedicated AA entry; `launch/aa/START-AA.cmd` opens its local offline UI.
+It adds ten-second turn deadline primitives, stale-result rejection, a killable
+preloaded shadow policy process, and a 6/7/8-player full-hand simulation, bounded
+MCCFR trainer and paired evaluator. **Live action advice remains disabled:** there
+is no validated production turn-time source or qualified policy asset. Physical
+end-to-end latency and empirical strategy strength remain unverified. Capture and
+model APIs are off by default; private recognition models remain external.
+See the [implementation and acceptance checklist](docs/AA-TEN-SECOND-IMPLEMENTATION.zh-CN.md),
+including the corrected attribution of this increment's short training probe.
+The original 378 failures were adapter binding errors, not measured coverage
+misses. An actual rerun after repairing the salt contract separately confirmed
+unknown information sets; see the [correction](docs/AA-EVALUATION-CORRECTION-V1.zh-CN.md).
+The [bounded study command](docs/AA-SELF-PLAY-STUDY.zh-CN.md) freezes and executes
+all nine player-count/seed configurations, retaining failures without automatic
+tuning, best-seed selection, paid calls, or live promotion.
+
 ## AA eight-seat development monitor
 
 Critical board, participation, ALL-IN and river-first-actor candidates now carry
@@ -103,9 +120,11 @@ outside Git and packages.
 
 ## Release status
 
-The published v0.1.11 installers still use the legacy H5 path and do not contain
-the current physical capture-card work. A new installer requires capture-card
-hardware acceptance and Windows packaging checks.
+The canonical repository has no accepted new Release. Historical v0.1.11 generic
+installers do not represent the current AA product. The 0.2.0.dev1 Windows preview
+uses the AA entry and requires the complete `PokerSense-AA` folder. Installer,
+hardware, physical latency and strategy qualification are separate acceptance
+steps; an offline EXE smoke check does not establish live readiness.
 
 ## Emulator source disabled
 
