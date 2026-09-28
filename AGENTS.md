@@ -33,6 +33,22 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-09-28 PREFLOP SUPPORT AUDIT COMPLETE: engineering PASS, support incomplete.**
+  Source4ca7bc0,manifest6f72bbdd; V2/MCCFR/nine assets unchanged. One supervised
+  batch107.621s completed63shards/10647slots/31941asset rows:2833HIT,3042NA,
+  23204UNVISITED,1990zero-regret-only,872nonzero-regret-only;0errors/notrun.
+  28899constructible rows9.80%HIT; after within-asset key dedup2229/27378=8.14%.
+  Fixed limp-then-minraise response prefix9126constructible rows allUNVISITED;
+  not a claim about every second decision. Original95o/8visit witness confirmed.
+  Regret membership is not learning/average export; old traverser roles UNKNOWN.
+  Independent raw result audit PASS;27input artifact hashes unchanged, old
+  primary retained. Fixed default physical geometry/169classes/3prefixes only,
+  not full-hand acceptance, natural frequency, profitability or live readiness.
+  FakeHIT/observation/NA/metadata/failed-nonuniform attacks rejected;30newtests,
+  84encoder/policy/MCCFR regressions and full lint pass. No fitting, capture,
+  paid API, package or live change. Next only: sampling coverage and correct
+  average weighting on enumerable small games before changing collection.
+  Results/commands:docs/AA-PREFLOP-SUPPORT-AUDIT-20260928.zh-CN.md.
 - **2026-09-28 LOCAL FULL-HAND CLOSEOUT: NO_GO, budget complete / samples PARTIAL.**
   Experiment source2dfe5a5, DraftPR41 over PR40; manifest27f20f7c. Both fixed
   Mapika models fail public-only decision checks (0.8b6/9,2b3/9); 2b folds all
