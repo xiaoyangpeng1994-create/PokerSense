@@ -1,5 +1,8 @@
 # PokerSense
 
+Read the [deduplicated work report and ChatGPT review brief](docs/reports/POKERSENSE-WORK-REPORT-20260928.zh-CN.md)
+for the complete capability inventory, fixed PR versions, experiment outcomes and evidence limits.
+
 The [finite V2 preflop support audit](docs/AA-PREFLOP-SUPPORT-AUDIT-20260928.zh-CN.md)
 completed all 31,941 asset checks without fitting or changing the nine policies.
 Only 2,833/28,899 constructible checks hit an exported average policy; most gaps
@@ -198,6 +201,15 @@ explicit local archive supplied by the operator.
 ## Development
 
 Python 3.11–3.13 is supported.
+
+On Windows, `launch/aa/START-AA.cmd` uses this checkout's `.venv` first,
+then a supported system Python (including a 3.12-only installation). Source
+checkouts take precedence over old EXEs; the console shows the selected path
+and dependency errors. See the [AA launcher setup](launch/aa/README.zh-CN.md).
+
+Frozen V1/V2 research loaders and the shadow worker share strict probability
+validation. Invalid distributions are refused without repair; see the
+[probability contract](docs/AA-POLICY-READINESS-V2.zh-CN.md#冻结概率验证合同).
 
 ```bash
 # Install development dependencies

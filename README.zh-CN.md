@@ -1,5 +1,8 @@
 # PokerSense
 
+完整进度与审核入口：[去重工作总汇报（含ChatGPT审核提纲）](docs/reports/POKERSENSE-WORK-REPORT-20260928.zh-CN.md)。
+能力清单、固定PR版本、实验结论和证据边界集中列示。
+
 已完成[V2有限翻前支持集审计](docs/AA-PREFLOP-SUPPORT-AUDIT-20260928.zh-CN.md)：
 31,941条资产检查全部保留，28,899条可构造决策中仅2,833条命中平均策略。
 多数缺口从未访问；regret表存在但全零、发生非零更新但未导出的情况分别报告。
@@ -146,6 +149,13 @@ PR 或安装包。真实标定原图同样属于私有离线数据，只保留�
 ## 开发
 
 支持 Python 3.11–3.13。
+
+Windows 的 `launch/aa/START-AA.cmd` 优先使用当前 checkout 的 `.venv`，然后
+选择受支持的系统 Python（只有 3.12 也可启动）。源码优先于旧 EXE，控制台显示
+实际路径和依赖缺失错误。最简准备见 [AA 启动说明](launch/aa/README.zh-CN.md)。
+
+V1/V2 冻结研究工件与影子 worker 共用严格概率校验，非法分布直接拒绝、不自动
+修复。兼容性与边缘行为见 [概率合同](docs/AA-POLICY-READINESS-V2.zh-CN.md#冻结概率验证合同)。
 
 ```bash
 # 安装开发依赖

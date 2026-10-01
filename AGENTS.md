@@ -33,6 +33,118 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-10-01 CI PYTEST OBSERVABILITY:** original local1dec0580/af267066
+  retained; integrated on8bd45e9e with PR49 menu guard. Version unchanged.
+  CI uses -v/-ra to offset configured -q and report
+  collection/summary/skip reasons; builtin JUnit paths separate OS, phase,
+  run and attempt. Checkout SHA, event SHA, PR head, runtime, configured scope
+  and step outcomes are recorded without an environment/context dump.
+  Existing test gates, matrix, dependencies, timeouts and permissions retained.
+  New-base Python3.12.14/pytest9.1.1:8static groups,9synthetic pytest processes with
+  20declared fixture items,2metadata groups;19verification groups PASS.
+  Expected failures/errors/signals retained; original incorrect SIGINT XML
+  expectation corrected against retained output without rerunning passed work.
+  Interrupted JUnit can contain a nameless unfinished case or be absent;
+  XML alone is not completion evidence. Owner excludes artifact upload;
+  the original proposed patch stays outside this batch. Runner-local reports
+  lack post-run retention; normal Actions logs retain console/status evidence.
+  Product full suite, Python3.11/Windows/macOS/PowerShell and GitHub execution
+  NOT_RUN locally; new-head PR CI and actual checkout identities are tracked
+  separately. No production/default/global settings, new dependencies or
+  user docs; no new action, upload, permission expansion or merge.
+- **2026-10-01 PENDING INFOSET MENU GUARD:** scoped candidate from af267066;
+  preserves the PR48 shadow boundary fix and the local 57c8aeb evidence.
+  Two production lines reject a changed menu already seen in this attempt,
+  before visits, strategy computation or sampling. Existing iterate rollback
+  preserves checkpoint and RNG; last_attempt_nodes remains diagnostic.
+  Python3.12.10/Node24.19.0: frozen20/20, related215/215, full5394PASS/2SKIP
+  of5396/0FAIL/ERROR, independent reference11/11 and UI runner8/8 PASS;
+  full lint and index hygiene PASS. Skips are missing phevaluator and Quartz;
+  no dependencies installed. Eight legal full-checkpoint hashes match the
+  pre-fix baseline and the preserved local candidate. Fixed custom-encoder
+  collisions are negative contract witnesses, not native V2 collision or
+  strategy-strength evidence. Sampling, probability and live gates unchanged;
+  no private assets, capture, release or deployment. Exact Draft PR head,
+  independent review and CI merge candidate are tracked in PR evidence.
+- **2026-10-01 SHADOW LOOKUP BOUNDARIES:** integrated on3629953c with
+  merged PR47 range/snapshot identity guard; tested source10380993. Original
+  b171c7e/511156ad and9323c0dc/65a5a5b1 evidence retained separately.
+  Version unchanged. V1/V2 HIT duplicate encoding, expired binding dispatch
+  and final record clock gaps are repaired: reuse one validated encoding,
+  preserve the existing absolute source/turn window, freeze worker allowance
+  at entry, check binding/IPC/results against it, and record one checked time.
+  400ms preprocessing still permits300ms worker when the source window allows;
+  950ms leaves50ms under1s source TTL. Menu/probability/scope/freshness and
+  identity refusal gates remain strict; production collector/strategy unchanged.
+  New-base Python3.12.14/Node24.19.0: related277PASS; full5376planned=
+  5368PASS/8platform SKIP/0FAIL/ERROR/INTERRUPTED/NOT_RUN, pytest621.92s,
+  command623.962615s. Full lint,57JS,11independent reference PASS, rerun on new base.
+  All63shadow and50identity-related cases PASS;775source/test/tool hashes
+  match the frozen tested code.1138tracked-file snapshot belongs to the tested
+  commit; final edits update only this note and runtime documentation.
+  Isolated workspace basetemp, minimum28.7926GiB free;125warnings retained.
+  Eight local skips:4Windows cmd,3WinDLL DPI,1Quartz. CI/owner review and
+  exact remote identity are tracked separately in PR evidence; no merge/deploy.
+  Independent source/identity compatibility/public-content/raw-evidence reviews
+  PASS. Public batch remains7paths; toy learning diagnostic remains local.
+  Synchronous work cannot be preempted; admission checks are not camera-to-
+  display, strategy-strength, real capture, packaging or live-play acceptance.
+  Contract and reproduction:docs/AA-TEN-SECOND-RUNTIME.zh-CN.md.
+- **2026-09-30 PORTABLE SYNTHETIC REGRESSIONS:** test/documentation-only batch
+  from511156ad, revised executed source5ed6ca6; version/production src unchanged.
+  83 deterministic checks cover actual SIMPLE/Fraction references, shared-info
+  own-reach deduplication, populated rollback/RNG/export, known recall limits
+  and P3 statuses. Parent review found initial list replacement could drop
+  omitted planned rows despite47old tests passing;36metadata cases now cover
+  stable local-id partial merges, frozen order/denominators and invalid shapes.
+  Old8feea082/head76e3fe0 tests/CI are historical evidence only; original raw
+  traces/hash/ledger preserved. Revised Python3.12.14 focused194passed with
+  83newcases/14,030counted calls; revised full5266passed/8platform skips/0failed
+  in636.966s. Revised full lint PASS; unchanged57JS/11standalone reference
+  results reused, full pytest again includes11reference cases. CI-style
+  cost remains separate from research58,455nodes/13.324054s. Public batch is
+  11Python test/helper files, small synthetic aggregate JSON,2docs and this note;
+  raw traces remain local. Production OWN/retained-memory encoding remain HOLD:
+  mixed finite-tree quality, unproven scale/compatibility/actual integration.
+  No strategy strength, historical refusal-cause or end-to-end latency claim.
+  Report:docs/reports/POKERSENSE-THREE-ROUND-SYNTHETIC-SUMMARY-20260930.zh-CN.md.
+- **2026-09-30 AA FROZEN PROBABILITY CONTRACT:** scoped interface fix from
+  review branch44cb0b28, version unchanged. V1/V2 loaders and shadow worker
+  share native finite [0,1] probabilities, exact nonempty string menus and
+  fsum mass with rel_tol0/abs_tol1e-12, without normalization or repair.
+  Worker validates raw keys before JSON copying. Loader's old ~1e-9 tolerance
+  is deliberately tightened; empty policy tables remain coverage misses.
+  54new regressions; Python3.12.14/Node24.19.0 focused103passed; full
+  5183passed/8platform skips/0failed in658.32s with isolated workspace
+  basetemp and >25GiB free. Full lint,57JS and11independent reference cases
+  PASS. Public synthetic compatibility18/18artifacts,504/504distributions,
+  0failures; not private historical acceptance. Independent read-only code
+  review and34boundary/raw-key/scope probes PASS; Draft PR/CI and final owner
+  review tracked in PR evidence. Does not supply missing average keys or
+  explain prior coverage refusals. Scope/legal/time gates, shadow encoding,
+  sampling and training unchanged; no private bundle, release or live change.
+- **2026-09-30 AA SOURCE LAUNCHER:** scoped fix from d6bfebd, version unchanged.
+  Source checkouts prefer their own `.venv` over stale EXEs; system Python
+  3.11-3.13 includes a 3.12-only setup and supported-version fallback when the
+  launcher default is newer. Actual interpreter/entry paths and missing desktop
+  dependencies are explicit; no automatic install or broken-venv fallback.
+  Python3.12.14/Node24.19.0: focused39passed/4Windows-only skipped; full
+  5129passed/8platform skips in669.69s with isolated workspace basetemp and
+  >25GiB free. Full lint,57JS cases,11independent reference tests and index/diff
+  hygiene PASS. Actual source bootstrap HTTP/manual spawn analysis and capture
+  refusal403 PASS. Four new cmd.exe cases require Windows CI; independent PR
+  review remains required. Strategy source unchanged; no release/live acceptance.
+- **2026-09-28 CONSOLIDATED WORK REPORT:** documentation-only successor to
+  f05d804. One canonical report groups all37pre-report PRs exactly once,
+  distinguishes main af67b4b from Draft37-42, closed research and local-only
+  work, and provides a ChatGPT read-only review brief. A whitelisted evidence
+  index binds public PR/CI snapshots and derived synthetic summaries to original
+  report hashes; it is not raw independent reproduction. Old documents/data
+  retained. Link/arithmetic/unique-PR/privacy checks and independent publication
+  review PASS; user-requested ChatGPT review is still pending.
+  No media, weights, credentials or raw private logs published; no
+  new experiment, runtime change, merge or release. Entry:
+  docs/reports/POKERSENSE-WORK-REPORT-20260928.zh-CN.md.
 - **2026-09-28 PREFLOP SUPPORT AUDIT COMPLETE: engineering PASS, support incomplete.**
   Source4ca7bc0,manifest6f72bbdd; V2/MCCFR/nine assets unchanged. One supervised
   batch107.621s completed63shards/10647slots/31941asset rows:2833HIT,3042NA,
