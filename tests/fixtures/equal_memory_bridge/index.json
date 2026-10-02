@@ -1,0 +1,44 @@
+{
+  "artifacts": [
+    {
+      "iterations": 16384,
+      "name": "first-2026100201-16384",
+      "path": "first-2026100201-16384.json",
+      "seed": 2026100201,
+      "sha256": "8c19238332b773b00b19dc0cf470c988a2c6349c1b643bf821e5f70149eadd18",
+      "source_batch_status": "COMPLETE_PAIRED_EXTENSION_NO_PROMOTION"
+    },
+    {
+      "iterations": 16384,
+      "name": "first-2026100202-16384",
+      "path": "first-2026100202-16384.json",
+      "seed": 2026100202,
+      "sha256": "d8710bb08234cfa2ab4cee9f0388f9de2f627a1d2f2c63547119c2bd6e3d4829",
+      "source_batch_status": "COMPLETE_PAIRED_EXTENSION_NO_PROMOTION"
+    },
+    {
+      "iterations": 16384,
+      "name": "first-2026100203-16384",
+      "path": "first-2026100203-16384.json",
+      "seed": 2026100203,
+      "sha256": "0807434fe290149ef98b72ffb338edd9deaf2a356bc655f4b0c7aef918422dad",
+      "source_batch_status": "COMPLETE_PAIRED_EXTENSION_NO_PROMOTION"
+    },
+    {
+      "iterations": 8192,
+      "name": "second-2026100301-8192",
+      "path": "second-2026100301-8192.json",
+      "seed": 2026100301,
+      "sha256": "d3e212b1d8475a8673de58fbb606684b69bad00e8fff09324f4bbd90e8ec738f",
+      "source_batch_status": "STOP_ERROR_OR_BUDGET"
+    }
+  ],
+  "coverage_miss": {
+    "iterations": 512,
+    "name": "coverage_miss-2026100201-512",
+    "path": "coverage_miss-2026100201-512.json",
+    "seed": 2026100201,
+    "sha256": "dbc2a81f06b9b6ff1a5c9b85868a64e0170cbea656907e8c3cce30574b15ad7d",
+    "source_batch_status": "COMPLETE_PAIRED_DIAGNOSTIC_NO_PROMOTION"
+  }
+}

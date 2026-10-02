@@ -33,6 +33,24 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-10-01 LOCAL EQUAL-MEMORY WORKER BRIDGE:** isolated test-only candidate
+  from8f158e25; opt-in tool binds pinned synthetic source bytes, equal-time
+  averages, exact own-memory contexts and caller-owned current state to the
+  existing isolated worker. Four saved endpoints query64/64infosets; the
+  saved512-iteration witness retains15HIT/1coverage refusal. Second-game source
+  remains STOP_ERROR_OR_BUDGET; no product V2 compatibility or qualification.
+  Python3.12.10:280bridge plus162existing related tests=442PASS/0FAIL/0SKIP,
+  pytest6.25s; focused lint PASS after22retained style failures. Independent
+  static review fixed raw-artifact pin bypass and bool-probability acceptance.
+  Final local Python3.12.10/pytest9.1.1 full suite5674PASS/2SKIP of5676,
+  0FAIL/ERROR/NOT_RUN, pytest687.48s; skipped missing phevaluator and Quartz.
+  Independent reference11/11 and UI57/57 PASS; full lint PASS. Acceptance
+  commands about693s, original full run retained through session recovery.
+  Thirty source references/22unique files retain hashes; tracked production
+  unchanged. Nine-file scope/content independent review PASS. Default disabled;
+  no fitting, capture, upload or publication. Live/product acceptance NOT_RUN.
+  Caller-provided current context is not real desktop authentication. Detailed
+  execution receipts retained locally; reproducible fixtures/tests included.
 - **2026-10-01 CI PYTEST OBSERVABILITY:** original local1dec0580/af267066
   retained; integrated on8bd45e9e with PR49 menu guard. Version unchanged.
   CI uses -v/-ra to offset configured -q and report
