@@ -33,6 +33,21 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-10-02 LOCAL NATIVE ARENA CONTEXT:** test-only successor to5243166.
+  Native reset plus the frozen legal prefix and successful steps build visible
+  own-memory and an atomic source-owned receipt; repeated reads retain TTL.
+  Clone/new-arena transactions preserve prior state on failure. Epoch, actor,
+  memory, scope and high-water clock checks refuse stale or inconsistent input;
+  final locked checks reject a step occurring after the real worker returns.
+  Frozen60cases include32native first-fixture observations/catalog/worker HITs.
+  Python3.12.10:focused379/379; full5734PASS/2SKIP of5736,0FAIL/ERROR/NOT_RUN,
+  pytest693.38s. Skips:missing phevaluator and Quartz. Reference11/11,UI57/57
+  PASS; full lint PASS after one retained E128 and AST-equivalent indent fix.
+  Independent scope/source/test review PASS. Existing bridge assets retained;
+  no production/default/strategy changes. Second fixture native-source path
+  NOT_RUN; original STOP_ERROR_OR_BUDGET retained. Trusted simulator internals
+  and synthetic timing do not authenticate a desktop or qualify a policy.
+  Local only; no training, capture, dependencies installed or publication.
 - **2026-10-01 LOCAL EQUAL-MEMORY WORKER BRIDGE:** isolated test-only candidate
   from8f158e25; opt-in tool binds pinned synthetic source bytes, equal-time
   averages, exact own-memory contexts and caller-owned current state to the
