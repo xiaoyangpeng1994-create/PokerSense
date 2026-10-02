@@ -33,6 +33,25 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-10-02 LOCAL TURN-RIVER INFRASTRUCTURE:** isolated research successor
+  to196cea2; mechanically truncate the second fixture at its turn start. The
+  declared C/B2/B4 action abstraction excludes otherwise legal native bet3.
+  Fixed2x2 active ranges and probability-one prefix are research assumptions.
+  Full52-card factory samples44rivers per actual joint and shuffles43remaining
+  cards; folded holdings/burns are marginalized, not fixed blockers. Compact
+  tree:176joint-river atoms,7653nodes,4776terminals,1488infosets. One native audit
+  compares two hidden arrangements:352resets,8448decisions,11616physical terminal
+  visits,9552unique terminal checks,0NOT_RUN; full build/save32.703s. Independent
+  six-seat Fraction ledgers, refunds,zero rake,stacks and visible-memory hashes
+  match native observations/settlement. Trusted host keys do not authenticate
+  external JSON. Infoset-consistent exact BR checks perfect recall and retains
+  owner zero-probability branches; all4fixed-river/profile comparisons match the
+  two legacy pure-strategy oracles. Two predefined legal profiles each have
+  1488rows and98160combined checked operations; NC_BB9451/2112 and83/88 are sanity
+  values, not trained coverage or qualification. Python3.12.10 targeted46PASS,
+  local lint PASS after3retained E128 findings and AST-equivalent whitespace
+  fixes. No full regression/UI, training, new worker integration, live/capture,
+  dependencies or publication. Production/default/learning code unchanged.
 - **2026-10-02 LOCAL CONTINUATION EVIDENCE IMPORT:** isolated test-only
   successor to157137cf. Saved second-game16384 equal endpoints now require a
   pinned raw parent/continuation chain before portable export; status-only
