@@ -33,6 +33,24 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-10-02 LOCAL CONTINUATION EVIDENCE IMPORT:** isolated test-only
+  successor to157137cf. Saved second-game16384 equal endpoints now require a
+  pinned raw parent/continuation chain before portable export; status-only
+  substitution remains rejected. Rules, fixture, seeds, native/equal state,
+  averaging semantics, zero-step restore and all18quality points are checked.
+  Original STOP_ERROR_OR_BUDGET retains1PASS/3HOLD/14NOT_RUN. Equal passes the
+  original per-variant three-seed0.05BB gate; the extra historical both-variant
+  aggregate does not qualify or veto that variant. All product/live gates stay
+  false. Three saved endpoints each pass32actual native-source worker queries
+  plus stale-epoch/wrong-range/unsupported-board refusals:96positive/9negative.
+  Python3.12.10:focused612PASS; full5998PASS/2SKIP of6000,0FAIL/ERROR/NOT_RUN,
+  pytest704.23s. Skips remain missing phevaluator and Quartz. Reference11/11,
+  UI57/57 and full lint PASS; two earlier E128 lint attempts retained, with
+  AST-equivalent whitespace fixes. Independent code/test/public-scope review
+  PASS. Three externally pinned synthetic fixtures contain no personal paths;
+  portable projections do not reauthenticate stripped original manifest bytes.
+  Original candidate and production/default/learning code unchanged. Local
+  only; no new experiment, dependencies, capture, publication or qualification.
 - **2026-10-02 LOCAL NATIVE ARENA CONTEXT:** test-only successor to5243166.
   Native reset plus the frozen legal prefix and successful steps build visible
   own-memory and an atomic source-owned receipt; repeated reads retain TTL.

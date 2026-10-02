@@ -1,0 +1,23 @@
+{
+  "artifacts": [
+    {
+      "iterations": 16384,
+      "path": "second-2026100301-16384.json",
+      "seed": 2026100301,
+      "sha256": "f962676a6834b82779b130ddf145c92c77902e0321789bc159b3326a371fc42e"
+    },
+    {
+      "iterations": 16384,
+      "path": "second-2026100302-16384.json",
+      "seed": 2026100302,
+      "sha256": "308437a81de59b6f7cedbbf8108a28eb383fb23ceab6be77934fdf25b1dac894"
+    },
+    {
+      "iterations": 16384,
+      "path": "second-2026100303-16384.json",
+      "seed": 2026100303,
+      "sha256": "0aab791b17d2c76ede8d087e9872c8f7212dacc7c279b9697dd4e5a4d3b9c443"
+    }
+  ],
+  "kind": "PINNED_SECOND_GAME_CONTINUATION_EQUAL_ENDPOINTS"
+}

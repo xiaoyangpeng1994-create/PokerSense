@@ -22,6 +22,9 @@ from poker_engine.strategy.aa_frozen_policy import (
 from poker_engine.strategy.aa_mccfr import ExternalSamplingMCCFR, NUMERICAL_SEMANTICS
 from poker_engine.strategy.aa_policy_encoding_v2 import encode_decision_v2
 from poker_engine.strategy.aa_rules_v2 import AARuleProfileV2
+from tools.aa_research_continuation import (
+    CONTINUATION_STATUS, EXTRA_SOURCE_NAMES, make_chain, validate_chain,
+)
 
 
 KIND = 'POKERSENSE_EQUAL_MEMORY_RESEARCH_BRIDGE_V1'
@@ -98,8 +101,11 @@ def _research_key(observation, binding):
 
 
 def _validate(document):
-    if not isinstance(document, dict) or set(document) != set(HEADER) | {
-            'sources', 'source_file_sha256', 'source_canonical_sha256', 'policy'}:
+    required = set(HEADER) | {
+        'sources', 'source_file_sha256', 'source_canonical_sha256', 'policy'}
+    if isinstance(document, dict) and 'continuation' in document:
+        required.add('continuation')
+    if not isinstance(document, dict) or set(document) != required:
         raise ValueError('unknown_artifact_schema')
     for key, expected in HEADER.items():
         if type(document[key]) is not type(expected) or document[key] != expected:
@@ -197,6 +203,11 @@ def _validate(document):
         'COMPLETE_PAIRED_EXTENSION_NO_PROMOTION',
         'COMPLETE_SECOND_FIXED_GAME_NO_PROMOTION', 'STOP_ERROR_OR_BUDGET',
     }
+    if result.get('status') == CONTINUATION_STATUS:
+        validate_chain(document)
+        allowed_statuses = {CONTINUATION_STATUS}
+    elif 'continuation' in document:
+        raise ValueError('continuation_requires_exact_result_status')
     if (quality.get('seed') != cp['seed'] or
             quality.get('iterations') != cp['iterations']
             or quality.get('variant') != 'equal'
@@ -233,6 +244,44 @@ def build_artifact(paths, *, expected_source_sha256):
         _validate(doc)
     except (KeyError, TypeError, AttributeError, OverflowError) as exc:
         raise ValueError('malformed_source_evidence') from exc
+    return doc
+
+
+def build_continuation_artifact(paths, *, expected_source_sha256,
+                                continuation_paths,
+                                expected_continuation_sha256):
+    """Validate pinned raw parent/continuation evidence before portable export.
+
+    Raw manifests can contain host paths. Their verified hashes and explicit
+    semantic projections remain distinct in the artifact. The caller must
+    independently pin the resulting artifact, as for the original bridge.
+    """
+    if (set(paths) != SOURCE_NAMES or set(expected_source_sha256) != SOURCE_NAMES
+            or set(continuation_paths) != EXTRA_SOURCE_NAMES
+            or set(expected_continuation_sha256) != EXTRA_SOURCE_NAMES):
+        raise ValueError('complete_pinned_continuation_sources_required')
+    sources = {key: _read_pinned(paths[key], expected_source_sha256[key])
+               for key in SOURCE_NAMES}
+    extras = {key: _read_pinned(continuation_paths[key],
+                                expected_continuation_sha256[key])
+              for key in EXTRA_SOURCE_NAMES}
+    policy = {}
+    for key, row in sources['equal']['average'].items():
+        total = sum(row[action] for action in sorted(row))
+        if total:
+            policy[key] = {action: value / total for action, value in row.items()}
+    doc = dict(HEADER, sources=sources,
+               source_file_sha256=dict(expected_source_sha256),
+               source_canonical_sha256={key: canonical_hash(value)
+                                        for key, value in sources.items()},
+               policy=policy)
+    try:
+        doc['continuation'] = make_chain(
+            extras, expected_continuation_sha256,
+            sources, expected_source_sha256)
+        _validate(doc)
+    except (KeyError, TypeError, AttributeError, OverflowError) as exc:
+        raise ValueError('malformed_continuation_evidence') from exc
     return doc
 
 
@@ -274,6 +323,7 @@ class ResearchEqualBridge:
         self._contexts = {k: deepcopy(v['visible_observation'])
                           for k, v in doc['sources']['catalog'].items()}
         self._batch_status = doc['sources']['result']['status']
+        self._continued = 'continuation' in doc
         self._policy = deepcopy(policy)
         self._worker = AAIsolatedPolicyWorker(
             policy, seed=doc['sources']['checkpoint']['seed'])
@@ -347,4 +397,6 @@ class ResearchEqualBridge:
                       average_statistic=AVERAGE,
                       source_batch_status=self._batch_status,
                       qualification='NOT_PRODUCT_QUALIFIED')
+        if self._continued:
+            result['source_parent_batch_status'] = 'STOP_ERROR_OR_BUDGET'
         return result
