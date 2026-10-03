@@ -1,0 +1,65 @@
+{
+  "average_A": "sum_t t * pi_owner[I] * pre_update_sigma[I,a]",
+  "average_B": "sum_t pi_owner[I] * pre_update_sigma[I,a]",
+  "excerpts": [
+    {
+      "end_line": 179,
+      "name": "identity_of",
+      "sha256": "49ca4bf547ab367474a7662b37d9277626fad8130f91fdd2404c40c91e742bd2",
+      "source": "def identity_of(key):\n        return tuple(tuple(x) if isinstance(x, list) else x for x in cat[key]['infoset'])",
+      "start_line": 178
+    },
+    {
+      "end_line": 186,
+      "name": "menu_of",
+      "sha256": "422bf96b92672c5690e9fbce47d01b680a35fa1cf0dffd16b1b32408402351ba",
+      "source": "def menu_of(key):\n        return tuple(menus[identity_of_key[key]])",
+      "start_line": 185
+    },
+    {
+      "end_line": 206,
+      "name": "checked_encoder",
+      "sha256": "e0186ca64ff01550662b27e10e4a87a19e0d3d0ae73b815c47fe6b32881bce52",
+      "source": "def checked_encoder(observation):\n        key = game['research_key'](observation)\n        require(key in cat and observation == cat[key]['visible_observation'],\n                'unrecognized_actual_visible_observation')\n        return key",
+      "start_line": 202
+    },
+    {
+      "end_line": 218,
+      "name": "snapshot",
+      "sha256": "edd85ddc211d6cb88fc7fd51d3defd50a47343bb718b58ce401fbb674cf60e9a",
+      "source": "def snapshot(solver):\n        prof = {}\n        for key, identity in identity_of_key.items():\n            row_obj = solver.regrets.get(key)\n            menu = menu_of(key)\n            row = ExternalSamplingMCCFR._strategy(\n                row_obj if row_obj is not None else {a: 0.0 for a in menu})\n            exact = {a: F.from_float(v) for a, v in row.items()}\n            mass = sum(exact.values(), F(0))\n            prof[identity] = {a: v / mass for a, v in exact.items()}\n        return prof",
+      "start_line": 208
+    },
+    {
+      "end_line": 252,
+      "name": "DualObserver",
+      "sha256": "5287343f8f56cb475fa11aefa32ac3c0356c45c94e036489e9599b59fe58e258",
+      "source": "class DualObserver(PairedObserver):\n        def __init__(self, *args, **kwargs):\n            super().__init__(*args, **kwargs)\n            self.acc_a = {}\n            self.acc_b = {}\n            self._pending = None\n            self.bypass = dict(sweeps_collected=0, discarded=0,\n                               zero_mass_rows_skipped=0)\n\n        def iterate(self, factory):\n            t = self.iterations + 1          # GLOBAL sweep index\n            profile = snapshot(self)\n            pending = collect(plan, profile, weight=F(1))\n            self._pending = pending\n            try:\n                result = super().iterate(factory)\n            except BaseException:\n                self._pending = None\n                self.bypass['discarded'] += 1\n                raise\n            increment = self._pending\n            self._pending = None\n            for identity, row in increment['delta'].items():\n                if sum(row.values(), F(0)) == 0:\n                    self.bypass['zero_mass_rows_skipped'] += 1\n                    continue\n                ta = self.acc_a.setdefault(identity, {})\n                tb = self.acc_b.setdefault(identity, {})\n                for action, value in row.items():\n                    tb[action] = tb.get(action, 0.0) + float(value)\n                    ta[action] = ta.get(action, 0.0) + float(t * value)\n            self.bypass['sweeps_collected'] += 1\n            return result",
+      "start_line": 220
+    },
+    {
+      "end_line": 274,
+      "name": "classify",
+      "sha256": "a8bb9f8b5c1151f4b2fcc42cca3e82f09a783123836c4ec742fc8d9aaf4be785",
+      "source": "def classify(table):\n        c = Counter({s: 0 for s in STATES})\n        for key in cat:\n            menu = menu_of(key)\n            row = table.get(key)\n            if row is None:\n                st = 'ABSENT'\n            elif not isinstance(row, dict) or set(row) != set(menu):\n                st = 'INVALID_MENU'\n            elif any(type(v) not in (float, int) or v != v\n                     or v in (float('inf'), float('-inf')) or v < 0\n                     for v in row.values()):\n                st = 'INVALID_VALUE'\n            else:\n                st = 'POSITIVE_VALID' if sum(row[a] for a in sorted(row)) > 0 \\\n                    else 'ZERO_MASS'\n            c[st] += 1\n        return dict(fixed_denominator=DENOM, counts=dict(c),\n                    complete=(c['POSITIVE_VALID'] == DENOM and not c['ABSENT']\n                              and not c['ZERO_MASS'] and not c['INVALID_MENU']\n                              and not c['INVALID_VALUE']))",
+      "start_line": 254
+    },
+    {
+      "end_line": 316,
+      "name": "score",
+      "sha256": "0ade243be955a0eafb9a54e092651e9be8f671d02662bfb889abd421f430c680",
+      "source": "def score(table, variant, sweeps, seed_left):\n        entry = dict(variant=variant, sweeps=sweeps, rows=len(table),\n                     evaluation_execution='NOT_RUN', status='NOT_SCORED', reason=None,\n                     nash_conv_bb=None, gains=None, quality_limit_bb='1/20',\n                     seconds=60,\n                     metric='nash_conv_bb=(gain_p1+gain_p2)/big_blind(2)')\n        if global_left() <= GLOBAL_SAVE_RESERVE or seed_left <= 5.0:\n            entry['reason'] = 'BUDGET_EXHAUSTED_BEFORE_SCORING'\n            return entry\n        cov = classify(table)\n        if not cov['complete']:\n            entry['reason'] = 'POLICY_NOT_COMPLETE_LEGAL_NORMALIZED'\n            return entry\n        normalized = {}\n        for key, row in table.items():\n            total = sum(row.values())\n            if not total > 0:\n                entry['reason'] = 'ZERO_OR_NONFINITE_MASS_ROW'\n                return entry\n            normalized[key] = {a: v / total for a, v in row.items()}\n        profile = {}\n        for key, row in normalized.items():\n            validate_distribution(row, menu_of(key))\n            exact = {a: F.from_float(p) for a, p in row.items()}\n            mass = sum(exact.values(), F(0))\n            profile[identity_of_key[key]] = {a: p / mass for a, p in exact.items()}\n        require(len(profile) == DENOM, 'profile_row_count')\n        entry['evaluation_execution'] = 'RUN'\n        started = time.monotonic()\n        try:\n            actual = br.evaluate(root, profile, seconds=60, max_ops=100000)\n            ncb = actual['nash_conv_bb']\n            entry.update(status='PASS' if ncb <= LIMIT else 'HOLD_QUALITY',\n                         nash_conv_bb=fj(ncb),\n                         gains={str(k): fj(v) for k, v in actual['gains'].items()},\n                         stats=actual['stats'])\n        except BaseException as exc:\n            entry.update(status='NOT_SCORED',\n                         reason=type(exc).__name__ + ':' + str(exc))\n        entry['elapsed_seconds'] = time.monotonic() - started\n        return entry",
+      "start_line": 276
+    }
+  ],
+  "execution": "SOURCE_ONLY; snippets depend on the historical PairedObserver and closure variables; not a runnable resume",
+  "historical_seeds": [
+    2026100501,
+    2026100502,
+    2026100503
+  ],
+  "quality_gate_bb": "1/20",
+  "source": "audit/turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+  "source_sha256": "915654a136093c230367687422ec69d73e5828d0ddf8474831b259f8803e830d",
+  "transaction": "native whole sweep succeeds before A/B commit; no fallback for missing saved rows"
+}

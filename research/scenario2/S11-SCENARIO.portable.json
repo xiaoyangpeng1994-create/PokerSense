@@ -1,0 +1,117 @@
+{
+  "action_abstraction_identical": true,
+  "board_ranks_1": [
+    "J",
+    "K",
+    "Q",
+    "T"
+  ],
+  "board_ranks_2": [
+    "2",
+    "5",
+    "9",
+    "J"
+  ],
+  "board_ranks_differ": true,
+  "board_suits_1": [
+    "c",
+    "d",
+    "h",
+    "s"
+  ],
+  "board_suits_2": [
+    "c",
+    "d",
+    "h",
+    "s"
+  ],
+  "constructor_source_relative": "t1/tools/aa_turn_river_game.py",
+  "constructor_source_sha256": "42066caa41afc3edc4270dbc106d499c53995cb53cd989a60a1c7a629833408e",
+  "contributions_identical": true,
+  "distinct_cards_in_board_and_ranges": true,
+  "encoder_id": "research-exact-turn-river-visible-memory-v1",
+  "fixture_spec_scenario1_sha256": "12166f257c07abbfb506e64baa8d1b56ec6984a00d27618fa7af3232a3b5a366",
+  "fixture_spec_scenario2_sha256": "d62cbe5284fd2f10d6e7c490abd7d2fa21d1926bf3a7251ca1295a6ebfbc9e33",
+  "joint_rivers_match_constructor": true,
+  "per_joint_holding": {
+    "AA/KK": {
+      "blocked_cards": 8,
+      "blocked_is_not_range_union": true,
+      "rivers": 44
+    },
+    "AA/PAIR_8": {
+      "blocked_cards": 8,
+      "blocked_is_not_range_union": true,
+      "rivers": 44
+    },
+    "TT/KK": {
+      "blocked_cards": 8,
+      "blocked_is_not_range_union": true,
+      "rivers": 44
+    },
+    "TT/PAIR_8": {
+      "blocked_cards": 8,
+      "blocked_is_not_range_union": true,
+      "rivers": 44
+    }
+  },
+  "prefix_identical": true,
+  "range_union_size": 12,
+  "reused_constructor": true,
+  "scope_id_scenario1": "aa-six-seat-two-active-full-chance-turn-river-v1",
+  "scope_id_scenario2": "aa-six-seat-two-active-full-chance-turn-river-scenario2-v1",
+  "showdown_signature_scenario1": {
+    "SET_K/SET_Q": {
+      "losses": 1,
+      "rivers": 44,
+      "ties": 8,
+      "wins": 35
+    },
+    "SET_K/STRAIGHT_B": {
+      "losses": 31,
+      "rivers": 44,
+      "ties": 3,
+      "wins": 10
+    },
+    "STRAIGHT_A/SET_Q": {
+      "losses": 10,
+      "rivers": 44,
+      "ties": 3,
+      "wins": 31
+    },
+    "STRAIGHT_A/STRAIGHT_B": {
+      "losses": 0,
+      "rivers": 44,
+      "ties": 44,
+      "wins": 0
+    }
+  },
+  "showdown_signature_scenario2": {
+    "AA/KK": {
+      "losses": 2,
+      "rivers": 44,
+      "ties": 0,
+      "wins": 42
+    },
+    "AA/PAIR_8": {
+      "losses": 2,
+      "rivers": 44,
+      "ties": 0,
+      "wins": 42
+    },
+    "TT/KK": {
+      "losses": 42,
+      "rivers": 44,
+      "ties": 0,
+      "wins": 2
+    },
+    "TT/PAIR_8": {
+      "losses": 2,
+      "rivers": 44,
+      "ties": 0,
+      "wins": 42
+    }
+  },
+  "signatures_differ": true,
+  "solver_written": false
+}

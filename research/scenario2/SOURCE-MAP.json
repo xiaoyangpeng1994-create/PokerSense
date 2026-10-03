@@ -1,0 +1,305 @@
+{
+  "algorithm_changed": false,
+  "baseline": "8f158e252e2f092b8c3706716b700c8a38a56af9",
+  "exact_copies": [
+    {
+      "destination": "scenario2_factory.py",
+      "sha256": "251286001893208d93a4828a73fe45e1048cf0233daaf4c026b284e9e10b1323",
+      "size_bytes": 1616,
+      "source": "cloud-source-handoff-20261003/payload/research/scenario2_factory.py",
+      "transformation": "exact bytes copied"
+    },
+    {
+      "destination": "own_reach_collector.py",
+      "sha256": "b67176f339f0cae398b23c701cba29d34a0df87227f6668abeeb2902c358f8ab",
+      "size_bytes": 6197,
+      "source": "cloud-source-handoff-20261003/payload/research/own_reach_collector.py",
+      "transformation": "exact bytes copied"
+    },
+    {
+      "destination": "AVERAGE-SOURCE-EXCERPTS.json",
+      "sha256": "1180c4b6a8e10ccdefe7cb6defb505171ad4c192ae7eed370a370258692afc53",
+      "size_bytes": 7460,
+      "source": "cloud-source-handoff-20261003/payload/research/AVERAGE-SOURCE-EXCERPTS.json",
+      "transformation": "exact bytes copied"
+    },
+    {
+      "destination": "S11-SCENARIO.portable.json",
+      "sha256": "5c02bf479120664ff42a21c9a7a773ca51526c5bf711d0c2d46e513fd0121370",
+      "size_bytes": 2544,
+      "source": "cloud-source-handoff-20261003/payload/scenario2/S11-SCENARIO.portable.json",
+      "transformation": "exact bytes copied"
+    },
+    {
+      "destination": "S11-TREE.json",
+      "sha256": "2d482e4f398a02a1e4217641d2b5b7eb6960c2f13ebc973fe98fa3e928070579",
+      "size_bytes": 459,
+      "source": "cloud-source-handoff-20261003/payload/scenario2/S11-TREE.json",
+      "transformation": "exact bytes copied"
+    },
+    {
+      "destination": "S11-NATIVE-AUDIT.json",
+      "sha256": "8842f91bc4ec01eadb3cfb36336d26b441c179933954e8b9c7d58ec0b7fa1e69",
+      "size_bytes": 350,
+      "source": "cloud-source-handoff-20261003/payload/scenario2/S11-NATIVE-AUDIT.json",
+      "transformation": "exact bytes copied"
+    },
+    {
+      "destination": "VISIBLE-CATALOG2.json",
+      "sha256": "0732a79b410d138699678088a64d7b5e7925b59185d33c0d994a89e013648e06",
+      "size_bytes": 8373781,
+      "source": "cloud-source-handoff-20261003/payload/scenario2/VISIBLE-CATALOG2.json",
+      "transformation": "exact bytes copied"
+    }
+  ],
+  "extractions": [
+    {
+      "destination": "paired_observer.py:PairedObserver",
+      "semantic_ast_verified": true,
+      "source": "river-native-average-control-20261001/runner.py",
+      "source_end_line": 61,
+      "source_name": "PairedObserver",
+      "source_snippet_sha256": "25e2fccb5079c632ec64dc3ea15247ce91ea9123a247cd370d725293ae1da4f6",
+      "source_start_line": 31,
+      "transformation": "remove outer indentation only; semantic AST identical"
+    },
+    {
+      "destination": "paired_observer.py:mean_policy",
+      "semantic_ast_verified": true,
+      "source": "river-native-average-control-20261001/runner.py",
+      "source_end_line": 168,
+      "source_name": "mean_policy",
+      "source_snippet_sha256": "eab565935567ff6aaefc833b10486efe202a5f050e1e3b65a964c9177f3cd7c9",
+      "source_start_line": 162,
+      "transformation": "remove outer indentation only; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/utc",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 70,
+      "source_name": "utc",
+      "source_snippet_sha256": "eaf581fceee82ef95cedac7d0369ead3de59532e834ccec7e141b018164760c0",
+      "source_start_line": 69,
+      "transformation": "nest in portable binding; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/read",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 74,
+      "source_name": "read",
+      "source_snippet_sha256": "37cb40d86fdcf79af0cbdb83cfbe6f9a948a842fcfe55e994088cfebaa45f64a",
+      "source_start_line": 73,
+      "transformation": "nest in portable binding; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/write",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 95,
+      "source_name": "write",
+      "source_snippet_sha256": "3567bf38bfcf2a53fd041c7d18d2ac850ae71bc8345db36cf9408809eec272e7",
+      "source_start_line": 90,
+      "transformation": "nest in portable binding; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/fj",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 100,
+      "source_name": "fj",
+      "source_snippet_sha256": "0618cd77f304682d6e67adb07796f3086f6407a2984b76648565d6c1b4c138ae",
+      "source_start_line": 98,
+      "transformation": "nest in portable binding; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/require",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 105,
+      "source_name": "require",
+      "source_snippet_sha256": "daa09245a3d19b23409fc4e82575f0e837ad531a224ac5e7c2076c9c2dd8ff71",
+      "source_start_line": 103,
+      "transformation": "nest in portable binding; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/global_left",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 109,
+      "source_name": "global_left",
+      "source_snippet_sha256": "308de1bb9e98a26b84c8ab52e022ea7dc5ce76bdbd6683b487db9e059111ff30",
+      "source_start_line": 108,
+      "transformation": "nest in portable binding; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/identity_of",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 179,
+      "source_name": "identity_of",
+      "source_snippet_sha256": "49ca4bf547ab367474a7662b37d9277626fad8130f91fdd2404c40c91e742bd2",
+      "source_start_line": 178,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/menu_of",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 186,
+      "source_name": "menu_of",
+      "source_snippet_sha256": "422bf96b92672c5690e9fbce47d01b680a35fa1cf0dffd16b1b32408402351ba",
+      "source_start_line": 185,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/checked_encoder",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 206,
+      "source_name": "checked_encoder",
+      "source_snippet_sha256": "e0186ca64ff01550662b27e10e4a87a19e0d3d0ae73b815c47fe6b32881bce52",
+      "source_start_line": 202,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/snapshot",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 218,
+      "source_name": "snapshot",
+      "source_snippet_sha256": "edd85ddc211d6cb88fc7fd51d3defd50a47343bb718b58ce401fbb674cf60e9a",
+      "source_start_line": 208,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/DualObserver",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 252,
+      "source_name": "DualObserver",
+      "source_snippet_sha256": "5287343f8f56cb475fa11aefa32ac3c0356c45c94e036489e9599b59fe58e258",
+      "source_start_line": 220,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/classify",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 274,
+      "source_name": "classify",
+      "source_snippet_sha256": "a8bb9f8b5c1151f4b2fcc42cca3e82f09a783123836c4ec742fc8d9aaf4be785",
+      "source_start_line": 254,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/score",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 316,
+      "source_name": "score",
+      "source_snippet_sha256": "0ade243be955a0eafb9a54e092651e9be8f671d02662bfb889abd421f430c680",
+      "source_start_line": 276,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/by_key",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 319,
+      "source_name": "by_key",
+      "source_snippet_sha256": "40b83cd469bdba4cf3922502400dd6c0a9ae5671ca996cd43833b578d5844cb9",
+      "source_start_line": 318,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/restore_only",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 352,
+      "source_name": "restore_only",
+      "source_snippet_sha256": "00076dcf1bccace58cd92c1d0bd39aa4aa69da68ddb29277f5ceab3e5a41beab",
+      "source_start_line": 321,
+      "transformation": "remove original main nesting; semantic AST identical"
+    },
+    {
+      "destination": "run_ab.py:create_runtime/run_seed",
+      "semantic_ast_verified": true,
+      "source": "turn-river-scenario2-seeds-20261003/scenario2_resume.py",
+      "source_end_line": 505,
+      "source_name": "run_seed",
+      "source_snippet_sha256": "18445b1adcde16b53469a4bcfd5a0c4cd6701e3be8d9d680beb9079e5fb659ff",
+      "source_start_line": 354,
+      "transformation": "remove original main nesting; semantic AST identical"
+    }
+  ],
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "e0ab0c3d0a63d1e19771e5f27ee1a4bd80a1fdf7e10b783a728639d5896b8728",
+      "size_bytes": 101
+    },
+    {
+      "path": "AVERAGE-SOURCE-EXCERPTS.json",
+      "sha256": "1180c4b6a8e10ccdefe7cb6defb505171ad4c192ae7eed370a370258692afc53",
+      "size_bytes": 7460
+    },
+    {
+      "path": "own_reach_collector.py",
+      "sha256": "b67176f339f0cae398b23c701cba29d34a0df87227f6668abeeb2902c358f8ab",
+      "size_bytes": 6197
+    },
+    {
+      "path": "paired_observer.py",
+      "sha256": "becd93e3db4ce438a81640842d77f57714e3219a68c04041c73245821b8818ab",
+      "size_bytes": 1768
+    },
+    {
+      "path": "README.md",
+      "sha256": "9f34f1124782d8545ae505150dac43d0676076ab53ccffe2d3127f7d07bf51db",
+      "size_bytes": 4809
+    },
+    {
+      "path": "run_ab.py",
+      "sha256": "7e6035d4ab9dd1d8aeb58580f40a9790bc935d6d6fc0ecc127cd5f8045c855a3",
+      "size_bytes": 23127
+    },
+    {
+      "path": "S11-NATIVE-AUDIT.json",
+      "sha256": "8842f91bc4ec01eadb3cfb36336d26b441c179933954e8b9c7d58ec0b7fa1e69",
+      "size_bytes": 350
+    },
+    {
+      "path": "S11-SCENARIO.portable.json",
+      "sha256": "5c02bf479120664ff42a21c9a7a773ca51526c5bf711d0c2d46e513fd0121370",
+      "size_bytes": 2544
+    },
+    {
+      "path": "S11-TREE.json",
+      "sha256": "2d482e4f398a02a1e4217641d2b5b7eb6960c2f13ebc973fe98fa3e928070579",
+      "size_bytes": 459
+    },
+    {
+      "path": "scenario2_factory.py",
+      "sha256": "251286001893208d93a4828a73fe45e1048cf0233daaf4c026b284e9e10b1323",
+      "size_bytes": 1616
+    },
+    {
+      "path": "VISIBLE-CATALOG2.json",
+      "sha256": "0732a79b410d138699678088a64d7b5e7925b59185d33c0d994a89e013648e06",
+      "size_bytes": 8373781
+    }
+  ],
+  "historical_budget_changed": false,
+  "historical_resume_available": false,
+  "new_binding": "run_ab.py:create_runtime/verify_source_files/main: paths, source guards, dependencies, root/menu/counter bindings only; no experiment scheduler",
+  "original_sources": {
+    "river-native-average-control-20261001/runner.py": "16ba7f4c27a940c5036301f98e603e5208286327e5ccb7feb9bdc3f42263a224",
+    "turn-river-scenario2-seeds-20261003/scenario2_resume.py": "915654a136093c230367687422ec69d73e5828d0ddf8474831b259f8803e830d"
+  },
+  "qualification": "NOT_PRODUCT_QUALIFIED",
+  "runtime_validation": "NOT_RUN: no construction, iterations, scoring, checkpoint restore/save",
+  "schema": "pokersense-frozen-scenario2-source-handoff-v1",
+  "source_head": "38a97da7f550047a12bfacd2e8174b1c225a0419"
+}

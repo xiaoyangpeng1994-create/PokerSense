@@ -1,0 +1,17 @@
+{
+  "catalog_sha256": "0732a79b410d138699678088a64d7b5e7925b59185d33c0d994a89e013648e06",
+  "chance": {
+    "all_mass_is_one": true,
+    "chance_nodes": 29,
+    "violations": []
+  },
+  "counts": {
+    "chance": 29,
+    "decision": 2848,
+    "terminal": 4776
+  },
+  "forced_denominator": null,
+  "infosets": 1488,
+  "infosets_regenerated_not_forced": true,
+  "tree_sha256": "ebd91278da4802739f01007edb22acd11e31a222d6d7c6557fb94b2828433494"
+}

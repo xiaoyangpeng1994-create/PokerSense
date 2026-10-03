@@ -1,0 +1,13 @@
+{
+  "catalog_rows": 1488,
+  "decision_checks": 8448,
+  "elapsed_seconds": 38.930702800047584,
+  "expected_physical_terminal_checks": 11616,
+  "expected_terminal_checks": 9552,
+  "infosets": 1488,
+  "native_resets": 352,
+  "physical_terminal_checks": 11616,
+  "status": "PASS",
+  "terminal_not_run": 0,
+  "unique_terminal_checks": 9552
+}

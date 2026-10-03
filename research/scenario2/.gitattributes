@@ -1,0 +1,2 @@
+# Frozen source/evidence hashes include the original line-ending bytes.
+* -text whitespace=cr-at-eol

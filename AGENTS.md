@@ -33,6 +33,15 @@ changing desktop capture, recognition, packaging, or project documentation.
    real capture and live play still require explicit user authorization.
 
 ## Current state
+- **2026-10-03 CLOUD SCENARIO2 SOURCE HANDOFF:** separate research branch
+  preserves the four commits through38a97da7; research/scenario2 carries seven
+  pinned source/input copies, the original observer and run/save logic in a
+  portable binding, README and source/hash mapping. Python3.12.10 syntax4,
+  imports4, extracted semantic AST18 and file-hash checks PASS; packaging0.875s.
+  No tree construction, training, scoring, checkpoint restore/save or heavy
+  tests. New binding runtime NOT_RUN; historical continuation is unavailable
+  without the excluded complete checkpoints/provenance/budget chain. Existing
+  QUARANTINED/HOLD outcomes and0.05BB gate retained. Source handoff only.
 - **2026-10-02 LOCAL TURN-RIVER INFRASTRUCTURE:** isolated research successor
   to196cea2; mechanically truncate the second fixture at its turn start. The
   declared C/B2/B4 action abstraction excludes otherwise legal native bet3.
